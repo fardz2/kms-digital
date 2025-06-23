@@ -9,14 +9,13 @@ import { SortIcon, SortUpIcon, SortDownIcon } from "./Icons";
 import { Button, PageButton } from "./Button";
 import { useMemo, useState, useEffect } from "react";
 import GlobalFilter from "./GlobalFilter";
-import exportTemplate from "../../../pages/Posyandu/ExportTemplate";
 import { Col, Modal, message, Form, Input } from "antd";
 import FormInputDataExcel from "../../form/FormInputDataExcel";
 import FormInputDataAnak from "../../form/FormInputDataAnak";
 import ReactSelect from "react-select";
 import axios from "axios";
 
-// Komponen SelectColumnFilter (tidak berubah)
+// SelectColumnFilter Component
 export function SelectColumnFilter({ column }) {
   const { filterOpt, filterValue, setFilter, preFilteredRows, id, render } =
     column;
@@ -64,7 +63,7 @@ export function SelectColumnFilter({ column }) {
   );
 }
 
-// Komponen FormTambahOrangTua
+// FormTambahOrangTua Component
 function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -78,22 +77,26 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
         password: values.password,
         nama: values.nama,
         alamat: values.alamat,
-        status: 1, // Set status to approved
-        id_posyandu: user.user?.id_posyandu, // Default dari user kader yang login
-        id_desa: user.user?.id_desa, // Default dari user kader yang login
+        status: 1,
+        id_posyandu: user.user?.id_posyandu,
+        id_desa: user.user?.id_desa,
       };
-      console.log(user);
 
       await axios.post(
         `${process.env.REACT_APP_BASE_URL}/api/auth/orang-tua/register`,
-        payload
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+          },
+        }
       );
 
       messageApi.open({
         type: "success",
         content: "Berhasil menambahkan orang tua",
       });
-      fetchOrangTua(); // Refresh parent list
+      fetchOrangTua();
       form.resetFields();
       onCancel();
     } catch (error) {
@@ -117,7 +120,7 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
         footer={null}
         width={600}
         confirmLoading={loading}
-        zIndex={1001} // Pastikan modal ini di atas modal lain
+        zIndex={1001}
       >
         <Form
           form={form}
@@ -168,7 +171,7 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   );
 }
 
-// Komponen Table
+// Table Component
 function Table({
   columns,
   data,
@@ -209,7 +212,6 @@ function Table({
   );
 
   const { globalFilter, pageIndex, pageSize } = state;
-  const { handleExport } = exportTemplate();
   const [isOpenModalInputExcel, setIsOpenModalInputExcel] = useState(false);
   const [isOpenModalInputDataAnak, setIsOpenModalInputDataAnak] =
     useState(false);
@@ -221,6 +223,7 @@ function Table({
   const [refreshKey, setRefreshKey] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
   const [approvingIds, setApprovingIds] = useState(new Set());
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Initialize user from localStorage
   let login_data;
@@ -228,33 +231,6 @@ function Table({
     login_data = JSON.parse(localStorage.getItem("login_data")) || {};
   }
   const [user, setUser] = useState(login_data);
-
-  const dataTemplate = [
-    {
-      nama: "asdafa",
-      panggilan: "sfa",
-      tglLahir: "2001-11-31",
-      alamat: "Lengkong",
-      jk: "L",
-      nama_ortu: "andi",
-      tgl_ukur: "2022-2-29",
-      berat: 12,
-      tinggi: 91,
-      lila: 25,
-    },
-    ...Array.from({ length: 10 }, (_, i) => ({
-      nama: `Nama ${i + 2}`,
-      panggilan: `Panggilan ${i + 2}`,
-      tglLahir: `2001-11-${i + 1}`,
-      alamat: `Alamat ${i + 2}`,
-      jk: i % 2 === 0 ? "L" : "P",
-      nama_ortu: `Ortu ${i + 2}`,
-      tgl_ukur: `2022-2-${i + 1}`,
-      berat: 10 + i,
-      tinggi: 90 + i,
-      lila: 20 + i,
-    })),
-  ];
 
   // Fetch parent data
   const fetchOrangTua = async () => {
@@ -297,7 +273,53 @@ function Table({
     }
   };
 
-  // Fetch parent data and reset filters when modal opens or after approval
+  // Handle export data anak to CSV
+  const handleExportDataAnak = async () => {
+    if (!user.token?.value) {
+      messageApi.open({
+        type: "error",
+        content: "Silakan login terlebih dahulu",
+      });
+      return;
+    }
+
+    setExportLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/export-data-anak-csv`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data-anak.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      messageApi.open({
+        type: "success",
+        content: "Berhasil mengunduh data anak",
+      });
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      messageApi.open({
+        type: "error",
+        content: error.response?.data?.message || "Gagal mengunduh data anak",
+      });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // Fetch parent data and reset filters when modal opens
   useEffect(() => {
     if (isOpenModalOrangTua) {
       fetchOrangTua();
@@ -414,7 +436,7 @@ function Table({
     [approvingIds]
   );
 
-  // Debug log untuk memantau status pagination
+  // Debug log for pagination
   useEffect(() => {
     console.log("Table Debug:", {
       dataLength: data.length,
@@ -470,9 +492,10 @@ function Table({
           </button>
           <button
             className="button2"
-            onClick={() => handleExport(dataTemplate)}
+            onClick={handleExportDataAnak}
+            disabled={exportLoading}
           >
-            Unduh Template Excel
+            {exportLoading ? "Mengunduh..." : "Unduh Data Anak"}
           </button>
           <button
             className="button2"
@@ -581,7 +604,6 @@ function Table({
           </div>
         </div>
       </div>
-      {/* Pagination */}
       <div className="py-3 flex items-center justify-end">
         <div className="flex-1 flex justify-between sm:hidden">
           <Button
@@ -614,59 +636,61 @@ function Table({
                   setPageSize(Number(e.target.value));
                 }}
               >
-                {[5, 10, 20, 50].map((size) => (
-                  <option key={size} value={size}>
-                    Show {size}
+                {[5, 10, 20].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    Show {pageSize}
                   </option>
                 ))}
               </select>
             </label>
           </div>
-          <nav
-            className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-            aria-label="Pagination"
-          >
-            <PageButton
-              className="rounded-l-md"
-              onClick={() => gotoPage(0)}
-              disabled={!canPreviousPage}
+          <div>
+            <nav
+              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
             >
-              <span className="sr-only">First</span>
-              <span>«</span>
-            </PageButton>
-            <PageButton
-              onClick={() => previousPage()}
-              disabled={!canPreviousPage}
-            >
-              <span className="sr-only">Previous</span>
-              <span>‹</span>
-            </PageButton>
-            {Array.from({ length: pageCount }, (_, index) => (
               <PageButton
-                key={index}
-                onClick={() => gotoPage(index)}
-                className={`${
-                  pageIndex === index
-                    ? "bg-indigo-600 text-black"
-                    : "bg-white text-gray-300"
-                }`}
+                className="rounded-l-md"
+                onClick={() => gotoPage(0)}
+                disabled={!canPreviousPage}
               >
-                {index + 1}
+                <span className="sr-only">First</span>
+                <span>«</span>
               </PageButton>
-            ))}
-            <PageButton onClick={() => nextPage()} disabled={!canNextPage}>
-              <span className="sr-only">Next</span>
-              <span>›</span>
-            </PageButton>
-            <PageButton
-              className="rounded-r-md"
-              onClick={() => gotoPage(pageCount - 1)}
-              disabled={!canNextPage}
-            >
-              <span className="sr-only">Last</span>
-              <span>»</span>
-            </PageButton>
-          </nav>
+              <PageButton
+                onClick={() => previousPage()}
+                disabled={!canPreviousPage}
+              >
+                <span className="sr-only">Previous</span>
+                <span>‹</span>
+              </PageButton>
+              {Array.from({ length: pageCount }, (_, index) => (
+                <PageButton
+                  key={index}
+                  onClick={() => gotoPage(index)}
+                  className={`${
+                    pageIndex === index
+                      ? "bg-indigo-600 text-black"
+                      : "bg-white text-gray-300"
+                  }`}
+                >
+                  {index + 1}
+                </PageButton>
+              ))}
+              <PageButton onClick={() => nextPage()} disabled={!canNextPage}>
+                <span className="sr-only">Next</span>
+                <span>›</span>
+              </PageButton>
+              <PageButton
+                className="rounded-r-md"
+                onClick={() => gotoPage(pageCount - 1)}
+                disabled={!canNextPage}
+              >
+                <span className="sr-only">Last</span>
+                <span>»</span>
+              </PageButton>
+            </nav>
+          </div>
         </div>
       </div>
       <Col sm="12" className="d-flex">

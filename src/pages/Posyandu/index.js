@@ -47,7 +47,10 @@ const PosyanduDashboard = () => {
       if (user.user.role !== "ORANG_TUA") {
         axios
           .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak`, {
-            headers: { Authorization: `Bearer ${user.token.value}` },
+            headers: {
+              Authorization: `Bearer ${user.token.value}`,
+              "Content-Type": "application/json",
+            },
           })
           .then((response) => {
             const sortedData = response.data.data.sort((a, b) =>
@@ -63,7 +66,10 @@ const PosyanduDashboard = () => {
       } else {
         axios
           .get(`${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak`, {
-            headers: { Authorization: `Bearer ${user.token.value}` },
+            headers: {
+              Authorization: `Bearer ${user.token.value}`,
+              "Content-Type": "application/json",
+            },
           })
           .then((response) => {
             const sortedData = response.data.data.sort((a, b) =>
@@ -162,6 +168,7 @@ const PosyanduDashboard = () => {
                             {
                               headers: {
                                 Authorization: `Bearer ${user.token.value}`,
+                                "Content-Type": "application/json",
                               },
                             }
                           )
