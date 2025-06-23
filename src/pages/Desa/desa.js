@@ -4,11 +4,11 @@ import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import bg_dashboard from "../../assets/img/bg-dashboard.svg";
-import Table, { SelectColumnFilter } from '../../components/layout/Table'
+import Table, { SelectColumnFilter } from "../../components/layout/Table";
 import { Berat, Tinggi, Lingkar } from "../../utilities/Berat";
 import { Container, Col, Row } from "react-bootstrap";
 import bg_desa from "../../assets/img/bg-desa.svg";
-import './desa-style.css';
+import "./desa-style.css";
 import Link from "antd/lib/typography/Link";
 
 const BackgroundComponent = () => {
@@ -17,10 +17,10 @@ const BackgroundComponent = () => {
     top: 80,
     left: -5,
     width: "100vw",
-    height: '100vh',
+    height: "100vh",
     zIndex: -10000,
     background: `url(${bg_desa}) no-repeat center`,
-    backgroundSize: '100vw auto',
+    backgroundSize: "100vw auto",
   };
 
   return <div style={backgroundStyles} />;
@@ -40,12 +40,12 @@ export default function Desa() {
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Kategori',
-        accessor: 'kategori',
+        Header: "Kategori",
+        accessor: "kategori",
       },
       {
-        Header: 'Total',
-        accessor: 'total',
+        Header: "Total",
+        accessor: "total",
       },
     ];
   }, []);
@@ -104,7 +104,6 @@ export default function Desa() {
       });
   }
 
-
   return (
     <>
       <BackgroundComponent />
@@ -112,25 +111,28 @@ export default function Desa() {
       <Navbar isLogin desa />
       {/* <BackgroundComponent /> */}
 
-      <Row
-        style={{ marginTop: "46px" }}
-        justify="space-between"
-        align="center"
-
-      >
-        <div style={{padding:"50px"}}  align="center" >
+      <Row style={{ marginTop: "46px" }} justify="space-between" align="center">
+        <div style={{ padding: "50px" }} align="center">
           {isLoading ? (
             data.map((value) => {
               return (
                 <Col
-
                   key={value}
                   span={24}
                   style={{ marginTop: "10px", marginBottom: "50px" }}
                 >
                   <Col span={24} style={{ marginTop: 5 }}>
-                    <h1 style={{ justifyContent: 'center', display: "flex", textTransform: "uppercase", color: "#7F7B7B", fontSize: "28px" }}
-                    >{value.nama_posyandu}</h1>
+                    <h1
+                      style={{
+                        justifyContent: "center",
+                        display: "flex",
+                        textTransform: "uppercase",
+                        color: "#7F7B7B",
+                        fontSize: "28px",
+                      }}
+                    >
+                      {value.nama_posyandu}
+                    </h1>
                   </Col>
                   <Row key={value} justify="space-between">
                     <Col span={7}>
@@ -149,7 +151,9 @@ export default function Desa() {
                     </Col>
                     <Col span={7}>
                       <Row justify="start">
-                        <h5 style={{ color: "rgba(177, 68, 68, 1)" }}>TINGGI</h5>
+                        <h5 style={{ color: "rgba(177, 68, 68, 1)" }}>
+                          TINGGI
+                        </h5>
                       </Row>
                       <Table
                         data={Tinggi(value.id_posyandu, data)}
@@ -162,7 +166,9 @@ export default function Desa() {
                     </Col>
                     <Col span={7}>
                       <Row justify="start">
-                        <h5 style={{ color: "rgba(177, 68, 68, 1)" }}>LINGKAR KEPALA</h5>
+                        <h5 style={{ color: "rgba(177, 68, 68, 1)" }}>
+                          LINGKAR KEPALA
+                        </h5>
                       </Row>
                       <Table
                         data={Lingkar(value.id_posyandu, data)}
@@ -192,8 +198,12 @@ export default function Desa() {
               <Form.Item
                 label="Periode Waktu berdasarkan bulan & tahun pengukuran"
                 name="waktu"
-                style={{ justifyContent: 'start', display: "flex", color: "#7F7B7B", fontSize: "28px" }}
-
+                style={{
+                  justifyContent: "start",
+                  display: "flex",
+                  color: "#7F7B7B",
+                  fontSize: "28px",
+                }}
                 rules={[
                   {
                     required: true,
@@ -205,7 +215,12 @@ export default function Desa() {
               </Form.Item>
 
               <Form.Item
-                style={{ justifyContent: 'start', display: "flex", color: "#7F7B7B", fontSize: "28px" }}
+                style={{
+                  justifyContent: "start",
+                  display: "flex",
+                  color: "#7F7B7B",
+                  fontSize: "28px",
+                }}
                 label="Pilih Posyandu"
                 name="posyandu"
                 rules={[
@@ -215,13 +230,20 @@ export default function Desa() {
                   },
                 ]}
               >
-                <Select listHeight={100} optionFilterProp="children" showSearch style={{ width: "400px" }}>
+                <Select
+                  listHeight={100}
+                  optionFilterProp="children"
+                  showSearch
+                  style={{ width: "400px" }}
+                >
                   {data.map((item) => (
                     <>
-                      <Select.Option key={item.id_posyandu} value={item.id_posyandu}>
+                      <Select.Option
+                        key={item.id_posyandu}
+                        value={item.id_posyandu}
+                      >
                         {item.nama_posyandu}
                       </Select.Option>
-
                     </>
                   ))}
                   <Select.Option key="all" value={null}>
@@ -234,26 +256,15 @@ export default function Desa() {
                 {/* <Button type="secondary" htmlType="submit"class="button">
                 Export CSV
               </Button> */}
-                <button class="btn-desa" type="submit">
-                  Export CSV
-                </button>
+                <Button type="submit">Export CSV</Button>
 
-
-                  <Link href="/desa/reminder" type="button">
-                    <a className="btn-desa">
-                      Tambah reminder
-                    </a>
-                  </Link>
-
-
-
+                <Link href="/desa/reminder" type="button">
+                  <Button type="button">Tambah reminder</Button>
+                </Link>
               </Form.Item>
-
             </Form>
-
           </Col>
-        </div >
-
+        </div>
       </Row>
     </>
   );

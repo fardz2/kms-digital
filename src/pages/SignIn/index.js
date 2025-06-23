@@ -122,7 +122,7 @@ export default function SignIn(props) {
             } else if (role_user === "TENAGA_KESEHATAN") {
               navigate("/tenaga-kesehatan/dashboard");
             } else if (role_user === "DESA") {
-              navigate("/デザ/dashboard");
+              navigate("/desa/dashboard");
             } else if (role_user === "ADMIN") {
               navigate("/admin/dashboard/desa");
             }
