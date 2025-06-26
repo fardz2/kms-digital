@@ -61,7 +61,7 @@ export default function RegisterKaderPosyandu() {
   // Function to update a Kader Posyandu
   function updateKader(id, values) {
     axios
-      .patch(
+      .put(
         `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
         {
           nama: values.nama,
