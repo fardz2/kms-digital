@@ -226,14 +226,14 @@ export default function NavbarComp(props) {
                       <h6 className="nav-link-text">Artikel</h6>
                     </Link>
                     <Link
-                      to="/forum"
+                      to="/tanya-jawab"
                       style={
-                        activeLink === "/forum"
+                        activeLink === "/tanya-jawab"
                           ? activeNavLinkStyle
                           : navLinkStyle
                       }
                     >
-                      <h6 className="nav-link-text">Forum</h6>
+                      <h6 className="nav-link-text">Tanya Jawab</h6>
                     </Link>
                   </>
                 )}

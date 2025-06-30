@@ -897,7 +897,7 @@ export default function DetailPosyandu() {
                   setIsOpenModalUpdatePerkembanganAnak(true);
                 }}
               >
-                Update
+                Ubah data
               </button>
               <button
                 className="buttonDelete"
@@ -979,7 +979,7 @@ export default function DetailPosyandu() {
                     className="cssbuttons-io-button"
                     onClick={() => setIsOpenModalInputPerkembanganAnak(true)}
                   >
-                    Tambah
+                    Tambah data
                     <div className="icon">
                       <svg
                         width="49"

@@ -95,7 +95,7 @@ function App() {
         {/* Role Orang_tua */}
         <Route element={<RequireAuth allowedRoles={[ROLES.OT]} />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/forum" element={<Post />} />
+          <Route path="/tanya-jawab" element={<Post />} />
           <Route path="/forum/detail/:id" element={<DetailForum />} />
           <Route path="/my-forum" element={<MyPost />} />
           <Route path="/dashboard/detail/:id" element={<Detail />} />

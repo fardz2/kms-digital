@@ -256,7 +256,9 @@ export default function Desa() {
                 {/* <Button type="secondary" htmlType="submit"class="button">
                 Export CSV
               </Button> */}
-                <Button type="submit">Export CSV</Button>
+                <Button type="button" onClick={onFinish}>
+                  Export CSV
+                </Button>
 
                 <Link href="/desa/reminder" type="button">
                   <Button type="button">Tambah reminder</Button>

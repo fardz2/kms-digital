@@ -76,12 +76,6 @@ export default function RegisterTenagaKesehatan() {
       key: "desa",
       render: (text) => text || "N/A",
     },
-    {
-      title: "Posyandu",
-      dataIndex: ["posyandu", "nama"],
-      key: "posyandu",
-      render: (text) => text || "N/A",
-    },
   ];
 
   useEffect(() => {
@@ -149,7 +143,6 @@ export default function RegisterTenagaKesehatan() {
           email: values.email,
           password: values.password,
           id_desa: values.desa,
-          id_posyandu: values.posyandu,
           status: true, // Set status to true automatically
         }
       )
@@ -167,6 +160,7 @@ export default function RegisterTenagaKesehatan() {
           type: "error",
           content: error.response?.data?.message || "Gagal Registrasi",
         });
+        console.error("Error during registration:", error);
       });
   };
 
@@ -309,31 +303,6 @@ export default function RegisterTenagaKesehatan() {
                       dataDesa.map((value) => (
                         <Select.Option key={value.id} value={value.id}>
                           {value.name}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  name="posyandu"
-                  label="Posyandu"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Posyandu masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select
-                    listHeight={100}
-                    optionFilterProp="children"
-                    showSearch
-                    placeholder="Pilih Posyandu"
-                  >
-                    {dataSource &&
-                      dataSource.map((value) => (
-                        <Select.Option key={value.id} value={value.id}>
-                          {value.nama}
                         </Select.Option>
                       ))}
                   </Select>
