@@ -92,6 +92,20 @@ export default function SignIn(props) {
       })
       .then((response) => {
         const role_user = response.data.data.user.role;
+        const user_status = response.data.data.user.status; // Ambil status pengguna
+
+        // Validasi status pengguna
+        if (user_status === "0") {
+          setLoading(false);
+          messageApi.open({
+            type: "error",
+            content:
+              "Akun Anda belum di-approve. Silakan tunggu persetujuan admin.",
+          });
+          return;
+        }
+
+        // Validasi role pengguna
         if (role_user !== role && role !== "ORANG_TUA") {
           setLoading(false);
           messageApi.open({
@@ -102,6 +116,8 @@ export default function SignIn(props) {
           });
           return;
         }
+
+        // Jika status dan role valid, lanjutkan proses login
         messageApi.open({
           type: "success",
           content: "Berhasil Login",
