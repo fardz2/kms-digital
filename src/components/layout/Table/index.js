@@ -9,7 +9,7 @@ import { SortIcon, SortUpIcon, SortDownIcon } from "./Icons";
 import { Button, PageButton } from "./Button";
 import { useMemo, useState, useEffect } from "react";
 import GlobalFilter from "./GlobalFilter";
-import { Col, Modal, message, Form, Input } from "antd";
+import { Col, Modal, message, Form, Input, Select } from "antd";
 import FormInputDataExcel from "../../form/FormInputDataExcel";
 import FormInputDataAnak from "../../form/FormInputDataAnak";
 import ReactSelect from "react-select";
@@ -63,6 +63,17 @@ export function SelectColumnFilter({ column }) {
   );
 }
 
+// Normalize status for filtering
+const normalizeStatus = (status) => {
+  if (typeof status === "string") {
+    return status === "true" || status === "1";
+  }
+  if (typeof status === "number") {
+    return status === 1;
+  }
+  return !!status; // Convert to boolean for null/undefined/false
+};
+
 // FormTambahOrangTua Component
 function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   const [form] = Form.useForm();
@@ -77,7 +88,7 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
         password: values.password,
         nama: values.nama,
         alamat: values.alamat,
-        status: 1,
+        status: values.status || false,
         id_posyandu: user.user?.id_posyandu,
         id_desa: user.user?.id_desa,
       };
@@ -110,6 +121,10 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
     }
   };
 
+  const onFinishFailed = (errorInfo) => {
+    console.log("Form Failed:", errorInfo);
+  };
+
   return (
     <>
       {contextHolder}
@@ -126,6 +141,7 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
           form={form}
           name="tambah_orang_tua"
           onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
           layout="vertical"
           autoComplete="off"
         >
@@ -149,9 +165,30 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Password masih kosong!" }]}
+            rules={[
+              { required: true, message: "Password masih kosong!" },
+              { pattern: "^.{8,}$", message: "Password minimal 8 karakter" },
+            ]}
           >
             <Input.Password placeholder="Masukkan password" />
+          </Form.Item>
+          <Form.Item
+            label="Confirm Password"
+            name="confirm"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: "Silahkan Confirm Password Anda!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Password tidak sesuai!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Confirm Password" />
           </Form.Item>
           <Form.Item
             label="Alamat"
@@ -160,9 +197,184 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
           >
             <Input placeholder="Masukkan alamat" />
           </Form.Item>
+          <Form.Item
+            label="Status"
+            name="status"
+            rules={[{ required: true, message: "Status masih kosong!" }]}
+          >
+            <Select placeholder="Pilih Status">
+              <Select.Option value={true}>Approve</Select.Option>
+              <Select.Option value={false}>Belum di Approve</Select.Option>
+            </Select>
+          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading}>
               Simpan
+            </Button>
+            <Button style={{ marginLeft: 8 }} onClick={onCancel}>
+              Batal
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+}
+
+// FormEditOrangTua Component
+function FormEditOrangTua({
+  isOpen,
+  onCancel,
+  fetchOrangTua,
+  user,
+  selectedUser,
+}) {
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedUser && isOpen) {
+      form.setFieldsValue({
+        nama: selectedUser.nama,
+        email: selectedUser.email,
+        alamat: selectedUser.alamat,
+        status: normalizeStatus(selectedUser.status),
+      });
+    }
+  }, [selectedUser, isOpen, form]);
+
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const payload = {
+        email: values.email,
+        password: values.password || undefined,
+        nama: values.nama,
+        alamat: values.alamat,
+        status: values.status,
+      };
+
+      await axios.put(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${selectedUser.id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+          },
+        }
+      );
+
+      messageApi.open({
+        type: "success",
+        content: "Berhasil memperbarui orang tua",
+      });
+      fetchOrangTua();
+      onCancel();
+    } catch (error) {
+      console.error("Error updating parent:", error);
+      messageApi.open({
+        type: "error",
+        content: error.response?.data?.message || "Gagal memperbarui orang tua",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onFinishFailed = (errorInfo) => {
+    console.log("Form Failed:", errorInfo);
+  };
+
+  return (
+    <>
+      {contextHolder}
+      <Modal
+        title="Edit Orang Tua"
+        open={isOpen}
+        onCancel={onCancel}
+        footer={null}
+        width={600}
+        confirmLoading={loading}
+        zIndex={1001}
+      >
+        <Form
+          form={form}
+          name="edit_orang_tua"
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          layout="vertical"
+          autoComplete="off"
+        >
+          <Form.Item
+            label="Nama"
+            name="nama"
+            rules={[{ required: true, message: "Nama masih kosong!" }]}
+          >
+            <Input placeholder="Masukkan nama" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Email masih kosong!" },
+              { type: "email", message: "Email belum sesuai!" },
+            ]}
+          >
+            <Input placeholder="user@email.com" />
+          </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[
+              {
+                pattern: "^.{8,}$",
+                message: "Password minimal 8 karakter",
+              },
+            ]}
+          >
+            <Input.Password placeholder="Masukkan password (kosongkan jika tidak diubah)" />
+          </Form.Item>
+          <Form.Item
+            label="Confirm Password"
+            name="confirm"
+            dependencies={["password"]}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Password tidak sesuai!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Confirm Password" />
+          </Form.Item>
+          <Form.Item
+            label="Alamat"
+            name="alamat"
+            rules={[{ required: true, message: "Alamat masih kosong!" }]}
+          >
+            <Input placeholder="Masukkan alamat" />
+          </Form.Item>
+          <Form.Item
+            label="Status"
+            name="status"
+            rules={[{ required: true, message: "Status masih kosong!" }]}
+          >
+            <Select placeholder="Pilih Status">
+              <Select.Option value={true}>Approve</Select.Option>
+              <Select.Option value={false}>Belum di Approve</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Simpan
+            </Button>
+            <Button style={{ marginLeft: 8 }} onClick={onCancel}>
+              Batal
             </Button>
           </Form.Item>
         </Form>
@@ -218,21 +430,22 @@ function Table({
   const [isOpenModalOrangTua, setIsOpenModalOrangTua] = useState(false);
   const [isOpenModalTambahOrangTua, setIsOpenModalTambahOrangTua] =
     useState(false);
+  const [isOpenModalEditOrangTua, setIsOpenModalEditOrangTua] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
+  const [userToDelete, setUserToDelete] = useState(null); // User to delete
+  const [selectedUser, setSelectedUser] = useState(null);
   const [orangTuaData, setOrangTuaData] = useState([]);
   const [orangTuaLoading, setOrangTuaLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
-  const [approvingIds, setApprovingIds] = useState(new Set());
   const [exportLoading, setExportLoading] = useState(false);
 
-  // Initialize user from localStorage
   let login_data;
   if (typeof window !== "undefined") {
     login_data = JSON.parse(localStorage.getItem("login_data")) || {};
   }
   const [user, setUser] = useState(login_data);
 
-  // Fetch parent data
   const fetchOrangTua = async () => {
     if (!user.token?.value) {
       messageApi.open({
@@ -258,7 +471,7 @@ function Table({
       );
       const normalizedData = response.data.data.map((item) => ({
         ...item,
-        status: Number(item.status),
+        status: normalizeStatus(item.status),
       }));
       setOrangTuaData(normalizedData);
     } catch (err) {
@@ -273,7 +486,6 @@ function Table({
     }
   };
 
-  // Handle export data anak to CSV
   const handleExportDataAnak = async () => {
     if (!user.token?.value) {
       messageApi.open({
@@ -319,7 +531,53 @@ function Table({
     }
   };
 
-  // Fetch parent data and reset filters when modal opens
+  const handleEditOrangTua = (record) => {
+    setSelectedUser(record);
+    setIsOpenModalEditOrangTua(true);
+  };
+
+  // Function to show delete confirmation modal
+  const showDeleteConfirm = (id) => {
+    setUserToDelete(id);
+    setIsDeleteModalVisible(true);
+  };
+
+  // Function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (userToDelete) {
+      axios
+        .delete(
+          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
+          {
+            headers: { Authorization: `Bearer ${user.token?.value}` },
+          }
+        )
+        .then((response) => {
+          messageApi.open({
+            type: "success",
+            content: "Orang Tua berhasil dihapus",
+          });
+          fetchOrangTua();
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
+        })
+        .catch((err) => {
+          messageApi.open({
+            type: "error",
+            content: err.response?.data?.message || "Gagal menghapus Orang Tua",
+          });
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
+        });
+    }
+  };
+
+  // Function to cancel delete
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+    setUserToDelete(null);
+  };
+
   useEffect(() => {
     if (isOpenModalOrangTua) {
       fetchOrangTua();
@@ -327,64 +585,6 @@ function Table({
     }
   }, [isOpenModalOrangTua, refreshKey, user.token?.value, setAllFilters]);
 
-  // Handle approval
-  const handleApproveOrangTua = (id, nama) => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      return;
-    }
-
-    Modal.confirm({
-      title: "Konfirmasi Status Orang Tua",
-      content: `Apakah Anda yakin ingin menyetujui ${nama}? Setelah disetujui, orang tua dapat mengakses data anak di posyandu.`,
-      okText: "Setujui",
-      okType: "primary",
-      cancelText: "Batal",
-      onOk: async () => {
-        setApprovingIds((prev) => new Set(prev).add(id));
-        const originalData = [...orangTuaData];
-        setOrangTuaData((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, status: 1 } : item))
-        );
-
-        try {
-          await axios.post(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/orang-tua/${id}/approve`,
-            { status: 1 },
-            {
-              headers: {
-                Authorization: `Bearer ${user.token?.value}`,
-              },
-            }
-          );
-          messageApi.open({
-            type: "success",
-            content: "Status orang tua berhasil diperbarui",
-          });
-          await fetchOrangTua();
-        } catch (err) {
-          setOrangTuaData(originalData);
-          messageApi.open({
-            type: "error",
-            content:
-              err.response?.data?.message ||
-              "Gagal memperbarui status orang tua",
-          });
-        } finally {
-          setApprovingIds((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(id);
-            return newSet;
-          });
-        }
-      },
-    });
-  };
-
-  // Columns for parent table
   const orangTuaColumns = useMemo(
     () => [
       {
@@ -403,40 +603,46 @@ function Table({
       {
         Header: "Status",
         accessor: "status",
-        Cell: ({ value }) => (value == 1 ? "Approve" : "Belum Diapprove"),
+        Cell: ({ value }) =>
+          normalizeStatus(value) ? "Approve" : "Belum Diapprove",
         Filter: SelectColumnFilter,
         filter: "equals",
         filterOpt: [
           { value: "", label: "All" },
-          { value: 1, label: "Approve" },
-          { value: 0, label: "Belum Diapprove" },
+          { value: true, label: "Approve" },
+          { value: false, label: "Belum Diapprove" },
         ],
+        onFilter: (value, record) => normalizeStatus(record.status) === value,
       },
       {
         Header: "Aksi",
         accessor: "action",
         disableFilters: true,
-        Cell: ({ row }) =>
-          row.original.status === 1 ? (
-            <span className="text-gray-500">Approved</span>
-          ) : (
+        Cell: ({ row }) => (
+          <div>
             <Button
-              type="primary"
-              loading={approvingIds.has(row.original.id)}
-              disabled={approvingIds.has(row.original.id)}
-              onClick={() =>
-                handleApproveOrangTua(row.original.id, row.original.nama)
-              }
+              type="default"
+              size="small"
+              onClick={() => handleEditOrangTua(row.original)}
+              style={{ marginRight: 8 }}
             >
-              Setujui
+              Edit
             </Button>
-          ),
+            <Button
+              type="dashed"
+              danger
+              size="small"
+              onClick={() => showDeleteConfirm(row.original.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
       },
     ],
-    [approvingIds]
+    []
   );
 
-  // Debug log for pagination
   useEffect(() => {
     console.log("Table Debug:", {
       dataLength: data.length,
@@ -744,11 +950,32 @@ function Table({
           ButtonCus={false}
         />
       </Modal>
+      <Modal
+        title="Konfirmasi Hapus"
+        open={isDeleteModalVisible}
+        onOk={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        okText="Hapus"
+        cancelText="Batal"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Apakah Anda yakin ingin menghapus Orang Tua ini?</p>
+      </Modal>
       <FormTambahOrangTua
         isOpen={isOpenModalTambahOrangTua}
         onCancel={() => setIsOpenModalTambahOrangTua(false)}
         fetchOrangTua={fetchOrangTua}
         user={user}
+      />
+      <FormEditOrangTua
+        isOpen={isOpenModalEditOrangTua}
+        onCancel={() => {
+          setIsOpenModalEditOrangTua(false);
+          setSelectedUser(null);
+        }}
+        fetchOrangTua={fetchOrangTua}
+        user={user}
+        selectedUser={selectedUser}
       />
     </>
   );

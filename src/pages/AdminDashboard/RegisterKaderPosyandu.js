@@ -24,9 +24,11 @@ export default function RegisterKaderPosyandu() {
   const [searchText, setSearchedText] = useState(""); // Search text for filtering
   const [statusFilter, setStatusFilter] = useState(null); // Status filter state
   const [messageApi, contextHolder] = message.useMessage();
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state for add/edit
   const [modalMode, setModalMode] = useState("add"); // Modal mode: 'add' or 'edit'
   const [selectedUser, setSelectedUser] = useState(null); // Selected user for editing
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
+  const [userToDelete, setUserToDelete] = useState(null); // User to delete
   const [user] = useState(() => {
     if (typeof window !== "undefined") {
       return JSON.parse(localStorage.getItem("login_data")) || {};
@@ -34,29 +36,48 @@ export default function RegisterKaderPosyandu() {
     return {};
   });
 
-  // Function to delete a Kader Posyandu
-  function deleteKader(id) {
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/kader-posyandu/${id}`,
-        {
-          headers: { Authorization: `Bearer ${user.token?.value}` },
-        }
-      )
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-        messageApi.open({
-          type: "success",
-          content: "Kader Posyandu berhasil dihapus",
+  // Function to show delete confirmation modal
+  const showDeleteConfirm = (id) => {
+    setUserToDelete(id);
+    setIsDeleteModalVisible(true);
+  };
+
+  // Function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (userToDelete) {
+      axios
+        .delete(
+          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
+          {
+            headers: { Authorization: `Bearer ${user.token?.value}` },
+          }
+        )
+        .then((response) => {
+          setRefreshKey((oldKey) => oldKey + 1);
+          messageApi.open({
+            type: "success",
+            content: "Kader Posyandu berhasil dihapus",
+          });
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
+        })
+        .catch((err) => {
+          messageApi.open({
+            type: "error",
+            content:
+              err.response?.data?.message || "Gagal menghapus Kader Posyandu",
+          });
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
         });
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal menghapus Kader Posyandu",
-        });
-      });
-  }
+    }
+  };
+
+  // Function to cancel delete
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+    setUserToDelete(null);
+  };
 
   // Function to update a Kader Posyandu
   function updateKader(id, values) {
@@ -177,7 +198,7 @@ export default function RegisterKaderPosyandu() {
             type="dashed"
             danger
             size="small"
-            onClick={() => deleteKader(record.id)}
+            onClick={() => showDeleteConfirm(record.id)}
           >
             Delete
           </Button>
@@ -514,6 +535,18 @@ export default function RegisterKaderPosyandu() {
                   </Button>
                 </Form.Item>
               </Form>
+            </Modal>
+
+            <Modal
+              title="Konfirmasi Hapus"
+              open={isDeleteModalVisible}
+              onOk={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
+              okText="Hapus"
+              cancelText="Batal"
+              okButtonProps={{ danger: true }}
+            >
+              <p>Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
             </Modal>
 
             {!isLoading && (
