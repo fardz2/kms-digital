@@ -14,6 +14,7 @@ import FormInputDataExcel from "../../form/FormInputDataExcel";
 import FormInputDataAnak from "../../form/FormInputDataAnak";
 import ReactSelect from "react-select";
 import axios from "axios";
+import moment from "moment";
 
 // SelectColumnFilter Component
 export function SelectColumnFilter({ column }) {
@@ -71,10 +72,10 @@ const normalizeStatus = (status) => {
   if (typeof status === "number") {
     return status === 1;
   }
-  return !!status; // Convert to boolean for null/undefined/false
+  return !!status;
 };
 
-// FormTambahOrangTua Component
+// FormTambahOrangTua Component (unchanged)
 function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
@@ -221,7 +222,7 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   );
 }
 
-// FormEditOrangTua Component
+// FormEditOrangTua Component (unchanged)
 function FormEditOrangTua({
   isOpen,
   onCancel,
@@ -425,17 +426,22 @@ function Table({
 
   const { globalFilter, pageIndex, pageSize } = state;
   const [isOpenModalInputExcel, setIsOpenModalInputExcel] = useState(false);
+
   const [isOpenModalInputDataAnak, setIsOpenModalInputDataAnak] =
     useState(false);
   const [isOpenModalOrangTua, setIsOpenModalOrangTua] = useState(false);
   const [isOpenModalTambahOrangTua, setIsOpenModalTambahOrangTua] =
     useState(false);
   const [isOpenModalEditOrangTua, setIsOpenModalEditOrangTua] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
-  const [userToDelete, setUserToDelete] = useState(null); // User to delete
+  const [isOpenModalAnakBelumApprove, setIsOpenModalAnakBelumApprove] =
+    useState(false); // New state for unapproved children modal
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [orangTuaData, setOrangTuaData] = useState([]);
+  const [anakBelumApproveData, setAnakBelumApproveData] = useState([]); // New state for unapproved children data
   const [orangTuaLoading, setOrangTuaLoading] = useState(false);
+  const [anakBelumApproveLoading, setAnakBelumApproveLoading] = useState(false); // New state for loading unapproved children
   const [refreshKey, setRefreshKey] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
   const [exportLoading, setExportLoading] = useState(false);
@@ -446,6 +452,7 @@ function Table({
   }
   const [user, setUser] = useState(login_data);
 
+  // Fetch Orang Tua data
   const fetchOrangTua = async () => {
     if (!user.token?.value) {
       messageApi.open({
@@ -486,6 +493,46 @@ function Table({
     }
   };
 
+  // Fetch Unapproved Children data
+  const fetchAnakBelumApprove = async () => {
+    if (!user.token?.value) {
+      messageApi.open({
+        type: "error",
+        content: "Silakan login terlebih dahulu",
+      });
+      setAnakBelumApproveLoading(false);
+      setIsOpenModalAnakBelumApprove(false);
+      return;
+    }
+
+    setAnakBelumApproveLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/belum-approve`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+          },
+        }
+      );
+      const sortedData = response.data.data.sort((a, b) =>
+        b.created_at.localeCompare(a.created_at)
+      );
+      setAnakBelumApproveData(sortedData);
+    } catch (err) {
+      messageApi.open({
+        type: "error",
+        content:
+          err.response?.data?.message ||
+          "Gagal mengambil data anak belum approve",
+      });
+      setAnakBelumApproveData([]);
+    } finally {
+      setAnakBelumApproveLoading(false);
+    }
+  };
+
+  // Export Data Anak
   const handleExportDataAnak = async () => {
     if (!user.token?.value) {
       messageApi.open({
@@ -536,13 +583,11 @@ function Table({
     setIsOpenModalEditOrangTua(true);
   };
 
-  // Function to show delete confirmation modal
   const showDeleteConfirm = (id) => {
     setUserToDelete(id);
     setIsDeleteModalVisible(true);
   };
 
-  // Function to handle delete confirmation
   const handleDeleteConfirm = () => {
     if (userToDelete) {
       axios
@@ -572,10 +617,42 @@ function Table({
     }
   };
 
-  // Function to cancel delete
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setUserToDelete(null);
+  };
+
+  // Approve child action
+  const handleApproveAnak = (id) => {
+    Modal.confirm({
+      title: "Apakah anda yakin ingin menyetujui anak ini?",
+
+      okText: "Ya",
+      cancelText: "Tidak",
+      onOk: async () => {
+        try {
+          await axios.put(
+            `${process.env.REACT_APP_BASE_URL}/api/posyandu/belum-approve/${id}/approve`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${user.token?.value}`,
+              },
+            }
+          );
+          messageApi.open({
+            type: "success",
+            content: "Anak berhasil disetujui",
+          });
+          fetchAnakBelumApprove();
+        } catch (error) {
+          messageApi.open({
+            type: "error",
+            content: error.response?.data?.message || "Gagal menyetujui anak",
+          });
+        }
+      },
+    });
   };
 
   useEffect(() => {
@@ -584,6 +661,18 @@ function Table({
       setAllFilters([]);
     }
   }, [isOpenModalOrangTua, refreshKey, user.token?.value, setAllFilters]);
+
+  useEffect(() => {
+    if (isOpenModalAnakBelumApprove) {
+      fetchAnakBelumApprove();
+      setAllFilters([]);
+    }
+  }, [
+    isOpenModalAnakBelumApprove,
+    refreshKey,
+    user.token?.value,
+    setAllFilters,
+  ]);
 
   const orangTuaColumns = useMemo(
     () => [
@@ -612,7 +701,6 @@ function Table({
           { value: true, label: "Approve" },
           { value: false, label: "Belum Diapprove" },
         ],
-        onFilter: (value, record) => normalizeStatus(record.status) === value,
       },
       {
         Header: "Aksi",
@@ -633,6 +721,112 @@ function Table({
               danger
               size="small"
               onClick={() => showDeleteConfirm(row.original.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  // Columns for Unapproved Children
+  const anakBelumApproveColumns = useMemo(
+    () => [
+      {
+        Header: "No",
+        accessor: "no",
+        disableFilters: true,
+      },
+      {
+        Header: "Nama Anak",
+        accessor: "nama",
+      },
+      {
+        Header: "Tanggal Lahir",
+        accessor: "tanggal_lahir",
+      },
+      {
+        Header: "Umur",
+        accessor: "umur",
+        Cell: ({ row }) => {
+          const umur = row.original.tanggal_lahir;
+          return <span>{`${moment().diff(moment(umur), "month")} Bulan`}</span>;
+        },
+      },
+      {
+        Header: "Jenis Kelamin",
+        accessor: "gender",
+        Cell: ({ value }) => {
+          return (
+            <span>{value === "LAKI_LAKI" ? "Laki-laki" : "Perempuan"}</span>
+          );
+        },
+      },
+      {
+        Header: "Alamat",
+        accessor: "alamat",
+      },
+      {
+        Header: "Nama Orang Tua",
+        accessor: "nama_ortu",
+      },
+      {
+        Header: "Aksi",
+        accessor: "aksi",
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <div>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => handleApproveAnak(row.original.id)}
+              style={{ marginRight: 8 }}
+            >
+              Approve
+            </Button>
+            <Button
+              type="dashed"
+              danger
+              size="small"
+              onClick={() => {
+                Modal.confirm({
+                  title: "Apakah anda yakin?",
+
+                  content: "Data yang dihapus tidak dapat dikembalikan",
+                  okText: "Ya",
+                  cancelText: "Tidak",
+                  onOk: () => {
+                    axios
+                      .delete(
+                        `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${row.original.id}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${user.token.value}`,
+                            "Content-Type": "application/json",
+                          },
+                        }
+                      )
+                      .then((response) => {
+                        messageApi.open({
+                          type: "success",
+                          content: "Data berhasil dihapus",
+                        });
+                        window.location.reload();
+                      })
+                      .catch((err) => {
+                        messageApi.open({
+                          type: "error",
+                          content: "Data gagal dihapus",
+                        });
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1000);
+                      });
+                  },
+                });
+              }}
             >
               Delete
             </Button>
@@ -692,9 +886,9 @@ function Table({
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 my-4">
           <button
             className="button2"
-            onClick={() => setIsOpenModalInputDataAnak(true)}
+            onClick={() => setIsOpenModalAnakBelumApprove(true)}
           >
-            Tambah Anak
+            Lihat Anak Belum Approve
           </button>
           <button
             className="button2"
@@ -910,6 +1104,7 @@ function Table({
         <FormInputDataAnak
           isOpen={isOpenModalInputDataAnak}
           onCancel={() => setIsOpenModalInputDataAnak(false)}
+          kader={true}
           fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
         />
       </Col>
@@ -951,6 +1146,43 @@ function Table({
         />
       </Modal>
       <Modal
+        title="Daftar Anak Belum Approve"
+        open={isOpenModalAnakBelumApprove}
+        onCancel={() => {
+          setIsOpenModalAnakBelumApprove(false);
+          setAllFilters([]);
+        }}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsOpenModalAnakBelumApprove(false);
+              setAllFilters([]);
+            }}
+          >
+            Tutup
+          </Button>,
+        ]}
+        width={1000}
+        confirmLoading={anakBelumApproveLoading}
+      >
+        <div className="mb-4">
+          <Button
+            type="primary"
+            onClick={() => setIsOpenModalInputDataAnak(true)}
+          >
+            Tambah Anak
+          </Button>
+        </div>
+        <Table
+          columns={anakBelumApproveColumns}
+          data={anakBelumApproveData}
+          initialState={{ pageIndex: 0, pageSize: 5 }}
+          noSearch={true}
+          ButtonCus={false}
+        />
+      </Modal>
+      <Modal
         title="Konfirmasi Hapus"
         open={isDeleteModalVisible}
         onOk={handleDeleteConfirm}
@@ -959,7 +1191,7 @@ function Table({
         cancelText="Batal"
         okButtonProps={{ danger: true }}
       >
-        <p>Apakah Anda yakin ingin menghapus Orang Tua ini?</p>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
       </Modal>
       <FormTambahOrangTua
         isOpen={isOpenModalTambahOrangTua}

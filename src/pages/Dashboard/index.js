@@ -214,6 +214,7 @@ export default function Dashboard() {
           isOpen={isOpenModalInputDataAnak}
           onCancel={() => setIsOpenModalInputDataAnak(false)}
           fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
+          kader={false}
         />
       </div>
       <div className="flex justify-center w-full">

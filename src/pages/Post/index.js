@@ -62,6 +62,7 @@ export default function Post() {
       href: `/tenaga-kesehatan/detail/${item.post_id}`,
       title: item.title,
       avatar: avatar,
+      nama_posyandu: item.posyandu,
       description: item.nama,
       role: item.role,
       content: moment(item.time).format("DD MMMM YYYY"),
@@ -130,6 +131,9 @@ export default function Post() {
                               : "tenaga kesehatan"}
                           </span>
                           )
+                        </p>
+                        <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                          {item.nama_posyandu}
                         </p>
                         <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                           {item.content}

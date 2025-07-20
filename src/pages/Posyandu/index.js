@@ -140,7 +140,7 @@ const PosyanduDashboard = () => {
                     navigate(`/kader-posyandu/dashboard/detail/${id}`)
                   }
                 >
-                  Detail
+                  Lihat pengukuran
                 </button>
                 <button
                   type="button"
@@ -150,7 +150,7 @@ const PosyanduDashboard = () => {
                     setIsOpenModalUpdateDataAnak(true);
                   }}
                 >
-                  Update
+                  Edit
                 </button>
                 <button
                   class="buttonDelete"

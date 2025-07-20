@@ -19,7 +19,7 @@ export default function FormInputDataAnak(props) {
   }
   // eslint-disable-next-line
   const [user, setUser] = useState(login_data);
-  const { isOpen, onCancel, fetch } = props;
+  const { isOpen, onCancel, fetch, kader } = props;
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [dataOrangTua, setDataOrangTua] = useState([]);
@@ -57,6 +57,7 @@ export default function FormInputDataAnak(props) {
                 gender: values.jenisKelamin,
                 alamat: values.alamat,
                 id_orang_tua: values.orangTua,
+                status: kader ? true : false,
               },
               {
                 headers: { Authorization: `Bearer ${user.token.value}` },
@@ -106,7 +107,7 @@ export default function FormInputDataAnak(props) {
               });
               setTimeout(() => {
                 onCancel();
-                window.location.reload()
+                window.location.reload();
                 fetch();
               }, 1000);
             })
