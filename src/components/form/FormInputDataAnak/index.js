@@ -57,7 +57,7 @@ export default function FormInputDataAnak(props) {
                 gender: values.jenisKelamin,
                 alamat: values.alamat,
                 id_orang_tua: values.orangTua,
-                status: kader ? true : false,
+                status: kader,
               },
               {
                 headers: { Authorization: `Bearer ${user.token.value}` },
@@ -95,6 +95,7 @@ export default function FormInputDataAnak(props) {
                 tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
                 gender: values.jenisKelamin,
                 alamat: values.alamat,
+                status: kader,
               },
               {
                 headers: { Authorization: `Bearer ${user.token.value}` },
