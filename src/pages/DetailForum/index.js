@@ -69,9 +69,11 @@ export default function DetailForum() {
       .then((response) => {
         setRefreshKey((oldKey) => oldKey + 1);
         form.resetFields();
+        message.success("Komentar berhasil dikirim!");
       })
       .catch((err) => {
         console.log(err);
+        message.error("Gagal mengirim komentar. Silakan coba lagi.");
       });
   };
 
