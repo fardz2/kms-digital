@@ -68,6 +68,7 @@ export default function Post() {
       role: item.role,
       read: item.read === "1",
       content: moment(item.time).format("DD MMMM YYYY"),
+      jawaban: item.jawaban_tenaga_kesehatan || [], // <- Tambahan
     }));
 
   return (
@@ -155,6 +156,26 @@ export default function Post() {
                             </svg>
                           </button>
                         </Link>
+                        {item.jawaban.length > 0 && (
+                          <div className="mt-2 p-3 bg-blue-50 rounded-xl">
+                            <p className="text-sm font-semibold mb-1 text-gray-800">
+                              Jawaban:
+                            </p>
+                            {item.jawaban.map((j, idx) => (
+                              <div
+                                key={idx}
+                                className="text-sm text-gray-700 border-b border-gray-200 pb-2 mb-2"
+                              >
+                                <p>
+                                  <strong>{j.nama}</strong>: {j.content}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {moment(j.waktu).format("DD MMM YYYY HH:mm")}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
