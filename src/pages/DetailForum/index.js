@@ -7,6 +7,7 @@ import Navbar from "../../components/layout/Navbar";
 import avatar from "../../assets/icon/user.png";
 import "./forum-style.css";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
+import { message } from "antd";
 
 export default function DetailForum() {
   const convertToGoodString = (str) => {
