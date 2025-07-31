@@ -66,6 +66,7 @@ export default function Post() {
       nama_posyandu: item.posyandu,
       description: item.nama,
       role: item.role,
+      read: item.read,
       content: moment(item.time).format("DD MMMM YYYY"),
     }));
 
@@ -133,9 +134,15 @@ export default function Post() {
                           </span>
                           )
                         </p>
-                        <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
-                          {item.nama_posyandu}
-                        </p>
+                        <div>
+                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                            {item.nama_posyandu}
+                          </p>
+                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                            {item.read ? "Sudah dibaca" : "Belum dibaca"} -{" "}
+                          </p>
+                        </div>
+
                         <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                           {item.content}
                         </p>
