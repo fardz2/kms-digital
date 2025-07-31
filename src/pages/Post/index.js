@@ -120,7 +120,7 @@ export default function Post() {
                       <div className="w-full">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mt-1">
-                            <a href={item.href}>{item.title}</a>
+                            <Link to={item.href}>{item.title}</Link>
                           </h2>
                         </div>
                         <p className="text-gray-800 text-sm sm:text-base mt-1">
@@ -138,7 +138,7 @@ export default function Post() {
                         <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                           {item.content}
                         </p>
-                        <a href={item.href}>
+                        <Link to={item.href}>
                           <button className="cta mt-3 sm:mt-4">
                             <span>Jawab</span>
                             <svg viewBox="0 0 13 10" height="10px" width="15px">
@@ -146,7 +146,7 @@ export default function Post() {
                               <polyline points="8 1 12 5 8 9"></polyline>
                             </svg>
                           </button>
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
