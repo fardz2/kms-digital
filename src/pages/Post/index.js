@@ -135,11 +135,13 @@ export default function Post() {
                           )
                         </p>
                         <div className="flex justify-between items-center ">
-                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm text-b">
                             {item.nama_posyandu}
                           </p>
                           <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
-                            {item.read === 1 ? "Sudah dibaca" : "Belum dibaca"}
+                            {item.read === 1
+                              ? "Sudah dijawab"
+                              : "Belum dijawab"}
                           </p>
                         </div>
 
