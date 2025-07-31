@@ -139,9 +139,6 @@ export default function Post() {
                           <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm text-b">
                             {item.nama_posyandu}
                           </p>
-                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm font-bold">
-                            {item.read ? "Sudah dijawab" : "Belum dijawab"}
-                          </p>
                         </div>
 
                         <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
