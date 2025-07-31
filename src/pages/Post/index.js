@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
+import { Link } from "react-router-dom";
 import "./post-style.css";
 
 export default function Post() {
