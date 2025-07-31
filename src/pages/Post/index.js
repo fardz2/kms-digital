@@ -134,7 +134,7 @@ export default function Post() {
                           </span>
                           )
                         </p>
-                        <div>
+                        <div className="flex justify-between items-center ">
                           <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                             {item.nama_posyandu}
                           </p>
