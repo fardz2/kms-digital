@@ -96,7 +96,7 @@ const PosyanduDashboard = () => {
         accessor: "nama",
       },
       {
-        Header: "Tangal Lahir",
+        Header: "Tanggal Lahir",
         accessor: "tanggal_lahir",
       },
       {
