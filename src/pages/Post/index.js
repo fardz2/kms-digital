@@ -139,7 +139,7 @@ export default function Post() {
                             {item.nama_posyandu}
                           </p>
                           <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
-                            {item.read ? "Sudah dibaca" : "Belum dibaca"} -{" "}
+                            {item.read === 1 ? "Sudah dibaca" : "Belum dibaca"}
                           </p>
                         </div>
 
