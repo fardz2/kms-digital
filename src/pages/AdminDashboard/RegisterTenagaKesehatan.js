@@ -24,6 +24,8 @@ export default function RegisterTenagaKesehatan() {
   const [searchText, setSearchedText] = useState(""); // Search text for filtering
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
+  const [userToDelete, setUserToDelete] = useState(null); // User to delete
   const [user] = useState(() => {
     if (typeof window !== "undefined") {
       return JSON.parse(localStorage.getItem("login_data")) || {};
@@ -31,29 +33,47 @@ export default function RegisterTenagaKesehatan() {
     return {};
   });
 
-  // Function to delete a Tenaga Kesehatan
-  function deleteTenagaKesehatan(id) {
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/tenaga-kesehatan/${id}`,
-        {
-          headers: { Authorization: `Bearer ${user.token?.value}` },
-        }
-      )
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1); // Trigger refetch
-        messageApi.open({
-          type: "success",
-          content: "Tenaga Kesehatan berhasil dihapus",
+  // Function to show delete confirmation modal
+  const showDeleteConfirm = (id) => {
+    setUserToDelete(id);
+    setIsDeleteModalVisible(true);
+  };
+
+  // Function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    if (userToDelete) {
+      axios
+        .delete(
+          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
+          {
+            headers: { Authorization: `Bearer ${user.token?.value}` },
+          }
+        )
+        .then((response) => {
+          setRefreshKey((oldKey) => oldKey + 1);
+          messageApi.open({
+            type: "success",
+            content: "Tenaga Kesehatan berhasil dihapus",
+          });
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
+        })
+        .catch((err) => {
+          messageApi.open({
+            type: "error",
+            content: "Gagal menghapus Tenaga Kesehatan",
+          });
+          setIsDeleteModalVisible(false);
+          setUserToDelete(null);
         });
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal menghapus Tenaga Kesehatan",
-        });
-      });
-  }
+    }
+  };
+
+  // Function to cancel delete
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+    setUserToDelete(null);
+  };
 
   // Table columns configuration
   const columns = [
@@ -75,6 +95,22 @@ export default function RegisterTenagaKesehatan() {
       dataIndex: ["desa", "name"],
       key: "desa",
       render: (text) => text || "N/A",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <div>
+          <Button
+            type="dashed"
+            danger
+            size="small"
+            onClick={() => showDeleteConfirm(record.id)}
+          >
+            Delete
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -317,6 +353,18 @@ export default function RegisterTenagaKesehatan() {
                   </Button>
                 </Form.Item>
               </Form>
+            </Modal>
+
+            <Modal
+              title="Konfirmasi Hapus"
+              open={isDeleteModalVisible}
+              onOk={handleDeleteConfirm}
+              onCancel={handleDeleteCancel}
+              okText="Hapus"
+              cancelText="Batal"
+              okButtonProps={{ danger: true }}
+            >
+              <p>Apakah Anda yakin ingin menghapus Tenaga Kesehatan ini?</p>
             </Modal>
 
             {!isLoading && (
