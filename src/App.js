@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Dashboard from "./pages/Dashboard";
 import Desa from "./pages/Desa/desa";
 import Detail from "./pages/Detail";
@@ -24,6 +24,9 @@ import InputAcara from "./pages/Desa/input_acara";
 import ArtikelAdmin from "./pages/AdminDashboard/ArtikelAdmin";
 import DetailArtikel from "./pages/Admin/DetailArtikel";
 
+// Initialize QueryClient
+const queryClient = new QueryClient();
+
 const ROLES = {
   Desa: "DESA",
   Posyandu: "KADER_POSYANDU",
@@ -42,111 +45,118 @@ const ROUTES = {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route
-          path="/sign-in/admin"
-          element={
-            <SignIn
-              TenagaKesehatan={false}
-              Desa={false}
-              kaderPosyandu={false}
-              admin={true}
-            />
-          }
-        />
-        <Route
-          path="/sign-in/tenaga-kesehatan"
-          element={
-            <SignIn
-              TenagaKesehatan={true}
-              Desa={false}
-              kaderPosyandu={false}
-              admin={false}
-            />
-          }
-        />
-        <Route
-          path="/sign-in/desa"
-          element={
-            <SignIn
-              Desa={true}
-              TenagaKesehatan={false}
-              kaderPosyandu={false}
-              admin={false}
-            />
-          }
-        />
-        <Route
-          path="/sign-in/kader-posyandu"
-          element={
-            <SignIn
-              kaderPosyandu={true}
-              Desa={false}
-              TenagaKesehatan={false}
-              admin={false}
-            />
-          }
-        />
-        <Route path="/sign-up" element={<SignUp />} />
-
-        {/* Role Orang_tua */}
-        <Route element={<RequireAuth allowedRoles={[ROLES.OT]} />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/tanya-jawab" element={<Post />} />
-          <Route path="/forum/detail/:id" element={<DetailForum />} />
-          <Route path="/my-forum" element={<MyPost />} />
-          <Route path="/dashboard/detail/:id" element={<Detail />} />
-        </Route>
-
-        {/* Role Kader Posyandu */}
-        <Route element={<RequireAuth allowedRoles={[ROLES.Posyandu]} />}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/sign-in" element={<SignIn />} />
           <Route
-            path="/kader-posyandu/dashboard"
-            element={<PosyanduDashboard />}
+            path="/sign-in/admin"
+            element={
+              <SignIn
+                TenagaKesehatan={false}
+                Desa={false}
+                kaderPosyandu={false}
+                admin={true}
+              />
+            }
           />
           <Route
-            path="/kader-posyandu/dashboard/detail/:id"
-            element={<DetailPosyandu />}
+            path="/sign-in/tenaga-kesehatan"
+            element={
+              <SignIn
+                TenagaKesehatan={true}
+                Desa={false}
+                kaderPosyandu={false}
+                admin={false}
+              />
+            }
           />
-        </Route>
+          <Route
+            path="/sign-in/desa"
+            element={
+              <SignIn
+                Desa={true}
+                TenagaKesehatan={false}
+                kaderPosyandu={false}
+                admin={false}
+              />
+            }
+          />
+          <Route
+            path="/sign-in/kader-posyandu"
+            element={
+              <SignIn
+                kaderPosyandu={true}
+                Desa={false}
+                TenagaKesehatan={false}
+                admin={false}
+              />
+            }
+          />
+          <Route path="/sign-up" element={<SignUp />} />
 
-        {/* Role Desa */}
-        <Route element={<RequireAuth allowedRoles={[ROLES.Desa]} />}>
-          <Route path="/desa/reminder" element={<InputAcara />} />
-          <Route path="/desa/dashboard" element={<Desa />} />
-        </Route>
-
-        {/* Role Admin */}
-        <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
-          <Route path="/admin/dashboard" element={<DashboardLayout />}>
-            <Route path={ROUTES.DESAROUTE} element={<DesaPage />} />
-            <Route path={ROUTES.POSYANDUROUTE} element={<InputPosyandu />} />
-            <Route
-              path={ROUTES.REGISTPOSYANDU}
-              element={<RegisterKaderPosyandu />}
-            />
-            <Route path={ROUTES.REGISTTENKES} element={<RegisterTenkes />} />
-            <Route path={ROUTES.ARTIKEL} element={<ArtikelAdmin />} />
+          {/* Role Orang_tua */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.OT]} />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/tanya-jawab" element={<Post />} />
+            <Route path="/forum/detail/:id" element={<DetailForum />} />
+            <Route path="/my-forum" element={<MyPost />} />
+            <Route path="/dashboard/detail/:id" element={<Detail />} />
           </Route>
-        </Route>
 
-        {/* Role Tenaga Kesehatan */}
-        <Route element={<RequireAuth allowedRoles={[ROLES.TK]} />}>
-          <Route path="/tenaga-kesehatan/dashboard" element={<Post />} />
-        </Route>
+          {/* Role Kader Posyandu */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.Posyandu]} />}>
+            <Route
+              path="/kader-posyandu/dashboard"
+              element={<PosyanduDashboard />}
+            />
+            <Route
+              path="/kader-posyandu/dashboard/detail/:id"
+              element={<DetailPosyandu />}
+            />
+          </Route>
 
-        {/* Public Routes */}
-        <Route path="/tenaga-kesehatan/detail/:id" element={<DetailForum />} />
-        <Route path="/artikel" element={<Artikel />} />
-        <Route path="/artikel/:id" element={<DetailArtikel />} />
+          {/* Role Desa */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.Desa]} />}>
+            <Route path="/desa/reminder" element={<InputAcara />} />
+            <Route path="/desa/dashboard" element={<Desa />} />
+          </Route>
 
-        {/* Not Found */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Role Admin */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+            <Route path="/admin/dashboard" element={<DashboardLayout />}>
+              <Route path={ROUTES.DESAROUTE} element={<DesaPage />} />
+              <Route path={ROUTES.POSYANDUROUTE} element={<InputPosyandu />} />
+              <Route
+                path={ROUTES.REGISTPOSYANDU}
+                element={<RegisterKaderPosyandu />}
+              />
+              <Route path={ROUTES.REGISTTENKES} element={<RegisterTenkes />} />
+              <Route path={ROUTES.ARTIKEL} element={<ArtikelAdmin />} />
+            </Route>
+          </Route>
+
+          {/* Role Tenaga Kesehatan */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.TK]} />}>
+            <Route path="/tenaga-kesehatan/dashboard" element={<Post />} />
+          </Route>
+
+          {/* Public Routes */}
+          <Route
+            path="/tenaga-kesehatan/detail/:id"
+            element={<DetailForum />}
+          />
+          <Route path="/artikel" element={<Artikel />} />
+          <Route path="/artikel/:id" element={<DetailArtikel />} />
+
+          {/* Not Found */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+      {/* Optional: Add React Query Devtools for debugging */}
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+    </QueryClientProvider>
   );
 }
 

@@ -6,43 +6,114 @@ import {
   DatePicker,
   message,
   Row,
-  Select,
   Table,
 } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import Container from "react-bootstrap/Container";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import moment from "moment";
 import bg from "../../assets/img/bg-reminder.png";
 import Navbar from "../../components/layout/Navbar";
+import useAuth from "../../hook/useAuth";
 import "./desa-style.css";
 
 export default function InputAcara() {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [user, setUser] = useState(login_data);
-  const [form] = Form.useForm();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [messageApi, contextHolder] = message.useMessage();
+  const user = useAuth();
 
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
   const [searchText, setSearchedText] = useState("");
 
-  function deleteReminder(id) {
-    axios
-      .delete(`${process.env.REACT_APP_BASE_URL}/api/reminder/${id}`, {
-        headers: { Authorization: `Bearer ${user.token.value}` },
-      })
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((err) => {
-        console.log(err);
+  const { data: remindersData, isLoading } = useQuery({
+    queryKey: ["reminders"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/reminder`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data reminder");
+      return response.json();
+    },
+    enabled: !!user?.token?.value,
+    onError: (err) => {
+      console.error("Fetch reminders error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data reminder",
       });
-  }
+    },
+  });
+
+  const createReminderMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/reminder`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            judul: values.judul,
+            deskripsi: values.deskripsi,
+            tanggal_reminder: moment(values.waktu).format("YYYY-MM-DD"),
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menyimpan reminder");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data Berhasil tersimpan",
+      });
+      form.resetFields();
+      queryClient.invalidateQueries(["reminders"]);
+    },
+    onError: (err) => {
+      console.error("Create reminder error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menyimpan reminder",
+      });
+    },
+  });
+
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/reminder/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus reminder");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["reminders"]);
+      messageApi.success("Reminder berhasil dihapus");
+    },
+    onError: (err) => {
+      console.error("Delete reminder error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus reminder",
+      });
+    },
+  });
 
   const columns = [
     {
@@ -68,55 +139,24 @@ export default function InputAcara() {
       title: "Action",
       key: "action",
       render: (_, record) => (
-        <Button onClick={() => deleteReminder(record.id)} type="dashed" danger>
+        <Button
+          onClick={() => deleteReminderMutation.mutate(record.id)}
+          type="dashed"
+          danger
+          disabled={deleteReminderMutation.isPending}
+        >
           Delete
         </Button>
       ),
     },
   ];
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/reminder`, {
-        headers: { Authorization: `Bearer ${user.token.value}` },
-      })
-      .then((response) => {
-        setData(response.data.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setIsLoading(false);
-      });
-  }, [refreshKey]);
-
   const onFinish = (values) => {
-    console.log("test", moment(values.waktu).format("YYYY-MM-DD"));
-    axios
-      .post(
-        `${process.env.REACT_APP_BASE_URL}/api/reminder`,
-        {
-          judul: values.judul,
-          deskripsi: values.deskripsi,
-          tanggal_reminder: moment(values.waktu).format("YYYY-MM-DD"),
-          // tanggal_reminder: moment(values.waktu).format("YYYY/MM/DD kk:mm:ss"),
-        },
-        {
-          headers: { Authorization: `Bearer ${user.token.value}` },
-        }
-      )
-
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-        form.resetFields();
-        messageApi.open({
-          type: "success",
-          content: "Data Berhasil tersimpan",
-        });
-      });
+    createReminderMutation.mutate(values);
   };
 
   const onFinishFailed = (values) => {
-    console.log(values);
+    console.log("Form failed:", values);
   };
 
   return (
@@ -200,10 +240,14 @@ export default function InputAcara() {
                 >
                   <DatePicker picker="date" />
                 </Form.Item>
-                {console.log(data)}
 
                 <Form.Item>
-                  <button class="button_reminder">
+                  <button
+                    class="button_reminder"
+                    htmlType="submit"
+                    loading={createReminderMutation.isPending}
+                    disabled={createReminderMutation.isPending}
+                  >
                     <span class="IconContainer">
                       <svg
                         width="24"
@@ -233,7 +277,7 @@ export default function InputAcara() {
                     />
                     <Table
                       title={() => <h1>Daftar Acara</h1>}
-                      dataSource={data}
+                      dataSource={remindersData?.data}
                       columns={columns}
                       loading={isLoading}
                       pagination={{ pageSize: 3 }}

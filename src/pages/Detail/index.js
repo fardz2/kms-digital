@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,19 +23,15 @@ import dataBeratTinggiBadanPria60Bulan from "../../json/ZScoreBeratTinggiBadanLa
 import dataBeratTinggiBadanPerempuan24Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan24.json";
 import dataBeratTinggiBadanPerempuan60Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan60.json";
 import Navbar from "../../components/layout/Navbar";
-import { Col, Row, Space, Table } from "antd";
-import FormInputPerkembanganAnak from "../../components/form/FormInputPerkembanganAnak";
+import { Table, message } from "antd";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { monthDiff } from "../../utilities/calculateMonth";
-import FormUpdatePerkembanganAnak from "../../components/form/FormUpdatePerkembanganAnak";
-import Navigation from "../../components/layout/Navigation";
 import Image from "react-bootstrap/Image";
 import bayi from "../../assets/img/bayi_1.png";
 import "./detail-style.css";
-import { AlignCenterOutlined } from "@ant-design/icons";
 import bg_dashboard from "../../assets/img/bg-dashboard.svg";
-import footerImage from "../../assets/img/powered_by_telkom.svg";
+import useAuth from "../../hook/useAuth";
 
 ChartJS.register(
   CategoryScale,
@@ -56,25 +52,63 @@ const BackgroundComponent = () => (
 );
 
 export default function Detail() {
-  let { id } = useParams();
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [user, setUser] = useState(login_data);
-  const [
-    isOpenModalInputPerkembanganAnak,
-    setIsOpenModalInputPerkembanganAnak,
-  ] = useState(false);
-  const [data, setData] = useState([]);
-  const [dataAnak, setDataAnak] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [
-    isOpenModalUpdatePerkembanganAnak,
-    setIsOpenModalUpdatePerkembanganAnak,
-  ] = useState(false);
-  const [dataPerkembanganAnak, setDataPerkembanganAnak] = useState(null);
+  const { id } = useParams();
+
+  const [messageApi, contextHolder] = message.useMessage();
+  const [activeContent, setActiveContent] = useState("Content 1");
+
+  const user = useAuth();
+
+  // Fetch child data using useQuery
+  const { data: dataAnak, isLoading: anakLoading } = useQuery({
+    queryKey: ["data-anak", id],
+    queryFn: async () => {
+      const url =
+        user?.user?.role !== "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${id}`;
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${user?.token?.value}` },
+      });
+      if (!response.ok) throw new Error("Gagal mengambil data anak");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      console.error("Error fetching child data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data anak",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch development statistics using useQuery
+  const { data: data, isLoading: perkembanganLoading } = useQuery({
+    queryKey: ["statistik-anak", id, user?.user?.role],
+    queryFn: async () => {
+      const url =
+        user?.user?.role !== "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${id}`;
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${user?.token?.value}` },
+      });
+      if (!response.ok)
+        throw new Error("Gagal mengambil data perkembangan anak");
+      const data = await response.json();
+      return data.data.sort((a, b) => a.date.localeCompare(b.date));
+    },
+    onError: (err) => {
+      console.error("Error fetching development data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data perkembangan anak",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
 
   const labels = Array.from(Array(61).keys());
   const label_PB_24 = [];
@@ -93,9 +127,9 @@ export default function Detail() {
 
   function datasetChart(type) {
     const dataset = [];
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data?.length; i++) {
       const diff = monthDiff(
-        moment(dataAnak.tanggal_lahir),
+        moment(dataAnak?.tanggal_lahir),
         moment(data[i].date)
       );
       dataset.push(Math.abs(diff));
@@ -105,7 +139,7 @@ export default function Detail() {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].berat));
           j++;
         } else {
@@ -117,7 +151,7 @@ export default function Detail() {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].tinggi));
           j++;
         } else {
@@ -129,7 +163,7 @@ export default function Detail() {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].lingkar_kepala));
           j++;
         } else {
@@ -139,7 +173,7 @@ export default function Detail() {
       return result;
     } else if (type === "gizi") {
       const dataset_gizi = [];
-      for (let i = 0; i < data.length; i++) {
+      for (let i = 0; i < data?.length; i++) {
         let floor;
         if (data[i].tinggi - Math.floor(data[i].tinggi) === 0.5) {
           floor = data[i].tinggi;
@@ -154,7 +188,7 @@ export default function Detail() {
       let j = 0;
       if (dataset[0] >= 0 && dataset[0] <= 24) {
         const dataSource =
-          dataAnak.gender === "LAKI_LAKI"
+          dataAnak?.gender === "LAKI_LAKI"
             ? dataBeratTinggiBadanPria24Bulan
             : dataBeratTinggiBadanPerempuan24Bulan;
         dataSource.forEach((item) => {
@@ -170,7 +204,7 @@ export default function Detail() {
         });
       } else if (dataset[0] > 24 && dataset[0] <= 60) {
         const dataSource =
-          dataAnak.gender === "LAKI_LAKI"
+          dataAnak?.gender === "LAKI_LAKI"
             ? dataBeratTinggiBadanPria60Bulan
             : dataBeratTinggiBadanPerempuan60Bulan;
         dataSource.forEach((item) => {
@@ -1050,103 +1084,6 @@ export default function Detail() {
     },
   };
 
-  useEffect(() => {
-    function fetchDataPerkembanganAnak() {
-      if (user.user.role !== "ORANG_TUA") {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              a.date.localeCompare(b.date)
-            );
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            setIsLoading(false);
-          });
-      } else {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              a.date.localeCompare(b.date)
-            );
-            console.log(sortedData);
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            setIsLoading(false);
-          });
-      }
-    }
-
-    fetchDataPerkembanganAnak();
-  }, [refreshKey]);
-
-  useEffect(() => {
-    function fetchDataAnakByID() {
-      if (user.user.role !== "ORANG_TUA") {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            setDataAnak(response.data.data);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            setDataAnak(response.data.data);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    }
-
-    fetchDataAnakByID();
-  }, []);
-
-  function deletePerkembanganAnak(id) {
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
-        {
-          headers: { Authorization: `Bearer ${user.token.value}` },
-        }
-      )
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
   const columns = [
     {
       title: "Tanggal Pengukuran",
@@ -1160,7 +1097,7 @@ export default function Detail() {
       key: "date",
       render: (tanggalPengukuran) =>
         `${monthDiff(
-          moment(dataAnak.tanggal_lahir),
+          moment(dataAnak?.tanggal_lahir),
           moment(tanggalPengukuran)
         )} Bulan`,
     },
@@ -1204,24 +1141,29 @@ export default function Detail() {
     },
   ];
 
-  const [activeContent, setActiveContent] = useState("Content 1");
-
   const handleButtonClick = (content) => {
     setActiveContent(content);
   };
 
   return (
     <>
+      {contextHolder}
       <Navbar isLogin />
       <BackgroundComponent />
       <div className="flex flex-col items-center p-3 sm:p-6 lg:p-8 w-full justify-center">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 w-full max-w-[800px] lg:h-[350px] h-auto mt-16">
           <div className="flex-1 text-left">
-            <h6 className="dashboard text-2xl lg:text-5xl">{dataAnak.nama}</h6>
-            <h6 className="dashboard text-2xl lg:text-5xl">{`${moment().diff(
-              moment(dataAnak.tanggal_lahir),
-              "month"
-            )} Bulan`}</h6>
+            <h6 className="dashboard text-2xl lg:text-5xl">
+              {dataAnak?.nama || ""}
+            </h6>
+            <h6 className="dashboard text-2xl lg:text-5xl">
+              {dataAnak?.tanggal_lahir
+                ? `${moment().diff(
+                    moment(dataAnak.tanggal_lahir),
+                    "month"
+                  )} Bulan`
+                : ""}
+            </h6>
           </div>
           <div className="flex flex-1 justify-center">
             <Image
@@ -1235,8 +1177,8 @@ export default function Detail() {
         <div className="w-full max-w-[1200px] px-4 sm:px-6 overflow-x-auto mt-20">
           <Table
             columns={columns}
-            dataSource={data}
-            loading={isLoading}
+            dataSource={data || []}
+            loading={anakLoading || perkembanganLoading}
             pagination={{ pageSize: 7 }}
             className="ant-table"
           />
@@ -1290,7 +1232,7 @@ export default function Detail() {
             <div className="w-full min-h-[300px] sm:min-h-[700px]">
               <Line
                 data={
-                  dataAnak.gender === "LAKI_LAKI"
+                  dataAnak?.gender === "LAKI_LAKI"
                     ? dataChartPriaBB
                     : dataChartPerempuanBB
                 }
@@ -1305,7 +1247,7 @@ export default function Detail() {
             <div className="w-full min-h-[300px] sm:min-h-[700px]">
               <Line
                 data={
-                  dataAnak.gender === "LAKI_LAKI"
+                  dataAnak?.gender === "LAKI_LAKI"
                     ? dataChartPriaTB
                     : dataChartPerempuanTB
                 }
@@ -1320,7 +1262,7 @@ export default function Detail() {
             <div className="w-full min-h-[300px] sm:min-h-[700px]">
               <Line
                 data={
-                  dataAnak.gender === "LAKI_LAKI"
+                  dataAnak?.gender === "LAKI_LAKI"
                     ? dataChartPriaLK
                     : dataChartPerempuanLK
                 }
@@ -1335,7 +1277,7 @@ export default function Detail() {
             <div className="w-full min-h-[300px] sm:min-h-[700px]">
               <Line
                 data={
-                  dataAnak.gender === "LAKI_LAKI"
+                  dataAnak?.gender === "LAKI_LAKI"
                     ? moment().diff(moment(dataAnak.tanggal_lahir), "month") >=
                         0 &&
                       moment().diff(moment(dataAnak.tanggal_lahir), "month") <=
@@ -1354,22 +1296,6 @@ export default function Detail() {
             </div>
           </div>
         )}
-
-        <FormInputPerkembanganAnak
-          isOpen={isOpenModalInputPerkembanganAnak}
-          onCancel={() => setIsOpenModalInputPerkembanganAnak(false)}
-          data={dataAnak ? dataAnak : null}
-          idAnak={id}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
-        />
-
-        <FormUpdatePerkembanganAnak
-          isOpen={isOpenModalUpdatePerkembanganAnak}
-          onCancel={() => setIsOpenModalUpdatePerkembanganAnak(false)}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
-          data={dataPerkembanganAnak}
-          profil={dataAnak}
-        />
       </div>
     </>
   );

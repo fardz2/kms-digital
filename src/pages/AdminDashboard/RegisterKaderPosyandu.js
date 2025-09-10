@@ -9,31 +9,209 @@ import {
   Table,
   Modal,
 } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
 import "./Search.css";
+import useAuth from "../../hook/useAuth";
 
 export default function RegisterKaderPosyandu() {
   const [form] = Form.useForm();
-  const [dataSource, setDataSource] = useState([]); // Posyandu data
-  const [kaderData, setKaderData] = useState([]); // Kader Posyandu data
-  const [dataDesa, setDataDesa] = useState([]); // Desa data
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [refreshKey, setRefreshKey] = useState(0); // Refresh key for refetching
-  const [searchText, setSearchedText] = useState(""); // Search text for filtering
-  const [statusFilter, setStatusFilter] = useState(null); // Status filter state
   const [messageApi, contextHolder] = message.useMessage();
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state for add/edit
-  const [modalMode, setModalMode] = useState("add"); // Modal mode: 'add' or 'edit'
-  const [selectedUser, setSelectedUser] = useState(null); // Selected user for editing
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
-  const [userToDelete, setUserToDelete] = useState(null); // User to delete
-  const [user] = useState(() => {
-    if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("login_data")) || {};
-    }
-    return {};
+  const [searchText, setSearchedText] = useState("");
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState("add");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const queryClient = useQueryClient();
+
+  const user = useAuth();
+
+  // Fetch desa data using useQuery
+  const { data: dataDesa, isLoading: desaLoading } = useQuery({
+    queryKey: ["desa"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data desa");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data desa",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch posyandu data using useQuery
+  const { data: dataSource, isLoading: posyanduLoading } = useQuery({
+    queryKey: ["posyandu"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data posyandu");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data posyandu",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch kader-posyandu data using useQuery
+  const { data: kaderData, isLoading: kaderLoading } = useQuery({
+    queryKey: ["kader-posyandu"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/kader-posyandu`,
+        {
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data Kader Posyandu");
+      const data = await response.json();
+      console.log("Kader Data:", data.data); // Debug log
+      return data.data;
+    },
+    onError: (err) => {
+      console.error("Fetch Error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data Kader Posyandu",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Mutation for creating a new Kader Posyandu
+  const createKaderMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nama: values.nama,
+            email: values.email,
+            password: values.password,
+            id_desa: values.desa,
+            id_posyandu: values.posyandu,
+            status: values.status || false,
+            role: "KADER_POSYANDU",
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal Registrasi");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Register Berhasil",
+      });
+      form.resetFields();
+      setIsModalVisible(false);
+      queryClient.invalidateQueries(["kader-posyandu"]);
+    },
+    onError: (error) => {
+      console.error("Register Error:", error);
+      messageApi.open({
+        type: "error",
+        content: error.message || "Gagal Registrasi",
+      });
+    },
+  });
+
+  // Mutation for updating a Kader Posyandu
+  const updateKaderMutation = useMutation({
+    mutationFn: async ({ id, values }) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nama: values.nama,
+            email: values.email,
+            password: values.password || undefined,
+            id_desa: values.desa,
+            id_posyandu: values.posyandu,
+            status: values.status,
+            role: "KADER_POSYANDU",
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal memperbarui Kader Posyandu");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Kader Posyandu berhasil diperbarui",
+      });
+      form.resetFields();
+      setIsModalVisible(false);
+      setModalMode("add");
+      setSelectedUser(null);
+      queryClient.invalidateQueries(["kader-posyandu"]);
+    },
+    onError: (error) => {
+      console.error("Update Error:", error);
+      messageApi.open({
+        type: "error",
+        content: error.message || "Gagal memperbarui Kader Posyandu",
+      });
+    },
+  });
+
+  // Mutation for deleting a Kader Posyandu
+  const deleteKaderMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus Kader Posyandu");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Kader Posyandu berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["kader-posyandu"]);
+      setIsDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
+    onError: (err) => {
+      console.error("Delete Error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus Kader Posyandu",
+      });
+      setIsDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
   });
 
   // Function to show delete confirmation modal
@@ -45,78 +223,15 @@ export default function RegisterKaderPosyandu() {
   // Function to handle delete confirmation
   const handleDeleteConfirm = () => {
     if (userToDelete) {
-      axios
-        .delete(
-          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
-          {
-            headers: { Authorization: `Bearer ${user.token?.value}` },
-          }
-        )
-        .then((response) => {
-          setRefreshKey((oldKey) => oldKey + 1);
-          messageApi.open({
-            type: "success",
-            content: "Kader Posyandu berhasil dihapus",
-          });
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        })
-        .catch((err) => {
-          messageApi.open({
-            type: "error",
-            content:
-              err.response?.data?.message || "Gagal menghapus Kader Posyandu",
-          });
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        });
+      deleteKaderMutation.mutate(userToDelete);
     }
   };
 
-  // Function to cancel delete
+  // Function to handle delete cancellation
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setUserToDelete(null);
   };
-
-  // Function to update a Kader Posyandu
-  function updateKader(id, values) {
-    axios
-      .put(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
-        {
-          nama: values.nama,
-          email: values.email,
-          password: values.password || undefined,
-          id_desa: values.desa,
-          id_posyandu: values.posyandu,
-          status: values.status,
-          role: "KADER_POSYANDU",
-        },
-        {
-          headers: { Authorization: `Bearer ${user.token?.value}` },
-        }
-      )
-      .then((response) => {
-        messageApi.open({
-          type: "success",
-          content: "Kader Posyandu berhasil diperbarui",
-        });
-        form.resetFields();
-        setIsModalVisible(false);
-        setModalMode("add");
-        setSelectedUser(null);
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((error) => {
-        console.error("Update Error:", error.response?.data);
-        messageApi.open({
-          type: "error",
-          content:
-            error.response?.data?.message || "Gagal memperbarui Kader Posyandu",
-        });
-      });
-  }
 
   // Function to reset filters
   const resetFilters = () => {
@@ -191,6 +306,11 @@ export default function RegisterKaderPosyandu() {
             size="small"
             onClick={() => handleEdit(record)}
             style={{ marginRight: 8 }}
+            disabled={
+              createKaderMutation.isPending ||
+              updateKaderMutation.isPending ||
+              deleteKaderMutation.isPending
+            }
           >
             Edit
           </Button>
@@ -199,6 +319,11 @@ export default function RegisterKaderPosyandu() {
             danger
             size="small"
             onClick={() => showDeleteConfirm(record.id)}
+            disabled={
+              createKaderMutation.isPending ||
+              updateKaderMutation.isPending ||
+              deleteKaderMutation.isPending
+            }
           >
             Delete
           </Button>
@@ -207,90 +332,11 @@ export default function RegisterKaderPosyandu() {
     },
   ];
 
-  useEffect(() => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu`)
-      .then((response) => {
-        setDataSource(response.data.data);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data posyandu",
-        });
-      });
-
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/desa`)
-      .then((response) => {
-        setDataDesa(response.data.data);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data desa",
-        });
-      });
-
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu/kader-posyandu`, {
-        headers: { Authorization: `Bearer ${user.token?.value}` },
-      })
-      .then((response) => {
-        console.log("Kader Data:", response.data.data); // Debug log
-        setKaderData(response.data.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch Error:", err.response?.data);
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data Kader Posyandu",
-        });
-        setIsLoading(false);
-      });
-  }, [refreshKey, messageApi, user.token?.value]);
-
   const onFinish = (values) => {
     if (modalMode === "add") {
-      axios
-        .post(`${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`, {
-          nama: values.nama,
-          email: values.email,
-          password: values.password,
-          id_desa: values.desa,
-          id_posyandu: values.posyandu,
-          status: values.status || false,
-          role: "KADER_POSYANDU",
-        })
-        .then((response) => {
-          messageApi.open({
-            type: "success",
-            content: "Register Berhasil",
-          });
-          form.resetFields();
-          setIsModalVisible(false);
-          setRefreshKey((oldKey) => oldKey + 1);
-        })
-        .catch((error) => {
-          console.error("Register Error:", error.response?.data);
-          messageApi.open({
-            type: "error",
-            content: error.response?.data?.message || "Gagal Registrasi",
-          });
-        });
+      createKaderMutation.mutate(values);
     } else if (modalMode === "edit" && selectedUser) {
-      updateKader(selectedUser.id, values);
+      updateKaderMutation.mutate({ id: selectedUser.id, values });
     }
   };
 
@@ -343,12 +389,18 @@ export default function RegisterKaderPosyandu() {
         }}
       >
         {contextHolder}
+
         <Row justify="space-between">
           <Col sm={24}>
             <Button
               type="primary"
               onClick={showModal}
               style={{ marginBottom: 16 }}
+              disabled={
+                createKaderMutation.isPending ||
+                updateKaderMutation.isPending ||
+                deleteKaderMutation.isPending
+              }
             >
               Tambah Kader Posyandu
             </Button>
@@ -473,6 +525,7 @@ export default function RegisterKaderPosyandu() {
                     optionFilterProp="children"
                     showSearch
                     placeholder="Pilih Desa"
+                    disabled={desaLoading}
                   >
                     {dataDesa &&
                       dataDesa.map((value) => (
@@ -498,6 +551,7 @@ export default function RegisterKaderPosyandu() {
                     optionFilterProp="children"
                     showSearch
                     placeholder="Pilih Posyandu"
+                    disabled={posyanduLoading}
                   >
                     {dataSource &&
                       dataSource.map((value) => (
@@ -527,10 +581,24 @@ export default function RegisterKaderPosyandu() {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={
+                      createKaderMutation.isPending ||
+                      updateKaderMutation.isPending
+                    }
+                  >
                     Simpan
                   </Button>
-                  <Button style={{ marginLeft: 8 }} onClick={handleCancel}>
+                  <Button
+                    style={{ marginLeft: 8 }}
+                    onClick={handleCancel}
+                    disabled={
+                      createKaderMutation.isPending ||
+                      updateKaderMutation.isPending
+                    }
+                  >
                     Batal
                   </Button>
                 </Form.Item>
@@ -549,38 +617,50 @@ export default function RegisterKaderPosyandu() {
               <p>Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
             </Modal>
 
-            {!isLoading && (
-              <Table
-                title={() => (
-                  <div className="flex justify-between items-center">
-                    <div className="flex justify-start items-center">
-                      <h2 className="text-sm font-semibold">
-                        Daftar Kader Posyandu
-                      </h2>
-                    </div>
-                    <div className="flex justify-end items-center gap-2">
-                      <Input.Search
-                        placeholder="Search here ..."
-                        value={searchText}
-                        onChange={(e) => setSearchedText(e.target.value)}
-                        onSearch={(value) => setSearchedText(value)}
-                      />
-                      <Button onClick={resetFilters}>Reset Filters</Button>
-                    </div>
+            <Table
+              title={() => (
+                <div className="flex justify-between items-center">
+                  <div className="flex justify-start items-center">
+                    <h2 className="text-sm font-semibold">
+                      Daftar Kader Posyandu
+                    </h2>
                   </div>
-                )}
-                dataSource={kaderData}
-                columns={columns}
-                loading={isLoading}
-                pagination={{ pageSize: 5 }}
-                rowKey="id"
-                onChange={handleTableChange}
-                locale={{
-                  emptyText: "Tidak ada data Kader Posyandu",
-                }}
-                scroll={{ x: "max-content" }}
-              />
-            )}
+                  <div className="flex justify-end items-center gap-2">
+                    <Input.Search
+                      placeholder="Search here ..."
+                      value={searchText}
+                      onChange={(e) => setSearchedText(e.target.value)}
+                      onSearch={(value) => setSearchedText(value)}
+                    />
+                    <Button
+                      onClick={resetFilters}
+                      disabled={
+                        createKaderMutation.isPending ||
+                        updateKaderMutation.isPending ||
+                        deleteKaderMutation.isPending
+                      }
+                    >
+                      Reset Filters
+                    </Button>
+                  </div>
+                </div>
+              )}
+              dataSource={kaderData || []}
+              columns={columns}
+              loading={
+                kaderLoading ||
+                createKaderMutation.isPending ||
+                updateKaderMutation.isPending ||
+                deleteKaderMutation.isPending
+              }
+              pagination={{ pageSize: 5 }}
+              rowKey="id"
+              onChange={handleTableChange}
+              locale={{
+                emptyText: "Tidak ada data Kader Posyandu",
+              }}
+              scroll={{ x: "max-content" }}
+            />
           </Col>
         </Row>
       </Container>

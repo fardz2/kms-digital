@@ -1,55 +1,65 @@
-import { Col, Form, Input, message, Modal, Row } from "antd";
-import axios from "axios";
-import React, { useState } from "react";
-
-export default function FormInputPost(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  // eslint-disable-next-line
-  const [user, setUser] = useState(login_data);
-  const { isOpen, onCancel, fetch } = props;
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Form, Modal, Row, Col, Input } from "antd";
+import { message } from "antd";
+import useAuth from "../../../hook/useAuth";
+export default function FormInputPost({ isOpen, onCancel }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const queryClient = useQueryClient();
 
-  function onOK() {
-    form
-      .validateFields()
-      .then((values) => {
-        form.resetFields();
+  const user = useAuth();
 
-        axios
-          .post(`${process.env.REACT_APP_BASE_URL}/api/post`, {
+  // Mutation for creating a new post
+  const createPostMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/post`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token?.value}`,
+          },
+          body: JSON.stringify({
             user_id: user.user.id,
             title: values.judul,
             content: values.pertanyaan,
-          })
-          .then((response) => {
-            messageApi.open({
-              type: "success",
-              content: "Data berhasil tersimpan",
-            });
-            setTimeout(() => {
-              onCancel();
-              fetch();
-            }, 1000);
-          })
-          .catch((err) => {
-            console.log(err);
-            messageApi.open({
-              type: "error",
-              content: "Data gagal tersimpan",
-            });
-            setTimeout(() => {
-              onCancel();
-            }, 1000);
-          });
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menyimpan data postingan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      onCancel();
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menyimpan data postingan",
+      });
+      setTimeout(() => {
+        onCancel();
+      }, 1000);
+    },
+  });
+
+  const onOK = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        createPostMutation.mutate(values);
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
       });
-  }
+  };
 
   return (
     <>
@@ -64,6 +74,7 @@ export default function FormInputPost(props) {
             type="button"
             onClick={onCancel}
             className="batal_btn"
+            disabled={createPostMutation.isPending}
           >
             Batal
           </button>,
@@ -72,6 +83,7 @@ export default function FormInputPost(props) {
             type="submit"
             onClick={onOK}
             className="simpan_btn"
+            disabled={createPostMutation.isPending}
           >
             Simpan
           </button>,
@@ -79,7 +91,7 @@ export default function FormInputPost(props) {
       >
         <Row>
           <Col span={24}>
-            <Form form={form} name="form_input_data_anak" layout="vertical">
+            <Form form={form} name="form_input_post" layout="vertical">
               <Form.Item
                 label="Judul"
                 name="judul"
@@ -90,10 +102,22 @@ export default function FormInputPost(props) {
                   },
                 ]}
               >
-                <Input />
+                <Input disabled={createPostMutation.isPending} />
               </Form.Item>
-              <Form.Item label="Pertanyaan" name="pertanyaan">
-                <Input.TextArea rows={4} />
+              <Form.Item
+                label="Pertanyaan"
+                name="pertanyaan"
+                rules={[
+                  {
+                    required: true,
+                    message: "Pertanyaan masih kosong!",
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  rows={4}
+                  disabled={createPostMutation.isPending}
+                />
               </Form.Item>
             </Form>
           </Col>

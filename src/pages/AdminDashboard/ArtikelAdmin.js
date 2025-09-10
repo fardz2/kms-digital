@@ -8,9 +8,11 @@ import {
   Row,
   Select,
   Table,
+  Spin,
 } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -18,27 +20,178 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 import FormUpdateDataArtikel from "../../components/form/FormUpdateDataArtikel";
 import { formatDate2 } from "../../utilities/Format";
 import { FiRotateCcw } from "react-icons/fi";
+import useAuth from "../../hook/useAuth";
 
 export default function ArtikelAdmin() {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(localStorage.getItem("login_data")) || {};
-  }
-  const [user, setUser] = useState(login_data);
   const [form] = Form.useForm();
-  const [refreshKey, setRefreshKey] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
   const [imageFile, setImageFile] = useState(null);
-  const [dataKategori, setDataKategori] = useState([]);
-  const [dataSource, setDataSource] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [dataArtikel, setDataArtikel] = useState(null);
   const [valueContent, setValueContent] = useState("");
   const [statePage, setStatePage] = useState("Artikel");
   const [isOpenModalUpdateDataArtikel, setIsOpenModalUpdateDataArtikel] =
     useState(false);
   const [searchText, setSearchedText] = useState("");
   const [statePageKateogries, setStatePageKateogries] = useState(false);
+  const [dataArtikel, setDataArtikel] = useState(null);
+  const queryClient = useQueryClient();
+
+  const user = useAuth();
+
+  // Fetch kategori data using useQuery
+  const { data: dataKategori, isLoading: kategoriLoading } = useQuery({
+    queryKey: ["kategori"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/kategori`,
+        {
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data kategori");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      console.error(err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data kategori",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch artikel data using useQuery
+  const { data: dataSource, isLoading: artikelLoading } = useQuery({
+    queryKey: ["artikel"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/artikel`,
+        {
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data artikel");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      console.error(err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data artikel",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Mutation for creating a new artikel
+  const createArtikelMutation = useMutation({
+    mutationFn: async (values) => {
+      if (!imageFile)
+        throw new Error("Silakan unggah cover artikel terlebih dahulu!");
+      const formData = new FormData();
+      formData.append("judul", values.judul);
+      formData.append("kategori", values.kategori);
+      formData.append("penulis", values.penulis);
+      formData.append("content", valueContent);
+      formData.append("image", imageFile);
+
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/artikel`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+          body: formData,
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      setValueContent("");
+      setImageFile(null);
+      queryClient.invalidateQueries(["artikel"]);
+    },
+    onError: (err) => {
+      console.error(err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+    },
+  });
+
+  // Mutation for creating a new kategori
+  const createKategoriMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/kategori`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      setValueContent("");
+      setImageFile(null);
+      setStatePageKateogries(false);
+      queryClient.invalidateQueries(["kategori"]);
+    },
+    onError: (err) => {
+      console.error(err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+    },
+  });
+
+  // Mutation for deleting an artikel
+  const deleteArtikelMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/artikel/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal dihapus");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["artikel"]);
+    },
+    onError: (err) => {
+      console.error(err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal dihapus",
+      });
+    },
+  });
 
   // Validate image file
   const validateImage = (file) => {
@@ -69,71 +222,14 @@ export default function ArtikelAdmin() {
 
   const onFinish = (values) => {
     if (!statePageKateogries) {
-      if (imageFile) {
-        let formData = new FormData();
-        formData.append("judul", values.judul);
-        formData.append("kategori", values.kategori);
-        formData.append("penulis", values.penulis);
-        formData.append("content", valueContent);
-        formData.append("image", imageFile);
-
-        axios
-          .post(`${process.env.REACT_APP_BASE_URL}/api/artikel`, formData, {
-            headers: {
-              Authorization: `Bearer ${user.token?.value}`,
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then(() => {
-            setRefreshKey((oldKey) => oldKey + 1);
-            messageApi.open({
-              type: "success",
-              content: "Data berhasil tersimpan",
-            });
-            form.resetFields();
-            setValueContent("");
-            setImageFile(null);
-          })
-          .catch((err) => {
-            console.error(err);
-            messageApi.open({
-              type: "error",
-              content: err.response?.data?.message || "Data gagal tersimpan",
-            });
-          });
-      } else {
-        messageApi.open({
-          type: "error",
-          content: "Silakan unggah cover artikel terlebih dahulu!",
-        });
-      }
+      createArtikelMutation.mutate(values);
     } else {
-      axios
-        .post(`${process.env.REACT_APP_BASE_URL}/api/kategori`, values, {
-          headers: { Authorization: `Bearer ${user.token?.value}` },
-        })
-        .then(() => {
-          setRefreshKey((oldKey) => oldKey + 1);
-          messageApi.open({
-            type: "success",
-            content: "Data berhasil tersimpan",
-          });
-          form.resetFields();
-          setValueContent("");
-          setImageFile(null);
-        })
-        .catch((err) => {
-          console.error(err);
-          messageApi.open({
-            type: "error",
-            content: err.response?.data?.message || "Data gagal tersimpan",
-          });
-        });
+      createKategoriMutation.mutate(values);
     }
   };
 
-  const onFinishFailed = (values) => {
-    console.log(values);
+  const onFinishFailed = (errorInfo) => {
+    console.log("Form Failed:", errorInfo);
   };
 
   const columns = [
@@ -164,6 +260,11 @@ export default function ArtikelAdmin() {
               setDataArtikel(record);
               setIsOpenModalUpdateDataArtikel(true);
             }}
+            disabled={
+              createArtikelMutation.isPending ||
+              createKategoriMutation.isPending ||
+              deleteArtikelMutation.isPending
+            }
           >
             Update
           </button>
@@ -178,10 +279,15 @@ export default function ArtikelAdmin() {
                 okText: "Ya",
                 cancelText: "Tidak",
                 onOk: () => {
-                  deleteDesa(record.id);
+                  deleteArtikelMutation.mutate(record.id);
                 },
               });
             }}
+            disabled={
+              createArtikelMutation.isPending ||
+              createKategoriMutation.isPending ||
+              deleteArtikelMutation.isPending
+            }
           >
             Delete
           </button>
@@ -189,74 +295,6 @@ export default function ArtikelAdmin() {
       ),
     },
   ];
-
-  useEffect(() => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/artikel`, {
-        headers: { Authorization: `Bearer ${user.token?.value}` },
-      })
-      .then((response) => {
-        setDataSource(response.data.data);
-        setStatePage("Artikel");
-        setStatePageKateogries(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data artikel",
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/kategori`, {
-        headers: { Authorization: `Bearer ${user.token?.value}` },
-      })
-      .then((response) => {
-        setDataKategori(response.data.data);
-      })
-      .catch((err) => {
-        console.error(err);
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data kategori",
-        });
-      });
-  }, [refreshKey, user.token?.value, messageApi]);
-
-  function deleteDesa(id) {
-    axios
-      .delete(`${process.env.REACT_APP_BASE_URL}/api/artikel/${id}`, {
-        headers: { Authorization: `Bearer ${user.token?.value}` },
-      })
-      .then(() => {
-        messageApi.open({
-          type: "success",
-          content: "Data berhasil dihapus",
-        });
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((err) => {
-        console.error(err);
-        messageApi.open({
-          type: "error",
-          content: "Data gagal dihapus",
-        });
-      });
-  }
 
   return (
     <>
@@ -269,6 +307,11 @@ export default function ArtikelAdmin() {
         }}
       >
         {contextHolder}
+        {(artikelLoading || kategoriLoading) && (
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
+            <Spin size="large" />
+          </div>
+        )}
         <Row justify="space-between">
           <Col span={24}>
             <div
@@ -281,12 +324,22 @@ export default function ArtikelAdmin() {
               <button
                 className="button_kirim"
                 onClick={() => setStatePage("Artikel")}
+                disabled={
+                  createArtikelMutation.isPending ||
+                  createKategoriMutation.isPending ||
+                  deleteArtikelMutation.isPending
+                }
               >
                 Artikel
               </button>
               <button
                 className="button_kirim"
                 onClick={() => setStatePage("Riwayat")}
+                disabled={
+                  createArtikelMutation.isPending ||
+                  createKategoriMutation.isPending ||
+                  deleteArtikelMutation.isPending
+                }
               >
                 Riwayat
               </button>
@@ -306,7 +359,10 @@ export default function ArtikelAdmin() {
                   label="Pilih kategori"
                   name="kategori"
                   rules={[
-                    { required: true, message: "Kategori masih kosong!" },
+                    {
+                      required: !statePageKateogries,
+                      message: "Kategori masih kosong!",
+                    },
                   ]}
                 >
                   <Select
@@ -315,16 +371,27 @@ export default function ArtikelAdmin() {
                     optionFilterProp="children"
                     showSearch
                     placeholder="Pilih Kategori"
+                    disabled={
+                      kategoriLoading ||
+                      createArtikelMutation.isPending ||
+                      createKategoriMutation.isPending
+                    }
                   >
                     <Select.Option value="add">
-                      <Button onClick={() => setStatePageKateogries(true)}>
+                      <Button
+                        onClick={() => setStatePageKateogries(true)}
+                        disabled={
+                          createArtikelMutation.isPending ||
+                          createKategoriMutation.isPending
+                        }
+                      >
                         Tambah Kategori
                       </Button>
                     </Select.Option>
                     {statePageKateogries ? (
                       <Select.Option></Select.Option>
                     ) : (
-                      dataKategori.map((item) => (
+                      dataKategori?.map((item) => (
                         <Select.Option key={item.id} value={item.name}>
                           {item.name}
                         </Select.Option>
@@ -478,16 +545,27 @@ export default function ArtikelAdmin() {
                 )}
                 <Col span={24} align="center">
                   <Form.Item>
-                    <button type="submit" className="button_kirim mx-5">
+                    <button
+                      type="submit"
+                      className="button_kirim mx-5"
+                      disabled={
+                        createArtikelMutation.isPending ||
+                        createKategoriMutation.isPending
+                      }
+                    >
                       {statePageKateogries
                         ? "Tambah kategori"
                         : "Tambah artikel"}
                     </button>
                     {statePageKateogries && (
                       <button
-                        type="primary"
+                        type="button"
                         className="button_kirim mx-5"
                         onClick={() => setStatePageKateogries(false)}
+                        disabled={
+                          createArtikelMutation.isPending ||
+                          createKategoriMutation.isPending
+                        }
                       >
                         Batal
                       </button>
@@ -496,57 +574,65 @@ export default function ArtikelAdmin() {
                 </Col>
               </Form>
             ) : (
-              !isLoading && (
-                <div className="overflow-x-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-sm font-semibold">Daftar Artikel</h2>
-                    <Input.Search
-                      placeholder="Search here ..."
-                      onSearch={(value) => setSearchedText(value)}
-                      className="w-full sm:w-64"
-                    />
-                  </div>
-                  <Table
-                    title={() => (
-                      <div className="flex justify-between items-center">
-                        <div className="flex justify-start items-center">
-                          <h2 className="text-sm font-semibold">
-                            Daftar Artikel
-                          </h2>
-                        </div>
-                        <div className="flex justify-end items-center">
-                          <Input.Search
-                            placeholder="Search here ..."
-                            onSearch={(value) => setSearchedText(value)}
-                            className="w-full sm:w-64"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    dataSource={dataSource}
-                    columns={columns}
-                    loading={isLoading}
-                    pagination={{ pageSize: 5 }}
-                    className="w-full"
-                    scroll={{ x: "max-content" }}
+              <div className="overflow-x-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-sm font-semibold">Daftar Artikel</h2>
+                  <Input.Search
+                    placeholder="Search here ..."
+                    onSearch={(value) => setSearchedText(value)}
+                    className="w-full sm:w-64"
                   />
-                  <div className="flex justify-center mt-4">
-                    <button
-                      className="button_kirim"
-                      onClick={() => setRefreshKey((oldKey) => oldKey + 1)}
-                    >
-                      <FiRotateCcw />
-                    </button>
-                  </div>
                 </div>
-              )
+                <Table
+                  title={() => (
+                    <div className="flex justify-between items-center">
+                      <div className="flex justify-start items-center">
+                        <h2 className="text-sm font-semibold">
+                          Daftar Artikel
+                        </h2>
+                      </div>
+                      <div className="flex justify-end items-center">
+                        <Input.Search
+                          placeholder="Search here ..."
+                          onSearch={(value) => setSearchedText(value)}
+                          className="w-full sm:w-64"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  dataSource={dataSource || []}
+                  columns={columns}
+                  loading={
+                    artikelLoading ||
+                    createArtikelMutation.isPending ||
+                    createKategoriMutation.isPending ||
+                    deleteArtikelMutation.isPending
+                  }
+                  pagination={{ pageSize: 5 }}
+                  className="w-full"
+                  scroll={{ x: "max-content" }}
+                />
+                <div className="flex justify-center mt-4">
+                  <button
+                    className="button_kirim"
+                    onClick={() => queryClient.invalidateQueries(["artikel"])}
+                    disabled={
+                      createArtikelMutation.isPending ||
+                      createKategoriMutation.isPending ||
+                      deleteArtikelMutation.isPending
+                    }
+                  >
+                    <FiRotateCcw />
+                  </button>
+                </div>
+              </div>
             )}
           </Col>
           <Col>
             <FormUpdateDataArtikel
               isOpen={isOpenModalUpdateDataArtikel}
               onCancel={() => setIsOpenModalUpdateDataArtikel(false)}
-              fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
+              fetch={() => queryClient.invalidateQueries(["artikel"])}
               data={dataArtikel}
             />
           </Col>

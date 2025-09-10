@@ -1,6 +1,6 @@
 import { DatePicker, Form, Input, InputNumber, message, Modal } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import dataBeratBadanByUmurPria from "../../../json/ZScoreBeratBadanLakiLaki.json";
 import dataBeratBadanByUmurPerempuan from "../../../json/ZScoreBeratBadanPerempuan.json";
 import dataTinggiBadanByUmurPria from "../../../json/ZScorePanjangBadanLakiLaki.json";
@@ -17,18 +17,15 @@ import {
   determineAmbangBatasPBBB,
   determineAmbangBatasTinggiBadan,
 } from "../../../utilities/determineAmbangBatas";
-import axios from "axios";
 import { monthDiff } from "../../../utilities/calculateMonth";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import useAuth from "../../../hook/useAuth";
 
 export default function FormInputPerkembanganAnak(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const { isOpen, onCancel, data, idAnak, fetch } = props;
+  const { isOpen, onCancel, data, idAnak } = props;
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [user, setUser] = useState(login_data);
+  const user = useAuth();
   const [zScoreBB, setZScoreBB] = useState(0);
   const [zScoreTB, setZScoreTB] = useState(0);
   const [zScoreLK, setZScoreLK] = useState(0);
@@ -36,16 +33,54 @@ export default function FormInputPerkembanganAnak(props) {
   const [tanggalPengukuran, setTanggalPengukuran] = useState("");
   const [beratBadanState, setBeratBadanState] = useState("");
   const [tinggiBadanState, setTinggiBadanState] = useState("");
+  const queryClient = useQueryClient();
+  const savePerkembanganAnakMutation = useMutation({
+    mutationFn: async (payload) => {
+      const url =
+        user?.user?.role === "KADER_POSYANDU"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("Gagal menyimpan data");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      onCancel();
+      queryClient.invalidateQueries(["statistik-anak", idAnak]);
+    },
+    onError: (err) => {
+      console.error("Error saving development data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+      setTimeout(() => {
+        onCancel();
+      }, 1000);
+    },
+  });
 
   const handleZScore = (beratBadan) => {
     setBeratBadanState(beratBadan);
     if (tanggalPengukuran) {
       let antropologiData = null;
       const umurBulan = monthDiff(
-        moment(data.tanggal_lahir),
+        moment(data?.tanggal_lahir),
         moment(tanggalPengukuran)
       );
-      if (data.gender === "LAKI_LAKI") {
+      if (data?.gender === "LAKI_LAKI") {
         antropologiData = dataBeratBadanByUmurPria.find(
           (item) => item.bulan === `${umurBulan}`
         );
@@ -77,10 +112,10 @@ export default function FormInputPerkembanganAnak(props) {
     if (zScoreTB !== null && zScoreBB !== null && tanggalPengukuran) {
       let antropologiData = null;
       const umurAnak = monthDiff(
-        moment(data.tanggal_lahir),
+        moment(data?.tanggal_lahir),
         moment(tanggalPengukuran)
       );
-      if (data.gender === "LAKI_LAKI") {
+      if (data?.gender === "LAKI_LAKI") {
         if (umurAnak >= 0 && umurAnak <= 24) {
           antropologiData = dataBeratTinggiBadanPria24Bulan.find(
             (item) => parseFloat(item.pb) === result
@@ -116,10 +151,10 @@ export default function FormInputPerkembanganAnak(props) {
     if (tanggalPengukuran) {
       let antropologiData = null;
       const umurBulan = monthDiff(
-        moment(data.tanggal_lahir),
+        moment(data?.tanggal_lahir),
         moment(tanggalPengukuran)
       );
-      if (data.gender === "LAKI_LAKI") {
+      if (data?.gender === "LAKI_LAKI") {
         antropologiData = dataTinggiBadanByUmurPria.find(
           (item) => item.bulan === `${umurBulan}`
         );
@@ -150,10 +185,10 @@ export default function FormInputPerkembanganAnak(props) {
     if (tanggalPengukuran) {
       let antropologiData = null;
       const umurBulan = monthDiff(
-        moment(data.tanggal_lahir),
+        moment(data?.tanggal_lahir),
         moment(tanggalPengukuran)
       );
-      if (data.gender === "LAKI_LAKI") {
+      if (data?.gender === "LAKI_LAKI") {
         antropologiData = dataLingkarKepalaByUmurPria.find(
           (item) => item.bulan === `${umurBulan}`
         );
@@ -192,38 +227,7 @@ export default function FormInputPerkembanganAnak(props) {
           z_score_lingkar_kepala: zScoreLK,
           z_score_gizi: zScoreBBPB,
         };
-        const headers = { Authorization: `Bearer ${user.token.value}` };
-        const url =
-          user.user.role === "KADER_POSYANDU"
-            ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak`
-            : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak`;
-
-        axios
-          .post(url, payload, { headers })
-          .then(() => {
-            messageApi.open({
-              type: "success",
-              content: "Data berhasil tersimpan",
-            });
-            setTimeout(() => {
-              form.resetFields();
-              onCancel();
-              fetch();
-              if (user.user.role === "KADER_POSYANDU") {
-                window.location.reload();
-              }
-            }, 1000);
-          })
-          .catch((err) => {
-            console.error(err);
-            messageApi.open({
-              type: "error",
-              content: "Data gagal tersimpan",
-            });
-            setTimeout(() => {
-              onCancel();
-            }, 1000);
-          });
+        savePerkembanganAnakMutation.mutate(payload);
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -237,7 +241,7 @@ export default function FormInputPerkembanganAnak(props) {
         open={isOpen}
         onCancel={onCancel}
         title="Input Data Perkembangan Anak"
-        bodyStyle={{ padding: "16px" }} // Consistent padding
+        bodyStyle={{ padding: "16px" }}
         footer={[
           <button
             key="back"
@@ -245,6 +249,7 @@ export default function FormInputPerkembanganAnak(props) {
             onClick={onCancel}
             className="batal_btn"
             style={{ marginRight: "8px" }}
+            disabled={savePerkembanganAnakMutation.isPending}
           >
             Batal
           </button>,
@@ -253,8 +258,9 @@ export default function FormInputPerkembanganAnak(props) {
             type="submit"
             onClick={onOK}
             className="simpan_btn"
+            disabled={savePerkembanganAnakMutation.isPending}
           >
-            Simpan
+            {savePerkembanganAnakMutation.isPending ? "Menyimpan..." : "Simpan"}
           </button>,
         ]}
       >
@@ -262,24 +268,24 @@ export default function FormInputPerkembanganAnak(props) {
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Nama Anak</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{data?.nama}</span>
+            <span>{data?.nama || "-"}</span>
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Jenis Kelamin</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{data?.gender}</span>
+            <span>{data?.gender || "-"}</span>
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Tanggal Lahir</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{data?.tanggal_lahir}</span>
+            <span>{data?.tanggal_lahir || "-"}</span>
           </div>
         </div>
         <Form
           form={form}
           name="form_input_perkembangan_anak"
           layout="vertical"
-          style={{ width: "100%" }} // Explicit full-width
+          style={{ width: "100%" }}
         >
           <Form.Item
             label="Tanggal Pengukuran"
@@ -295,7 +301,7 @@ export default function FormInputPerkembanganAnak(props) {
                 )
               }
               allowClear={false}
-              style={{ width: "100%" }} // Full-width input
+              style={{ width: "100%" }}
             />
           </Form.Item>
           <Form.Item
@@ -306,13 +312,10 @@ export default function FormInputPerkembanganAnak(props) {
             <InputNumber
               min={0}
               onChange={handleZScore}
-              style={{ width: "100%" }} // Full-width input
+              style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="ZScoreBB"
-            style={{ display: "none" }} // Hidden field
-          >
+          <Form.Item name="ZScoreBB" style={{ display: "none" }}>
             <Input value={`${zScoreBB} SD`} disabled type="hidden" />
           </Form.Item>
           <Form.Item
@@ -323,19 +326,13 @@ export default function FormInputPerkembanganAnak(props) {
             <InputNumber
               min={0}
               onChange={handleZScoreTinggiBadan}
-              style={{ width: "100%" }} // Full-width input
+              style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="ZScoreTB"
-            style={{ display: "none" }} // Hidden field
-          >
+          <Form.Item name="ZScoreTB" style={{ display: "none" }}>
             <Input value={`${zScoreTB} SD`} disabled type="hidden" />
           </Form.Item>
-          <Form.Item
-            name="ZScoreGizi"
-            style={{ display: "none" }} // Hidden field
-          >
+          <Form.Item name="ZScoreGizi" style={{ display: "none" }}>
             <Input value={`${zScoreBBPB} SD`} disabled type="hidden" />
           </Form.Item>
           <Form.Item
@@ -348,13 +345,10 @@ export default function FormInputPerkembanganAnak(props) {
             <InputNumber
               min={0}
               onChange={handleZScoreLingkarKepala}
-              style={{ width: "100%" }} // Full-width input
+              style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            name="ZScoreLK"
-            style={{ display: "none" }} // Hidden field
-          >
+          <Form.Item name="ZScoreLK" style={{ display: "none" }}>
             <Input value={`${zScoreLK} SD`} disabled type="hidden" />
           </Form.Item>
         </Form>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,24 +23,19 @@ import dataBeratTinggiBadanPria60Bulan from "../../json/ZScoreBeratTinggiBadanLa
 import dataBeratTinggiBadanPerempuan24Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan24.json";
 import dataBeratTinggiBadanPerempuan60Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan60.json";
 import Navbar from "../../components/layout/Navbar";
-import { Modal, message } from "antd";
+import { Modal, message, Row, Col } from "antd";
 import FormInputPerkembanganAnak from "../../components/form/FormInputPerkembanganAnak";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import { monthDiff } from "../../utilities/calculateMonth";
 import FormUpdatePerkembanganAnak from "../../components/form/FormUpdatePerkembanganAnak";
-import Navigation from "../../components/layout/Navigation";
 import Image from "react-bootstrap/Image";
-import { Row, Col } from "antd";
-import bayi from "../../assets/img/bayi_1.png";
-import "../Detail/detail-style.css";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import bg_dashboard from "../../assets/img/bg-dashboard.svg";
-import footerImage from "../../assets/img/powered_by_telkom.svg";
 import Table from "../../components/layout/Table";
-import FormDetailPerkembanganAnak from "../../components/form/FormDetailDataPerkembanganAnak";
 import { Container } from "react-bootstrap";
-
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import useAuth from "../../hook/useAuth";
+import { monthDiff } from "../../utilities/calculateMonth";
+import bayi from "../../assets/img/bayi_1.png";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -60,32 +55,111 @@ const BackgroundComponent = () => (
 );
 
 export default function DetailPosyandu() {
-  let { id } = useParams();
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [user, setUser] = useState(login_data);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuth();
+  const [messageApi, contextHolder] = message.useMessage();
   const [
     isOpenModalInputPerkembanganAnak,
     setIsOpenModalInputPerkembanganAnak,
-  ] = useState(false);
-  const [data, setData] = useState([]);
-  const [dataAnak, setDataAnak] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [
-    isOpenModalDetailPerkembanganAnak,
-    setIsOpenModalDetailPerkembanganAnak,
   ] = useState(false);
   const [
     isOpenModalUpdatePerkembanganAnak,
     setIsOpenModalUpdatePerkembanganAnak,
   ] = useState(false);
-  const [dataPerkembanganAnakDetail, setDataPerkembanganAnakDetail] =
-    useState(null);
   const [dataPerkembanganAnak, setDataPerkembanganAnak] = useState(null);
-  const [messageApi, contextHolder] = message.useMessage();
+  const [activeContent, setActiveContent] = useState("Content 1");
+
+  // Fetch child data
+  const { data: dataAnak, isLoading: dataAnakLoading } = useQuery({
+    queryKey: ["data-anak", id, user?.user?.role],
+    queryFn: async () => {
+      const url =
+        user?.user?.role !== "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${id}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error("Gagal mengambil data anak");
+      const responseData = await response.json();
+      return responseData.data;
+    },
+    onError: (err) => {
+      console.error("Error fetching child data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data anak",
+      });
+    },
+    enabled: !!user?.token?.value && !!user?.user?.role,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch development data
+  const { data, isLoading: dataLoading } = useQuery({
+    queryKey: ["statistik-anak", id, user?.user?.role],
+    queryFn: async () => {
+      const url =
+        user?.user?.role !== "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${id}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok)
+        throw new Error("Gagal mengambil data perkembangan anak");
+      const responseData = await response.json();
+      return responseData.data.sort((a, b) => a.date.localeCompare(b.date));
+    },
+    onError: (err) => {
+      console.error("Error fetching development data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data perkembangan anak",
+      });
+    },
+    enabled: !!user?.token?.value && !!user?.user?.role,
+  });
+
+  // Mutation for deleting development data
+  const deletePerkembanganAnakMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus data");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["statistik-anak", id]);
+    },
+    onError: (err) => {
+      console.error("Error deleting development data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus data",
+      });
+    },
+  });
 
   const labels = Array.from({ length: 61 }, (_, i) => i);
   const label_PB_24 = [];
@@ -103,15 +177,16 @@ export default function DetailPosyandu() {
   }
 
   function datasetChart(type) {
-    const dataset = data.map((item) =>
-      Math.abs(monthDiff(moment(dataAnak.tanggal_lahir), moment(item.date)))
-    );
+    const dataset =
+      data?.map((item) =>
+        Math.abs(monthDiff(moment(dataAnak?.tanggal_lahir), moment(item.date)))
+      ) || [];
 
     if (type === "berat") {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].berat));
           j++;
         } else {
@@ -123,7 +198,7 @@ export default function DetailPosyandu() {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].tinggi));
           j++;
         } else {
@@ -135,7 +210,7 @@ export default function DetailPosyandu() {
       const result = [];
       let j = 0;
       for (let i = 0; i < 61; i++) {
-        if (dataset.includes(i) && j < data.length) {
+        if (dataset.includes(i) && j < data?.length) {
           result.push(Number(data[j].lingkar_kepala));
           j++;
         } else {
@@ -145,7 +220,7 @@ export default function DetailPosyandu() {
       return result;
     } else if (type === "gizi") {
       const dataset_gizi = [];
-      for (let i = 0; i < data.length; i++) {
+      for (let i = 0; i < data?.length; i++) {
         let floor;
         if (data[i].tinggi - Math.floor(data[i].tinggi) === 0.5) {
           floor = data[i].tinggi;
@@ -160,7 +235,7 @@ export default function DetailPosyandu() {
       let j = 0;
       if (dataset[0] >= 0 && dataset[0] <= 24) {
         const dataSource =
-          dataAnak.gender === "LAKI_LAKI"
+          dataAnak?.gender === "LAKI_LAKI"
             ? dataBeratTinggiBadanPria24Bulan
             : dataBeratTinggiBadanPerempuan24Bulan;
         dataSource.forEach((item) => {
@@ -176,7 +251,7 @@ export default function DetailPosyandu() {
         });
       } else if (dataset[0] > 24 && dataset[0] <= 60) {
         const dataSource =
-          dataAnak.gender === "LAKI_LAKI"
+          dataAnak?.gender === "LAKI_LAKI"
             ? dataBeratTinggiBadanPria60Bulan
             : dataBeratTinggiBadanPerempuan60Bulan;
         dataSource.forEach((item) => {
@@ -193,6 +268,7 @@ export default function DetailPosyandu() {
       }
       return result;
     }
+    return [];
   }
 
   const getPointRadius = () => {
@@ -1056,129 +1132,6 @@ export default function DetailPosyandu() {
     },
   };
 
-  useEffect(() => {
-    function fetchDataPerkembanganAnak() {
-      if (user?.user?.role !== "ORANG_TUA") {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              a.date.localeCompare(b.date)
-            );
-            console.log(sortedData);
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            console.log(err);
-            messageApi.open({
-              type: "error",
-              content: "Gagal mengambil data perkembangan anak",
-            });
-            console.log(err);
-            setIsLoading(false);
-          });
-      } else {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              a.date.localeCompare(b.date)
-            );
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            console.log(err);
-            messageApi.open({
-              type: "error",
-              content: "Gagal mengambil data perkembangan anak",
-            });
-            console.log(err);
-            setIsLoading(false);
-          });
-      }
-    }
-
-    if (user) fetchDataPerkembanganAnak();
-  }, [refreshKey, user]);
-
-  useEffect(() => {
-    function fetchDataAnakByID() {
-      if (user?.user?.role !== "ORANG_TUA") {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            setDataAnak(response.data.data);
-          })
-          .catch((err) => {
-            console.log(err);
-            messageApi.open({
-              type: "error",
-              content: "Gagal mengambil data anak",
-            });
-          });
-      } else {
-        axios
-          .get(
-            `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${id}`,
-            {
-              headers: { Authorization: `Bearer ${user.token.value}` },
-            }
-          )
-          .then((response) => {
-            setDataAnak(response.data.data);
-          })
-          .catch((err) => {
-            console.log(err);
-            messageApi.open({
-              type: "error",
-              content: "Gagal mengambil data anak",
-            });
-          });
-      }
-    }
-
-    if (user) fetchDataAnakByID();
-  }, [user]);
-
-  function deletePerkembanganAnak(id) {
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token.value}`,
-          },
-        }
-      )
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((err) => {
-        console.log(err);
-        messageApi.open({
-          type: "error",
-          content: "Gagal menghapus data",
-        });
-      });
-  }
-
   const columns = useMemo(() => {
     return [
       {
@@ -1192,11 +1145,11 @@ export default function DetailPosyandu() {
       {
         Header: "Umur",
         accessor: "date",
-        Cell: ({ value, row }) => {
+        Cell: ({ row }) => {
           const tglPengukuran = row.original.date;
           return (
             <span>
-              {dataAnak.tanggal_lahir
+              {dataAnak?.tanggal_lahir
                 ? `${monthDiff(
                     moment(dataAnak.tanggal_lahir),
                     moment(tglPengukuran)
@@ -1217,8 +1170,8 @@ export default function DetailPosyandu() {
         Header: "Status - BB/U",
         accessor: "statusBB",
         Cell: ({ row }) => {
-          const statusBB = row.original.statistik.berat;
-          return <span>{statusBB}</span>;
+          const statusBB = row.original.statistik?.berat;
+          return <span>{statusBB || "-"}</span>;
         },
       },
       {
@@ -1232,8 +1185,8 @@ export default function DetailPosyandu() {
         Header: "Status - TB/U",
         accessor: "statusTB",
         Cell: ({ row }) => {
-          const statusBB = row.original.statistik.tinggi;
-          return <span>{statusBB}</span>;
+          const statusTB = row.original.statistik?.tinggi;
+          return <span>{statusTB || "-"}</span>;
         },
       },
       {
@@ -1247,16 +1200,16 @@ export default function DetailPosyandu() {
         Header: "Status - LK/U",
         accessor: "statusLK",
         Cell: ({ row }) => {
-          const statusBB = row.original.statistik.lingkar_kepala;
-          return <span>{statusBB}</span>;
+          const statusLK = row.original.statistik?.lingkar_kepala;
+          return <span>{statusLK || "-"}</span>;
         },
       },
       {
         Header: "Status - Gizi",
         accessor: "statusGizi",
         Cell: ({ row }) => {
-          const statusBB = row.original.statistik.gizi;
-          return <span>{statusBB}</span>;
+          const statusGizi = row.original.statistik?.gizi;
+          return <span>{statusGizi || "-"}</span>;
         },
       },
       {
@@ -1274,6 +1227,7 @@ export default function DetailPosyandu() {
                   setDataPerkembanganAnak(dataAksi);
                   setIsOpenModalUpdatePerkembanganAnak(true);
                 }}
+                disabled={deletePerkembanganAnakMutation.isPending}
               >
                 Ubah data
               </button>
@@ -1286,36 +1240,10 @@ export default function DetailPosyandu() {
                     content: "Data yang dihapus tidak dapat dikembalikan",
                     okText: "Ya",
                     cancelText: "Tidak",
-                    onOk: () => {
-                      axios
-                        .delete(
-                          `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${id}`,
-                          {
-                            headers: {
-                              Authorization: `Bearer ${user.token.value}`,
-                            },
-                          }
-                        )
-                        .then((response) => {
-                          messageApi.open({
-                            type: "success",
-                            content: "Data berhasil dihapus",
-                          });
-                          setTimeout(() => {
-                            setRefreshKey((oldKey) => oldKey + 1);
-                            window.location.reload();
-                          }, 1000);
-                        })
-                        .catch((err) => {
-                          console.log(err);
-                          messageApi.open({
-                            type: "error",
-                            content: "Data gagal dihapus",
-                          });
-                        });
-                    },
+                    onOk: () => deletePerkembanganAnakMutation.mutate(id),
                   });
                 }}
+                disabled={deletePerkembanganAnakMutation.isPending}
               >
                 Delete
               </button>
@@ -1324,9 +1252,12 @@ export default function DetailPosyandu() {
         },
       },
     ];
-  }, [dataAnak, user, messageApi]);
-
-  const [activeContent, setActiveContent] = useState("Content 1");
+  }, [
+    dataAnak,
+    user?.token?.value,
+    user?.user?.role,
+    deletePerkembanganAnakMutation.isPending,
+  ]);
 
   const handleButtonClick = (content) => {
     setActiveContent(content);
@@ -1347,15 +1278,21 @@ export default function DetailPosyandu() {
             >
               <Col xs={24} sm={16} md={12} lg={8} className="text-start">
                 <h6 className="dashboard mb-2 sm:mb-3 lg:mb-4 text-2xl lg:text-5xl">
-                  {dataAnak.nama}
+                  {dataAnak?.nama || ""}
                 </h6>
                 <h6 className="dashboard sm:text-lg lg:text-[25px] mb-4 sm:mb-6 text-2xl lg:text-5xl">
-                  {moment().diff(moment(dataAnak.tanggal_lahir), "month")} Bulan
+                  {dataAnak?.tanggal_lahir
+                    ? `${moment().diff(
+                        moment(dataAnak.tanggal_lahir),
+                        "month"
+                      )} Bulan`
+                    : ""}
                 </h6>
                 <div className="flex justify-start">
                   <button
                     className="cssbuttons-io-button"
                     onClick={() => setIsOpenModalInputPerkembanganAnak(true)}
+                    disabled={dataAnakLoading}
                   >
                     Tambah data
                     <div className="icon">
@@ -1387,12 +1324,16 @@ export default function DetailPosyandu() {
             </Row>
           </Col>
           <Col span={24}>
-            <Table columns={columns} data={data} />
+            <Table
+              columns={columns}
+              data={data || []}
+              loading={dataLoading || dataAnakLoading}
+            />
           </Col>
           <Col className="flex justify-center items-center flex-col md:flex-row mt-8 gap-3">
             <button
               className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
-                activeContent === "Content 4"
+                activeContent === "Content 1"
                   ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
                   : ""
               }`}
@@ -1402,7 +1343,7 @@ export default function DetailPosyandu() {
             </button>
             <button
               className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
-                activeContent === "Content 4"
+                activeContent === "Content 2"
                   ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
                   : ""
               }`}
@@ -1412,7 +1353,7 @@ export default function DetailPosyandu() {
             </button>
             <button
               className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
-                activeContent === "Content 4"
+                activeContent === "Content 3"
                   ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
                   : ""
               }`}
@@ -1440,7 +1381,7 @@ export default function DetailPosyandu() {
               <div className="w-full min-h-[500px] sm:min-h-[700px]">
                 <Line
                   data={
-                    dataAnak.gender === "LAKI_LAKI"
+                    dataAnak?.gender === "LAKI_LAKI"
                       ? dataChartPriaBB
                       : dataChartPerempuanBB
                   }
@@ -1458,7 +1399,7 @@ export default function DetailPosyandu() {
               <div className="w-full min-h-[500px] sm:min-h-[700px]">
                 <Line
                   data={
-                    dataAnak.gender === "LAKI_LAKI"
+                    dataAnak?.gender === "LAKI_LAKI"
                       ? dataChartPriaTB
                       : dataChartPerempuanTB
                   }
@@ -1476,7 +1417,7 @@ export default function DetailPosyandu() {
               <div className="w-full min-h-[500px] sm:min-h-[700px]">
                 <Line
                   data={
-                    dataAnak.gender === "LAKI_LAKI"
+                    dataAnak?.gender === "LAKI_LAKI"
                       ? dataChartPriaLK
                       : dataChartPerempuanLK
                   }
@@ -1494,23 +1435,23 @@ export default function DetailPosyandu() {
               <div className="w-full min-h-[500px] sm:min-h-[700px]">
                 <Line
                   data={
-                    dataAnak.gender === "LAKI_LAKI"
+                    dataAnak?.gender === "LAKI_LAKI"
                       ? moment().diff(
-                          moment(dataAnak.tanggal_lahir),
+                          moment(dataAnak?.tanggal_lahir),
                           "month"
                         ) >= 0 &&
                         moment().diff(
-                          moment(dataAnak.tanggal_lahir),
+                          moment(dataAnak?.tanggal_lahir),
                           "month"
                         ) <= 24
                         ? dataChartPriaGizi_0_24
                         : dataChartPriaGizi_25_60
                       : moment().diff(
-                          moment(dataAnak.tanggal_lahir),
+                          moment(dataAnak?.tanggal_lahir),
                           "month"
                         ) >= 0 &&
                         moment().diff(
-                          moment(dataAnak.tanggal_lahir),
+                          moment(dataAnak?.tanggal_lahir),
                           "month"
                         ) <= 24
                       ? dataChartPerempuanGizi_0_24
@@ -1525,17 +1466,16 @@ export default function DetailPosyandu() {
           <FormInputPerkembanganAnak
             isOpen={isOpenModalInputPerkembanganAnak}
             onCancel={() => setIsOpenModalInputPerkembanganAnak(false)}
-            data={dataAnak ? dataAnak : null}
+            data={dataAnak || null}
             idAnak={id}
-            fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
           />
 
           <FormUpdatePerkembanganAnak
             isOpen={isOpenModalUpdatePerkembanganAnak}
             onCancel={() => setIsOpenModalUpdatePerkembanganAnak(false)}
-            fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
             data={dataPerkembanganAnak}
             profil={dataAnak}
+            idAnak={id}
           />
         </Row>
       </Container>

@@ -1,7 +1,3 @@
-import { useRef, useState } from "react";
-import { FaBars } from "react-icons/fa";
-import { IoMdNotificationsOutline } from "react-icons/io";
-import { AiOutlineMail } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import Logo from "../../../assets/img/GiziBalita_logo.png";
 

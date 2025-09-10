@@ -1,8 +1,7 @@
 import { Form, Input, message, Spin } from "antd";
-import axios from "axios";
-import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { MailOutlined, KeyOutlined } from "@ant-design/icons";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import logo from "./GiziBalita_logo.png";
 import background from "./login_bg.svg";
 import banner from "./banner.svg";
@@ -24,53 +23,58 @@ export default function SignIn(props) {
   const navigate = useNavigate();
   const location = useLocation();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
 
-  // Check if user is already authenticated
-  useEffect(() => {
-    let login_data = null;
-    let isAuthenticated = false;
-    let userRole = null;
+  // Check authentication status using useQuery
+  const { isLoading: authLoading } = useQuery({
+    queryKey: ["authCheck"],
+    queryFn: () => {
+      let login_data = null;
+      let isAuthenticated = false;
+      let userRole = null;
 
-    try {
-      if (typeof window !== "undefined") {
-        login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
-        isAuthenticated =
-          login_data &&
-          login_data.token &&
-          login_data.user &&
-          login_data.user.role;
-        userRole = isAuthenticated ? login_data.user.role : null;
+      try {
+        if (typeof window !== "undefined") {
+          login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
+          isAuthenticated =
+            login_data &&
+            login_data.token &&
+            login_data.user &&
+            login_data.user.role;
+          userRole = isAuthenticated ? login_data.user.role : null;
+        }
+      } catch (error) {
+        console.error("Error parsing login_data:", error);
+        localStorage.removeItem("login_data"); // Clear invalid data
+        isAuthenticated = false;
       }
-    } catch (error) {
-      console.error("Error parsing login_data:", error);
-      localStorage.removeItem("login_data"); // Clear invalid data
-      isAuthenticated = false;
-    }
 
-    if (isAuthenticated) {
-      // Redirect to role-specific dashboard
-      const redirectPath =
-        userRole === "ORANG_TUA"
-          ? "/dashboard"
-          : userRole === "KADER_POSYANDU"
-          ? "/kader-posyandu/dashboard"
-          : userRole === "TENAGA_KESEHATAN"
-          ? "/tenaga-kesehatan/dashboard"
-          : userRole === "DESA"
-          ? "/desa/dashboard"
-          : userRole === "ADMIN"
-          ? "/admin/dashboard/desa"
-          : "/"; // Fallback to home if role is unknown
+      if (isAuthenticated) {
+        // Redirect to role-specific dashboard
+        const redirectPath =
+          userRole === "ORANG_TUA"
+            ? "/dashboard"
+            : userRole === "KADER_POSYANDU"
+            ? "/kader-posyandu/dashboard"
+            : userRole === "TENAGA_KESEHATAN"
+            ? "/tenaga-kesehatan/dashboard"
+            : userRole === "DESA"
+            ? "/desa/dashboard"
+            : userRole === "ADMIN"
+            ? "/admin/dashboard/desa"
+            : "/"; // Fallback to home if role is unknown
 
-      messageApi.open({
-        type: "info",
-        content: "Anda sudah login. Mengarahkan ke dashboard...",
-      });
+        messageApi.open({
+          type: "info",
+          content: "Anda sudah login. Mengarahkan ke dashboard...",
+        });
 
-      navigate(redirectPath, { replace: true });
-    }
-  }, [navigate, messageApi]);
+        navigate(redirectPath, { replace: true });
+      }
+
+      return { isAuthenticated };
+    },
+    retry: false, // No retry for auth check
+  });
 
   // Determine the role for redirect purposes
   const getRoleRedirect = () => {
@@ -83,75 +87,87 @@ export default function SignIn(props) {
 
   const role = getRoleRedirect();
 
-  const onFinish = (values) => {
-    setLoading(true);
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/auth/login`, {
-        email: values.email,
-        password: values.password,
-      })
-      .then((response) => {
-        const role_user = response.data.data.user.role;
-        const user_status = response.data.data.user.status; // Ambil status pengguna
-
-        // Validasi status pengguna
-        if (user_status === "0") {
-          setLoading(false);
-          messageApi.open({
-            type: "error",
-            content:
-              "Akun Anda belum di-approve. Silakan tunggu persetujuan admin.",
-          });
-          return;
+  // Login mutation using useMutation
+  const loginMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+          }),
         }
+      );
+      if (!response.ok) {
+        throw new Error("Email dan Password belum sesuai");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      const role_user = data.data.user.role;
+      const user_status = data.data.user.status;
 
-        // Validasi role pengguna
-        if (role_user !== role && role !== "ORANG_TUA") {
-          setLoading(false);
-          messageApi.open({
-            type: "error",
-            content: `Akses ditolak. Anda bukan ${role
-              .replace("_", " ")
-              .toLowerCase()}.`,
-          });
-          return;
-        }
-
-        // Jika status dan role valid, lanjutkan proses login
-        messageApi.open({
-          type: "success",
-          content: "Berhasil Login",
-        });
-        localStorage.setItem("login_data", JSON.stringify(response.data.data));
-        setTimeout(() => {
-          setLoading(false);
-          // Check if there's a previous page to redirect to
-          const from = location.state?.from?.pathname || null;
-          if (from && from !== "/sign-in" && from !== "/sign-up") {
-            navigate(from, { replace: true }); // Redirect to the previous page
-          } else {
-            // Fallback to role-specific dashboard
-            if (role_user === "ORANG_TUA") {
-              navigate("/dashboard/");
-            } else if (role_user === "KADER_POSYANDU") {
-              navigate("/kader-posyandu/dashboard/");
-            } else if (role_user === "TENAGA_KESEHATAN") {
-              navigate("/tenaga-kesehatan/dashboard");
-            } else if (role_user === "DESA") {
-              navigate("/desa/dashboard");
-            } else if (role_user === "ADMIN") {
-              navigate("/admin/dashboard/desa");
-            }
-          }
-        }, 1000);
-      })
-      .catch((error) => {
-        setLoading(false);
+      // Validasi status pengguna
+      if (user_status === "0") {
         messageApi.open({
           type: "error",
-          content: "Email dan Password belum sesuai",
+          content:
+            "Akun Anda belum di-approve. Silakan tunggu persetujuan admin.",
         });
+        return;
+      }
+
+      // Validasi role pengguna
+      if (role_user !== role && role !== "ORANG_TUA") {
+        messageApi.open({
+          type: "error",
+          content: `Akses ditolak. Anda bukan ${role
+            .replace("_", " ")
+            .toLowerCase()}.`,
+        });
+        return;
+      }
+
+      // Jika status dan role valid, lanjutkan proses login
+      messageApi.open({
+        type: "success",
+        content: "Berhasil Login",
       });
+      localStorage.setItem("login_data", JSON.stringify(data.data));
+      setTimeout(() => {
+        // Check if there's a previous page to redirect to
+        const from = location.state?.from?.pathname || null;
+        if (from && from !== "/sign-in" && from !== "/sign-up") {
+          navigate(from, { replace: true }); // Redirect to the previous page
+        } else {
+          // Fallback to role-specific dashboard
+          if (role_user === "ORANG_TUA") {
+            navigate("/dashboard/");
+          } else if (role_user === "KADER_POSYANDU") {
+            navigate("/kader-posyandu/dashboard/");
+          } else if (role_user === "TENAGA_KESEHATAN") {
+            navigate("/tenaga-kesehatan/dashboard");
+          } else if (role_user === "DESA") {
+            navigate("/desa/dashboard");
+          } else if (role_user === "ADMIN") {
+            navigate("/admin/dashboard/desa");
+          }
+        }
+      }, 1000);
+    },
+    onError: (error) => {
+      messageApi.open({
+        type: "error",
+        content: error.message || "Email dan Password belum sesuai",
+      });
+    },
+  });
+
+  const onFinish = (values) => {
+    loginMutation.mutate(values);
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -250,7 +266,7 @@ export default function SignIn(props) {
                   borderRadius: "20px",
                   marginBottom: "20px",
                 }}
-                disabled={loading}
+                disabled={loginMutation.isPending}
               >
                 LOGIN
               </button>
@@ -311,7 +327,7 @@ export default function SignIn(props) {
             <button
               type="submit"
               className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-              disabled={loading}
+              disabled={loginMutation.isPending}
             >
               Login
             </button>
@@ -325,7 +341,7 @@ export default function SignIn(props) {
     <>
       <BackgroundComponent />
       {contextHolder}
-      {loading && (
+      {(loginMutation.isPending || authLoading) && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
           <Spin size="large" />
         </div>

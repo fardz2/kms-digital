@@ -7,33 +7,35 @@ import {
 } from "react-table";
 import { SortIcon, SortUpIcon, SortDownIcon } from "./Icons";
 import { Button, PageButton } from "./Button";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 import GlobalFilter from "./GlobalFilter";
 import { Col, Modal, message, Form, Input, Select } from "antd";
 import FormInputDataExcel from "../../form/FormInputDataExcel";
 import FormInputDataAnak from "../../form/FormInputDataAnak";
 import ReactSelect from "react-select";
-import axios from "axios";
 import moment from "moment";
+import useAuth from "../../../hook/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+// Centralized fetch error handler
+const handleFetchError = async (response, defaultMessage) => {
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || defaultMessage);
+  }
+  return response;
+};
 
 // SelectColumnFilter Component
 export function SelectColumnFilter({ column }) {
   const { filterOpt, filterValue, setFilter, preFilteredRows, id, render } =
     column;
   const options = useMemo(() => {
-    const options = new Set();
-    preFilteredRows.forEach((row) => {
-      options.add(row.values[id]);
-    });
-    return [...options.values()];
+    const opts = new Set(preFilteredRows.map((row) => row.values[id]));
+    return [...opts].map((opt) => ({ value: opt, label: opt }));
   }, [id, preFilteredRows]);
 
-  const opt =
-    filterOpt ||
-    options.map((option) => ({
-      value: option,
-      label: option,
-    }));
+  const opt = filterOpt || [{ value: "", label: "All" }, ...options];
 
   return (
     <label className="grid grid-cols-12 gap-x-2 items-center mt-4">
@@ -44,46 +46,41 @@ export function SelectColumnFilter({ column }) {
         className="w-full h-full col-span-10 rounded-md text-sm border-gray-600 shadow focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-70"
         name={id}
         id={id}
-        onChange={(e) => {
-          console.log("Applying filter for", id, ":", e.value);
-          setFilter(e.value === "" ? undefined : Number(e.value));
-        }}
+        onChange={(e) =>
+          setFilter(e.value === "" ? undefined : Number(e.value))
+        }
         placeholder="All"
         value={{
-          value: filterValue !== undefined ? filterValue : "",
+          value: filterValue ?? "",
           label:
             filterValue !== undefined
-              ? filterValue == 1
+              ? filterValue
                 ? "Approve"
                 : "Belum Diapprove"
               : "All",
         }}
-        options={[{ value: "", label: "All" }, ...opt]}
+        options={opt}
       />
     </label>
   );
 }
 
 // Normalize status for filtering
-const normalizeStatus = (status) => {
-  if (typeof status === "string") {
-    return status === "true" || status === "1";
-  }
-  if (typeof status === "number") {
-    return status === 1;
-  }
-  return !!status;
-};
+const normalizeStatus = (status) =>
+  typeof status === "string"
+    ? status === "true" || status === "1"
+    : typeof status === "number"
+    ? status === 1
+    : !!status;
 
-// FormTambahOrangTua Component (unchanged)
-function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
+// FormTambahOrangTua Component
+function FormTambahOrangTua({ isOpen, onCancel, user }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
+  const addOrangTuaMutation = useMutation({
+    mutationFn: async (values) => {
       const payload = {
         email: values.email,
         password: values.password,
@@ -93,38 +90,29 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
         id_posyandu: user.user?.id_posyandu,
         id_desa: user.user?.id_desa,
       };
-
-      await axios.post(
+      const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/auth/orang-tua/register`,
-        payload,
         {
+          method: "POST",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${user.token?.value}`,
           },
+          body: JSON.stringify(payload),
         }
       );
-
-      messageApi.open({
-        type: "success",
-        content: "Berhasil menambahkan orang tua",
-      });
-      fetchOrangTua();
+      await handleFetchError(response, "Gagal menambahkan orang tua");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.success("Berhasil menambahkan orang tua");
+      queryClient.invalidateQueries(["orangTua"]);
       form.resetFields();
       onCancel();
-    } catch (error) {
-      console.error("Error adding parent:", error);
-      messageApi.open({
-        type: "error",
-        content: error.response?.data?.message || "Gagal menambahkan orang tua",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onFinishFailed = (errorInfo) => {
-    console.log("Form Failed:", errorInfo);
-  };
+    },
+    onError: (error) =>
+      messageApi.error(error.message || "Gagal menambahkan orang tua"),
+  });
 
   return (
     <>
@@ -135,14 +123,14 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
         onCancel={onCancel}
         footer={null}
         width={600}
-        confirmLoading={loading}
+        confirmLoading={addOrangTuaMutation.isLoading}
         zIndex={1001}
       >
         <Form
           form={form}
           name="tambah_orang_tua"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          onFinish={addOrangTuaMutation.mutate}
+          onFinishFailed={(errorInfo) => console.log("Form Failed:", errorInfo)}
           layout="vertical"
           autoComplete="off"
         >
@@ -181,10 +169,9 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
               { required: true, message: "Silahkan Confirm Password Anda!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Password tidak sesuai!"));
+                  return !value || getFieldValue("password") === value
+                    ? Promise.resolve()
+                    : Promise.reject(new Error("Password tidak sesuai!"));
                 },
               }),
             ]}
@@ -209,7 +196,11 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
             </Select>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={addOrangTuaMutation.isLoading}
+            >
               Simpan
             </Button>
             <Button style={{ marginLeft: 8 }} onClick={onCancel}>
@@ -222,17 +213,11 @@ function FormTambahOrangTua({ isOpen, onCancel, fetchOrangTua, user }) {
   );
 }
 
-// FormEditOrangTua Component (unchanged)
-function FormEditOrangTua({
-  isOpen,
-  onCancel,
-  fetchOrangTua,
-  user,
-  selectedUser,
-}) {
+// FormEditOrangTua Component
+function FormEditOrangTua({ isOpen, onCancel, user, selectedUser }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (selectedUser && isOpen) {
@@ -245,9 +230,8 @@ function FormEditOrangTua({
     }
   }, [selectedUser, isOpen, form]);
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
+  const editOrangTuaMutation = useMutation({
+    mutationFn: async (values) => {
       const payload = {
         email: values.email,
         password: values.password || undefined,
@@ -255,37 +239,28 @@ function FormEditOrangTua({
         alamat: values.alamat,
         status: values.status,
       };
-
-      await axios.put(
+      const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/auth/users/${selectedUser.id}`,
-        payload,
         {
+          method: "PUT",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${user.token?.value}`,
           },
+          body: JSON.stringify(payload),
         }
       );
-
-      messageApi.open({
-        type: "success",
-        content: "Berhasil memperbarui orang tua",
-      });
-      fetchOrangTua();
+      await handleFetchError(response, "Gagal memperbarui orang tua");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.success("Berhasil memperbarui orang tua");
+      queryClient.invalidateQueries(["orangTua"]);
       onCancel();
-    } catch (error) {
-      console.error("Error updating parent:", error);
-      messageApi.open({
-        type: "error",
-        content: error.response?.data?.message || "Gagal memperbarui orang tua",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onFinishFailed = (errorInfo) => {
-    console.log("Form Failed:", errorInfo);
-  };
+    },
+    onError: (error) =>
+      messageApi.error(error.message || "Gagal memperbarui orang tua"),
+  });
 
   return (
     <>
@@ -296,14 +271,14 @@ function FormEditOrangTua({
         onCancel={onCancel}
         footer={null}
         width={600}
-        confirmLoading={loading}
+        confirmLoading={editOrangTuaMutation.isLoading}
         zIndex={1001}
       >
         <Form
           form={form}
           name="edit_orang_tua"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          onFinish={editOrangTuaMutation.mutate}
+          onFinishFailed={(errorInfo) => console.log("Form Failed:", errorInfo)}
           layout="vertical"
           autoComplete="off"
         >
@@ -328,10 +303,7 @@ function FormEditOrangTua({
             label="Password"
             name="password"
             rules={[
-              {
-                pattern: "^.{8,}$",
-                message: "Password minimal 8 karakter",
-              },
+              { pattern: "^.{8,}$", message: "Password minimal 8 karakter" },
             ]}
           >
             <Input.Password placeholder="Masukkan password (kosongkan jika tidak diubah)" />
@@ -343,10 +315,9 @@ function FormEditOrangTua({
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Password tidak sesuai!"));
+                  return !value || getFieldValue("password") === value
+                    ? Promise.resolve()
+                    : Promise.reject(new Error("Password tidak sesuai!"));
                 },
               }),
             ]}
@@ -371,7 +342,11 @@ function FormEditOrangTua({
             </Select>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={editOrangTuaMutation.isLoading}
+            >
               Simpan
             </Button>
             <Button style={{ marginLeft: 8 }} onClick={onCancel}>
@@ -407,16 +382,12 @@ function Table({
     nextPage,
     previousPage,
     setPageSize,
-    state,
+    state: { globalFilter, pageIndex, pageSize },
     preGlobalFilteredRows,
     setGlobalFilter,
     setAllFilters,
   } = useTable(
-    {
-      columns,
-      data,
-      initialState,
-    },
+    { columns, data, initialState },
     useFilters,
     useGlobalFilter,
     useSortBy,
@@ -424,137 +395,97 @@ function Table({
     TableHooks
   );
 
-  const { globalFilter, pageIndex, pageSize } = state;
-  const [isOpenModalInputExcel, setIsOpenModalInputExcel] = useState(false);
-
-  const [isOpenModalInputDataAnak, setIsOpenModalInputDataAnak] =
-    useState(false);
-  const [isOpenModalOrangTua, setIsOpenModalOrangTua] = useState(false);
-  const [isOpenModalTambahOrangTua, setIsOpenModalTambahOrangTua] =
-    useState(false);
-  const [isOpenModalEditOrangTua, setIsOpenModalEditOrangTua] = useState(false);
-  const [isOpenModalAnakBelumApprove, setIsOpenModalAnakBelumApprove] =
-    useState(false); // New state for unapproved children modal
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [modalState, setModalState] = useState({
+    inputExcel: false,
+    inputDataAnak: false,
+    orangTua: false,
+    tambahOrangTua: false,
+    editOrangTua: false,
+    anakBelumApprove: false,
+    delete: false,
+  });
   const [userToDelete, setUserToDelete] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [orangTuaData, setOrangTuaData] = useState([]);
-  const [anakBelumApproveData, setAnakBelumApproveData] = useState([]); // New state for unapproved children data
-  const [orangTuaLoading, setOrangTuaLoading] = useState(false);
-  const [anakBelumApproveLoading, setAnakBelumApproveLoading] = useState(false); // New state for loading unapproved children
-  const [refreshKey, setRefreshKey] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
-  const [exportLoading, setExportLoading] = useState(false);
+  const user = useAuth();
+  const queryClient = useQueryClient();
 
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(localStorage.getItem("login_data")) || {};
-  }
-  const [user, setUser] = useState(login_data);
+  const toggleModal = useCallback(
+    (modal, value) => {
+      setModalState((prev) => ({ ...prev, [modal]: value }));
+      if (!value) setAllFilters([]);
+    },
+    [setAllFilters]
+  );
 
   // Fetch Orang Tua data
-  const fetchOrangTua = async () => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      setOrangTuaLoading(false);
-      setIsOpenModalOrangTua(false);
-      return;
-    }
-
-    setOrangTuaLoading(true);
-    try {
-      const response = await axios.get(
+  const { data: orangTuaData = [], isLoading: orangTuaLoading } = useQuery({
+    queryKey: ["orangTua", user.token?.value],
+    queryFn: async () => {
+      if (!user.token?.value) throw new Error("Silakan login terlebih dahulu");
+      const response = await fetch(
         `${
           process.env.REACT_APP_BASE_URL
         }/api/posyandu/orang-tua/list?_=${Date.now()}`,
         {
-          headers: {
-            Authorization: `Bearer ${user.token?.value}`,
-          },
+          headers: { Authorization: `Bearer ${user.token?.value}` },
         }
       );
-      const normalizedData = response.data.data.map((item) => ({
+      await handleFetchError(response, "Gagal mengambil data orang tua");
+      const data = await response.json();
+      return data.data.map((item) => ({
         ...item,
         status: normalizeStatus(item.status),
       }));
-      setOrangTuaData(normalizedData);
-    } catch (err) {
-      messageApi.open({
-        type: "error",
-        content:
-          err.response?.data?.message || "Gagal mengambil data orang tua",
-      });
-      setOrangTuaData([]);
-    } finally {
-      setOrangTuaLoading(false);
-    }
-  };
+    },
+    enabled: modalState.orangTua && !!user.token?.value,
+    onError: (error) =>
+      messageApi.error(error.message || "Gagal mengambil data orang tua"),
+  });
 
   // Fetch Unapproved Children data
-  const fetchAnakBelumApprove = async () => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      setAnakBelumApproveLoading(false);
-      setIsOpenModalAnakBelumApprove(false);
-      return;
-    }
-
-    setAnakBelumApproveLoading(true);
-    try {
-      const response = await axios.get(
+  const {
+    data: anakBelumApproveData = [],
+    isLoading: anakBelumApproveLoading,
+  } = useQuery({
+    queryKey: ["anakBelumApprove", user.token?.value],
+    queryFn: async () => {
+      if (!user.token?.value) throw new Error("Silakan login terlebih dahulu");
+      const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/posyandu/belum-approve`,
         {
-          headers: {
-            Authorization: `Bearer ${user.token?.value}`,
-          },
+          headers: { Authorization: `Bearer ${user.token?.value}` },
         }
       );
-      const sortedData = response.data.data.sort((a, b) =>
-        b.created_at.localeCompare(a.created_at)
+      await handleFetchError(
+        response,
+        "Gagal mengambil data anak belum approve"
       );
-      setAnakBelumApproveData(sortedData);
-    } catch (err) {
-      messageApi.open({
-        type: "error",
-        content:
-          err.response?.data?.message ||
-          "Gagal mengambil data anak belum approve",
-      });
-      setAnakBelumApproveData([]);
-    } finally {
-      setAnakBelumApproveLoading(false);
-    }
-  };
+      const data = await response.json();
+      return data.data.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    },
+    enabled: modalState.anakBelumApprove && !!user.token?.value,
+    onError: (error) =>
+      messageApi.error(
+        error.message || "Gagal mengambil data anak belum approve"
+      ),
+  });
 
   // Export Data Anak
-  const handleExportDataAnak = async () => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      return;
-    }
-
-    setExportLoading(true);
-    try {
-      const response = await axios.get(
+  const exportDataAnakMutation = useMutation({
+    mutationFn: async () => {
+      if (!user.token?.value) throw new Error("Silakan login terlebih dahulu");
+      const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/export-data-anak-csv`,
         {
-          headers: {
-            Authorization: `Bearer ${user.token?.value}`,
-          },
-          responseType: "blob",
+          headers: { Authorization: `Bearer ${user.token?.value}` },
         }
       );
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      await handleFetchError(response, "Gagal mengunduh data anak");
+      return response.blob();
+    },
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", "data-anak.csv");
@@ -562,133 +493,121 @@ function Table({
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      messageApi.success("Berhasil mengunduh data anak");
+    },
+    onError: (error) =>
+      messageApi.error(error.message || "Gagal mengunduh data anak"),
+  });
 
-      messageApi.open({
-        type: "success",
-        content: "Berhasil mengunduh data anak",
-      });
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      messageApi.open({
-        type: "error",
-        content: error.response?.data?.message || "Gagal mengunduh data anak",
-      });
-    } finally {
-      setExportLoading(false);
-    }
-  };
-
-  const handleEditOrangTua = (record) => {
-    setSelectedUser(record);
-    setIsOpenModalEditOrangTua(true);
-  };
-
-  const showDeleteConfirm = (id) => {
-    setUserToDelete(id);
-    setIsDeleteModalVisible(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (userToDelete) {
-      axios
-        .delete(
-          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
-          {
-            headers: { Authorization: `Bearer ${user.token?.value}` },
-          }
-        )
-        .then((response) => {
-          messageApi.open({
-            type: "success",
-            content: "Orang Tua berhasil dihapus",
-          });
-          fetchOrangTua();
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        })
-        .catch((err) => {
-          messageApi.open({
-            type: "error",
-            content: err.response?.data?.message || "Gagal menghapus Orang Tua",
-          });
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        });
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalVisible(false);
-    setUserToDelete(null);
-  };
-
-  // Approve child action
-  const handleApproveAnak = (id) => {
-    Modal.confirm({
-      title: "Apakah anda yakin ingin menyetujui anak ini?",
-
-      okText: "Ya",
-      cancelText: "Tidak",
-      onOk: async () => {
-        try {
-          await axios.put(
-            `${process.env.REACT_APP_BASE_URL}/api/posyandu/belum-approve/${id}/approve`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${user.token?.value}`,
-              },
-            }
-          );
-          messageApi.open({
-            type: "success",
-            content: "Anak berhasil disetujui",
-          });
-          fetchAnakBelumApprove();
-        } catch (error) {
-          messageApi.open({
-            type: "error",
-            content: error.response?.data?.message || "Gagal menyetujui anak",
-          });
+  // Delete Orang Tua
+  const deleteOrangTuaMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${user.token?.value}` },
         }
-      },
-    });
-  };
+      );
+      await handleFetchError(response, "Gagal menghapus Orang Tua");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.success("Orang Tua berhasil dihapus");
+      queryClient.invalidateQueries(["orangTua"]);
+      toggleModal("delete", false);
+      setUserToDelete(null);
+    },
+    onError: (error) => {
+      messageApi.error(error.message || "Gagal menghapus Orang Tua");
+      toggleModal("delete", false);
+      setUserToDelete(null);
+    },
+  });
 
-  useEffect(() => {
-    if (isOpenModalOrangTua) {
-      fetchOrangTua();
-      setAllFilters([]);
-    }
-  }, [isOpenModalOrangTua, refreshKey, user.token?.value, setAllFilters]);
+  // Approve Anak
+  const approveAnakMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/belum-approve/${id}/approve`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await handleFetchError(response, "Gagal menyetujui anak");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.success("Anak berhasil disetujui");
+      queryClient.invalidateQueries(["anakBelumApprove"]);
+    },
+    onError: (error) =>
+      messageApi.error(error.message || "Gagal menyetujui anak"),
+  });
 
-  useEffect(() => {
-    if (isOpenModalAnakBelumApprove) {
-      fetchAnakBelumApprove();
-      setAllFilters([]);
-    }
-  }, [
-    isOpenModalAnakBelumApprove,
-    refreshKey,
-    user.token?.value,
-    setAllFilters,
-  ]);
+  // Delete Anak
+  const deleteAnakMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await handleFetchError(response, "Gagal menghapus data anak");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.success("Data berhasil dihapus");
+      queryClient.invalidateQueries(["anakBelumApprove"]);
+      setTimeout(() => window.location.reload(), 1000);
+    },
+    onError: (error) => {
+      messageApi.error(error.message || "Gagal menghapus data anak");
+      setTimeout(() => window.location.reload(), 1000);
+    },
+  });
+
+  const handleEditOrangTua = useCallback(
+    (record) => {
+      setSelectedUser(record);
+      toggleModal("editOrangTua", true);
+    },
+    [toggleModal]
+  );
+
+  const showDeleteConfirm = useCallback(
+    (id) => {
+      setUserToDelete(id);
+      toggleModal("delete", true);
+    },
+    [toggleModal]
+  );
+
+  const handleApproveAnak = useCallback(
+    (id) =>
+      Modal.confirm({
+        title: "Apakah anda yakin ingin menyetujui anak ini?",
+        okText: "Ya",
+        cancelText: "Tidak",
+        onOk: () => approveAnakMutation.mutate(id),
+      }),
+    [approveAnakMutation]
+  );
 
   const orangTuaColumns = useMemo(
     () => [
-      {
-        Header: "No",
-        accessor: "no",
-        disableFilters: true,
-      },
-      {
-        Header: "Nama",
-        accessor: "nama",
-      },
-      {
-        Header: "Alamat",
-        accessor: "alamat",
-      },
+      { Header: "No", accessor: "no", disableFilters: true },
+      { Header: "Nama", accessor: "nama" },
+      { Header: "Alamat", accessor: "alamat" },
       {
         Header: "Status",
         accessor: "status",
@@ -728,50 +647,33 @@ function Table({
         ),
       },
     ],
-    []
+    [handleEditOrangTua, showDeleteConfirm]
   );
 
-  // Columns for Unapproved Children
   const anakBelumApproveColumns = useMemo(
     () => [
-      {
-        Header: "No",
-        accessor: "no",
-        disableFilters: true,
-      },
-      {
-        Header: "Nama Anak",
-        accessor: "nama",
-      },
-      {
-        Header: "Tanggal Lahir",
-        accessor: "tanggal_lahir",
-      },
+      { Header: "No", accessor: "no", disableFilters: true },
+      { Header: "Nama Anak", accessor: "nama" },
+      { Header: "Tanggal Lahir", accessor: "tanggal_lahir" },
       {
         Header: "Umur",
         accessor: "umur",
-        Cell: ({ row }) => {
-          const umur = row.original.tanggal_lahir;
-          return <span>{`${moment().diff(moment(umur), "month")} Bulan`}</span>;
-        },
+        Cell: ({ row }) => (
+          <span>{`${moment().diff(
+            moment(row.original.tanggal_lahir),
+            "month"
+          )} Bulan`}</span>
+        ),
       },
       {
         Header: "Jenis Kelamin",
         accessor: "gender",
-        Cell: ({ value }) => {
-          return (
-            <span>{value === "LAKI_LAKI" ? "Laki-laki" : "Perempuan"}</span>
-          );
-        },
+        Cell: ({ value }) => (
+          <span>{value === "LAKI_LAKI" ? "Laki-laki" : "Perempuan"}</span>
+        ),
       },
-      {
-        Header: "Alamat",
-        accessor: "alamat",
-      },
-      {
-        Header: "Nama Orang Tua",
-        accessor: "nama_ortu",
-      },
+      { Header: "Alamat", accessor: "alamat" },
+      { Header: "Nama Orang Tua", accessor: "nama_ortu" },
       {
         Header: "Aksi",
         accessor: "aksi",
@@ -790,43 +692,15 @@ function Table({
               type="dashed"
               danger
               size="small"
-              onClick={() => {
+              onClick={() =>
                 Modal.confirm({
                   title: "Apakah anda yakin?",
-
                   content: "Data yang dihapus tidak dapat dikembalikan",
                   okText: "Ya",
                   cancelText: "Tidak",
-                  onOk: () => {
-                    axios
-                      .delete(
-                        `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${row.original.id}`,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${user.token.value}`,
-                            "Content-Type": "application/json",
-                          },
-                        }
-                      )
-                      .then((response) => {
-                        messageApi.open({
-                          type: "success",
-                          content: "Data berhasil dihapus",
-                        });
-                        window.location.reload();
-                      })
-                      .catch((err) => {
-                        messageApi.open({
-                          type: "error",
-                          content: "Data gagal dihapus",
-                        });
-                        setTimeout(() => {
-                          window.location.reload();
-                        }, 1000);
-                      });
-                  },
-                });
-              }}
+                  onOk: () => deleteAnakMutation.mutate(row.original.id),
+                })
+              }
             >
               Delete
             </Button>
@@ -834,28 +708,8 @@ function Table({
         ),
       },
     ],
-    []
+    [handleApproveAnak, deleteAnakMutation]
   );
-
-  useEffect(() => {
-    console.log("Table Debug:", {
-      dataLength: data.length,
-      pageSize,
-      pageCount,
-      pageIndex,
-      pageOptions,
-      canPreviousPage,
-      canNextPage,
-    });
-  }, [
-    data.length,
-    pageSize,
-    pageCount,
-    pageIndex,
-    pageOptions,
-    canPreviousPage,
-    canNextPage,
-  ]);
 
   return (
     <>
@@ -870,7 +724,7 @@ function Table({
             />
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {headerGroups.map((headerGroup) =>
             headerGroup.headers.map((column) =>
               column.Filter ? (
@@ -886,20 +740,22 @@ function Table({
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 my-4">
           <button
             className="button2"
-            onClick={() => setIsOpenModalAnakBelumApprove(true)}
+            onClick={() => toggleModal("anakBelumApprove", true)}
           >
             Lihat Anak Belum Approve
           </button>
           <button
             className="button2"
-            onClick={handleExportDataAnak}
-            disabled={exportLoading}
+            onClick={() => exportDataAnakMutation.mutate()}
+            disabled={exportDataAnakMutation.isLoading}
           >
-            {exportLoading ? "Mengunduh..." : "Unduh Data Anak"}
+            {exportDataAnakMutation.isLoading
+              ? "Mengunduh..."
+              : "Unduh Data Anak"}
           </button>
           <button
             className="button2"
-            onClick={() => setIsOpenModalOrangTua(true)}
+            onClick={() => toggleModal("orangTua", true)}
           >
             Lihat Orang Tua
           </button>
@@ -964,9 +820,7 @@ function Table({
                         className={i % 2 === 0 ? "bg-gray-100" : ""}
                       >
                         {row.cells.map((cell) => {
-                          if (cell.column.show === false) {
-                            return null;
-                          }
+                          if (cell.column.show === false) return null;
                           if (cell.column.id === "no") {
                             return (
                               <td
@@ -974,7 +828,7 @@ function Table({
                                 key={i}
                               >
                                 <div className="text-sm text-gray-900">
-                                  {state.pageIndex * state.pageSize + i + 1}
+                                  {pageIndex * pageSize + i + 1}
                                 </div>
                               </td>
                             );
@@ -1032,13 +886,11 @@ function Table({
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                }}
+                onChange={(e) => setPageSize(Number(e.target.value))}
               >
-                {[5, 10, 20].map((pageSize) => (
-                  <option key={pageSize} value={pageSize}>
-                    Show {pageSize}
+                {[5, 10, 20].map((size) => (
+                  <option key={size} value={size}>
+                    Show {size}
                   </option>
                 ))}
               </select>
@@ -1054,40 +906,36 @@ function Table({
                 onClick={() => gotoPage(0)}
                 disabled={!canPreviousPage}
               >
-                <span className="sr-only">First</span>
-                <span>«</span>
+                <span className="sr-only">First</span>«
               </PageButton>
               <PageButton
                 onClick={() => previousPage()}
                 disabled={!canPreviousPage}
               >
-                <span className="sr-only">Previous</span>
-                <span>‹</span>
+                <span className="sr-only">Previous</span>‹
               </PageButton>
               {Array.from({ length: pageCount }, (_, index) => (
                 <PageButton
                   key={index}
                   onClick={() => gotoPage(index)}
-                  className={`${
+                  className={
                     pageIndex === index
                       ? "bg-indigo-600 text-black"
                       : "bg-white text-gray-300"
-                  }`}
+                  }
                 >
                   {index + 1}
                 </PageButton>
               ))}
               <PageButton onClick={() => nextPage()} disabled={!canNextPage}>
-                <span className="sr-only">Next</span>
-                <span>›</span>
+                <span className="sr-only">Next</span>›
               </PageButton>
               <PageButton
                 className="rounded-r-md"
                 onClick={() => gotoPage(pageCount - 1)}
                 disabled={!canNextPage}
               >
-                <span className="sr-only">Last</span>
-                <span>»</span>
+                <span className="sr-only">Last</span>»
               </PageButton>
             </nav>
           </div>
@@ -1095,34 +943,27 @@ function Table({
       </div>
       <Col sm="12" className="d-flex">
         <FormInputDataExcel
-          isOpen={isOpenModalInputExcel}
-          onCancel={() => setIsOpenModalInputExcel(false)}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
+          isOpen={modalState.inputExcel}
+          onCancel={() => toggleModal("inputExcel", false)}
+          fetch={() =>
+            queryClient.invalidateQueries(["orangTua", "anakBelumApprove"])
+          }
         />
       </Col>
       <Col sm="12" className="d-flex">
         <FormInputDataAnak
-          isOpen={isOpenModalInputDataAnak}
-          onCancel={() => setIsOpenModalInputDataAnak(false)}
+          isOpen={modalState.inputDataAnak}
+          onCancel={() => toggleModal("inputDataAnak", false)}
           kader={true}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
+          fetch={() => queryClient.invalidateQueries(["anakBelumApprove"])}
         />
       </Col>
       <Modal
         title="Daftar Orang Tua"
-        open={isOpenModalOrangTua}
-        onCancel={() => {
-          setIsOpenModalOrangTua(false);
-          setAllFilters([]);
-        }}
+        open={modalState.orangTua}
+        onCancel={() => toggleModal("orangTua", false)}
         footer={[
-          <Button
-            key="cancel"
-            onClick={() => {
-              setIsOpenModalOrangTua(false);
-              setAllFilters([]);
-            }}
-          >
+          <Button key="cancel" onClick={() => toggleModal("orangTua", false)}>
             Tutup
           </Button>,
         ]}
@@ -1132,7 +973,7 @@ function Table({
         <div className="mb-4">
           <Button
             type="primary"
-            onClick={() => setIsOpenModalTambahOrangTua(true)}
+            onClick={() => toggleModal("tambahOrangTua", true)}
           >
             Tambah Orang Tua
           </Button>
@@ -1147,18 +988,12 @@ function Table({
       </Modal>
       <Modal
         title="Daftar Anak Belum Approve"
-        open={isOpenModalAnakBelumApprove}
-        onCancel={() => {
-          setIsOpenModalAnakBelumApprove(false);
-          setAllFilters([]);
-        }}
+        open={modalState.anakBelumApprove}
+        onCancel={() => toggleModal("anakBelumApprove", false)}
         footer={[
           <Button
             key="cancel"
-            onClick={() => {
-              setIsOpenModalAnakBelumApprove(false);
-              setAllFilters([]);
-            }}
+            onClick={() => toggleModal("anakBelumApprove", false)}
           >
             Tutup
           </Button>,
@@ -1169,7 +1004,7 @@ function Table({
         <div className="mb-4">
           <Button
             type="primary"
-            onClick={() => setIsOpenModalInputDataAnak(true)}
+            onClick={() => toggleModal("inputDataAnak", true)}
           >
             Tambah Anak
           </Button>
@@ -1184,9 +1019,12 @@ function Table({
       </Modal>
       <Modal
         title="Konfirmasi Hapus"
-        open={isDeleteModalVisible}
-        onOk={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        open={modalState.delete}
+        onOk={() => userToDelete && deleteOrangTuaMutation.mutate(userToDelete)}
+        onCancel={() => {
+          toggleModal("delete", false);
+          setUserToDelete(null);
+        }}
         okText="Hapus"
         cancelText="Batal"
         okButtonProps={{ danger: true }}
@@ -1194,18 +1032,16 @@ function Table({
         <p>Apakah Anda yakin ingin menghapus data ini?</p>
       </Modal>
       <FormTambahOrangTua
-        isOpen={isOpenModalTambahOrangTua}
-        onCancel={() => setIsOpenModalTambahOrangTua(false)}
-        fetchOrangTua={fetchOrangTua}
+        isOpen={modalState.tambahOrangTua}
+        onCancel={() => toggleModal("tambahOrangTua", false)}
         user={user}
       />
       <FormEditOrangTua
-        isOpen={isOpenModalEditOrangTua}
+        isOpen={modalState.editOrangTua}
         onCancel={() => {
-          setIsOpenModalEditOrangTua(false);
+          toggleModal("editOrangTua", false);
           setSelectedUser(null);
         }}
-        fetchOrangTua={fetchOrangTua}
         user={user}
         selectedUser={selectedUser}
       />

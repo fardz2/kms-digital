@@ -1,82 +1,73 @@
-import { List, Spin } from "antd";
-import axios from "axios";
+import { List, Spin, message } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../../components/layout/Navbar";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
-import { Link } from "react-router-dom";
 import "./post-style.css";
+import useAuth from "../../hook/useAuth";
 
 export default function Post() {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = localStorage.getItem("login_data");
-  }
-
-  // Initialize user state safely
-  const [user, setUser] = useState(login_data ? JSON.parse(login_data) : null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [dataPost, setDataPost] = useState([]);
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [messageApi, contextHolder] = message.useMessage();
 
-  useEffect(() => {
-    if (!user?.user?.id || !user?.user?.role) {
-      setIsLoading(false);
-      console.error("User ID or role not found");
-      return;
-    }
+  const user = useAuth();
 
-    const endpoint =
-      user.user.role === "ORANG_TUA"
-        ? `${process.env.REACT_APP_BASE_URL}/api/post/orang-tua/${user.user.id}`
-        : user.user.role === "TENAGA_KESEHATAN"
-        ? `${process.env.REACT_APP_BASE_URL}/api/post/tenaga-kesehatan/${user.user.id}`
-        : null;
+  // Fetch posts using useQuery
+  const { data: dataPost, isLoading: postsLoading } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      if (!user?.user?.id || !user?.user?.role) {
+        throw new Error("User ID or role not found");
+      }
 
-    if (!endpoint) {
-      setIsLoading(false);
-      console.error("Invalid user role");
-      return;
-    }
+      const endpoint =
+        user.user.role === "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/post/orang-tua/${user.user.id}`
+          : user.user.role === "TENAGA_KESEHATAN"
+          ? `${process.env.REACT_APP_BASE_URL}/api/post/tenaga-kesehatan/${user.user.id}`
+          : null;
 
-    axios
-      .get(endpoint)
-      .then((response) => {
-        setIsLoading(false);
-        const sortedData = response.data.data.sort((a, b) =>
-          b.time.localeCompare(a.time)
-        );
-        setDataPost(sortedData);
-        console.log("Data fetched successfully:", sortedData, endpoint);
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        console.error("Error fetching posts:", err);
+      if (!endpoint) {
+        throw new Error("Invalid user role");
+      }
+
+      const response = await axios.get(endpoint);
+      return response.data.data.sort((a, b) => b.time.localeCompare(a.time));
+    },
+    onError: (err) => {
+      console.error("Error fetching posts:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data postingan",
       });
-  }, [refreshKey, user?.user?.id, user?.user?.role]);
+    },
+    enabled: !!user?.user?.id && !!user?.user?.role,
+  });
 
-  const data =
-    !isLoading &&
-    dataPost.map((item) => ({
-      href: `/tenaga-kesehatan/detail/${item.post_id}`,
-      title: item.title,
-      avatar: avatar,
-      nama_posyandu: item.posyandu,
-      description: item.nama,
-      role: item.role,
-      read: item.read === "1",
-      content: moment(item.time).format("DD MMMM YYYY"),
-      jawaban: item.jawaban_tenaga_kesehatan || [], // <- Tambahan
-    }));
+  // Map data for the List component
+  const data = dataPost?.map((item) => ({
+    href: `/tenaga-kesehatan/detail/${item.post_id}`,
+    title: item.title,
+    avatar: avatar,
+    nama_posyandu: item.posyandu,
+    description: item.nama,
+    role: item.role,
+    read: item.read === "1",
+    content: moment(item.time).format("DD MMMM YYYY"),
+    jawaban: item.jawaban_tenaga_kesehatan || [],
+  }));
 
   return (
     <>
+      {contextHolder}
       <Navbar isLogin />
       <div className="flex flex-col justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full flex justify-center mt-6 sm:mt-8 lg:mt-10">
-          <Spin size="large" spinning={isLoading} />
+          <Spin size="large" spinning={postsLoading} />
           {user?.user?.role === "ORANG_TUA" && (
             <button
               className="cssbuttons-io-button"
@@ -106,7 +97,7 @@ export default function Post() {
         </div>
 
         <div className="w-full flex justify-center mt-4 sm:mt-6">
-          {!isLoading && (
+          {!postsLoading && data && (
             <>
               <List
                 className="w-full px-4 sm:px-6"
@@ -135,12 +126,11 @@ export default function Post() {
                           </span>
                           )
                         </p>
-                        <div className="flex justify-between items-center ">
-                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm text-b">
+                        <div className="flex justify-between items-center">
+                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                             {item.nama_posyandu}
                           </p>
                         </div>
-
                         <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
                           {item.content}
                         </p>
@@ -181,7 +171,6 @@ export default function Post() {
               <FormInputPost
                 isOpen={isOpenModalInputPost}
                 onCancel={() => setIsOpenModalInputPost(false)}
-                fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
               />
             </>
           )}

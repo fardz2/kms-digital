@@ -12,157 +12,195 @@ import {
   Input,
   Button,
   message,
+  Spin,
 } from "antd";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import "./index.css";
 import InputDesa from "./InputDesa";
 import InputPosyandu from "./InputPosyandu";
 import RegisterKaderPosyandu from "./RegisterKaderPosyandu";
 import RegisterTenagaKesehatan from "./RegisterTenagaKesehatan";
+import useAuth from "../../hook/useAuth";
 
 export default function AdminDashboard() {
   const { Content, Footer, Sider } = Layout;
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [collapsed, setCollapsed] = useState(false);
-  const [current, setCurrent] = useState("1");
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [user, setUser] = useState(
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("login_data") || "{}")
-      : {}
+  const [state, setState] = useState({
+    collapsed: false,
+    current: "1",
+    isProfileModalOpen: false,
+  });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuth();
+
+  // Centralized fetch error handler
+  const handleFetchError = async (response, defaultMessage) => {
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || defaultMessage);
+    }
+    return response;
+  };
+
+  // Memoized menu items
+  const items = useMemo(
+    () => [
+      {
+        key: "sub1",
+        icon: <DesktopOutlined />,
+        label: "Input Data",
+        children: [
+          { key: "1", label: "Desa" },
+          { key: "2", label: "Posyandu" },
+        ],
+      },
+      {
+        key: "sub2",
+        icon: <UserOutlined />,
+        label: "Register Akun",
+        children: [
+          { key: "3", label: "Kader Posyandu" },
+          { key: "4", label: "Tenaga Kesehatan" },
+        ],
+      },
+      { key: "5", icon: <DesktopOutlined />, label: "Ubah Password" },
+      { key: "6", icon: <LogoutOutlined />, label: "Logout" },
+    ],
+    []
   );
 
-  function getItem(label, key, icon, children) {
-    return {
-      key,
-      icon,
-      children,
-      label,
+  // Memoized breadcrumb items based on current selection
+  const breadcrumbItems = useMemo(() => {
+    const base = [{ title: "Dashboard" }];
+    const paths = {
+      1: [{ title: "Input Data" }, { title: "Desa" }],
+      2: [{ title: "Input Data" }, { title: "Posyandu" }],
+      3: [{ title: "Register Akun" }, { title: "Kader Posyandu" }],
+      4: [{ title: "Register Akun" }, { title: "Tenaga Kesehatan" }],
+      5: [{ title: "Ubah Password" }],
     };
-  }
+    return [...base, ...(paths[state.current] || [])];
+  }, [state.current]);
 
-  const items = [
-    getItem("Input Data", "sub1", <DesktopOutlined />, [
-      getItem("Desa", "1"),
-      getItem("Posyandu", "2"),
-    ]),
-    getItem("Register Akun", "sub2", <UserOutlined />, [
-      getItem("Kader Posyandu", "3"),
-      getItem("Tenaga Kesehatan", "4"),
-    ]),
-    getItem("Ubah Password", "5", <DesktopOutlined />),
-    getItem("Logout", "6", <LogoutOutlined />),
-  ];
-
-  // Fetch profile data when modal opens
-  useEffect(() => {
-    if (isProfileModalOpen && user?.token?.value) {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/api/profile`, {
+  // Fetch profile data
+  const { data: profileData, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.token?.value],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/profile`,
+        {
           headers: {
-            Authorization: `Bearer ${user.token.value}`,
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
           },
-        })
-        .then((response) => {
-          form.setFieldsValue({
-            nama: response.data.data.user.name,
-          });
-        })
-        .catch((err) => {
-          console.error("Fetch profile error:", err);
-          messageApi.open({
-            type: "error",
-            content: err.response?.data?.message || "Gagal mengambil profil",
-          });
-        });
-    }
-  }, [isProfileModalOpen, user?.token?.value, form, messageApi]);
+        }
+      );
+      await handleFetchError(response, "Gagal mengambil profil");
+      const data = await response.json();
+      return data.data.user;
+    },
+    enabled: state.isProfileModalOpen && !!user?.token?.value,
+    onSuccess: (data) => form.setFieldsValue({ nama: data.name }),
+    onError: (err) => messageApi.error(err.message || "Gagal mengambil profil"),
+  });
 
-  const handleMenu = (e) => {
-    setCurrent(e.key);
-    if (e.key === "5") {
-      setIsProfileModalOpen(true);
-    } else if (e.key === "6") {
-      localStorage.clear();
-      window.location.href = "/sign-in/admin";
-    }
-  };
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/profile`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+      await handleFetchError(response, "Gagal memperbarui profil");
+      return response.json();
+    },
+    onSuccess: (response) => {
+      messageApi.success("Profil berhasil diperbarui");
+      localStorage.setItem(
+        "login_data",
+        JSON.stringify({
+          ...user,
+          user: { ...user.user, name: response.data.user.name },
+        })
+      );
+      form.resetFields();
+      setState((prev) => ({ ...prev, isProfileModalOpen: false }));
+    },
+    onError: (err) =>
+      messageApi.error(err.message || "Gagal memperbarui profil"),
+  });
 
-  const handleUpdateProfile = () => {
+  // Handle menu click
+  const handleMenu = useCallback(
+    (e) => {
+      setState((prev) => ({ ...prev, current: e.key }));
+      if (e.key === "5") {
+        setState((prev) => ({ ...prev, isProfileModalOpen: true }));
+        queryClient.invalidateQueries(["profile"]);
+      } else if (e.key === "6") {
+        localStorage.clear();
+        navigate("/sign-in", { replace: true });
+      }
+    },
+    [navigate, queryClient]
+  );
+
+  // Handle profile update
+  const handleUpdateProfile = useCallback(() => {
     form
       .validateFields()
-      .then((values) => {
-        axios
-          .put(`${process.env.REACT_APP_BASE_URL}/api/profile`, values, {
-            headers: {
-              Authorization: `Bearer ${user.token.value}`,
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            messageApi.open({
-              type: "success",
-              content: "Profil berhasil diperbarui",
-            });
-            // Update localStorage
-            localStorage.setItem(
-              "login_data",
-              JSON.stringify({
-                ...user,
-                user: {
-                  ...user.user,
-                  name: response.data.data.user.name,
-                },
-              })
-            );
-            setUser((prev) => ({
-              ...prev,
-              user: {
-                ...prev.user,
-                name: response.data.data.user.name,
-              },
-            }));
-            form.resetFields();
-            setIsProfileModalOpen(false);
-          })
-          .catch((err) => {
-            console.error("Update profile error:", err);
-            messageApi.open({
-              type: "error",
-              content:
-                err.response?.data?.message || "Gagal memperbarui profil",
-            });
-          });
-      })
-      .catch((info) => {
-        console.log("Validation Failed:", info);
-      });
-  };
+      .then(updateProfileMutation.mutate)
+      .catch((info) => console.log("Validation Failed:", info));
+  }, [form, updateProfileMutation]);
 
-  const handleCancel = () => {
+  // Handle modal cancel
+  const handleCancel = useCallback(() => {
     form.resetFields();
-    setIsProfileModalOpen(false);
-  };
+    setState((prev) => ({ ...prev, isProfileModalOpen: false }));
+  }, [form]);
+
+  // Render content based on current menu
+  const renderContent = useMemo(() => {
+    const components = {
+      1: <InputDesa />,
+      2: <InputPosyandu />,
+      3: <RegisterKaderPosyandu />,
+      4: <RegisterTenagaKesehatan />,
+    };
+    return components[state.current] || null;
+  }, [state.current]);
 
   return (
     <>
       {contextHolder}
-      <Layout
-        style={{
-          minHeight: "100vh",
-        }}
-      >
+      {(profileLoading || updateProfileMutation.isPending) && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
+          <Spin size="large" />
+        </div>
+      )}
+      <Layout style={{ minHeight: "100vh" }}>
         <Sider
           collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
+          collapsed={state.collapsed}
+          onCollapse={(value) =>
+            setState((prev) => ({ ...prev, collapsed: value }))
+          }
         >
           <div className="logo" />
           <Menu
             onClick={handleMenu}
-            selectedKeys={[current]}
+            selectedKeys={[state.current]}
             theme="dark"
             defaultSelectedKeys={["1"]}
             mode="inline"
@@ -170,72 +208,20 @@ export default function AdminDashboard() {
           />
         </Sider>
         <Layout className="site-layout">
-          <Content
-            style={{
-              margin: "0 16px",
-            }}
-          >
-            <Breadcrumb
-              style={{
-                margin: "16px 0",
-              }}
-            >
-              <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
-              {current === "1" && (
-                <>
-                  <Breadcrumb.Item>Input Data</Breadcrumb.Item>
-                  <Breadcrumb.Item>Desa</Breadcrumb.Item>
-                </>
-              )}
-              {current === "2" && (
-                <>
-                  <Breadcrumb.Item>Input Data</Breadcrumb.Item>
-                  <Breadcrumb.Item>Posyandu</Breadcrumb.Item>
-                </>
-              )}
-              {current === "3" && (
-                <>
-                  <Breadcrumb.Item>Register Akun</Breadcrumb.Item>
-                  <Breadcrumb.Item>Kader Posyandu</Breadcrumb.Item>
-                </>
-              )}
-              {current === "4" && (
-                <>
-                  <Breadcrumb.Item>Register Akun</Breadcrumb.Item>
-                  <Breadcrumb.Item>Tenaga Kesehatan</Breadcrumb.Item>
-                </>
-              )}
-              {current === "5" && (
-                <>
-                  <Breadcrumb.Item>Ubah Password</Breadcrumb.Item>
-                </>
-              )}
-            </Breadcrumb>
+          <Content style={{ margin: "0 16px" }}>
+            <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
             <div
               className="site-layout-background"
-              style={{
-                padding: 24,
-                minHeight: 360,
-              }}
+              style={{ padding: 24, minHeight: 360 }}
             >
-              {current === "1" && <InputDesa />}
-              {current === "2" && <InputPosyandu />}
-              {current === "3" && <RegisterKaderPosyandu />}
-              {current === "4" && <RegisterTenagaKesehatan />}
+              {renderContent}
             </div>
           </Content>
-          <Footer
-            style={{
-              textAlign: "center",
-            }}
-          >
-            GiziBalita ©2023
-          </Footer>
+          <Footer style={{ textAlign: "center" }}>GiziBalita ©2023</Footer>
         </Layout>
-        {/* Profile Modal */}
         <Modal
           title="Profil Pengguna"
-          open={isProfileModalOpen}
+          open={state.isProfileModalOpen}
           onCancel={handleCancel}
           footer={[
             <Button key="cancel" onClick={handleCancel} className="batal_btn">
@@ -246,6 +232,7 @@ export default function AdminDashboard() {
               type="primary"
               onClick={handleUpdateProfile}
               className="update_btn"
+              disabled={updateProfileMutation.isPending}
             >
               Update
             </Button>,
@@ -257,7 +244,7 @@ export default function AdminDashboard() {
               name="nama"
               rules={[{ required: true, message: "Nama wajib diisi!" }]}
             >
-              <Input disabled />
+              <Input disabled={profileLoading} />
             </Form.Item>
             <Form.Item
               label="Password Baru"
@@ -272,10 +259,9 @@ export default function AdminDashboard() {
               rules={[
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Password tidak cocok!"));
+                    return !value || getFieldValue("password") === value
+                      ? Promise.resolve()
+                      : Promise.reject(new Error("Password tidak cocok!"));
                   },
                 }),
               ]}

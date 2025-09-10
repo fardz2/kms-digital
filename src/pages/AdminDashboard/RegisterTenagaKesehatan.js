@@ -8,29 +8,161 @@ import {
   Select,
   Table,
   Modal,
+  Spin,
 } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import "./Search.css";
+import useAuth from "../../hook/useAuth";
 
 export default function RegisterTenagaKesehatan() {
   const [form] = Form.useForm();
-  const [dataSource, setDataSource] = useState([]); // Posyandu data
-  const [tenagaKesehatanData, setTenagaKesehatanData] = useState([]); // Tenaga Kesehatan data
-  const [dataDesa, setDataDesa] = useState([]); // Desa data
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [refreshKey, setRefreshKey] = useState(0); // Refresh key for refetching
-  const [searchText, setSearchedText] = useState(""); // Search text for filtering
   const [messageApi, contextHolder] = message.useMessage();
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal visibility state for delete
-  const [userToDelete, setUserToDelete] = useState(null); // User to delete
-  const [user] = useState(() => {
-    if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("login_data")) || {};
-    }
-    return {};
+  const [searchText, setSearchedText] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const queryClient = useQueryClient();
+
+  const user = useAuth();
+
+  // Fetch desa data using useQuery
+  const { data: dataDesa, isLoading: desaLoading } = useQuery({
+    queryKey: ["desa"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data desa");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data desa",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch posyandu data using useQuery
+  const { data: dataSource, isLoading: posyanduLoading } = useQuery({
+    queryKey: ["posyandu"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data posyandu");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data posyandu",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
+
+  // Fetch tenaga-kesehatan data using useQuery
+  const { data: tenagaKesehatanData, isLoading: tenagaKesehatanLoading } =
+    useQuery({
+      queryKey: ["tenaga-kesehatan"],
+      queryFn: async () => {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/api/posyandu/tenaga-kesehatan`,
+          {
+            headers: { Authorization: `Bearer ${user?.token?.value}` },
+          }
+        );
+        if (!response.ok)
+          throw new Error("Gagal mengambil data Tenaga Kesehatan");
+        const data = await response.json();
+        return data.data;
+      },
+      onError: (err) => {
+        console.error("Fetch Error:", err);
+        messageApi.open({
+          type: "error",
+          content: err.message || "Gagal mengambil data Tenaga Kesehatan",
+        });
+      },
+      enabled: !!user?.token?.value,
+    });
+
+  // Mutation for creating a new Tenaga Kesehatan
+  const createTenagaKesehatanMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/tenaga-kesehatan/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nama: values.nama,
+            email: values.email,
+            password: values.password,
+            id_desa: values.desa,
+            status: true,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal Registrasi");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Register Berhasil",
+      });
+      form.resetFields();
+      setIsModalVisible(false);
+      queryClient.invalidateQueries(["tenaga-kesehatan"]);
+    },
+    onError: (error) => {
+      console.error("Register Error:", error);
+      messageApi.open({
+        type: "error",
+        content: error.message || "Gagal Registrasi",
+      });
+    },
+  });
+
+  // Mutation for deleting a Tenaga Kesehatan
+  const deleteTenagaKesehatanMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus Tenaga Kesehatan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Tenaga Kesehatan berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["tenaga-kesehatan"]);
+      setIsDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
+    onError: (err) => {
+      console.error("Delete Error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus Tenaga Kesehatan",
+      });
+      setIsDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
   });
 
   // Function to show delete confirmation modal
@@ -42,34 +174,11 @@ export default function RegisterTenagaKesehatan() {
   // Function to handle delete confirmation
   const handleDeleteConfirm = () => {
     if (userToDelete) {
-      axios
-        .delete(
-          `${process.env.REACT_APP_BASE_URL}/api/auth/users/${userToDelete}`,
-          {
-            headers: { Authorization: `Bearer ${user.token?.value}` },
-          }
-        )
-        .then((response) => {
-          setRefreshKey((oldKey) => oldKey + 1);
-          messageApi.open({
-            type: "success",
-            content: "Tenaga Kesehatan berhasil dihapus",
-          });
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        })
-        .catch((err) => {
-          messageApi.open({
-            type: "error",
-            content: "Gagal menghapus Tenaga Kesehatan",
-          });
-          setIsDeleteModalVisible(false);
-          setUserToDelete(null);
-        });
+      deleteTenagaKesehatanMutation.mutate(userToDelete);
     }
   };
 
-  // Function to cancel delete
+  // Function to handle delete cancellation
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setUserToDelete(null);
@@ -106,6 +215,10 @@ export default function RegisterTenagaKesehatan() {
             danger
             size="small"
             onClick={() => showDeleteConfirm(record.id)}
+            disabled={
+              createTenagaKesehatanMutation.isPending ||
+              deleteTenagaKesehatanMutation.isPending
+            }
           >
             Delete
           </Button>
@@ -114,94 +227,12 @@ export default function RegisterTenagaKesehatan() {
     },
   ];
 
-  useEffect(() => {
-    if (!user.token?.value) {
-      messageApi.open({
-        type: "error",
-        content: "Silakan login terlebih dahulu",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Fetch posyandu data
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu`)
-      .then((response) => {
-        setDataSource(response.data.data);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data posyandu",
-        });
-      });
-
-    // Fetch desa data
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/desa`)
-      .then((response) => {
-        setDataDesa(response.data.data);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data desa",
-        });
-      });
-
-    // Fetch tenaga kesehatan data
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu/tenaga-kesehatan`, {
-        headers: { Authorization: `Bearer ${user.token?.value}` },
-      })
-      .then((response) => {
-        setTenagaKesehatanData(response.data.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data Tenaga Kesehatan",
-        });
-        setIsLoading(false);
-      });
-  }, [refreshKey, messageApi, user.token?.value]);
-
   const onFinish = (values) => {
-    axios
-      .post(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/tenaga-kesehatan/register`,
-        {
-          nama: values.nama,
-          email: values.email,
-          password: values.password,
-          id_desa: values.desa,
-          status: true, // Set status to true automatically
-        }
-      )
-      .then((response) => {
-        messageApi.open({
-          type: "success",
-          content: "Register Berhasil",
-        });
-        form.resetFields();
-        setIsModalVisible(false); // Close modal on success
-        setRefreshKey((oldKey) => oldKey + 1); // Trigger refetch
-      })
-      .catch((error) => {
-        messageApi.open({
-          type: "error",
-          content: error.response?.data?.message || "Gagal Registrasi",
-        });
-        console.error("Error during registration:", error);
-      });
+    createTenagaKesehatanMutation.mutate(values);
   };
 
-  const onFinishFailed = (values) => {
-    console.log(values);
+  const onFinishFailed = (errorInfo) => {
+    console.log("Form Failed:", errorInfo);
   };
 
   const showModal = () => {
@@ -224,12 +255,17 @@ export default function RegisterTenagaKesehatan() {
         }}
       >
         {contextHolder}
+
         <Row justify="space-between">
           <Col sm={24}>
             <Button
               type="primary"
               onClick={showModal}
               style={{ marginBottom: 16 }}
+              disabled={
+                createTenagaKesehatanMutation.isPending ||
+                deleteTenagaKesehatanMutation.isPending
+              }
             >
               Tambah Tenaga Kesehatan
             </Button>
@@ -334,6 +370,7 @@ export default function RegisterTenagaKesehatan() {
                     optionFilterProp="children"
                     showSearch
                     placeholder="Pilih Desa"
+                    disabled={desaLoading}
                   >
                     {dataDesa &&
                       dataDesa.map((value) => (
@@ -345,10 +382,18 @@ export default function RegisterTenagaKesehatan() {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={createTenagaKesehatanMutation.isPending}
+                  >
                     Simpan
                   </Button>
-                  <Button style={{ marginLeft: 8 }} onClick={handleCancel}>
+                  <Button
+                    style={{ marginLeft: 8 }}
+                    onClick={handleCancel}
+                    disabled={createTenagaKesehatanMutation.isPending}
+                  >
                     Batal
                   </Button>
                 </Form.Item>
@@ -367,36 +412,38 @@ export default function RegisterTenagaKesehatan() {
               <p>Apakah Anda yakin ingin menghapus Tenaga Kesehatan ini?</p>
             </Modal>
 
-            {!isLoading && (
-              <Table
-                title={() => (
-                  <div className="flex justify-between items-center">
-                    <div className="flex justify-start items-center">
-                      <h2 className="text-sm font-semibold">
-                        Daftar Tenaga Kesehatan
-                      </h2>
-                    </div>
-                    <div className="flex justify-end items-center">
-                      <Input.Search
-                        placeholder="Search here ..."
-                        onSearch={(value) => {
-                          setSearchedText(value);
-                        }}
-                      />
-                    </div>
+            <Table
+              title={() => (
+                <div className="flex justify-between items-center">
+                  <div className="flex justify-start items-center">
+                    <h2 className="text-sm font-semibold">
+                      Daftar Tenaga Kesehatan
+                    </h2>
                   </div>
-                )}
-                dataSource={tenagaKesehatanData}
-                columns={columns}
-                loading={isLoading}
-                pagination={{ pageSize: 5 }}
-                rowKey="id"
-                locale={{
-                  emptyText: "Tidak ada data Tenaga Kesehatan",
-                }}
-                scroll={{ x: "max-content" }} // Enable horizontal scrolling
-              />
-            )}
+                  <div className="flex justify-end items-center">
+                    <Input.Search
+                      placeholder="Search here ..."
+                      onSearch={(value) => {
+                        setSearchedText(value);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              dataSource={tenagaKesehatanData || []}
+              columns={columns}
+              loading={
+                tenagaKesehatanLoading ||
+                createTenagaKesehatanMutation.isPending ||
+                deleteTenagaKesehatanMutation.isPending
+              }
+              pagination={{ pageSize: 5 }}
+              rowKey="id"
+              locale={{
+                emptyText: "Tidak ada data Tenaga Kesehatan",
+              }}
+              scroll={{ x: "max-content" }}
+            />
           </Col>
         </Row>
       </Container>

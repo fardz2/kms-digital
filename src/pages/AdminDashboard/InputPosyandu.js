@@ -9,37 +9,116 @@ import {
   Table,
   Modal,
 } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [dataSource, setDataSource] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
-  const [dataDesa, setDataDesa] = useState([]);
   const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const queryClient = useQueryClient();
 
-  function deletePosyandu(id) {
-    axios
-      .delete(`${process.env.REACT_APP_BASE_URL}/api/posyandu/${id}`)
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-        messageApi.open({
-          type: "success",
-          content: "Posyandu berhasil dihapus",
-        });
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: err.response?.data?.message || "Gagal menghapus posyandu",
-        });
+  // Fetch desa data using useQuery
+  const { data: dataDesa, isLoading: desaLoading } = useQuery({
+    queryKey: ["desa"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data desa");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data desa",
       });
-  }
+    },
+  });
+
+  // Fetch posyandu data using useQuery
+  const { data: dataSource, isLoading: posyanduLoading } = useQuery({
+    queryKey: ["posyandu"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data posyandu");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data posyandu",
+      });
+    },
+  });
+
+  // Mutation for deleting a posyandu
+  const deletePosyanduMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus posyandu");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Posyandu berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["posyandu"]);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus posyandu",
+      });
+    },
+  });
+
+  // Mutation for creating a new posyandu
+  const createPosyanduMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id_desa: values.desa,
+            nama: values.posyandu,
+            alamat: values.alamat,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Posyandu berhasil disimpan",
+      });
+      queryClient.invalidateQueries(["posyandu"]);
+      form.resetFields();
+      setIsModalVisible(false);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+    },
+  });
 
   const showDeleteConfirm = (id, nama) => {
     Modal.confirm({
@@ -49,7 +128,7 @@ export default function InputPosyandu() {
       okType: "danger",
       cancelText: "Batal",
       onOk() {
-        deletePosyandu(id);
+        deletePosyanduMutation.mutate(id);
       },
       onCancel() {
         console.log("Hapus dibatalkan");
@@ -80,6 +159,7 @@ export default function InputPosyandu() {
           onClick={() => showDeleteConfirm(record.id, record.nama)}
           type="dashed"
           danger
+          disabled={deletePosyanduMutation.isPending}
         >
           Delete
         </Button>
@@ -87,56 +167,8 @@ export default function InputPosyandu() {
     },
   ];
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu`)
-      .then((response) => {
-        setDataSource(response.data.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data posyandu",
-        });
-        setIsLoading(false);
-      });
-
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/desa`)
-      .then((response) => {
-        setDataDesa(response.data.data);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data desa",
-        });
-      });
-  }, [refreshKey, messageApi]);
-
   const onFinish = (values) => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/posyandu`, {
-        id_desa: values.desa,
-        nama: values.posyandu,
-        alamat: values.alamat,
-      })
-      .then((response) => {
-        messageApi.open({
-          type: "success",
-          content: "Posyandu berhasil disimpan",
-        });
-        setRefreshKey((oldKey) => oldKey + 1);
-        form.resetFields();
-        setIsModalVisible(false);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: err.response?.data?.message || "Data gagal tersimpan",
-        });
-      });
+    createPosyanduMutation.mutate(values);
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -169,6 +201,7 @@ export default function InputPosyandu() {
               type="primary"
               onClick={showModal}
               style={{ marginBottom: 16 }}
+              disabled={createPosyanduMutation.isPending}
             >
               Tambah Posyandu
             </Button>
@@ -200,12 +233,14 @@ export default function InputPosyandu() {
                     listHeight={100}
                     optionFilterProp="children"
                     showSearch
+                    disabled={desaLoading}
                   >
-                    {dataDesa.map((item) => (
-                      <Select.Option key={item.id} value={item.id}>
-                        {item.name}
-                      </Select.Option>
-                    ))}
+                    {dataDesa &&
+                      dataDesa.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.name}
+                        </Select.Option>
+                      ))}
                   </Select>
                 </Form.Item>
 
@@ -236,39 +271,49 @@ export default function InputPosyandu() {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={createPosyanduMutation.isPending}
+                  >
                     Simpan
                   </Button>
-                  <Button style={{ marginLeft: 8 }} onClick={handleCancel}>
+                  <Button
+                    style={{ marginLeft: 8 }}
+                    onClick={handleCancel}
+                    disabled={createPosyanduMutation.isPending}
+                  >
                     Batal
                   </Button>
                 </Form.Item>
               </Form>
             </Modal>
-            {!isLoading && (
-              <Table
-                title={() => (
-                  <div className="flex justify-between items-center">
-                    <div className="flex justify-start items-center">
-                      <h2 className="text-sm font-semibold">Daftar Posyandu</h2>
-                    </div>
-                    <div className="flex justify-end items-center">
-                      <Input.Search
-                        placeholder="Search here ..."
-                        onSearch={(value) => {
-                          setSearchedText(value);
-                        }}
-                      />
-                    </div>
+            <Table
+              title={() => (
+                <div className="flex justify-between items-center">
+                  <div className="flex justify-start items-center">
+                    <h2 className="text-sm font-semibold">Daftar Posyandu</h2>
                   </div>
-                )}
-                dataSource={dataSource}
-                columns={columns}
-                loading={isLoading}
-                pagination={{ pageSize: 5 }}
-                rowKey="id"
-              />
-            )}
+                  <div className="flex justify-end items-center">
+                    <Input.Search
+                      placeholder="Search here ..."
+                      onSearch={(value) => {
+                        setSearchedText(value);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              dataSource={dataSource || []}
+              columns={columns}
+              loading={
+                posyanduLoading ||
+                createPosyanduMutation.isPending ||
+                deletePosyanduMutation.isPending
+              }
+              pagination={{ pageSize: 5 }}
+              rowKey="id"
+            />
           </Col>
         </Row>
       </Container>

@@ -8,42 +8,45 @@ import {
   Row,
   Select,
 } from "antd";
-import axios from "axios";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
 import "./formUpdateData_style.css";
+import { useQueryClient } from "@tanstack/react-query";
+import useAuth from "../../../hook/useAuth";
 
-export default function FormUpdateDataAnak(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [user, setUser] = useState(login_data);
-  const { isOpen, onCancel, fetch, data } = props;
+export default function FormUpdateDataAnak({ isOpen, onCancel, data }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [dataOrangTua, setDataOrangTua] = useState([]);
+  const queryClient = useQueryClient();
+  const user = useAuth();
 
-  useEffect(() => {
-    if (user?.user?.role !== "ORANG_TUA") {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu/orang-tua`, {
-          headers: { Authorization: `Bearer ${user.token.value}` },
-        })
-        .then((response) => {
-          console.log("Data orang tua:", response.data.data); // Debugging
-          setDataOrangTua(response.data.data);
-        })
-        .catch((err) => {
-          console.error("Gagal mengambil data orang tua:", err.response || err);
-          messageApi.open({
-            type: "error",
-            content: "Gagal memuat data orang tua",
-          });
-        });
-    }
-  }, [user, messageApi]);
+  // Fetch orang-tua data using useQuery (for non-ORANG_TUA roles)
+  const { data: dataOrangTua, isLoading: orangTuaLoading } = useQuery({
+    queryKey: ["orang-tua"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/orang-tua`,
+        {
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data orang tua");
+      const data = await response.json();
+      console.log("Data orang tua:", data.data); // Debugging
+      return data.data;
+    },
+    onError: (err) => {
+      console.error("Gagal mengambil data orang tua:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal memuat data orang tua",
+      });
+    },
+    enabled: !!user?.token?.value && user?.user?.role !== "ORANG_TUA",
+  });
 
+  // Set initial form values when data changes
   useEffect(() => {
     if (data) {
       console.log("Data anak:", data); // Debugging
@@ -58,54 +61,62 @@ export default function FormUpdateDataAnak(props) {
     }
   }, [form, data]);
 
+  // Mutation for updating data-anak
+  const updateAnakMutation = useMutation({
+    mutationFn: async (values) => {
+      const url =
+        user?.user?.role === "KADER_POSYANDU"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${data.id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${data.id}`;
+      const payload = {
+        nama: values.nama,
+        panggilan: values.panggilan,
+        tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
+        gender: values.jenisKelamin,
+        alamat: values.alamat,
+        ...(user?.user?.role !== "ORANG_TUA" && {
+          id_orang_tua: values.orangTua,
+        }),
+      };
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      setTimeout(() => {
+        onCancel();
+        queryClient.invalidateQueries(["data-anak"]);
+      }, 1000);
+    },
+    onError: (err) => {
+      console.error("Gagal menyimpan data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+      setTimeout(() => {
+        onCancel();
+      }, 1000);
+    },
+  });
+
   function onOK() {
     form
       .validateFields()
       .then((values) => {
-        form.resetFields();
-        const payload = {
-          nama: values.nama,
-          panggilan: values.panggilan,
-          tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
-          gender: values.jenisKelamin,
-          alamat: values.alamat,
-          ...(user.user.role !== "ORANG_TUA" && {
-            id_orang_tua: values.orangTua,
-          }),
-        };
-
-        const url =
-          user.user.role === "KADER_POSYANDU"
-            ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${data.id}`
-            : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak/${data.id}`;
-
-        axios
-          .put(url, payload, {
-            headers: { Authorization: `Bearer ${user.token.value}` },
-          })
-          .then(() => {
-            messageApi.open({
-              type: "success",
-              content: "Data berhasil tersimpan",
-            });
-            setTimeout(() => {
-              onCancel();
-              fetch();
-              if (user.user.role === "ORANG_TUA") {
-                window.location.reload();
-              }
-            }, 1000);
-          })
-          .catch((err) => {
-            console.error("Gagal menyimpan data:", err.response || err);
-            messageApi.open({
-              type: "error",
-              content: "Data gagal tersimpan",
-            });
-            setTimeout(() => {
-              onCancel();
-            }, 1000);
-          });
+        updateAnakMutation.mutate(values);
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -126,14 +137,16 @@ export default function FormUpdateDataAnak(props) {
               type="button"
               onClick={onCancel}
               className="batal_btn"
+              disabled={updateAnakMutation.isPending}
             >
               Batal
             </button>,
             <button
               key="submit"
-              type="submit"
+              type="button"
               onClick={onOK}
               className="simpan_btn"
+              disabled={updateAnakMutation.isPending || orangTuaLoading}
             >
               Simpan
             </button>,
@@ -200,12 +213,14 @@ export default function FormUpdateDataAnak(props) {
                       { required: true, message: "Orang Tua masih kosong!" },
                     ]}
                   >
-                    <Select placeholder="Pilih Orang Tua">
+                    <Select
+                      placeholder="Pilih Orang Tua"
+                      loading={orangTuaLoading}
+                    >
                       {dataOrangTua && dataOrangTua.length > 0 ? (
                         dataOrangTua.map((data) => (
                           <Select.Option key={data.id} value={data.id}>
-                            {data.nama}{" "}
-                            {/* Pastikan properti ini adalah nama orang tua */}
+                            {data.nama}
                           </Select.Option>
                         ))
                       ) : (

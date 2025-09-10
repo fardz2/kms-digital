@@ -1,36 +1,96 @@
 import { Button, Col, Form, Input, message, Row, Table, Modal } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
-import { FiRotateCcw } from "react-icons/fi";
 import "./Search.css";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [dataSource, setDataSource] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
   const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const queryClient = useQueryClient();
 
-  function deleteDesa(id) {
-    axios
-      .delete(`${process.env.REACT_APP_BASE_URL}/api/desa/${id}`)
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-        messageApi.open({
-          type: "success",
-          content: "Desa berhasil dihapus",
-        });
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: err.response?.data?.message || "Gagal menghapus desa",
-        });
+  // Fetch desa data using useQuery
+  const { data: dataSource, isLoading } = useQuery({
+    queryKey: ["desa"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`
+      );
+      if (!response.ok) throw new Error("Gagal mengambil data desa");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data desa",
       });
-  }
+    },
+  });
+
+  // Mutation for deleting a desa
+  const deleteDesaMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus desa");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Desa berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["desa"]);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus desa",
+      });
+    },
+  });
+
+  // Mutation for creating a new desa
+  const createDesaMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: values.name,
+            password: values.password,
+            password_confirmation: values.password_confirmation,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Desa dan akun berhasil disimpan",
+      });
+      queryClient.invalidateQueries(["desa"]);
+      form.resetFields();
+      setIsModalVisible(false);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+    },
+  });
 
   const showDeleteConfirm = (id, name) => {
     Modal.confirm({
@@ -40,7 +100,7 @@ export default function InputDesa() {
       okType: "danger",
       cancelText: "Batal",
       onOk() {
-        deleteDesa(id);
+        deleteDesaMutation.mutate(id);
       },
       onCancel() {
         console.log("Hapus dibatalkan");
@@ -67,6 +127,7 @@ export default function InputDesa() {
           onClick={() => showDeleteConfirm(record.id, record.name)}
           type="dashed"
           danger
+          disabled={deleteDesaMutation.isPending}
         >
           Delete
         </Button>
@@ -74,45 +135,8 @@ export default function InputDesa() {
     },
   ];
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/desa`)
-      .then((response) => {
-        setDataSource(response.data.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: "Gagal mengambil data desa",
-        });
-        setIsLoading(false);
-      });
-  }, [refreshKey, messageApi]);
-
   const onFinish = (values) => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/desa`, {
-        name: values.name,
-        password: values.password,
-        password_confirmation: values.password_confirmation,
-      })
-      .then((response) => {
-        messageApi.open({
-          type: "success",
-          content: "Desa dan akun berhasil disimpan",
-        });
-        setRefreshKey((oldKey) => oldKey + 1);
-        form.resetFields();
-        setIsModalVisible(false);
-      })
-      .catch((err) => {
-        messageApi.open({
-          type: "error",
-          content: err.response?.data?.message || "Data gagal tersimpan",
-        });
-        console.error("Error saving data:", err);
-      });
+    createDesaMutation.mutate(values);
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -145,6 +169,7 @@ export default function InputDesa() {
               type="primary"
               onClick={showModal}
               style={{ marginBottom: 16 }}
+              disabled={createDesaMutation.isPending}
             >
               Tambah Desa
             </Button>
@@ -214,39 +239,49 @@ export default function InputDesa() {
                   <Input.Password placeholder="Konfirmasi Password" />
                 </Form.Item>
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={createDesaMutation.isPending}
+                  >
                     Simpan
                   </Button>
-                  <Button style={{ marginLeft: 8 }} onClick={handleCancel}>
+                  <Button
+                    style={{ marginLeft: 8 }}
+                    onClick={handleCancel}
+                    disabled={createDesaMutation.isPending}
+                  >
                     Batal
                   </Button>
                 </Form.Item>
               </Form>
             </Modal>
-            {!isLoading && (
-              <Table
-                title={() => (
-                  <div className="flex justify-between items-center">
-                    <div className="flex justify-start items-center">
-                      <h2 className="text-sm font-semibold">Daftar Desa</h2>
-                    </div>
-                    <div className="flex justify-end items-center">
-                      <Input.Search
-                        placeholder="Search here ..."
-                        onSearch={(value) => {
-                          setSearchedText(value);
-                        }}
-                      />
-                    </div>
+            <Table
+              title={() => (
+                <div className="flex justify-between items-center">
+                  <div className="flex justify-start items-center">
+                    <h2 className="text-sm font-semibold">Daftar Desa</h2>
                   </div>
-                )}
-                dataSource={dataSource}
-                columns={columns}
-                loading={isLoading}
-                pagination={{ pageSize: 5 }}
-                rowKey="id"
-              />
-            )}
+                  <div className="flex justify-end items-center">
+                    <Input.Search
+                      placeholder="Search here ..."
+                      onSearch={(value) => {
+                        setSearchedText(value);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              dataSource={dataSource || []}
+              columns={columns}
+              loading={
+                isLoading ||
+                createDesaMutation.isPending ||
+                deleteDesaMutation.isPending
+              }
+              pagination={{ pageSize: 5 }}
+              rowKey="id"
+            />
           </Col>
         </Row>
       </Container>

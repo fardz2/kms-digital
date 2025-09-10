@@ -1,18 +1,18 @@
-import { Col, DatePicker, Form, message, Row, Spin, Modal } from "antd";
+import { Col, Modal, Row, message } from "antd";
 import Navbar from "../../components/layout/Navbar";
 import bg_dashboard from "../../assets/img/bg-dashboard.svg";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Table from "../../components/layout/Table";
-import CustomButton from "../../components/layout/Button/CustomButton";
-import axios from "axios";
 import moment from "moment";
 import ReactToPrint from "react-to-print";
 import BukuPanduan from "./BukuPanduan";
 import "./posyandu.css";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FormUpdateDataAnak from "../../components/form/FormUpdateDataAnak";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Container } from "react-bootstrap";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import useAuth from "../../hook/useAuth";
 
 const BackgroundComponent = () => {
   return (
@@ -27,70 +27,81 @@ const BackgroundComponent = () => {
 };
 
 const PosyanduDashboard = () => {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [messageApi, contextHolder] = message.useMessage();
-  const [user, setUser] = useState(login_data);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [dataAnak, setDataAnak] = useState(null);
-  const ref = useRef();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [messageApi, contextHolder] = message.useMessage();
   const [isOpenModalUpdateDataAnak, setIsOpenModalUpdateDataAnak] =
     useState(false);
+  const [dataAnak, setDataAnak] = useState(null);
+  const ref = useRef();
+  const user = useAuth();
 
-  useEffect(() => {
-    function fetchDataAnak() {
-      if (user.user.role !== "ORANG_TUA") {
-        axios
-          .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak`, {
-            headers: {
-              Authorization: `Bearer ${user.token.value}`,
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              b.created_at.localeCompare(a.created_at)
-            );
-            console.log(response.data.data);
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            setIsLoading(false);
-          });
-      } else {
-        axios
-          .get(`${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak`, {
-            headers: {
-              Authorization: `Bearer ${user.token.value}`,
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            const sortedData = response.data.data.sort((a, b) =>
-              b.created_at.localeCompare(a.created_at)
-            );
+  // Fetch child data using useQuery
+  const { data, isLoading: dataLoading } = useQuery({
+    queryKey: ["data-anak", user?.user?.role],
+    queryFn: async () => {
+      const url =
+        user?.user?.role !== "ORANG_TUA"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error("Gagal mengambil data anak");
+      const responseData = await response.json();
+      return responseData.data.sort((a, b) =>
+        b.created_at.localeCompare(a.created_at)
+      );
+    },
+    onError: (err) => {
+      console.error("Error fetching child data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data anak",
+      });
+    },
+    enabled: !!user?.token?.value && !!user?.user?.role,
+    staleTime: 5 * 60 * 1000,
+  });
 
-            setData(sortedData);
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            setIsLoading(false);
-          });
-      }
-    }
+  // Mutation for deleting child data
+  const deleteDataAnakMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal menghapus data anak");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil dihapus",
+      });
+      queryClient.invalidateQueries(["data-anak"]);
+    },
+    onError: (err) => {
+      console.error("Error deleting child data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus data anak",
+      });
+    },
+  });
 
-    fetchDataAnak();
-
-    // eslint-disable-next-line
-  }, [refreshKey]);
-  const columns = useMemo(() => {
-    return [
+  // Define columns with useMemo
+  const columns = useMemo(
+    () => [
       {
         Header: "Nama Anak",
         accessor: "nama",
@@ -129,31 +140,32 @@ const PosyanduDashboard = () => {
         accessor: "aksi",
         Cell: ({ row }) => {
           const id = row.original.id;
-
           const data = row.original;
           return (
-            <>
-              <div style={{ justifyContent: "space-between", display: "flex" }}>
+            <div style={{ justifyContent: "space-between", display: "flex" }}>
+              <button
+                className="btnDetail"
+                onClick={() =>
+                  navigate(`/kader-posyandu/dashboard/detail/${id}`)
+                }
+                disabled={deleteDataAnakMutation.isPending}
+              >
+                Lihat pengukuran
+              </button>
+              <button
+                type="button"
+                className="buttonUpdate"
+                onClick={() => {
+                  setDataAnak(data);
+                  setIsOpenModalUpdateDataAnak(true);
+                }}
+                disabled={deleteDataAnakMutation.isPending}
+              >
+                Edit
+              </button>
+              {user?.user?.role !== "ORANG_TUA" && (
                 <button
-                  class="btnDetail"
-                  onClick={(e) =>
-                    navigate(`/kader-posyandu/dashboard/detail/${id}`)
-                  }
-                >
-                  Lihat pengukuran
-                </button>
-                <button
-                  type="button"
-                  class="buttonUpdate"
-                  onClick={() => {
-                    setDataAnak(data);
-                    setIsOpenModalUpdateDataAnak(true);
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  class="buttonDelete"
+                  className="buttonDelete"
                   onClick={() => {
                     Modal.confirm({
                       title: "Apakah anda yakin?",
@@ -161,50 +173,22 @@ const PosyanduDashboard = () => {
                       content: "Data yang dihapus tidak dapat dikembalikan",
                       okText: "Ya",
                       cancelText: "Tidak",
-                      onOk: () => {
-                        axios
-                          .delete(
-                            `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
-                            {
-                              headers: {
-                                Authorization: `Bearer ${user.token.value}`,
-                                "Content-Type": "application/json",
-                              },
-                            }
-                          )
-                          .then((response) => {
-                            messageApi.open({
-                              type: "success",
-                              content: "Data berhasil dihapus",
-                            });
-                            setTimeout(() => {
-                              setRefreshKey((oldKey) => oldKey + 1);
-                              window.location.reload();
-                              fetch();
-                            }, 1000);
-                          })
-                          .catch((err) => {
-                            messageApi.open({
-                              type: "error",
-                              content: "Data gagal dihapus",
-                            });
-                            setTimeout(() => {
-                              window.location.reload();
-                            }, 1000);
-                          });
-                      },
+                      onOk: () => deleteDataAnakMutation.mutate(id),
                     });
                   }}
+                  disabled={deleteDataAnakMutation.isPending}
                 >
                   Delete
                 </button>
-              </div>
-            </>
+              )}
+            </div>
           );
         },
       },
-    ];
-  }, []);
+    ],
+    [deleteDataAnakMutation.isPending.user?.user?.role]
+  );
+
   return (
     <>
       {contextHolder}
@@ -223,19 +207,17 @@ const PosyanduDashboard = () => {
               Halo {user?.user?.name || ""}
             </h6>
             <h3 className="dashboard text-xl lg:text-3xl">
-              Selamat datang di posyandu {user?.user?.posyandu_name || ""},{" "}
+              Selamat datang di posyandu {user?.user?.posyandu_name || ""}
             </h3>
           </Col>
         </Row>
         <Row className="justify-content-center" style={{ marginTop: "30px" }}>
           <ReactToPrint
-            trigger={() => {
-              return (
-                <button type="button" class="button3 mx-5">
-                  Baca Panduan
-                </button>
-              );
-            }}
+            trigger={() => (
+              <button type="button" className="button3 mx-5">
+                Baca Panduan
+              </button>
+            )}
             content={() => ref.current}
             documentTitle="Buku Panduan.pdf"
           />
@@ -248,6 +230,7 @@ const PosyanduDashboard = () => {
               initialState={{
                 pageSize: 10,
               }}
+              loading={dataLoading || deleteDataAnakMutation.isPending}
               ButtonCus
             />
           </Col>
@@ -257,7 +240,7 @@ const PosyanduDashboard = () => {
           <FormUpdateDataAnak
             isOpen={isOpenModalUpdateDataAnak}
             onCancel={() => setIsOpenModalUpdateDataAnak(false)}
-            fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
+            fetch={() => queryClient.invalidateQueries(["data-anak"])}
             data={dataAnak}
           />
         </Col>

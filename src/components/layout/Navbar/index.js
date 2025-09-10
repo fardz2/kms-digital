@@ -5,62 +5,115 @@ import { UserOutlined } from "@ant-design/icons";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import axios from "axios";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import useAuth from "../../../hook/useAuth";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function NavbarComp(props) {
   const { isLogin, admin, posyandu, desa, kader, tenkes } = props;
   const navigate = useNavigate();
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
-  }
-  const [user, setUser] = useState(login_data);
+  const queryClient = useQueryClient();
   const [activeLink, setActiveLink] = useState("");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const user = useAuth();
 
   useEffect(() => {
     const currentPath = window.location.pathname;
     setActiveLink(currentPath);
+
+    form.setFieldsValue({ nama: user?.user?.name || "User" });
   }, []);
 
-  // Fetch profile data when modal opens
-  useEffect(() => {
-    if (
-      isProfileModalOpen &&
-      user?.token?.value &&
-      user?.user?.role !== "ADMIN"
-    ) {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/api/profile`, {
+  // Fetch profile data
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      if (user?.user?.role === "ADMIN") return null;
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/profile`,
+        {
           headers: {
-            Authorization: `Bearer ${user.token.value}`,
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Gagal mengambil profil");
+      const data = await response.json();
+      // Debugging
+      return data;
+    },
+    onSuccess: (data) => {
+      form.setFieldsValue({
+        nama: data?.data?.user?.name,
+      });
+    },
+    onError: (err) => {
+      console.error("Fetch profile error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil profil",
+      });
+    },
+  });
+  useEffect(() => {
+    if (isProfileModalOpen) {
+      refetch();
+      form.setFieldsValue({ nama: user?.user?.name || "User" });
+      console.log("Refetching profile data..."); // Debugging
+    }
+  }, [isProfileModalOpen, refetch]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/profile`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user?.token?.value}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal memperbarui profil");
+      return response.json();
+    },
+    onSuccess: (response) => {
+      messageApi.open({
+        type: "success",
+        content: "Profil berhasil diperbarui",
+      });
+      localStorage.setItem(
+        "login_data",
+        JSON.stringify({
+          ...user,
+          user: {
+            ...user.user,
+            name: response.data.user.name,
           },
         })
-        .then((response) => {
-          form.setFieldsValue({
-            nama: response.data.data.user.name,
-          });
-        })
-        .catch((err) => {
-          console.error("Fetch profile error:", err);
-          messageApi.open({
-            type: "error",
-            content: err.response?.data?.message || "Gagal mengambil profil",
-          });
-        });
-    }
-  }, [
-    isProfileModalOpen,
-    user?.token?.value,
-    user?.user?.role,
-    form,
-    messageApi,
-  ]);
+      );
+      queryClient.invalidateQueries(["profile"]);
+      form.resetFields();
+      setIsProfileModalOpen(false);
+    },
+    onError: (err) => {
+      console.error("Update profile error:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal memperbarui profil",
+      });
+    },
+  });
 
   const handleProfileClick = () => {
     if (user?.user?.role !== "ADMIN") {
@@ -72,47 +125,7 @@ export default function NavbarComp(props) {
     form
       .validateFields()
       .then((values) => {
-        axios
-          .put(`${process.env.REACT_APP_BASE_URL}/api/profile`, values, {
-            headers: {
-              Authorization: `Bearer ${user.token.value}`,
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            messageApi.open({
-              type: "success",
-              content: "Profil berhasil diperbarui",
-            });
-            // Update localStorage
-            localStorage.setItem(
-              "login_data",
-              JSON.stringify({
-                ...user,
-                user: {
-                  ...user.user,
-                  name: response.data.data.user.name,
-                },
-              })
-            );
-            setUser((prev) => ({
-              ...prev,
-              user: {
-                ...prev.user,
-                name: response.data.data.user.name,
-              },
-            }));
-            form.resetFields();
-            setIsProfileModalOpen(false);
-          })
-          .catch((err) => {
-            console.error("Update profile error:", err);
-            messageApi.open({
-              type: "error",
-              content:
-                err.response?.data?.message || "Gagal memperbarui profil",
-            });
-          });
+        updateProfileMutation.mutate(values);
       })
       .catch((info) => {
         console.log("Validation Failed:", info);
@@ -122,6 +135,11 @@ export default function NavbarComp(props) {
   const handleCancel = () => {
     form.resetFields();
     setIsProfileModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("login_data");
+    navigate("/");
   };
 
   const navbarStyle = {
@@ -146,7 +164,6 @@ export default function NavbarComp(props) {
     textDecoration: "underline",
   };
 
-  // Basic Navbar for non-authenticated users
   const BasicNavbar = () => (
     <Navbar style={navbarStyle} expand="md">
       <Container fluid="md">
@@ -299,7 +316,7 @@ export default function NavbarComp(props) {
               >
                 <Col>
                   <Row justify="end" style={{ fontWeight: "bold" }}>
-                    {user?.user?.name || "User"}
+                    {profileData?.data.user?.name || "User"}
                   </Row>
                   <Row justify="end">
                     {user?.user?.role
@@ -319,11 +336,9 @@ export default function NavbarComp(props) {
                 <Col style={{ display: "flex", alignItems: "center" }}>
                   <button
                     className="Btn"
-                    onClick={() => {
-                      localStorage.removeItem("login_data");
-                      navigate("/");
-                    }}
+                    onClick={handleLogout}
                     style={{ marginLeft: "20px" }}
+                    disabled={updateProfileMutation.isPending}
                   >
                     <div className="sign">
                       <svg viewBox="0 0 512 512">
@@ -338,13 +353,17 @@ export default function NavbarComp(props) {
           </Container>
         </Navbar>
 
-        {/* Profile Modal */}
         <Modal
           title="Profil Pengguna"
           open={isProfileModalOpen}
           onCancel={handleCancel}
           footer={[
-            <Button key="cancel" onClick={handleCancel} className="batal_btn">
+            <Button
+              key="cancel"
+              onClick={handleCancel}
+              className="batal_btn"
+              disabled={updateProfileMutation.isPending}
+            >
               Batal
             </Button>,
             <Button
@@ -352,8 +371,9 @@ export default function NavbarComp(props) {
               type="primary"
               onClick={handleUpdateProfile}
               className="update_btn"
+              disabled={updateProfileMutation.isPending || isProfileLoading}
             >
-              Update
+              {updateProfileMutation.isPending ? "Menyimpan..." : "Update"}
             </Button>,
           ]}
         >
@@ -363,7 +383,7 @@ export default function NavbarComp(props) {
               name="nama"
               rules={[{ required: true, message: "Nama wajib diisi!" }]}
             >
-              <Input />
+              <Input disabled={isProfileLoading} />
             </Form.Item>
             <Form.Item
               label="Password Baru"
@@ -394,7 +414,7 @@ export default function NavbarComp(props) {
     );
   }
 
-  if (admin) {
+  if (admin || posyandu || desa || kader || tenkes) {
     return (
       <Navbar style={navbarStyle} expand="lg">
         <Container fluid="md">
@@ -412,7 +432,7 @@ export default function NavbarComp(props) {
             className="justify-content-start"
             style={{ backgroundColor: "#FFB4B4" }}
           >
-            {desa && (
+            {(desa || admin) && (
               <Nav className="mx-auto align-items-center">
                 <Link
                   to="/dashboard"
@@ -444,7 +464,7 @@ export default function NavbarComp(props) {
                 </Link>
               </Nav>
             )}
-            {posyandu && (
+            {(posyandu || admin) && (
               <Nav className="mx-auto align-items-center">
                 <Link
                   to="/dashboard"
@@ -476,7 +496,7 @@ export default function NavbarComp(props) {
                 </Link>
               </Nav>
             )}
-            {kader && (
+            {(kader || admin) && (
               <Nav className="mx-auto align-items-center">
                 <Link
                   to="/dashboard"
@@ -508,7 +528,7 @@ export default function NavbarComp(props) {
                 </Link>
               </Nav>
             )}
-            {tenkes && (
+            {(tenkes || admin) && (
               <Nav className="mx-auto align-items-center">
                 <Link
                   to="/tenaga-kesehatan/dashboard"

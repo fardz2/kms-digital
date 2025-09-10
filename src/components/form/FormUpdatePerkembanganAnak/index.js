@@ -1,16 +1,6 @@
-import {
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  message,
-  Modal,
-  Row,
-} from "antd";
+import { DatePicker, Form, Input, InputNumber, message, Modal } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import dataBeratBadanByUmurPria from "../../../json/ZScoreBeratBadanLakiLaki.json";
 import dataBeratBadanByUmurPerempuan from "../../../json/ZScoreBeratBadanPerempuan.json";
 import dataTinggiBadanByUmurPria from "../../../json/ZScorePanjangBadanLakiLaki.json";
@@ -27,19 +17,17 @@ import {
   determineAmbangBatasTinggiBadan,
   determineAmbangBatasPBBB,
 } from "../../../utilities/determineAmbangBatas";
-import axios from "axios";
 import { monthDiff } from "../../../utilities/calculateMonth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useAuth from "../../../hook/useAuth";
 import "../FormUpdateDataAnak/formUpdateData_style.css";
 
 export default function FormUpdatePerkembanganAnak(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const { isOpen, onCancel, data, profil, fetch } = props;
+  const { isOpen, onCancel, data, profil, idAnak } = props;
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [user, setUser] = useState(login_data);
+  const user = useAuth();
+  const queryClient = useQueryClient();
   const [zScoreBB, setZScoreBB] = useState(0);
   const [zScoreTB, setZScoreTB] = useState(0);
   const [zScoreLK, setZScoreLK] = useState(0);
@@ -48,31 +36,76 @@ export default function FormUpdatePerkembanganAnak(props) {
   const [beratBadanState, setBeratBadanState] = useState("");
   const [tinggiBadanState, setTinggiBadanState] = useState("");
 
+  const updatePerkembanganAnakMutation = useMutation({
+    mutationFn: async (payload) => {
+      const url =
+        user?.user?.role === "KADER_POSYANDU"
+          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${data?.id}`
+          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${data?.id}`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${user?.token?.value}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("Gagal memperbarui data");
+      const responseData = await response.json();
+      console.log("Response:", responseData);
+      return responseData;
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data berhasil tersimpan",
+      });
+      form.resetFields();
+      onCancel();
+      queryClient.invalidateQueries({
+        queryKey: ["statistik-anak", idAnak],
+      });
+    },
+    onError: (err) => {
+      console.error("Error updating development data:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+      setTimeout(() => {
+        onCancel();
+      }, 1000);
+    },
+  });
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && data) {
       form.setFieldsValue({
         tanggalPengukuran: moment(data.date),
         beratBadan: data.berat,
         tinggiBadan: data.tinggi,
         lingkarKepala: data.lingkar_kepala,
       });
+      setTanggalPengukuran(data.date);
+      setBeratBadanState(data.berat);
+      setTinggiBadanState(data.tinggi);
       handleZScore(data.berat);
       handleZScoreTinggiBadan(data.tinggi);
       handleZScoreLingkarKepala(data.lingkar_kepala);
     }
-  }, [isOpen, data]);
+  }, [isOpen, data, form]);
 
   const handleZScore = (beratBadan) => {
     setBeratBadanState(beratBadan);
     const datePengukuran = form.getFieldValue("tanggalPengukuran");
-    if (datePengukuran !== null && datePengukuran !== "") {
+    if (datePengukuran && profil?.tanggal_lahir) {
       let antropologiData = null;
       const determineMonth = `${monthDiff(
         moment(profil.tanggal_lahir),
         moment(datePengukuran)
       )}`;
 
-      if (profil.gender === "LAKI_LAKI") {
+      if (profil?.gender === "LAKI_LAKI") {
         antropologiData = dataBeratBadanByUmurPria.find(
           (item) => item.bulan === determineMonth
         );
@@ -104,13 +137,18 @@ export default function FormUpdatePerkembanganAnak(props) {
     } else {
       result = Math.floor(tinggiBadan) + 0.5;
     }
-    if (zScoreTB !== null && zScoreBB !== null && tanggalPengukuran) {
+    if (
+      zScoreTB !== null &&
+      zScoreBB !== null &&
+      tanggalPengukuran &&
+      profil?.tanggal_lahir
+    ) {
       let antropologiData = null;
       const umurAnak = monthDiff(
         moment(profil.tanggal_lahir),
         moment(tanggalPengukuran)
       );
-      if (profil.gender === "LAKI_LAKI") {
+      if (profil?.gender === "LAKI_LAKI") {
         if (umurAnak >= 0 && umurAnak <= 24) {
           antropologiData = dataBeratTinggiBadanPria24Bulan.find(
             (item) => parseFloat(item.pb) === result
@@ -144,14 +182,14 @@ export default function FormUpdatePerkembanganAnak(props) {
   const handleZScoreTinggiBadan = (tinggiBadan) => {
     setTinggiBadanState(tinggiBadan);
     const datePengukuran = form.getFieldValue("tanggalPengukuran");
-    if (datePengukuran !== null && datePengukuran !== "") {
+    if (datePengukuran && profil?.tanggal_lahir) {
       let antropologiData = null;
       const determineMonth = `${monthDiff(
         moment(profil.tanggal_lahir),
         moment(datePengukuran)
       )}`;
 
-      if (profil.gender === "LAKI_LAKI") {
+      if (profil?.gender === "LAKI_LAKI") {
         antropologiData = dataTinggiBadanByUmurPria.find(
           (item) => item.bulan === determineMonth
         );
@@ -180,14 +218,14 @@ export default function FormUpdatePerkembanganAnak(props) {
 
   const handleZScoreLingkarKepala = (lingkarKepala) => {
     const datePengukuran = form.getFieldValue("tanggalPengukuran");
-    if (datePengukuran !== null && datePengukuran !== "") {
+    if (datePengukuran && profil?.tanggal_lahir) {
       let antropologiData = null;
       const determineMonth = `${monthDiff(
         moment(profil.tanggal_lahir),
         moment(datePengukuran)
       )}`;
 
-      if (profil.gender === "LAKI_LAKI") {
+      if (profil?.gender === "LAKI_LAKI") {
         antropologiData = dataLingkarKepalaByUmurPria.find(
           (item) => item.bulan === determineMonth
         );
@@ -215,87 +253,17 @@ export default function FormUpdatePerkembanganAnak(props) {
     form
       .validateFields()
       .then((values) => {
-        if (user && user.user.role === "KADER_POSYANDU") {
-          axios
-            .put(
-              `${process.env.REACT_APP_BASE_URL}/api/posyandu/statistik-anak/${data.id}`,
-              {
-                berat: parseFloat(values.beratBadan),
-                tinggi: parseFloat(values.tinggiBadan),
-                lingkar_kepala: parseFloat(values.lingkarKepala),
-                date: moment(values.tanggalPengukuran).format("YYYY-MM-DD"),
-                z_score_berat: zScoreBB,
-                z_score_tinggi: zScoreTB,
-                z_score_lingkar_kepala: zScoreLK,
-                z_score_gizi: zScoreBBPB,
-              },
-              {
-                headers: { Authorization: `Bearer ${user.token.value}` },
-              }
-            )
-            .then((response) => {
-              messageApi.open({
-                type: "success",
-                content: "Data berhasil tersimpan",
-              });
-              setTimeout(() => {
-                form.resetFields();
-                onCancel();
-                fetch();
-              }, 1000);
-            })
-            .catch((err) => {
-              console.log(err);
-              messageApi.open({
-                type: "error",
-                content: "Data gagal tersimpan",
-              });
-              setTimeout(() => {
-                onCancel();
-              }, 1000);
-            });
-        }
-
-        if (user && user.user.role === "ORANG_TUA") {
-          axios
-            .put(
-              `${process.env.REACT_APP_BASE_URL}/api/orang-tua/statistik-anak/${data.id}`,
-              {
-                berat: parseFloat(values.beratBadan),
-                tinggi: parseFloat(values.tinggiBadan),
-                lingkar_kepala: parseFloat(values.lingkarKepala),
-                date: moment(values.tanggalPengukuran).format("YYYY-MM-DD"),
-                z_score_berat: zScoreBB,
-                z_score_tinggi: zScoreTB,
-                z_score_lingkar_kepala: zScoreLK,
-                z_score_gizi: zScoreBBPB,
-              },
-              {
-                headers: { Authorization: `Bearer ${user.token.value}` },
-              }
-            )
-            .then((response) => {
-              messageApi.open({
-                type: "success",
-                content: "Data berhasil tersimpan",
-              });
-              setTimeout(() => {
-                form.resetFields();
-                onCancel();
-                fetch();
-              }, 1000);
-            })
-            .catch((err) => {
-              console.log(err);
-              messageApi.open({
-                type: "error",
-                content: "Data gagal tersimpan",
-              });
-              setTimeout(() => {
-                onCancel();
-              }, 1000);
-            });
-        }
+        const payload = {
+          berat: parseFloat(values.beratBadan),
+          tinggi: parseFloat(values.tinggiBadan),
+          lingkar_kepala: parseFloat(values.lingkarKepala),
+          date: moment(values.tanggalPengukuran).format("YYYY-MM-DD"),
+          z_score_berat: zScoreBB,
+          z_score_tinggi: zScoreTB,
+          z_score_lingkar_kepala: zScoreLK,
+          z_score_gizi: zScoreBBPB,
+        };
+        updatePerkembanganAnakMutation.mutate(payload);
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -317,6 +285,7 @@ export default function FormUpdatePerkembanganAnak(props) {
             onClick={onCancel}
             className="batal_btn"
             style={{ marginRight: "8px" }}
+            disabled={updatePerkembanganAnakMutation.isPending}
           >
             Batal
           </button>,
@@ -325,8 +294,11 @@ export default function FormUpdatePerkembanganAnak(props) {
             type="submit"
             onClick={onOK}
             className="simpan_btn"
+            disabled={updatePerkembanganAnakMutation.isPending}
           >
-            Simpan
+            {updatePerkembanganAnakMutation.isPending
+              ? "Menyimpan..."
+              : "Simpan"}
           </button>,
         ]}
       >
@@ -334,17 +306,17 @@ export default function FormUpdatePerkembanganAnak(props) {
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Nama Anak</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{profil?.nama}</span>
+            <span>{profil?.nama || "-"}</span>
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Jenis Kelamin</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{profil?.gender}</span>
+            <span>{profil?.gender || "-"}</span>
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <span style={{ width: "120px" }}>Tanggal Lahir</span>
             <span style={{ marginRight: "8px" }}>:</span>
-            <span>{profil?.tanggal_lahir}</span>
+            <span>{profil?.tanggal_lahir || "-"}</span>
           </div>
         </div>
         <Form
@@ -361,7 +333,6 @@ export default function FormUpdatePerkembanganAnak(props) {
             ]}
           >
             <DatePicker
-              disabled // ⬅️ ini yang penting
               onChange={(values) =>
                 setTanggalPengukuran(
                   values ? moment(values).format("YYYY-MM-DD") : ""
@@ -388,7 +359,7 @@ export default function FormUpdatePerkembanganAnak(props) {
           <Form.Item
             label="Tinggi Badan"
             name="tinggiBadan"
-            rules={[{ required: true, message: "Tinggi Badan masih kosang!" }]}
+            rules={[{ required: true, message: "Tinggi Badan masih kosong!" }]}
           >
             <InputNumber
               min={0}

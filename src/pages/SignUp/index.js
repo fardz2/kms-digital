@@ -1,8 +1,8 @@
-import { Button, Form, Input, message, Select } from "antd";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { Form, Input, message, Select, Spin } from "antd";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import banner from "../SignIn/banner.svg";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
 import logo from "../SignIn/GiziBalita_logo.png";
 import background from "../SignIn/login_bg.svg";
 
@@ -17,129 +17,180 @@ export default function SignUp() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [role, setRole] = useState(3);
-  const [dataDesa, setDataDesa] = useState(null);
-  const [dataPosyandu, setDataPosyandu] = useState(null);
 
-  // Check if user is already authenticated
-  useEffect(() => {
-    let login_data = null;
-    let isAuthenticated = false;
-    let userRole = null;
+  // Check authentication status using useQuery
+  const { isLoading: authLoading } = useQuery({
+    queryKey: ["authCheck"],
+    queryFn: () => {
+      let login_data = null;
+      let isAuthenticated = false;
+      let userRole = null;
 
-    try {
-      if (typeof window !== "undefined") {
-        login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
-        isAuthenticated =
-          login_data &&
-          login_data.token &&
-          login_data.user &&
-          login_data.user.role;
-        userRole = isAuthenticated ? login_data.user.role : null;
+      try {
+        if (typeof window !== "undefined") {
+          login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
+          isAuthenticated =
+            login_data &&
+            login_data.token &&
+            login_data.user &&
+            login_data.user.role;
+          userRole = isAuthenticated ? login_data.user.role : null;
+        }
+      } catch (error) {
+        console.error("Error parsing login_data:", error);
+        localStorage.removeItem("login_data"); // Clear invalid data
+        isAuthenticated = false;
       }
-    } catch (error) {
-      console.error("Error parsing login_data:", error);
-      localStorage.removeItem("login_data"); // Clear invalid data
-      isAuthenticated = false;
-    }
 
-    if (isAuthenticated) {
-      // Redirect to role-specific dashboard
-      const redirectPath =
-        userRole === "ORANG_TUA"
-          ? "/dashboard"
-          : userRole === "KADER_POSYANDU"
-          ? "/kader-posyandu/dashboard"
-          : userRole === "TENAGA_KESEHATAN"
-          ? "/tenaga-kesehatan/dashboard"
-          : userRole === "DESA"
-          ? "/desa/dashboard"
-          : userRole === "ADMIN"
-          ? "/admin/dashboard/desa"
-          : "/"; // Fallback to home if role is unknown
+      if (isAuthenticated) {
+        const redirectPath =
+          userRole === "ORANG_TUA"
+            ? "/dashboard"
+            : userRole === "KADER_POSYANDU"
+            ? "/kader-posyandu/dashboard"
+            : userRole === "TENAGA_KESEHATAN"
+            ? "/tenaga-kesehatan/dashboard"
+            : userRole === "DESA"
+            ? "/desa/dashboard"
+            : userRole === "ADMIN"
+            ? "/admin/dashboard/desa"
+            : "/";
 
+        messageApi.open({
+          type: "info",
+          content: "Anda sudah login. Mengarahkan ke dashboard...",
+        });
+
+        navigate(redirectPath, { replace: true });
+      }
+
+      return { isAuthenticated };
+    },
+    retry: false,
+  });
+
+  // Fetch desa data using useQuery
+  const { data: dataDesa, isLoading: desaLoading } = useQuery({
+    queryKey: ["desa"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/desa`
+      );
+      if (!response.ok) throw new Error("Failed to fetch desa data");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (error) => {
+      console.error("Error fetching desa:", error);
       messageApi.open({
-        type: "info",
-        content: "Anda sudah login. Mengarahkan ke dashboard...",
+        type: "error",
+        content: "Gagal memuat data desa",
       });
+    },
+  });
 
-      navigate(redirectPath, { replace: true });
-    }
-  }, [navigate, messageApi]);
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/desa`)
-      .then((response) => {
-        setDataDesa(response.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
+  // Fetch posyandu data using useQuery
+  const { data: dataPosyandu, isLoading: posyanduLoading } = useQuery({
+    queryKey: ["posyandu"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
+      );
+      if (!response.ok) throw new Error("Failed to fetch posyandu data");
+      const data = await response.json();
+      return data.data;
+    },
+    onError: (error) => {
+      console.error("Error fetching posyandu:", error);
+      messageApi.open({
+        type: "error",
+        content: "Gagal memuat data posyandu",
       });
+    },
+  });
 
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/posyandu`)
-      .then((response) => {
-        setDataPosyandu(response.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
+  // Register mutation for Kader Posyandu
+  const posyanduRegisterMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nama: values.nama,
+            email: values.email,
+            password: values.password,
+            id_desa: values.desa,
+            id_posyandu: values.posyandu,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal Registrasi");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Register Berhasil",
       });
-  }, []);
+      setTimeout(() => {
+        navigate("/sign-in");
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
+      messageApi.open({
+        type: "error",
+        content: error.message || "Gagal Registrasi",
+      });
+    },
+  });
+
+  // Register mutation for Orang Tua
+  const orangTuaRegisterMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/auth/orang-tua/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nama: values.nama,
+            email: values.email,
+            password: values.password,
+            id_desa: values.desa,
+            id_posyandu: values.posyandu,
+            alamat: values.alamat,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal Registrasi");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Register Berhasil",
+      });
+      setTimeout(() => {
+        navigate("/sign-in");
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
+      messageApi.open({
+        type: "error",
+        content: error.message || "Gagal Registrasi",
+      });
+    },
+  });
 
   const onFinish = (values) => {
-    if (values && role === 4) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`, {
-          nama: values.nama,
-          email: values.email,
-          password: values.password,
-          id_desa: values.desa,
-          id_posyandu: values.posyandu,
-        })
-        .then((response) => {
-          messageApi.open({
-            type: "success",
-            content: "Register Berhasil",
-          });
-          setTimeout(() => {
-            navigate("/sign-in");
-          }, 1000);
-        })
-        .catch((error) => {
-          console.log(error);
-          messageApi.open({
-            type: "error",
-            content: "Gagal Registrasi",
-          });
-        });
-    }
-
-    if (values && role === 3) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_URL}/api/auth/orang-tua/register`, {
-          nama: values.nama,
-          email: values.email,
-          password: values.password,
-          id_desa: values.desa,
-          id_posyandu: values.posyandu,
-          alamat: values.alamat, // Include alamat for ORANG_TUA
-        })
-        .then((response) => {
-          messageApi.open({
-            type: "success",
-            content: "Register Berhasil",
-          });
-          setTimeout(() => {
-            navigate("/sign-in");
-          }, 1000);
-        })
-        .catch((error) => {
-          console.log(error);
-          messageApi.open({
-            type: "error",
-            content: "Gagal Registrasi",
-          });
-        });
+    if (role === 4) {
+      posyanduRegisterMutation.mutate(values);
+    } else if (role === 3) {
+      orangTuaRegisterMutation.mutate(values);
     }
   };
 
@@ -151,6 +202,11 @@ export default function SignUp() {
     <>
       {contextHolder}
       <BackgroundComponent />
+      {(authLoading || desaLoading || posyanduLoading) && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
+          <Spin size="large" />
+        </div>
+      )}
       <div
         className="flex items-center justify-center min-h-screen p-2 sm:p-4"
         style={{ background: "transparent" }}
@@ -278,7 +334,11 @@ export default function SignUp() {
                 label="Desa"
                 rules={[{ required: true, message: "Pilih Desa!" }]}
               >
-                <Select placeholder="Pilih Desa" allowClear>
+                <Select
+                  placeholder="Pilih Desa"
+                  allowClear
+                  disabled={desaLoading}
+                >
                   {dataDesa &&
                     dataDesa.map((value) => (
                       <Select.Option key={value.id} value={value.id}>
@@ -293,7 +353,11 @@ export default function SignUp() {
                 label="Posyandu"
                 rules={[{ required: true, message: "Pilih Posyandu!" }]}
               >
-                <Select placeholder="Pilih Posyandu" allowClear>
+                <Select
+                  placeholder="Pilih Posyandu"
+                  allowClear
+                  disabled={posyanduLoading}
+                >
                   {dataPosyandu &&
                     dataPosyandu.map((value) => (
                       <Select.Option key={value.id} value={value.id}>
@@ -314,6 +378,10 @@ export default function SignUp() {
                     marginBottom: "20px",
                     width: "100%",
                   }}
+                  disabled={
+                    posyanduRegisterMutation.isPending ||
+                    orangTuaRegisterMutation.isPending
+                  }
                 >
                   Daftar
                 </button>

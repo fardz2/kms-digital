@@ -1,16 +1,16 @@
-import { Avatar, Space, Table } from "antd";
-import axios from "axios";
+import { Avatar, Space, Table, message } from "antd";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import FormInputDataAnak from "../../components/form/FormInputDataAnak";
 import FormUpdateDataAnak from "../../components/form/FormUpdateDataAnak";
 import Navbar from "../../components/layout/Navbar";
 import bg_dashboard from "../../assets/img/bg-dashboard.svg";
 import Carousel from "react-bootstrap/Carousel";
 import bayi from "../../assets/img/bayi_1.png";
-
 import "./dashboard-style.css";
+import useAuth from "../../hook/useAuth";
 
 const BackgroundComponent = () => (
   <div
@@ -20,63 +20,71 @@ const BackgroundComponent = () => (
 );
 
 export default function Dashboard() {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-
-  const [user, setUser] = useState(login_data);
   const [isOpenModalInputDataAnak, setIsOpenModalInputDataAnak] =
     useState(false);
   const [isOpenModalUpdateDataAnak, setIsOpenModalUpdateDataAnak] =
     useState(false);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [dataAnak, setDataAnak] = useState(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    function fetchDataAnak() {
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const user = useAuth();
+
+  // Fetch data-anak using useQuery
+  const { data: anakData, isLoading: anakLoading } = useQuery({
+    queryKey: ["data-anak"],
+    queryFn: async () => {
       const url =
-        user.user.role !== "ORANG_TUA"
+        user?.user?.role !== "ORANG_TUA"
           ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak`
           : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak`;
-      axios
-        .get(url, {
-          headers: { Authorization: `Bearer ${user.token.value}` },
-        })
-        .then((response) => {
-          const sortedData = response.data.data.sort((a, b) =>
-            b.created_at.localeCompare(a.created_at)
-          );
-          console.log(sortedData);
-          setData(sortedData);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setIsLoading(false);
-          console.log(err);
-        });
-    }
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${user?.token?.value}` },
+      });
+      if (!response.ok) throw new Error("Gagal mengambil data anak");
+      const data = await response.json();
+      console.log("Fetched anak data:", data); // Debugging
+      return data.data.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    },
+    onError: (err) => {
+      console.error("Error fetching data-anak:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal mengambil data anak",
+      });
+    },
+    enabled: !!user?.token?.value,
+  });
 
-    fetchDataAnak();
-  }, [refreshKey, user]);
-
-  function deleteAnak(id) {
-    axios
-      .delete(
+  // Mutation for deleting anak data
+  const deleteAnakMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak/${id}`,
         {
-          headers: { Authorization: `Bearer ${user.token.value}` },
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${user?.token?.value}` },
         }
-      )
-      .then(() => {
-        setRefreshKey((oldKey) => oldKey + 1);
-      })
-      .catch((err) => {
-        console.log(err);
+      );
+      if (!response.ok) throw new Error("Gagal menghapus data anak");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Data anak berhasil dihapus",
       });
-  }
+      queryClient.invalidateQueries(["data-anak"]);
+    },
+    onError: (err) => {
+      console.error("Error deleting data-anak:", err);
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal menghapus data anak",
+      });
+    },
+  });
 
   const columns = [
     {
@@ -116,11 +124,12 @@ export default function Dashboard() {
               Detail
             </button>
           </Link>
-          {user && user.user.role !== "ORANG_TUA" && (
+          {user?.user?.role !== "ORANG_TUA" && (
             <button
               className="button_dashboard"
-              onClick={() => deleteAnak(record.id)}
+              onClick={() => deleteAnakMutation.mutate(record.id)}
               type="button"
+              disabled={deleteAnakMutation.isPending}
             >
               Delete
             </button>
@@ -132,14 +141,15 @@ export default function Dashboard() {
 
   return (
     <>
+      {contextHolder}
       <BackgroundComponent />
       <Navbar isLogin />
-      <div className="flex justify-center  p-3 sm:p-8 lg:h-[400px] h-[600px]">
+      <div className="flex justify-center p-3 sm:p-8 lg:h-[400px] h-[600px]">
         <div className="flex flex-col lg:flex-row gap-4 w-full max-w-[700px]">
-          <div className="flex-1 ">
+          <div className="flex-1">
             <h6 className="dashboard text-2xl lg:text-5xl">Hallo</h6>
             <h6 className="dashboard text-2xl lg:text-5xl">
-              {user && user.user.name}
+              {user?.user?.name || ""}
             </h6>
             <h5 className="text-[#B14444] text-lg sm:text-xl mb-4">
               Selamat datang di posyandu {user?.user?.posyandu_name || ""}
@@ -148,6 +158,7 @@ export default function Dashboard() {
               className="cssbuttons-io-button"
               onClick={() => setIsOpenModalInputDataAnak(true)}
               type="button"
+              disabled={deleteAnakMutation.isPending}
             >
               Tambah Anak
               <div className="icon">
@@ -168,11 +179,11 @@ export default function Dashboard() {
               </div>
             </button>
           </div>
-          <div className="flex flex-1   items-center justify-center w-full">
+          <div className="flex flex-1 items-center justify-center w-full">
             <div className="max-w-[200px]">
-              {data.length > 0 && (
+              {anakData?.length > 0 && (
                 <Carousel>
-                  {data.map((item, index) => (
+                  {anakData.map((item, index) => (
                     <Carousel.Item
                       interval={1000}
                       className="flex justify-center p-2.5"
@@ -202,8 +213,8 @@ export default function Dashboard() {
         <div className="w-full max-w-[1200px] overflow-x-auto">
           <Table
             columns={columns}
-            dataSource={data}
-            loading={isLoading}
+            dataSource={anakData || []}
+            loading={anakLoading || deleteAnakMutation.isPending}
             pagination={{ pageSize: 7 }}
             className="ant-table"
           />
@@ -213,7 +224,6 @@ export default function Dashboard() {
         <FormInputDataAnak
           isOpen={isOpenModalInputDataAnak}
           onCancel={() => setIsOpenModalInputDataAnak(false)}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
           kader={false}
         />
       </div>
@@ -221,7 +231,6 @@ export default function Dashboard() {
         <FormUpdateDataAnak
           isOpen={isOpenModalUpdateDataAnak}
           onCancel={() => setIsOpenModalUpdateDataAnak(false)}
-          fetch={() => setRefreshKey((oldKey) => oldKey + 1)}
           data={dataAnak}
         />
       </div>
