@@ -1082,6 +1082,7 @@ export default function Detail() {
             const sortedData = response.data.data.sort((a, b) =>
               a.date.localeCompare(b.date)
             );
+            console.log(sortedData);
             setData(sortedData);
             setIsLoading(false);
           })
@@ -1243,25 +1244,41 @@ export default function Detail() {
 
         <div className="flex flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-[1200px] mt-4 sm:mt-6">
           <button
-            className="button_detail text-sm sm:text-base px-4 py-2 rounded-lg"
+            className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+              activeContent === "Content 1"
+                ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                : ""
+            }`}
             onClick={() => handleButtonClick("Content 1")}
           >
             Berat Badan
           </button>
           <button
-            className="button_detail text-sm sm:text-base px-4 py-2 rounded-lg"
+            className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+              activeContent === "Content 2"
+                ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                : ""
+            }`}
             onClick={() => handleButtonClick("Content 2")}
           >
             Tinggi Badan
           </button>
           <button
-            className="button_detail text-sm sm:text-base px-4 py-2 rounded-lg"
+            className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+              activeContent === "Content 3"
+                ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                : ""
+            }`}
             onClick={() => handleButtonClick("Content 3")}
           >
             Lingkar Kepala
           </button>
           <button
-            className="button_detail text-sm sm:text-base px-4 py-2 rounded-lg"
+            className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+              activeContent === "Content 4"
+                ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                : ""
+            }`}
             onClick={() => handleButtonClick("Content 4")}
           >
             Gizi

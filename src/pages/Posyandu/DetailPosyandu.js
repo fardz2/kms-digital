@@ -18,6 +18,10 @@ import dataTinggiBadanByUmurPria from "../../json/ZScorePanjangBadanLakiLaki.jso
 import dataTinggiBadanByUmurPerempuan from "../../json/ZScorePanjangBadanPerempuan.json";
 import dataLingkarKepalaByUmurPria from "../../json/ZScoreLingkarKepalaLakiLaki.json";
 import dataLingkarKepalaByUmurPerempuan from "../../json/ZScoreLingkarKepalaPerempuan.json";
+import dataBeratTinggiBadanPria24Bulan from "../../json/ZScoreBeratTinggiBadanLakiLaki24.json";
+import dataBeratTinggiBadanPria60Bulan from "../../json/ZScoreBeratTinggiBadanLakiLaki60.json";
+import dataBeratTinggiBadanPerempuan24Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan24.json";
+import dataBeratTinggiBadanPerempuan60Bulan from "../../json/ZScoreBeratTinggiBadanPerempuan60.json";
 import Navbar from "../../components/layout/Navbar";
 import { Modal, message } from "antd";
 import FormInputPerkembanganAnak from "../../components/form/FormInputPerkembanganAnak";
@@ -84,6 +88,19 @@ export default function DetailPosyandu() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const labels = Array.from({ length: 61 }, (_, i) => i);
+  const label_PB_24 = [];
+  let value = 45.0;
+  while (value <= 110.0) {
+    label_PB_24.push(value);
+    value += 0.5;
+  }
+
+  const label_PB_60 = [];
+  value = 65.0;
+  while (value <= 110.0) {
+    label_PB_60.push(value);
+    value += 0.5;
+  }
 
   function datasetChart(type) {
     const dataset = data.map((item) =>
@@ -124,6 +141,55 @@ export default function DetailPosyandu() {
         } else {
           result.push(null);
         }
+      }
+      return result;
+    } else if (type === "gizi") {
+      const dataset_gizi = [];
+      for (let i = 0; i < data.length; i++) {
+        let floor;
+        if (data[i].tinggi - Math.floor(data[i].tinggi) === 0.5) {
+          floor = data[i].tinggi;
+        } else if (data[i].tinggi - Math.floor(data[i].tinggi) < 0.5) {
+          floor = Math.floor(data[i].tinggi);
+        } else {
+          floor = Math.floor(data[i].tinggi) + 0.5;
+        }
+        dataset_gizi.push(floor);
+      }
+      const result = [];
+      let j = 0;
+      if (dataset[0] >= 0 && dataset[0] <= 24) {
+        const dataSource =
+          dataAnak.gender === "LAKI_LAKI"
+            ? dataBeratTinggiBadanPria24Bulan
+            : dataBeratTinggiBadanPerempuan24Bulan;
+        dataSource.forEach((item) => {
+          if (
+            j < dataset_gizi.length &&
+            parseFloat(dataset_gizi[j]) === parseFloat(item.pb)
+          ) {
+            result.push(Number(data[j].berat));
+            j++;
+          } else {
+            result.push(null);
+          }
+        });
+      } else if (dataset[0] > 24 && dataset[0] <= 60) {
+        const dataSource =
+          dataAnak.gender === "LAKI_LAKI"
+            ? dataBeratTinggiBadanPria60Bulan
+            : dataBeratTinggiBadanPerempuan60Bulan;
+        dataSource.forEach((item) => {
+          if (
+            j < dataset_gizi.length &&
+            parseFloat(dataset_gizi[j]) === parseFloat(item.pb)
+          ) {
+            result.push(Number(data[j].berat));
+            j++;
+          } else {
+            result.push(null);
+          }
+        });
       }
       return result;
     }
@@ -304,7 +370,7 @@ export default function DetailPosyandu() {
       {
         data: dataTinggiBadanByUmurPria.map((data) => data.SD1pos),
         borderColor: "rgb(234, 255, 0)",
-        backgroundColor: "rgba(238, 255, 0.5)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
         type: "line",
         label: "SD +1",
       },
@@ -432,7 +498,7 @@ export default function DetailPosyandu() {
       {
         data: dataLingkarKepalaByUmurPria.map((data) => data.SD1pos),
         borderColor: "rgb(234, 255, 0)",
-        backgroundColor: "rgba(238, 255, 0.5)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
         type: "line",
         label: "SD +1",
       },
@@ -482,7 +548,7 @@ export default function DetailPosyandu() {
       {
         data: dataLingkarKepalaByUmurPerempuan.map((data) => data.SD1neg),
         borderColor: "rgb(234, 255, 0)",
-        backgroundColor: "rgba(238, 255, 0.5)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
         type: "line",
         label: "SD -1",
       },
@@ -496,7 +562,7 @@ export default function DetailPosyandu() {
       {
         data: dataLingkarKepalaByUmurPerempuan.map((data) => data.SD1pos),
         borderColor: "rgb(234, 255, 0)",
-        backgroundColor: "rgba(238, 255, 0.5)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
         type: "line",
         label: "SD +1",
       },
@@ -509,6 +575,262 @@ export default function DetailPosyandu() {
       },
       {
         data: dataLingkarKepalaByUmurPerempuan.map((data) => data.SD3pos),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +3",
+      },
+    ],
+  };
+
+  const dataChartPriaGizi_0_24 = {
+    labels: label_PB_24,
+    datasets: [
+      {
+        data: datasetChart("gizi"),
+        pointBackgroundColor: "black",
+        borderColor: "black",
+        type: "scatter",
+        showLine: false,
+        pointRadius: getPointRadius,
+        label: "Data Anak",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD3neg),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -3",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD2neg),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -2",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD1neg),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD -1",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.median),
+        borderColor: "rgb(154, 255, 136)",
+        backgroundColor: "rgba(0, 255, 30, 0.5)",
+        type: "line",
+        label: "Median",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD1pos),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD +1",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD2pos),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +2",
+      },
+      {
+        data: dataBeratTinggiBadanPria24Bulan.map((data) => data.SD3pos),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +3",
+      },
+    ],
+  };
+
+  const dataChartPriaGizi_25_60 = {
+    labels: label_PB_60,
+    datasets: [
+      {
+        data: datasetChart("gizi"),
+        pointBackgroundColor: "black",
+        borderColor: "black",
+        type: "scatter",
+        showLine: false,
+        pointRadius: getPointRadius,
+        label: "Data Anak",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD3neg),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -3",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD2neg),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -2",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD1neg),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD -1",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.median),
+        borderColor: "rgb(154, 255, 136)",
+        backgroundColor: "rgba(0, 255, 30, 0.5)",
+        type: "line",
+        label: "Median",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD1pos),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD +1",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD2pos),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +2",
+      },
+      {
+        data: dataBeratTinggiBadanPria60Bulan.map((data) => data.SD3pos),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +3",
+      },
+    ],
+  };
+
+  const dataChartPerempuanGizi_0_24 = {
+    labels: label_PB_24,
+    datasets: [
+      {
+        data: datasetChart("gizi"),
+        pointBackgroundColor: "black",
+        borderColor: "black",
+        type: "scatter",
+        showLine: false,
+        pointRadius: getPointRadius,
+        label: "Data Anak",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD3neg),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -3",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD2neg),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -2",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD1neg),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD -1",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.median),
+        borderColor: "rgb(154, 255, 136)",
+        backgroundColor: "rgba(0, 255, 30, 0.5)",
+        type: "line",
+        label: "Median",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD1pos),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD +1",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD2pos),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +2",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan24Bulan.map((data) => data.SD3pos),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +3",
+      },
+    ],
+  };
+
+  const dataChartPerempuanGizi_25_60 = {
+    labels: label_PB_60,
+    datasets: [
+      {
+        data: datasetChart("gizi"),
+        pointBackgroundColor: "black",
+        borderColor: "black",
+        type: "scatter",
+        showLine: false,
+        pointRadius: getPointRadius,
+        label: "Data Anak",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD3neg),
+        borderColor: "rgb(255, 0, 55)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -3",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD2neg),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD -2",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD1neg),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD -1",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.median),
+        borderColor: "rgb(154, 255, 136)",
+        backgroundColor: "rgba(0, 255, 30, 0.5)",
+        type: "line",
+        label: "Median",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD1pos),
+        borderColor: "rgb(234, 255, 0)",
+        backgroundColor: "rgba(238, 255, 0, 0.5)",
+        type: "line",
+        label: "SD +1",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD2pos),
+        borderColor: "rgb(255, 137, 163)",
+        backgroundColor: "rgba(255, 0, 55, 0.5)",
+        type: "line",
+        label: "SD +2",
+      },
+      {
+        data: dataBeratTinggiBadanPerempuan60Bulan.map((data) => data.SD3pos),
         borderColor: "rgb(255, 0, 55)",
         backgroundColor: "rgba(255, 0, 55, 0.5)",
         type: "line",
@@ -679,6 +1001,61 @@ export default function DetailPosyandu() {
     },
   };
 
+  const optionsGizi = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        title: {
+          display: true,
+          text: "Berat Badan (kg)",
+          font: { size: 14 },
+        },
+        ticks: {
+          font: { size: 12 },
+          precision: 1,
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Panjang Badan (cm)",
+          font: { size: 14 },
+        },
+        ticks: {
+          maxTicksLimit: 61,
+          font: { size: 12 },
+        },
+        min: 45,
+        max: 110,
+      },
+    },
+    elements: {
+      point: {
+        radius: 0,
+        pointStyle: "circle",
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        enabled: true,
+        mode: "nearest",
+        intersect: false,
+        callbacks: {
+          label: (context) =>
+            `Berat: ${context.parsed.y} kg, Tinggi: ${context.parsed.x} cm`,
+        },
+      },
+      title: {
+        display: true,
+        text: "Berat Badan berdasarkan Panjang Badan",
+        font: { size: 16 },
+        padding: { top: 10, bottom: 20 },
+      },
+    },
+  };
+
   useEffect(() => {
     function fetchDataPerkembanganAnak() {
       if (user?.user?.role !== "ORANG_TUA") {
@@ -693,6 +1070,7 @@ export default function DetailPosyandu() {
             const sortedData = response.data.data.sort((a, b) =>
               a.date.localeCompare(b.date)
             );
+            console.log(sortedData);
             setData(sortedData);
             setIsLoading(false);
           })
@@ -1013,23 +1391,44 @@ export default function DetailPosyandu() {
           </Col>
           <Col className="flex justify-center items-center flex-col md:flex-row mt-8 gap-3">
             <button
-              className="button_detail"
+              className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+                activeContent === "Content 4"
+                  ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                  : ""
+              }`}
               onClick={() => handleButtonClick("Content 1")}
             >
               Berat Badan
             </button>
             <button
-              className="button_detail"
+              className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+                activeContent === "Content 4"
+                  ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                  : ""
+              }`}
               onClick={() => handleButtonClick("Content 2")}
             >
-              Tinggi badan
+              Tinggi Badan
             </button>
             <button
-              className="button_detail"
-              style={{ width: "190px" }}
+              className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+                activeContent === "Content 4"
+                  ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                  : ""
+              }`}
               onClick={() => handleButtonClick("Content 3")}
             >
-              Lingkar kepala
+              Lingkar Kepala
+            </button>
+            <button
+              className={`button_detail text-sm sm:text-base px-4 py-2 rounded-lg ${
+                activeContent === "Content 4"
+                  ? "bg-blue-500 shadow-[0px_3px_2px_#3b82f6,_0px_3px_5px_#000]"
+                  : ""
+              }`}
+              onClick={() => handleButtonClick("Content 4")}
+            >
+              Gizi
             </button>
           </Col>
 
@@ -1082,6 +1481,42 @@ export default function DetailPosyandu() {
                       : dataChartPerempuanLK
                   }
                   options={optionsLK}
+                />
+              </div>
+            </Col>
+          )}
+
+          {activeContent === "Content 4" && (
+            <Col
+              className="chart-container w-full mt-8 p-2 sm:p-4 border-2 border-gray-300 rounded-lg"
+              span={24}
+            >
+              <div className="w-full min-h-[500px] sm:min-h-[700px]">
+                <Line
+                  data={
+                    dataAnak.gender === "LAKI_LAKI"
+                      ? moment().diff(
+                          moment(dataAnak.tanggal_lahir),
+                          "month"
+                        ) >= 0 &&
+                        moment().diff(
+                          moment(dataAnak.tanggal_lahir),
+                          "month"
+                        ) <= 24
+                        ? dataChartPriaGizi_0_24
+                        : dataChartPriaGizi_25_60
+                      : moment().diff(
+                          moment(dataAnak.tanggal_lahir),
+                          "month"
+                        ) >= 0 &&
+                        moment().diff(
+                          moment(dataAnak.tanggal_lahir),
+                          "month"
+                        ) <= 24
+                      ? dataChartPerempuanGizi_0_24
+                      : dataChartPerempuanGizi_25_60
+                  }
+                  options={optionsGizi}
                 />
               </div>
             </Col>
