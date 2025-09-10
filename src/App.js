@@ -15,7 +15,6 @@ import PosyanduDashboard from "./pages/Posyandu";
 import DetailPosyandu from "./pages/Posyandu/DetailPosyandu";
 import DashboardLayout from "./components/layout/Dashboard/DashboardLayout";
 import RequireAuth from "./utilities/RequireAuth";
-import LandingPageAdmin from "./pages/Admin/index";
 import DesaPage from "./pages/Admin/Desa/DesaPage";
 import InputPosyandu from "./pages/AdminDashboard/InputPosyandu";
 import RegisterKaderPosyandu from "./pages/AdminDashboard/RegisterKaderPosyandu";
@@ -154,8 +153,6 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      {/* Optional: Add React Query Devtools for debugging */}
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 }

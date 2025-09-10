@@ -1,10 +1,15 @@
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useMemo } from "react";
 
 const useAuth = (expectedRole) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const user = (() => {
+  // Define public routes that don't require authentication
+  const publicRoutes = ["/sign-in", "/"];
+
+  // Compute user data with useMemo to avoid recalculation
+  const user = useMemo(() => {
     try {
       if (typeof window !== "undefined") {
         const loginDataStr = localStorage.getItem("login_data");
@@ -13,17 +18,27 @@ const useAuth = (expectedRole) => {
         if (loginData?.token?.value && loginData?.user?.role) {
           return loginData;
         }
+        return null;
       }
     } catch (error) {
       console.error("Gagal mem-parsing data login:", error);
+      localStorage.clear(); // Clear corrupted data
     }
     return null;
-  })();
+  }, []); // Empty dependency array since localStorage is read once on mount
 
   useEffect(() => {
+    // Skip authentication for public routes
+    if (publicRoutes.includes(location.pathname)) {
+      return;
+    }
+
     if (!user) {
       localStorage.clear();
-      navigate("/sign-in", { replace: true });
+      navigate("/sign-in", {
+        replace: true,
+        state: { error: "Silakan login terlebih dahulu." },
+      });
     } else {
       const userRole = user.user.role;
 
@@ -38,7 +53,6 @@ const useAuth = (expectedRole) => {
 
       // If an expected role is provided, validate it
       if (expectedRole && userRole !== expectedRole) {
-        // Redirect to the user's role-specific dashboard if role doesn't match
         const redirectPath = roleDashboards[userRole] || "/sign-in";
         navigate(redirectPath, {
           replace: true,
@@ -50,7 +64,7 @@ const useAuth = (expectedRole) => {
         });
       }
     }
-  }, [user, navigate, expectedRole]);
+  }, [user, navigate, expectedRole, location.pathname]);
 
   return user;
 };
