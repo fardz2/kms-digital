@@ -313,6 +313,10 @@ export default function InputPosyandu() {
               }
               pagination={{ pageSize: 5 }}
               rowKey="id"
+              locale={{
+                emptyText: "Tidak ada data Kader Posyandu",
+              }}
+              scroll={{ x: "max-content" }}
             />
           </Col>
         </Row>
