@@ -33,6 +33,11 @@ const useAuth = (expectedRole) => {
       return;
     }
 
+    // Allow ORANG_TUA and TENAGA_KESEHATAN to access /tenaga-kesehatan/detail/:id
+    const isDetailRoute = location.pathname.startsWith(
+      "/tenaga-kesehatan/detail/"
+    );
+
     if (!user) {
       localStorage.clear();
       navigate("/sign-in", {
@@ -53,6 +58,14 @@ const useAuth = (expectedRole) => {
 
       // If an expected role is provided, validate it
       if (expectedRole && userRole !== expectedRole) {
+        // Special case: Allow ORANG_TUA and TENAGA_KESEHATAN for detail route
+        if (
+          isDetailRoute &&
+          (userRole === "ORANG_TUA" || userRole === "TENAGA_KESEHATAN")
+        ) {
+          return; // Allow access
+        }
+
         const redirectPath = roleDashboards[userRole] || "/sign-in";
         navigate(redirectPath, {
           replace: true,

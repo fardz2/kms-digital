@@ -1,9 +1,8 @@
-import { List, Spin, message } from "antd";
+import { List, Spin, Empty, message } from "antd";
 import moment from "moment";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
@@ -13,10 +12,9 @@ import useAuth from "../../hook/useAuth";
 export default function Post() {
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-
   const user = useAuth();
 
-  // Fetch posts using useQuery
+  // Fetch posts using useQuery with fetch API
   const { data: dataPost, isLoading: postsLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
@@ -35,11 +33,17 @@ export default function Post() {
         throw new Error("Invalid user role");
       }
 
-      const response = await axios.get(endpoint);
-      return response.data.data.sort((a, b) => b.time.localeCompare(a.time));
+      // Gunakan fetch API seperti useEffect
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const jsonData = await response.json();
+      return jsonData.data.sort((a, b) => b.time.localeCompare(a.time));
     },
     onError: (err) => {
-      console.error("Error fetching posts:", err);
+      console.error("Post: Error fetching posts:", err);
       messageApi.open({
         type: "error",
         content: err.message || "Gagal mengambil data postingan",
@@ -48,7 +52,7 @@ export default function Post() {
     enabled: !!user?.user?.id && !!user?.user?.role,
   });
 
-  // Map data for the List component
+  // Map data for the List component (hanya jika dataPost ada)
   const data = dataPost?.map((item) => ({
     href: `/tenaga-kesehatan/detail/${item.post_id}`,
     title: item.title,
@@ -71,9 +75,14 @@ export default function Post() {
           {user?.user?.role === "ORANG_TUA" && (
             <button
               className="cssbuttons-io-button"
-              style={{ marginTop: "50px" }}
+              style={{ marginTop: "50px", pointerEvents: "auto", zIndex: 10 }}
               type="button"
-              onClick={() => setIsOpenModalInputPost(true)}
+              onClick={() => {
+                console.log(
+                  "Post: Button clicked, setting isOpenModalInputPost to true"
+                );
+                setIsOpenModalInputPost(true);
+              }}
             >
               Pertanyaan
               <div className="icon">
@@ -97,80 +106,103 @@ export default function Post() {
         </div>
 
         <div className="w-full flex justify-center mt-4 sm:mt-6">
-          {!postsLoading && data && (
+          {!postsLoading && (
             <>
-              <List
-                className="w-full px-4 sm:px-6"
-                itemLayout="vertical"
-                size="large"
-                pagination={{
-                  pageSize: 4,
-                  className: "flex justify-center mt-4",
-                }}
-                dataSource={data}
-                renderItem={(item) => (
-                  <div className="flex bg-gray-50 shadow-lg rounded-2xl my-4 sm:my-5 w-full max-w-[900px] mx-auto">
-                    <div className="flex items-start px-4 py-4 sm:px-6 sm:py-6 w-full">
-                      <div className="w-full">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mt-1">
-                            <Link to={item.href}>{item.title}</Link>
-                          </h2>
-                        </div>
-                        <p className="text-gray-800 text-sm sm:text-base mt-1">
-                          {item.description} (
-                          <span className="text-blue-600">
-                            {item.role === "ORANG_TUA"
-                              ? "orang tua"
-                              : "tenaga kesehatan"}
-                          </span>
-                          )
-                        </p>
-                        <div className="flex justify-between items-center">
-                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
-                            {item.nama_posyandu}
-                          </p>
-                        </div>
-                        <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
-                          {item.content}
-                        </p>
-                        <Link to={item.href}>
-                          <button className="cta mt-3 sm:mt-4">
-                            <span>Jawab</span>
-                            <svg viewBox="0 0 13 10" height="10px" width="15px">
-                              <path d="M1,5 L11,5"></path>
-                              <polyline points="8 1 12 5 8 9"></polyline>
-                            </svg>
-                          </button>
-                        </Link>
-                        {item.jawaban.length > 0 && (
-                          <div className="mt-2 p-3 bg-blue-50 rounded-xl">
-                            <p className="text-sm font-semibold mb-1 text-gray-800">
-                              Jawaban:
-                            </p>
-                            {item.jawaban.map((j, idx) => (
-                              <div
-                                key={idx}
-                                className="text-sm text-gray-700 border-b border-gray-200 pb-2 mb-2"
-                              >
-                                <p>
-                                  <strong>{j.nama}</strong>: {j.content}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {moment(j.waktu).format("DD MMM YYYY HH:mm")}
-                                </p>
-                              </div>
-                            ))}
+              {!dataPost || dataPost.length === 0 ? (
+                <div className="w-full max-w-[900px] mx-auto text-center py-12">
+                  <Empty
+                    description={
+                      <span className="text-gray-600 text-base">Not found</span>
+                    }
+                  />
+                  <p className="mt-4 text-gray-500 text-sm">
+                    Tidak ada postingan yang ditemukan.
+                  </p>
+                </div>
+              ) : (
+                <List
+                  className="w-full px-4 sm:px-6"
+                  itemLayout="vertical"
+                  size="large"
+                  pagination={{
+                    pageSize: 4,
+                    className: "flex justify-center mt-4",
+                  }}
+                  dataSource={data}
+                  renderItem={(item) => (
+                    <div className="flex bg-gray-50 shadow-lg rounded-2xl my-4 sm:my-5 w-full max-w-[900px] mx-auto">
+                      <div className="flex items-start px-4 py-4 sm:px-6 sm:py-6 w-full">
+                        <div className="w-full">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mt-1">
+                              <Link to={item.href}>{item.title}</Link>
+                            </h2>
                           </div>
-                        )}
+                          <p className="text-gray-800 text-sm sm:text-base mt-1">
+                            {item.description} (
+                            <span className="text-blue-600">
+                              {item.role === "ORANG_TUA"
+                                ? "orang tua"
+                                : "tenaga kesehatan"}
+                            </span>
+                            )
+                          </p>
+                          <div className="flex justify-between items-center">
+                            <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                              {item.nama_posyandu}
+                            </p>
+                          </div>
+                          <p className="mt-2 sm:mt-3 text-gray-700 text-xs sm:text-sm">
+                            {item.content}
+                          </p>
+                          <Link to={item.href}>
+                            <button className="cta mt-3 sm:mt-4">
+                              <span>Jawab</span>
+                              <svg
+                                viewBox="0 0 13 10"
+                                height="10px"
+                                width="15px"
+                              >
+                                <path d="M1,5 L11,5"></path>
+                                <polyline points="8 1 12 5 8 9"></polyline>
+                              </svg>
+                            </button>
+                          </Link>
+                          {item.jawaban.length > 0 && (
+                            <div className="mt-2 p-3 bg-blue-50 rounded-xl">
+                              <p className="text-sm font-semibold mb-1 text-gray-800">
+                                Jawaban:
+                              </p>
+                              {item.jawaban.map((j, idx) => (
+                                <div
+                                  key={idx}
+                                  className="text-sm text-gray-700 border-b border-gray-200 pb-2 mb-2"
+                                >
+                                  <p>
+                                    <strong>{j.nama}</strong>: {j.content}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {moment(j.waktu).format(
+                                      "DD MMM YYYY HH:mm"
+                                    )}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              />
+                  )}
+                />
+              )}
               <FormInputPost
+                key={isOpenModalInputPost.toString()} // Force re-render on state change
                 isOpen={isOpenModalInputPost}
-                onCancel={() => setIsOpenModalInputPost(false)}
+                onCancel={() => {
+                  console.log("Post: Closing modal");
+                  setIsOpenModalInputPost(false);
+                }}
               />
             </>
           )}

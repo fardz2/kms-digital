@@ -2,23 +2,29 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Modal, Row, Col, Input } from "antd";
 import { message } from "antd";
 import useAuth from "../../../hook/useAuth";
+
 export default function FormInputPost({ isOpen, onCancel }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const queryClient = useQueryClient();
-
   const user = useAuth();
+
+  // Log for debugging
+  console.log("FormInputPost: isOpen:", isOpen, "User:", user);
 
   // Mutation for creating a new post
   const createPostMutation = useMutation({
     mutationFn: async (values) => {
+      if (!user?.token?.value || !user?.user?.id) {
+        throw new Error("User authentication data missing");
+      }
       const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/post`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token?.value}`,
+            Authorization: `Bearer ${user.token.value}`,
           },
           body: JSON.stringify({
             user_id: user.user.id,
@@ -40,6 +46,7 @@ export default function FormInputPost({ isOpen, onCancel }) {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
     onError: (err) => {
+      console.error("FormInputPost: Error creating post:", err);
       messageApi.open({
         type: "error",
         content: err.message || "Gagal menyimpan data postingan",
@@ -51,13 +58,14 @@ export default function FormInputPost({ isOpen, onCancel }) {
   });
 
   const onOK = () => {
+    console.log("FormInputPost: Submitting form");
     form
       .validateFields()
       .then((values) => {
         createPostMutation.mutate(values);
       })
       .catch((info) => {
-        console.log("Validate Failed:", info);
+        console.log("FormInputPost: Validation failed:", info);
       });
   };
 
@@ -65,7 +73,7 @@ export default function FormInputPost({ isOpen, onCancel }) {
     <>
       {contextHolder}
       <Modal
-        open={isOpen}
+        visible={isOpen} // Changed to visible for Ant Design < v4.17 compatibility
         onCancel={onCancel}
         title="Input Pertanyaan"
         footer={[
