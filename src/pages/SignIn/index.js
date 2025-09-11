@@ -109,15 +109,21 @@ export default function SignIn(props) {
     onSuccess: (data) => {
       const role_user = data.data.user.role;
       const user_status = data.data.user.status;
-      console.log(user_status);
       // Validasi status pengguna
       if (user_status === 0) {
-        messageApi.open({
-          type: "error",
-          content:
+        const roleMessages = {
+          ORANG_TUA:
+            "Akun Anda belum di-approve. Silakan tunggu persetujuan kader posyandu.",
+          KADER_POSYANDU:
             "Akun Anda belum di-approve. Silakan tunggu persetujuan admin.",
-        });
-        return;
+        };
+        if (roleMessages[role_user]) {
+          messageApi.open({
+            type: "error",
+            content: roleMessages[role_user],
+          });
+          return;
+        }
       }
 
       // Validasi role pengguna
