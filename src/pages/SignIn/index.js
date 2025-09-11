@@ -109,9 +109,9 @@ export default function SignIn(props) {
     onSuccess: (data) => {
       const role_user = data.data.user.role;
       const user_status = data.data.user.status;
-
+      console.log(user_status);
       // Validasi status pengguna
-      if (user_status === "0") {
+      if (user_status === 0) {
         messageApi.open({
           type: "error",
           content:
@@ -130,8 +130,6 @@ export default function SignIn(props) {
         });
         return;
       }
-
-      // Jika status dan role valid, lanjutkan proses login
       messageApi.open({
         type: "success",
         content: "Berhasil Login",

@@ -194,6 +194,7 @@ const Sidebar = ({ showSidebar, isMobile, closeSidebar }) => {
             onClick={() => {
               navigate("/");
               localStorage.removeItem("login_data");
+              messageApi.success("Berhasil logout");
               if (isMobile) closeSidebar();
             }}
           >

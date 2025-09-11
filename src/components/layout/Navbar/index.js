@@ -139,6 +139,7 @@ export default function NavbarComp(props) {
 
   const handleLogout = () => {
     localStorage.removeItem("login_data");
+    messageApi.success("Berhasil logout");
     navigate("/");
   };
 

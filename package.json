@@ -1,6 +1,7 @@
 {
   "name": "gizi-balita-frontend",
   "version": "0.1.0",
+  "homepage": "https://kmslebakwangi.com",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
