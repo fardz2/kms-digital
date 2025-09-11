@@ -1208,7 +1208,7 @@ export default function DetailPosyandu() {
         Header: "Status - Gizi",
         accessor: "statusGizi",
         Cell: ({ row }) => {
-          const statusGizi = row.original.statistik?.gizi;
+          const statusGizi = row.original.status_gizi;
           return <span>{statusGizi || "-"}</span>;
         },
       },

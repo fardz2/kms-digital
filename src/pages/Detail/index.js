@@ -98,6 +98,7 @@ export default function Detail() {
       if (!response.ok)
         throw new Error("Gagal mengambil data perkembangan anak");
       const data = await response.json();
+      console.log(data);
       return data.data.sort((a, b) => a.date.localeCompare(b.date));
     },
     onError: (err) => {
@@ -1137,7 +1138,7 @@ export default function Detail() {
     {
       title: "Status - Gizi",
       key: "statusGizi",
-      dataIndex: ["statistik", "gizi"],
+      dataIndex: ["status_gizi"],
     },
   ];
 

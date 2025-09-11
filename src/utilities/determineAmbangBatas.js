@@ -93,4 +93,3 @@ export const determineAmbangBatasPBBB = (
     return zScoreMinusOneSD;
   }
 };
-
