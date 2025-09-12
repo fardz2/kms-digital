@@ -18,6 +18,8 @@ export default function InputPosyandu() {
   const [messageApi, contextHolder] = message.useMessage();
   const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState("add");
+  const [selectedPosyandu, setSelectedPosyandu] = useState(null);
   const queryClient = useQueryClient();
 
   // Fetch desa data using useQuery
@@ -58,6 +60,80 @@ export default function InputPosyandu() {
     },
   });
 
+  // Mutation for creating a new posyandu
+  const createPosyanduMutation = useMutation({
+    mutationFn: async (values) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id_desa: values.desa,
+            nama: values.posyandu,
+            alamat: values.alamat,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Data gagal tersimpan");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Posyandu berhasil disimpan",
+      });
+      queryClient.invalidateQueries(["posyandu"]);
+      form.resetFields();
+      setIsModalVisible(false);
+      setModalMode("add");
+      setSelectedPosyandu(null);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Data gagal tersimpan",
+      });
+    },
+  });
+
+  // Mutation for updating a posyandu
+  const updatePosyanduMutation = useMutation({
+    mutationFn: async ({ id, values }) => {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/posyandu/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id_desa: values.desa,
+            nama: values.posyandu,
+            alamat: values.alamat,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Gagal memperbarui posyandu");
+      return response.json();
+    },
+    onSuccess: () => {
+      messageApi.open({
+        type: "success",
+        content: "Posyandu berhasil diperbarui",
+      });
+      queryClient.invalidateQueries(["posyandu"]);
+      form.resetFields();
+      setIsModalVisible(false);
+      setModalMode("add");
+      setSelectedPosyandu(null);
+    },
+    onError: (err) => {
+      messageApi.open({
+        type: "error",
+        content: err.message || "Gagal memperbarui posyandu",
+      });
+    },
+  });
+
   // Mutation for deleting a posyandu
   const deletePosyanduMutation = useMutation({
     mutationFn: async (id) => {
@@ -85,41 +161,6 @@ export default function InputPosyandu() {
     },
   });
 
-  // Mutation for creating a new posyandu
-  const createPosyanduMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id_desa: values.desa,
-            nama: values.posyandu,
-            alamat: values.alamat,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Data gagal tersimpan");
-      return response.json();
-    },
-    onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Posyandu berhasil disimpan",
-      });
-      queryClient.invalidateQueries(["posyandu"]);
-      form.resetFields();
-      setIsModalVisible(false);
-    },
-    onError: (err) => {
-      messageApi.open({
-        type: "error",
-        content: err.message || "Data gagal tersimpan",
-      });
-    },
-  });
-
   const showDeleteConfirm = (id, nama) => {
     Modal.confirm({
       title: "Konfirmasi Hapus",
@@ -134,6 +175,17 @@ export default function InputPosyandu() {
         console.log("Hapus dibatalkan");
       },
     });
+  };
+
+  const handleEdit = (record) => {
+    setModalMode("edit");
+    setSelectedPosyandu(record);
+    form.setFieldsValue({
+      desa: record.id_desa, // Use id_desa instead of desa?.id
+      posyandu: record.nama,
+      alamat: record.alamat,
+    });
+    setIsModalVisible(true);
   };
 
   const columns = [
@@ -155,20 +207,44 @@ export default function InputPosyandu() {
       title: "Action",
       key: "action",
       render: (_, record) => (
-        <Button
-          onClick={() => showDeleteConfirm(record.id, record.nama)}
-          type="dashed"
-          danger
-          disabled={deletePosyanduMutation.isPending}
-        >
-          Delete
-        </Button>
+        <div>
+          <Button
+            type="default"
+            size="small"
+            onClick={() => handleEdit(record)}
+            style={{ marginRight: 8 }}
+            disabled={
+              createPosyanduMutation.isPending ||
+              updatePosyanduMutation.isPending ||
+              deletePosyanduMutation.isPending
+            }
+          >
+            Edit
+          </Button>
+          <Button
+            type="dashed"
+            danger
+            size="small"
+            onClick={() => showDeleteConfirm(record.id, record.nama)}
+            disabled={
+              createPosyanduMutation.isPending ||
+              updatePosyanduMutation.isPending ||
+              deletePosyanduMutation.isPending
+            }
+          >
+            Delete
+          </Button>
+        </div>
       ),
     },
   ];
 
   const onFinish = (values) => {
-    createPosyanduMutation.mutate(values);
+    if (modalMode === "add") {
+      createPosyanduMutation.mutate(values);
+    } else if (modalMode === "edit" && selectedPosyandu) {
+      updatePosyanduMutation.mutate({ id: selectedPosyandu.id, values });
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -176,11 +252,16 @@ export default function InputPosyandu() {
   };
 
   const showModal = () => {
+    setModalMode("add");
+    setSelectedPosyandu(null);
+    form.resetFields();
     setIsModalVisible(true);
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
+    setModalMode("add");
+    setSelectedPosyandu(null);
     form.resetFields();
   };
 
@@ -201,12 +282,16 @@ export default function InputPosyandu() {
               type="primary"
               onClick={showModal}
               style={{ marginBottom: 16 }}
-              disabled={createPosyanduMutation.isPending}
+              disabled={
+                createPosyanduMutation.isPending ||
+                updatePosyanduMutation.isPending ||
+                deletePosyanduMutation.isPending
+              }
             >
               Tambah Posyandu
             </Button>
             <Modal
-              title="Tambah Posyandu"
+              title={modalMode === "add" ? "Tambah Posyandu" : "Edit Posyandu"}
               open={isModalVisible}
               onCancel={handleCancel}
               footer={null}
@@ -233,6 +318,7 @@ export default function InputPosyandu() {
                     listHeight={100}
                     optionFilterProp="children"
                     showSearch
+                    placeholder="Pilih Desa"
                     disabled={desaLoading}
                   >
                     {dataDesa &&
@@ -274,14 +360,20 @@ export default function InputPosyandu() {
                   <Button
                     type="primary"
                     htmlType="submit"
-                    disabled={createPosyanduMutation.isPending}
+                    disabled={
+                      createPosyanduMutation.isPending ||
+                      updatePosyanduMutation.isPending
+                    }
                   >
                     Simpan
                   </Button>
                   <Button
                     style={{ marginLeft: 8 }}
                     onClick={handleCancel}
-                    disabled={createPosyanduMutation.isPending}
+                    disabled={
+                      createPosyanduMutation.isPending ||
+                      updatePosyanduMutation.isPending
+                    }
                   >
                     Batal
                   </Button>
@@ -309,12 +401,13 @@ export default function InputPosyandu() {
               loading={
                 posyanduLoading ||
                 createPosyanduMutation.isPending ||
+                updatePosyanduMutation.isPending ||
                 deletePosyanduMutation.isPending
               }
               pagination={{ pageSize: 5 }}
               rowKey="id"
               locale={{
-                emptyText: "Tidak ada data Kader Posyandu",
+                emptyText: "Tidak ada data Posyandu",
               }}
               scroll={{ x: "max-content" }}
             />
