@@ -10,11 +10,13 @@
 
 ## 1. Latar Belakang
 
-Setelah Plan 1-5 selesai, aplikasi sudah punya dashboard kader dengan beranda + daftar balita + detail + laporan + form slider. Tetapi konteks pemakaian aplikasi ternyata berbeda dari asumsi awal:
+Setelah Plan 1-5 selesai, aplikasi sudah punya dashboard kader dengan beranda + daftar balita + detail + laporan + form slider. Tetapi struktur navigasi masih menambah friction yang tidak perlu:
 
-> **Kader hanya buka aplikasi saat hari posyandu** (1x sebulan), bukan rutin harian.
+- **Beranda → card "Daftar Balita" → daftar → tap balita → halaman detail → tombol "Ukur"** = 4-5 tap untuk satu balita
+- Form pengukuran default dari angka statis (8kg) walaupun balita tsb bulan lalu 11kg — kader harus geser banyak tiap kali
+- Status balita (sudah/belum diukur bulan ini, perlu perhatian) tidak visible di daftar — kader tidak tahu progress tanpa cek satu per satu
 
-Dengan konteks ini, struktur "beranda → card → daftar balita → detail → tombol ukur" = 4-5 tap per balita, dikalikan 25 balita per posyandu = ratusan tap total. Beranda kader (`/kader/beranda`) juga tidak memberikan nilai signifikan karena pengguna langsung tahu tujuannya: input data balita.
+Inti masalah: **kader butuh fokus input, bukan navigasi.** Seberapa sering kader pakai aplikasi (sekali sebulan, sekali seminggu, visit rumah) tidak mengubah kebutuhan ini — yang penting saat kader buka aplikasi, satu layar cukup.
 
 ## 2. Tujuan
 
@@ -92,6 +94,8 @@ Dengan konteks ini, struktur "beranda → card → daftar balita → detail → 
 - `⚪` abu — balita belum diukur bulan berjalan
 
 Sort order default: ⚠️ di atas, lalu ⚪, lalu ✅. Kader langsung lihat prioritas.
+
+**Bulan berjalan** di spec ini = bulan kalender berjalan (`moment().format('YYYY-MM')`). Kalau kader ingin lihat progress bulan lain, bisa ganti via MonthPicker di header (future enhancement, tidak di plan ini).
 
 ### 4.3 CTA per state
 
@@ -309,10 +313,10 @@ const handleUlang = (anak, pengukuranBulanIni) => {
 
 ### 7.3 Safety untuk smart default
 
-- Kalau `latest.date` lebih dari 2 bulan sebelum hari ini (`moment().diff(latest.date, 'month') > 2`) → tidak prefill (data mungkin tidak relevan lagi; anak mungkin sudah berubah signifikan)
-- Tanggal always default ke hari ini (`moment()`), tidak copy dari `latest.date`
-- Catatan always kosong untuk create mode
+- Tanggal always default ke hari ini (`moment()`), tidak copy dari `latest.date`. Kader bisa ubah manual kalau perlu
+- Catatan always kosong untuk create mode (catatan terkait kondisi hari ini, bukan sebelumnya)
 - z_score akan dihitung ulang di form saat user simpan (sudah ada di Plan 2)
+- Prefill diaktifkan untuk semua pengukuran terakhir tanpa batas waktu cutoff. Kalaupun pengukuran terakhir 6 bulan lalu, kader tetap tinggal geser sedikit dari angka itu, bukan dari 0/default statis. Geser sedikit tetap lebih cepat daripada mulai dari nol.
 
 ---
 
@@ -401,7 +405,7 @@ Tidak perlu unit test komponen baru (semua presentational, covered via manual).
 
 | Risiko | Mitigasi |
 |---|---|
-| Smart default bikin kader tidak sadar nilai belum di-update → data salah | Tanggal always hari ini. Highlight visual kalau nilai = bulan lalu (font abu). Kalau >2 bulan lalu, tidak prefill |
+| Smart default bikin kader tidak sadar nilai belum di-update → data salah | Tanggal always hari ini (visual cue bahwa ini sesi baru). Angka slider tetap menonjol di layar sehingga kader pasti review sebelum tap Simpan |
 | 25+ balita paralel queries lambat | Sudah tested di LaporanBulananKader. Kalau lambat, tambah skeleton loading per card |
 | User bookmark `/kader/beranda` | Legacy redirect handles |
 | `PengukuranForm` prop `existing` vs `prefillFrom` ambigu | Precedence eksplisit di code: `existing` wins |
