@@ -1,4 +1,4 @@
-import { BsPersonLinesFill, BsTextRight } from 'react-icons/bs';
+import { BsPersonLinesFill, BsTextRight, BsFileBarGraph } from 'react-icons/bs';
 import { FaPaperPlane } from 'react-icons/fa';
 export const sidebarlink = [
     {
@@ -36,5 +36,15 @@ export const sidebarlink = [
             },
         ],
     },
-    
+    {
+        title: 'Laporan',
+        links: [
+            {
+                title: 'Laporan Keseluruhan',
+                path: 'laporan',
+                icon: BsFileBarGraph,
+            },
+        ],
+    },
+
 ];
