@@ -24,6 +24,19 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Klik card balita → `/kader/balita/:id` render detail existing
 - [ ] Tombol keluar di beranda berfungsi (konfirmasi dialog)
 
+## Pengukuran (Plan 2)
+- [ ] Form pengukuran buka dari DetailAnak, tanggal default hari ini
+- [ ] Slider BB/TB/LK responsive, tombol +/− jalan
+- [ ] Slider LILA hanya muncul untuk balita umur ≥ 7 bulan
+- [ ] Catatan textarea jalan (max 500 char)
+- [ ] Status Gizi preview muncul live saat semua terisi
+- [ ] Submit create pengukuran baru → toast sukses → riwayat bertambah
+- [ ] Edit pengukuran existing pre-loads nilai correctly
+- [ ] Delete pengukuran dengan konfirmasi dialog
+- [ ] 4 tab chart (BB/TB/LK/Gizi) switch dengan benar
+- [ ] Chart Z-Score menampilkan data point balita (titik hitam) di atas band WHO
+- [ ] Payload POST/PUT include `lila` dan `catatan` (null jika kosong)
+
 ## Orang Tua (legacy pages, new routes)
 - [ ] `/orangtua/balita` render dashboard lama
 - [ ] `/orangtua/forum`, `/orangtua/forum/saya`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan
