@@ -113,7 +113,7 @@ export default function LaporanBulananKader() {
             <Card title="Sebaran Status Gizi" style={{ marginBottom: 'var(--space-lg)' }}>
               <StatusDistribution
                 distribusi={laporan.distribusi}
-                total={laporan.sudahDiukur}
+                total={Object.values(laporan.distribusi).reduce((a, b) => a + b, 0)}
               />
             </Card>
 
