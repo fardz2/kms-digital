@@ -35,8 +35,6 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/masuk" element={<LoginPortal />} />
       <Route path="/sign-up" element={<SignUp />} />
-      <Route path="/artikel" element={<ArtikelList />} />
-      <Route path="/artikel/:id" element={<ArtikelDetailPage />} />
 
       {/* Legacy redirects */}
       {LEGACY_REDIRECTS.map(({ from, to }) => (
@@ -82,6 +80,18 @@ export default function AppRoutes() {
         <Route path="/tenkes/beranda" element={<BerandaTenkes />} />
         <Route path="/tenkes/forum" element={<Post />} />
         <Route path="/tenkes/balita/:id" element={<DetailForum />} />
+      </Route>
+
+      {/* Artikel (accessible by any authenticated role) */}
+      <Route
+        element={
+          <RequireRole
+            allow={['ORANG_TUA', 'KADER_POSYANDU', 'TENAGA_KESEHATAN', 'DESA', 'ADMIN']}
+          />
+        }
+      >
+        <Route path="/artikel" element={<ArtikelList />} />
+        <Route path="/artikel/:id" element={<ArtikelDetailPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

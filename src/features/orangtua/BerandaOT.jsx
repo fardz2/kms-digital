@@ -152,8 +152,10 @@ export default function BerandaOT() {
 
       <FormInputDataAnak
         isOpen={formOpen}
-        onCancel={() => setFormOpen(false)}
-        fetch={() => refetch()}
+        onCancel={() => {
+          setFormOpen(false);
+          refetch();
+        }}
       />
     </AppShell>
   );
