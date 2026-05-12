@@ -1,7 +1,7 @@
 # KMS Digital — Simplify & Redesign Spec
 
 **Tanggal:** 2026-05-12
-**Status:** Draft — menunggu review user
+**Status:** Phase 0–2 DONE (Plan 1 implemented). Phase 3–9 pending.
 **Repo:** kms-digital (kmslebakwangi.com)
 **Stack:** React 18 (CRA) + Ant Design v4 + Bootstrap + Tailwind + TanStack Query v5
 
@@ -686,17 +686,18 @@ Fallback jika endpoint belum ada: frontend aggregate di client dari `/api/posyan
 
 ## 14. Testing Strategy
 
-Project tidak punya test suite. **Tidak menambah test framework** karena:
-- User frontend-only freelance, budget waktu terbatas
-- Setup Vitest/Jest tidak sepadan untuk scope ini
+Project tidak punya test framework sebelumnya. **Plan 1 menambah test via Jest + React Testing Library** (sudah bundled dengan Create React App — zero install).
 
-Quality gate alternatif:
-- Manual regression checklist di `docs/testing-checklist.md` (dijalankan tiap phase selesai): flow login → dashboard → input pengukuran → chart → export laporan
+Saat ini (Plan 1):
+- 4 test suites, 30 tests untuk logic kritis: session storage, query key factory, role mapping, legacy redirects
+- Jalankan: `npm test -- --watchAll=false`
+- Coverage fokus di pure logic (tidak test component render — dilanjutkan di plan berikutnya sesuai kebutuhan)
+
+Quality gate kombinasi:
+- Automated unit test (Jest) untuk logic murni
+- Manual regression checklist di `docs/testing-checklist.md` untuk flow end-to-end
 - ESLint config existing (`react-app`, `react-app/jest`) tetap
-- JSDoc untuk props penting di komponen UI reusable
 - Preview staging sebelum merge (jika tersedia)
-
-Kalau user minta test nanti: Vitest + React Testing Library.
 
 ---
 
