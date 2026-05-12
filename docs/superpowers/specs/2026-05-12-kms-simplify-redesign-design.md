@@ -1,7 +1,7 @@
 # KMS Digital — Simplify & Redesign Spec
 
 **Tanggal:** 2026-05-12
-**Status:** Draft — menunggu review user
+**Status:** Phase 0–2 DONE (Plan 1 implemented). Phase 3–9 pending.
 **Repo:** kms-digital (kmslebakwangi.com)
 **Stack:** React 18 (CRA) + Ant Design v4 + Bootstrap + Tailwind + TanStack Query v5
 
