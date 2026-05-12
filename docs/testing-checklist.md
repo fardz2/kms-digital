@@ -2,6 +2,14 @@
 
 Dijalankan sebelum merge tiap PR besar atau rilis ke production.
 
+## Automated Tests
+
+Jalankan sebelum manual testing:
+```bash
+npm test -- --watchAll=false
+```
+Expected: semua test PASS (saat ini: 30 tests di 4 suites).
+
 ## Login & Session
 - [ ] Login semua 5 role via `/masuk` portal sukses
 - [ ] Legacy `/sign-in/*` redirect ke `/masuk` dengan role terisi
