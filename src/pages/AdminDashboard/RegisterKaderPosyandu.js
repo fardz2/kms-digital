@@ -102,6 +102,7 @@ export default function RegisterKaderPosyandu() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token?.value}`,
           },
           body: JSON.stringify({
             nama: values.nama,
@@ -114,7 +115,16 @@ export default function RegisterKaderPosyandu() {
           }),
         }
       );
-      if (!response.ok) throw new Error("Gagal Registrasi");
+      if (!response.ok) {
+        let detail = "";
+        try {
+          const body = await response.json();
+          detail = body?.message ?? body?.error ?? JSON.stringify(body);
+        } catch (e) {
+          detail = response.statusText;
+        }
+        throw new Error(`Gagal Registrasi (${response.status}): ${detail}`);
+      }
       return response.json();
     },
     onSuccess: () => {
