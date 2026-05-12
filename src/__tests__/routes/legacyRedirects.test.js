@@ -38,7 +38,7 @@ describe('legacy redirects', () => {
   test('maps old role dashboards to new paths', () => {
     const map = Object.fromEntries(LEGACY_REDIRECTS.map((e) => [e.from, e.to]));
     expect(map['/dashboard']).toEqual('/orangtua/balita');
-    expect(map['/kader-posyandu/dashboard']).toEqual('/kader/beranda');
+    expect(map['/kader-posyandu/dashboard']).toEqual('/kader/balita');
     expect(map['/desa/dashboard']).toEqual('/desa/beranda');
     expect(map['/tenaga-kesehatan/dashboard']).toEqual('/tenkes/forum');
   });
@@ -47,5 +47,11 @@ describe('legacy redirects', () => {
     const entry = LEGACY_REDIRECTS.find((e) => e.from === '/tenaga-kesehatan/detail/:id');
     expect(entry).toBeDefined();
     expect(entry.to).toEqual('/tenkes/balita/:id');
+  });
+
+  test('includes kader beranda shortcut redirect', () => {
+    const entry = LEGACY_REDIRECTS.find((e) => e.from === '/kader/beranda');
+    expect(entry).toBeDefined();
+    expect(entry.to).toEqual('/kader/balita');
   });
 });

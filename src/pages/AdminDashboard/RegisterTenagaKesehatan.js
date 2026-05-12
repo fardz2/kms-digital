@@ -14,7 +14,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
-import "./Search.css";
 import useAuth from "../../hook/useAuth";
 
 export default function RegisterTenagaKesehatan() {

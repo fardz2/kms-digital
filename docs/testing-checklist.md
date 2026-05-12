@@ -91,6 +91,23 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] `npm test -- --watchAll=false` 63/63 pass
 - [ ] Legacy redirect semua masih jalan (`/sign-in`, `/dashboard`, `/kader-posyandu/dashboard`, dll)
 
+## Mode Posyandu (Plan 6)
+- [ ] Login kader → langsung render `/kader/balita` sebagai ModePosyandu (bukan BerandaKader)
+- [ ] Header pink menampilkan "Halo [nama]", nama posyandu, bulan berjalan
+- [ ] Progress bar menunjukkan rasio `X/Y sudah diukur`
+- [ ] Filter chip 3 state dengan count badge (Semua / Belum / Perhatian)
+- [ ] Search berfungsi real-time
+- [ ] Sort order: ⚠️ > ⚪ > ✅ (perlu perhatian di atas)
+- [ ] Tap "✏️ UKUR" → form pengukuran dengan prefill dari pengukuran terakhir
+- [ ] Tap "Ulang" pada balita sudah diukur → form edit dengan values bulan ini
+- [ ] Tap "Lihat riwayat" → navigate ke `/kader/balita/:id`
+- [ ] Simpan pengukuran → card auto update ke ✅ tanpa reload
+- [ ] DatePicker di form menerima tanggal lampau untuk backdated entries
+- [ ] Sticky footer "+ Tambah Balita Baru" selalu accessible
+- [ ] Menu Laporan + Keluar di header berfungsi
+- [ ] Legacy redirect `/kader/beranda` → `/kader/balita`
+- [ ] Legacy redirect `/kader-posyandu/dashboard` → `/kader/balita`
+
 ## Orang Tua (legacy pages, new routes)
 - [ ] `/orangtua/balita` render dashboard lama
 - [ ] `/orangtua/forum`, `/orangtua/forum/saya`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan
