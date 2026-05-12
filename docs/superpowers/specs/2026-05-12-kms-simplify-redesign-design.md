@@ -1,7 +1,7 @@
 # KMS Digital — Simplify & Redesign Spec
 
 **Tanggal:** 2026-05-12
-**Status:** Phase 0–8 DONE (Plan 1 + Plan 2 + Plan 3 + Plan 4). Phase 9 (cleanup) pending (Plan 5).
+**Status:** DONE — Plan 1 + 2 + 3 + 4 + 5 implemented. Known gaps di Section 18.
 **Repo:** kms-digital (kmslebakwangi.com)
 **Stack:** React 18 (CRA) + Ant Design v4 + Bootstrap + Tailwind + TanStack Query v5
 
@@ -730,3 +730,19 @@ Quality gate kombinasi:
 - **Kader**: relawan posyandu, input data balita
 - **Stunting**: tinggi badan di bawah -2 SD dari median umur (indikator gagal tumbuh kronis)
 - **BB/U, TB/U**: Berat Badan per Umur, Tinggi Badan per Umur (kategori Z-Score WHO)
+
+---
+
+## 18. Known Gaps After Plan 5
+
+File legacy yang **tetap dipakai di production** setelah cleanup:
+
+- **Forum**: `src/pages/Post/`, `src/pages/MyPost/`, `src/pages/DetailForum/` belum di-rewrite. Routed untuk role ORANG_TUA & TENAGA_KESEHATAN. Rewrite ke `features/forum/` menunggu prioritas berikutnya.
+- **Admin CMS**: `src/pages/AdminDashboard/{ArtikelAdmin,InputPosyandu,RegisterKaderPosyandu,RegisterTenagaKesehatan,InputDesa}.js` + `src/pages/Admin/Desa/DesaPage.js` tetap pakai style & hook lama (`useAuth`). UI tidak konsisten dengan design tokens. Rewrite per-feature di iterasi berikutnya.
+- **`src/hook/useAuth.js`** tetap ada karena masih dipakai 8 consumer legacy (Forum pages, Admin CMS, Table component, Navbar, FormInputDataAnak, FormInputPost). Dihapus setelah semua consumer bermigrasi ke `useSession`.
+- **`src/components/layout/Navbar/` + `src/components/form/{FormInputDataAnak,FormInputPost,FormInputDataExcel,FormUpdateDataArtikel}/`** tetap dipakai legacy; belum konsisten dengan design tokens.
+- **Master data anak edit**: Tidak ada UI edit untuk data anak (nama, tanggal lahir) di redesign. Legacy `FormUpdateDataAnak` dihapus karena konsumernya juga dihapus. Jika user perlu edit data anak, tambah `EditAnak.jsx` di `features/anak/`.
+
+## 19. Status Final
+
+Plan 1 + 2 + 3 + 4 + 5 selesai. Semua Phase 0–9 dari spec terpenuhi kecuali gap di Section 18. Redesign siap rilis ke production setelah manual smoke test.
