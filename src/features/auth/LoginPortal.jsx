@@ -6,6 +6,7 @@ import { useToast } from '../../components/ui/Toast';
 import LoginForm from './LoginForm';
 import { useLogin } from '../../queries/useAuthQueries';
 import { useSession } from './useSession';
+import { ROLE_HOME } from './roleHome';
 
 const ROLES = [
   { key: 'ORANG_TUA', label: 'Orang Tua', icon: '\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67' },
@@ -14,14 +15,6 @@ const ROLES = [
   { key: 'DESA', label: 'Pemerintah Desa', icon: '\uD83C\uDFDB\uFE0F' },
   { key: 'ADMIN', label: 'Admin', icon: '\u2699\uFE0F' },
 ];
-
-const ROLE_HOME = {
-  ORANG_TUA: '/orangtua/balita',
-  KADER_POSYANDU: '/kader/beranda',
-  TENAGA_KESEHATAN: '/tenkes/forum',
-  DESA: '/desa/beranda',
-  ADMIN: '/admin/dashboard/desa',
-};
 
 export default function LoginPortal() {
   const [searchParams] = useSearchParams();
@@ -32,7 +25,7 @@ export default function LoginPortal() {
   const [errorText, setErrorText] = useState(null);
   const navigate = useNavigate();
   const toast = useToast();
-  const { isAuthenticated, role: currentRole } = useSession();
+  const { isAuthenticated, role: currentRole, login } = useSession();
   const loginMutation = useLogin();
 
   useEffect(() => {
@@ -60,6 +53,7 @@ export default function LoginPortal() {
             return;
           }
 
+          login(data);
           toast.success('Berhasil masuk');
           navigate(ROLE_HOME[userRole] ?? '/', { replace: true });
         },

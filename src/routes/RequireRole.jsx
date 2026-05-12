@@ -1,14 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSession } from '../features/auth/useSession';
-
-const ROLE_HOME = {
-  ORANG_TUA: '/orangtua/balita',
-  KADER_POSYANDU: '/kader/beranda',
-  TENAGA_KESEHATAN: '/tenkes/forum',
-  DESA: '/desa/beranda',
-  ADMIN: '/admin/dashboard/desa',
-};
+import { ROLE_HOME } from '../features/auth/roleHome';
 
 export default function RequireRole({ allow, children }) {
   const { isAuthenticated, role } = useSession();
