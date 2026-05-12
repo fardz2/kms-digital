@@ -18,6 +18,8 @@ Setelah Plan 1-5 selesai, aplikasi sudah punya dashboard kader dengan beranda + 
 
 Inti masalah: **kader butuh fokus input, bukan navigasi.** Seberapa sering kader pakai aplikasi (sekali sebulan, sekali seminggu, visit rumah) tidak mengubah kebutuhan ini — yang penting saat kader buka aplikasi, satu layar cukup.
 
+**Skenario tambahan: input backdated.** Sebelum aplikasi ini dipakai, kader catat data posyandu di buku tulis tangan. Mereka akan migrasi data lampau ke aplikasi sebagai dokumentasi. Artinya kader sering input data dengan tanggal lampau, bukan selalu hari ini. Spec ini harus mendukung kasus tsb tanpa alur khusus — cukup DatePicker di form menerima tanggal lampau (sudah default di antd).
+
 ## 2. Tujuan
 
 **Goals:**
@@ -313,10 +315,11 @@ const handleUlang = (anak, pengukuranBulanIni) => {
 
 ### 7.3 Safety untuk smart default
 
-- Tanggal always default ke hari ini (`moment()`), tidak copy dari `latest.date`. Kader bisa ubah manual kalau perlu
+- Tanggal always default ke hari ini (`moment()`), tidak copy dari `latest.date`. Kader bisa ubah manual di DatePicker untuk input data backdated (DatePicker antd menerima tanggal lampau secara default, tidak perlu config khusus)
 - Catatan always kosong untuk create mode (catatan terkait kondisi hari ini, bukan sebelumnya)
 - z_score akan dihitung ulang di form saat user simpan (sudah ada di Plan 2)
 - Prefill diaktifkan untuk semua pengukuran terakhir tanpa batas waktu cutoff. Kalaupun pengukuran terakhir 6 bulan lalu, kader tetap tinggal geser sedikit dari angka itu, bukan dari 0/default statis. Geser sedikit tetap lebih cepat daripada mulai dari nol.
+- "Latest" = pengukuran dengan `p.date` terbaru (tanggal pengukuran sebenarnya), bukan `created_at` (kapan di-input). Jadi data backdated yang lebih tua tidak akan menggeser prefill dari data aktual yang lebih baru.
 
 ---
 
