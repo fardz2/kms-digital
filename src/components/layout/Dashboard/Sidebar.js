@@ -7,7 +7,7 @@ import { Modal, Form, Input, Button, message } from "antd";
 import axios from "axios";
 import adminUser from "../../../assets/icon/user.svg";
 import sidebarImage from "../../../assets/img/sidebar.svg";
-import { readSession } from "../../../features/auth/session-storage";
+import { readSession, clearSession } from "../../../features/auth/session-storage";
 
 const Sidebar = ({ showSidebar, isMobile, closeSidebar }) => {
   const { pathname } = useLocation();
@@ -188,10 +188,10 @@ const Sidebar = ({ showSidebar, isMobile, closeSidebar }) => {
           <button
             className="sidebarlink flex items-center pl-6 h-12 hover:bg-rose-400 duration-300 mt-2"
             onClick={() => {
-              navigate("/");
-              localStorage.removeItem("login_data");
+              clearSession();
               messageApi.success("Berhasil logout");
               if (isMobile) closeSidebar();
+              navigate("/masuk", { replace: true });
             }}
           >
             <FiLogOut size={20} color="#b41318" />

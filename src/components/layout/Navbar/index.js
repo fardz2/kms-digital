@@ -7,6 +7,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../../../hook/useAuth";
+import { clearSession } from "../../../features/auth/session-storage";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -138,7 +139,7 @@ export default function NavbarComp(props) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("login_data");
+    clearSession();
     messageApi.success("Berhasil logout");
     navigate("/");
   };
