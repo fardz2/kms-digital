@@ -32,7 +32,7 @@ export default function KelolaAcara() {
         const payload = {
           judul: values.judul,
           deskripsi: values.deskripsi ?? '',
-          tanggal: moment(values.tanggal).format('YYYY-MM-DD'),
+          tanggal_reminder: moment(values.tanggal).format('YYYY-MM-DD'),
         };
         createMutation.mutate(payload, {
           onSuccess: () => {
@@ -63,7 +63,7 @@ export default function KelolaAcara() {
   };
 
   const sorted = [...(reminders ?? [])].sort((a, b) =>
-    (b.tanggal ?? '').localeCompare(a.tanggal ?? '')
+    (b.tanggal_reminder ?? '').localeCompare(a.tanggal_reminder ?? '')
   );
 
   return (
@@ -146,7 +146,9 @@ export default function KelolaAcara() {
                     {acara.judul}
                   </div>
                   <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
-                    {acara.tanggal ? moment(acara.tanggal).format('DD MMMM YYYY') : '-'}
+                    {acara.tanggal_reminder
+                      ? moment(acara.tanggal_reminder).format('DD MMMM YYYY')
+                      : '-'}
                   </div>
                   {acara.deskripsi && (
                     <div style={{ fontSize: 'var(--text-base)', marginTop: 'var(--space-xs)' }}>
