@@ -1,7 +1,7 @@
 # KMS Digital — Simplify & Redesign Spec
 
 **Tanggal:** 2026-05-12
-**Status:** Phase 0–4 DONE (Plan 1 + Plan 2 implemented). Phase 5–9 pending.
+**Status:** Phase 0–4, 7–8 DONE (Plan 1 + Plan 2 + Plan 4). Phase 5–6 pending (Plan 3, blocked by B2). Phase 9 (cleanup) pending.
 **Repo:** kms-digital (kmslebakwangi.com)
 **Stack:** React 18 (CRA) + Ant Design v4 + Bootstrap + Tailwind + TanStack Query v5
 
