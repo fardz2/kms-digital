@@ -104,6 +104,16 @@ const SD_COLORS = {
   SD1: 'rgb(234, 255, 0)',
   MEDIAN: 'rgb(154, 255, 136)',
 };
+const SD_BG = {
+  SD3: 'rgba(255, 0, 55, 0.5)',
+  SD2: 'rgba(255, 0, 55, 0.5)',
+  SD1: 'rgba(238, 255, 0, 0.5)',
+  MEDIAN: 'rgba(0, 255, 30, 0.5)',
+};
+
+function getPointRadius() {
+  return typeof window !== 'undefined' && window.innerWidth < 640 ? 3 : 5;
+}
 
 function buildAgeDatasets(genderRef, dataPoints) {
   return [
@@ -113,36 +123,52 @@ function buildAgeDatasets(genderRef, dataPoints) {
       borderColor: 'black',
       type: 'scatter',
       showLine: false,
-      pointRadius: 5,
+      pointRadius: getPointRadius,
       label: 'Data Anak',
     },
-    { data: genderRef.map((d) => d.SD3neg), borderColor: SD_COLORS.SD3, type: 'line', label: 'SD -3' },
-    { data: genderRef.map((d) => d.SD2neg), borderColor: SD_COLORS.SD2, type: 'line', label: 'SD -2' },
-    { data: genderRef.map((d) => d.SD1neg), borderColor: SD_COLORS.SD1, type: 'line', label: 'SD -1' },
-    { data: genderRef.map((d) => d.median), borderColor: SD_COLORS.MEDIAN, type: 'line', label: 'Median' },
-    { data: genderRef.map((d) => d.SD1pos), borderColor: SD_COLORS.SD1, type: 'line', label: 'SD +1' },
-    { data: genderRef.map((d) => d.SD2pos), borderColor: SD_COLORS.SD2, type: 'line', label: 'SD +2' },
-    { data: genderRef.map((d) => d.SD3pos), borderColor: SD_COLORS.SD3, type: 'line', label: 'SD +3' },
+    { data: genderRef.map((d) => d.SD3neg), borderColor: SD_COLORS.SD3, backgroundColor: SD_BG.SD3, type: 'line', label: 'SD -3' },
+    { data: genderRef.map((d) => d.SD2neg), borderColor: SD_COLORS.SD2, backgroundColor: SD_BG.SD2, type: 'line', label: 'SD -2' },
+    { data: genderRef.map((d) => d.SD1neg), borderColor: SD_COLORS.SD1, backgroundColor: SD_BG.SD1, type: 'line', label: 'SD -1' },
+    { data: genderRef.map((d) => d.median), borderColor: SD_COLORS.MEDIAN, backgroundColor: SD_BG.MEDIAN, type: 'line', label: 'Median' },
+    { data: genderRef.map((d) => d.SD1pos), borderColor: SD_COLORS.SD1, backgroundColor: SD_BG.SD1, type: 'line', label: 'SD +1' },
+    { data: genderRef.map((d) => d.SD2pos), borderColor: SD_COLORS.SD2, backgroundColor: SD_BG.SD2, type: 'line', label: 'SD +2' },
+    { data: genderRef.map((d) => d.SD3pos), borderColor: SD_COLORS.SD3, backgroundColor: SD_BG.SD3, type: 'line', label: 'SD +3' },
   ];
 }
 
-function ageChartOptions(yLabel, unit) {
+function ageChartOptions(yLabel, unit, shortLabel) {
   return {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      y: { title: { display: true, text: `${yLabel} (${unit})` } },
-      x: { title: { display: true, text: 'Umur (Bulan)' }, min: 0, max: 60 },
+      y: {
+        title: { display: true, text: `${yLabel} (${unit})`, font: { size: 14 } },
+        ticks: { font: { size: 12 }, precision: 1 },
+      },
+      x: {
+        title: { display: true, text: 'Umur (Bulan)', font: { size: 14 } },
+        ticks: { maxTicksLimit: 61, font: { size: 12 } },
+        min: 0,
+        max: 60,
+      },
     },
-    elements: { point: { radius: 0 } },
+    elements: { point: { radius: 0, pointStyle: 'circle' } },
     plugins: {
       legend: { display: false },
       tooltip: {
+        enabled: true,
+        mode: 'nearest',
+        intersect: false,
         callbacks: {
-          label: (ctx) => `${yLabel}: ${ctx.parsed.y} ${unit}`,
+          label: (ctx) => `${shortLabel}: ${ctx.parsed.y} ${unit}`,
         },
       },
-      title: { display: true, text: `${yLabel} berdasarkan Umur` },
+      title: {
+        display: true,
+        text: `${yLabel} berdasarkan Umur`,
+        font: { size: 16 },
+        padding: { top: 10, bottom: 20 },
+      },
     },
   };
 }
@@ -192,15 +218,15 @@ export default function ChartWHO({ anak, pengukuran }) {
   const charts = {
     BB: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refBB, dataBB) },
-      options: ageChartOptions('Berat Badan', 'kg'),
+      options: ageChartOptions('Berat Badan', 'kg', 'Berat'),
     },
     TB: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refTB, dataTB) },
-      options: ageChartOptions('Tinggi Badan', 'cm'),
+      options: ageChartOptions('Tinggi Badan', 'cm', 'Tinggi'),
     },
     LK: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refLK, dataLK) },
-      options: ageChartOptions('Lingkar Kepala', 'cm'),
+      options: ageChartOptions('Lingkar Kepala', 'cm', 'Lingkar Kepala'),
     },
     Gizi: {
       data: { labels: pbLabels, datasets: buildAgeDatasets(refGizi, dataGizi) },
@@ -208,18 +234,34 @@ export default function ChartWHO({ anak, pengukuran }) {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: { title: { display: true, text: 'Berat Badan (kg)' } },
-          x: { title: { display: true, text: 'Panjang Badan (cm)' }, min: 45, max: 110 },
+          y: {
+            title: { display: true, text: 'Berat Badan (kg)', font: { size: 14 } },
+            ticks: { font: { size: 12 }, precision: 1 },
+          },
+          x: {
+            title: { display: true, text: 'Panjang Badan (cm)', font: { size: 14 } },
+            ticks: { maxTicksLimit: 61, font: { size: 12 } },
+            min: 45,
+            max: 110,
+          },
         },
-        elements: { point: { radius: 0 } },
+        elements: { point: { radius: 0, pointStyle: 'circle' } },
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: true,
+            mode: 'nearest',
+            intersect: false,
             callbacks: {
               label: (ctx) => `Berat: ${ctx.parsed.y} kg, Tinggi: ${ctx.parsed.x} cm`,
             },
           },
-          title: { display: true, text: 'Berat Badan berdasarkan Panjang Badan' },
+          title: {
+            display: true,
+            text: 'Berat Badan berdasarkan Panjang Badan',
+            font: { size: 16 },
+            padding: { top: 10, bottom: 20 },
+          },
         },
       },
     },
