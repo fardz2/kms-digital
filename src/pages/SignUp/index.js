@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import logo from "../SignIn/GiziBalita_logo.png";
-import background from "../SignIn/login_bg.svg";
+import logo from "./GiziBalita_logo.png";
+import background from "./login_bg.svg";
 
 const BackgroundComponent = () => (
   <div

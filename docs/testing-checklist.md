@@ -84,6 +84,13 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] `/artikel/:id` render ArtikelDetailPage baru
 - [ ] Akses tanpa login (public) masih jalan
 
+## Post-Cleanup (Plan 5)
+- [ ] Tidak ada 404/ReferenceError saat navigate ke semua route
+- [ ] Build size lebih kecil dibanding sebelum cleanup
+- [ ] Tidak ada console error "Cannot resolve module 'xxx'"
+- [ ] `npm test -- --watchAll=false` 63/63 pass
+- [ ] Legacy redirect semua masih jalan (`/sign-in`, `/dashboard`, `/kader-posyandu/dashboard`, dll)
+
 ## Orang Tua (legacy pages, new routes)
 - [ ] `/orangtua/balita` render dashboard lama
 - [ ] `/orangtua/forum`, `/orangtua/forum/saya`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan

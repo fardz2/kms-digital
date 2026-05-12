@@ -1,7 +1,0 @@
-.ant-input-search
-  > .ant-input-group
-  > .ant-input-group-addon:last-child
-  .ant-input-search-button:not(.ant-btn-primary) {
-  color: rgb(0 0 0);
-  width: 62px !important;
-}

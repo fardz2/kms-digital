@@ -4,7 +4,7 @@ import landingPageImage from "../../assets/img/baby-banner.svg";
 import video from "../../assets/video/video_testing.mp4";
 import bannerImage from "../../assets/img/banner_item.svg";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
-import background from "../SignIn/login_bg.svg";
+import background from "./login_bg.svg";
 import NavbarComp from "../../components/layout/Navbar";
 import { Container } from "react-bootstrap";
 import "./landingPage.css"; // Retain for custom button and description-banner styles
