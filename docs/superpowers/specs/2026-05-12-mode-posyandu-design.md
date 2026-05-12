@@ -1,7 +1,7 @@
 # Mode Posyandu — Simplify Kader Flow Spec
 
 **Tanggal:** 2026-05-12
-**Status:** Draft — menunggu review user
+**Status:** DONE — Plan 6 implemented and merged.
 **Repo:** kms-digital (kmslebakwangi.com)
 **Depends on:** Plan 1-5 sudah merged ke staging
 **Stack:** React 18 (CRA) + Ant Design v4 + TanStack Query v5
