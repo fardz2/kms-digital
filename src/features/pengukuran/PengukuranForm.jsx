@@ -23,7 +23,7 @@ const DEFAULTS = {
   catatan: '',
 };
 
-export default function PengukuranForm({ open, onClose, anak, existing }) {
+export default function PengukuranForm({ open, onClose, anak, existing, prefillFrom }) {
   const toast = useToast();
   const createMutation = useCreatePengukuran(anak?.id);
   const updateMutation = useUpdatePengukuran(anak?.id);
@@ -39,14 +39,16 @@ export default function PengukuranForm({ open, onClose, anak, existing }) {
   const [catatan, setCatatan] = useState(DEFAULTS.catatan);
 
   useEffect(() => {
-    if (open && existing) {
-      setTanggal(existing.date ? moment(existing.date) : moment());
-      setBerat(Number(existing.berat) || DEFAULTS.berat);
-      setTinggi(Number(existing.tinggi) || DEFAULTS.tinggi);
-      setLingkarKepala(Number(existing.lingkar_kepala) || DEFAULTS.lingkarKepala);
-      setLila(Number(existing.lila) || DEFAULTS.lila);
-      setCatatan(existing.catatan ?? '');
-    } else if (open) {
+    if (!open) return;
+    const source = existing ?? prefillFrom;
+    if (source) {
+      setTanggal(existing?.date ? moment(existing.date) : moment());
+      setBerat(Number(source.berat) || DEFAULTS.berat);
+      setTinggi(Number(source.tinggi) || DEFAULTS.tinggi);
+      setLingkarKepala(Number(source.lingkar_kepala) || DEFAULTS.lingkarKepala);
+      setLila(Number(source.lila) || DEFAULTS.lila);
+      setCatatan(existing?.catatan ?? '');
+    } else {
       setTanggal(moment());
       setBerat(DEFAULTS.berat);
       setTinggi(DEFAULTS.tinggi);
@@ -54,7 +56,7 @@ export default function PengukuranForm({ open, onClose, anak, existing }) {
       setLila(DEFAULTS.lila);
       setCatatan(DEFAULTS.catatan);
     }
-  }, [open, existing]);
+  }, [open, existing, prefillFrom]);
 
   const umurBulan = useMemo(() => {
     if (!anak?.tanggal_lahir || !tanggal) return null;
