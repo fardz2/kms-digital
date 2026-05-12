@@ -11,4 +11,5 @@ export const LEGACY_REDIRECTS = [
   { from: '/desa/dashboard', to: '/desa/beranda' },
   { from: '/desa/reminder', to: '/desa/acara' },
   { from: '/tenaga-kesehatan/dashboard', to: '/tenkes/forum' },
+  { from: '/tenaga-kesehatan/detail/:id', to: '/tenkes/balita/:id' },
 ];
