@@ -9,12 +9,14 @@ import BerandaOT from '../features/orangtua/BerandaOT';
 import BerandaTenkes from '../features/tenkes/BerandaTenkes';
 import ArtikelList from '../features/artikel/ArtikelList';
 import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
-import LaporanAdminPlaceholder from '../features/admin/LaporanAdminPlaceholder';
+import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
+import LaporanAdmin from '../features/laporan/LaporanAdmin';
+import BerandaDesa from '../features/desa/BerandaDesa';
+import KelolaAcara from '../features/desa/KelolaAcara';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
 // Legacy pages (masih dipakai sampai migrasi selesai)
 import LandingPage from '../pages/LandingPage';
-import Desa from '../pages/Desa/desa';
 import DetailForum from '../pages/DetailForum';
 import SignUp from '../pages/SignUp';
 import Post from '../pages/Post';
@@ -25,7 +27,6 @@ import DesaPage from '../pages/Admin/Desa/DesaPage';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
 import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu';
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
-import InputAcara from '../pages/Desa/input_acara';
 import ArtikelAdmin from '../pages/AdminDashboard/ArtikelAdmin';
 
 export default function AppRoutes() {
@@ -46,6 +47,7 @@ export default function AppRoutes() {
         <Route path="/kader/beranda" element={<BerandaKader />} />
         <Route path="/kader/balita" element={<DaftarAnak />} />
         <Route path="/kader/balita/:id" element={<DetailAnak />} />
+        <Route path="/kader/laporan" element={<LaporanBulananKader />} />
       </Route>
 
       {/* Role: Orang Tua (legacy pages, new routes) */}
@@ -59,8 +61,8 @@ export default function AppRoutes() {
 
       {/* Role: Desa (legacy) */}
       <Route element={<RequireRole allow={['DESA']} />}>
-        <Route path="/desa/beranda" element={<Desa />} />
-        <Route path="/desa/acara" element={<InputAcara />} />
+        <Route path="/desa/beranda" element={<BerandaDesa />} />
+        <Route path="/desa/acara" element={<KelolaAcara />} />
       </Route>
 
       {/* Role: Admin (legacy) */}
@@ -71,7 +73,7 @@ export default function AppRoutes() {
           <Route path="kader-posyandu" element={<RegisterKaderPosyandu />} />
           <Route path="tenaga-kesehatan" element={<RegisterTenkes />} />
           <Route path="artikel" element={<ArtikelAdmin />} />
-          <Route path="laporan" element={<LaporanAdminPlaceholder />} />
+          <Route path="laporan" element={<LaporanAdmin />} />
         </Route>
       </Route>
 
