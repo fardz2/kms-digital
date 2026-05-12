@@ -12,7 +12,6 @@ import {
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
-import "./Search.css";
 import useAuth from "../../hook/useAuth";
 
 export default function RegisterKaderPosyandu() {

@@ -2,7 +2,6 @@ import { Button, Col, Form, Input, message, Row, Table, Modal } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
-import "./Search.css";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
