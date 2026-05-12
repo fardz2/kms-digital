@@ -4,20 +4,19 @@ import LoginPortal from '../features/auth/LoginPortal';
 import RequireRole from './RequireRole';
 import BerandaKader from '../features/kader/BerandaKader';
 import DaftarAnak from '../features/anak/DaftarAnak';
+import DetailAnak from '../features/anak/DetailAnak';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
 // Legacy pages (masih dipakai sampai migrasi selesai)
 import LandingPage from '../pages/LandingPage';
 import Dashboard from '../pages/Dashboard';
 import Desa from '../pages/Desa/desa';
-import Detail from '../pages/Detail';
 import DetailForum from '../pages/DetailForum';
 import SignUp from '../pages/SignUp';
 import Post from '../pages/Post';
 import MyPost from '../pages/MyPost';
 import NotFound from '../pages/NotFound';
 import Artikel from '../pages/Artikel';
-import DetailPosyandu from '../pages/Posyandu/DetailPosyandu';
 import DashboardLayout from '../components/layout/Dashboard/DashboardLayout';
 import DesaPage from '../pages/Admin/Desa/DesaPage';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
@@ -46,7 +45,7 @@ export default function AppRoutes() {
       <Route element={<RequireRole allow={['KADER_POSYANDU']} />}>
         <Route path="/kader/beranda" element={<BerandaKader />} />
         <Route path="/kader/balita" element={<DaftarAnak />} />
-        <Route path="/kader/balita/:id" element={<DetailPosyandu />} />
+        <Route path="/kader/balita/:id" element={<DetailAnak />} />
       </Route>
 
       {/* Role: Orang Tua (legacy pages, new routes) */}
@@ -55,7 +54,7 @@ export default function AppRoutes() {
         <Route path="/orangtua/forum" element={<Post />} />
         <Route path="/orangtua/forum/saya" element={<MyPost />} />
         <Route path="/orangtua/forum/:id" element={<DetailForum />} />
-        <Route path="/orangtua/balita/:id" element={<Detail />} />
+        <Route path="/orangtua/balita/:id" element={<DetailAnak />} />
       </Route>
 
       {/* Role: Desa (legacy) */}
