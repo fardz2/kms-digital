@@ -2,6 +2,8 @@ import { Form, Input, message, Select, Spin } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { readSession } from "../../features/auth/session-storage";
+import { ROLE_HOME } from "../../features/auth/roleHome";
 
 import logo from "./GiziBalita_logo.png";
 import background from "./login_bg.svg";
@@ -22,39 +24,12 @@ export default function SignUp() {
   const { isLoading: authLoading } = useQuery({
     queryKey: ["authCheck"],
     queryFn: () => {
-      let login_data = null;
-      let isAuthenticated = false;
-      let userRole = null;
-
-      try {
-        if (typeof window !== "undefined") {
-          login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
-          isAuthenticated =
-            login_data &&
-            login_data.token &&
-            login_data.user &&
-            login_data.user.role;
-          userRole = isAuthenticated ? login_data.user.role : null;
-        }
-      } catch (error) {
-        console.error("Error parsing login_data:", error);
-        localStorage.removeItem("login_data"); // Clear invalid data
-        isAuthenticated = false;
-      }
+      const session = readSession();
+      const isAuthenticated = !!session?.token?.value && !!session?.user?.role;
+      const userRole = isAuthenticated ? session.user.role : null;
 
       if (isAuthenticated) {
-        const redirectPath =
-          userRole === "ORANG_TUA"
-            ? "/dashboard"
-            : userRole === "KADER_POSYANDU"
-            ? "/kader-posyandu/dashboard"
-            : userRole === "TENAGA_KESEHATAN"
-            ? "/tenaga-kesehatan/dashboard"
-            : userRole === "DESA"
-            ? "/desa/dashboard"
-            : userRole === "ADMIN"
-            ? "/admin/dashboard/desa"
-            : "/";
+        const redirectPath = ROLE_HOME[userRole] ?? "/";
 
         messageApi.open({
           type: "info",

@@ -14,14 +14,11 @@ import React, { useEffect, useState } from "react";
 import './style.css';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { readSession } from "../../../features/auth/session-storage";
 
 export default function FormUpdateDataArtikel(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
   // eslint-disable-next-line
-  const [user, setUser] = useState(login_data);
+  const [user, setUser] = useState(() => readSession());
   const { isOpen, onCancel, fetch, data } = props;
   const [dataKategori, setDataKategori] = useState([]);
   const [form] = Form.useForm();

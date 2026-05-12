@@ -7,6 +7,7 @@ import { Modal, Form, Input, Button, message } from "antd";
 import axios from "axios";
 import adminUser from "../../../assets/icon/user.svg";
 import sidebarImage from "../../../assets/img/sidebar.svg";
+import { readSession } from "../../../features/auth/session-storage";
 
 const Sidebar = ({ showSidebar, isMobile, closeSidebar }) => {
   const { pathname } = useLocation();
@@ -14,12 +15,7 @@ const Sidebar = ({ showSidebar, isMobile, closeSidebar }) => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      return JSON.parse(localStorage.getItem("login_data") || "{}");
-    }
-    return {};
-  });
+  const [user, setUser] = useState(() => readSession() ?? {});
 
   // Fetch profile data when modal opens
   useEffect(() => {

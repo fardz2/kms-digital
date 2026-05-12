@@ -8,6 +8,7 @@ import avatar from "../../assets/icon/user.png";
 import "./forum-style.css";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
 import { message } from "antd";
+import { readSession } from "../../features/auth/session-storage";
 
 export default function DetailForum() {
   const convertToGoodString = (str) => {
@@ -21,11 +22,7 @@ export default function DetailForum() {
   };
 
   let { id } = useParams();
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-  const [user, setUser] = useState(login_data);
+  const [user, setUser] = useState(() => readSession());
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(true);
   const [detailPost, setDetailPost] = useState({});

@@ -6,18 +6,14 @@ import FormInputPost from "../../components/form/FormInputPost";
 import Navbar from "../../components/layout/Navbar";
 import Navigation from "../../components/layout/Navigation";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
+import { readSession } from "../../features/auth/session-storage";
 
 import avatar from "../../assets/icon/user.png";
 
 
 export default function MyPost() {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(`${localStorage.getItem("login_data")}`);
-  }
-
   // eslint-disable-next-line
-  const [user, setUser] = useState(login_data);
+  const [user, setUser] = useState(() => readSession());
   const [isLoading, setIsLoading] = useState(true);
   const [dataPost, setDataPost] = useState([]);
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);

@@ -1,13 +1,10 @@
 import { Col, Form, Input, message, Modal, Row } from "antd";
 import axios from "axios";
 import React, { useState } from "react";
+import { readSession } from "../../../features/auth/session-storage";
 
 export default function FormInputDataExcel(props) {
-  let login_data;
-  if (typeof window !== "undefined") {
-    login_data = JSON.parse(localStorage.getItem("login_data") || "{}");
-  }
-  const [user] = useState(login_data);
+  const [user] = useState(() => readSession() ?? {});
   const { isOpen, onCancel, fetch } = props;
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
