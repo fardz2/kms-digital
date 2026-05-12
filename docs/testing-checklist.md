@@ -54,6 +54,31 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Klik menu → render placeholder "Fitur laporan sedang disiapkan"
 - [ ] Sub-page existing (Desa, Posyandu, Kader, Tenkes, Artikel) tidak regressions
 
+## Laporan (Plan 3)
+
+### Kader
+- [ ] `/kader/laporan` render MonthPicker + 3 StatCard + ProgressBar partisipasi
+- [ ] StatusDistribution menampilkan 4 bar (normal/kurang/stunting/obesitas)
+- [ ] List balita belum diukur menampilkan nama + umur
+- [ ] List perlu perhatian menampilkan nama + status
+- [ ] Ganti bulan → data berubah
+- [ ] Bulan kosong → semua "belum diukur", pesan "🎉"
+
+### Desa
+- [ ] `/desa/beranda` render LaporanDesa berdasarkan statistik-gizi endpoint
+- [ ] StatCard total balita + jumlah posyandu
+- [ ] List progress bar per-posyandu
+- [ ] 3 Card distribusi BB/TB/LK total desa
+
+### Desa Acara
+- [ ] `/desa/acara` form tambah acara (judul + tanggal required, deskripsi optional)
+- [ ] Submit → toast → list refresh
+- [ ] Hapus dengan konfirmasi
+
+### Admin Laporan
+- [ ] `/admin/dashboard/laporan` render LaporanAdmin informasional
+- [ ] Tidak ada error saat akses
+
 ## Artikel Public
 - [ ] `/artikel` render ArtikelList baru (bukan legacy)
 - [ ] `/artikel/:id` render ArtikelDetailPage baru
