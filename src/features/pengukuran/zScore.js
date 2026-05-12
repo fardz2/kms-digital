@@ -76,6 +76,7 @@ export function computeZScoreGizi({
     return null;
   }
   const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
+  if (umur < 0 || umur > 60) return null;
   const pb = roundPbToHalfStep(tinggi);
 
   let dataset;

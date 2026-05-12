@@ -29,7 +29,7 @@ export default function DetailAnak() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  const canEdit = role === 'KADER_POSYANDU' || role === 'ORANG_TUA';
+  const canEdit = role === 'KADER_POSYANDU';
 
   const handleEdit = (item) => {
     setEditing(item);

@@ -19,11 +19,12 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
     z_score_gizi,
   } = pengukuran;
 
+  const toZ = (v) => (v == null || v === '' ? null : Number(v));
   const status = overallStatus({
-    zScoreBB: Number(z_score_berat),
-    zScoreTB: Number(z_score_tinggi),
-    zScoreLK: Number(z_score_lingkar_kepala),
-    zScoreGizi: Number(z_score_gizi),
+    zScoreBB: toZ(z_score_berat),
+    zScoreTB: toZ(z_score_tinggi),
+    zScoreLK: toZ(z_score_lingkar_kepala),
+    zScoreGizi: toZ(z_score_gizi),
   });
 
   return (

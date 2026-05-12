@@ -8,7 +8,7 @@ import StatusBadge from '../../components/ui/StatusBadge';
 import { useToast } from '../../components/ui/Toast';
 import CatatanField from './CatatanField';
 import { computeAllZScores } from './zScore';
-import { overallStatus } from './statusGizi';
+import { overallStatus, STATUS } from './statusGizi';
 import { monthDiff } from '../../utils/monthDiff';
 import {
   useCreatePengukuran,
@@ -75,7 +75,7 @@ export default function PengukuranForm({ open, onClose, anak, existing }) {
     });
   }, [anak, tanggal, berat, tinggi, lingkarKepala]);
 
-  const status = zScores ? overallStatus(zScores) : 'unknown';
+  const status = zScores ? overallStatus(zScores) : STATUS.UNKNOWN;
 
   const handleSubmit = () => {
     const payload = {
