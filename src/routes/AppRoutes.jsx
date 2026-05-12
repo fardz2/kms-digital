@@ -2,8 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPortal from '../features/auth/LoginPortal';
 import RequireRole from './RequireRole';
-import BerandaKader from '../features/kader/BerandaKader';
-import DaftarAnak from '../features/anak/DaftarAnak';
+import ModePosyandu from '../features/kader/ModePosyandu';
 import DetailAnak from '../features/anak/DetailAnak';
 import BerandaOT from '../features/orangtua/BerandaOT';
 import BerandaTenkes from '../features/tenkes/BerandaTenkes';
@@ -44,8 +43,7 @@ export default function AppRoutes() {
 
       {/* Role: Kader Posyandu (NEW) */}
       <Route element={<RequireRole allow={['KADER_POSYANDU']} />}>
-        <Route path="/kader/beranda" element={<BerandaKader />} />
-        <Route path="/kader/balita" element={<DaftarAnak />} />
+        <Route path="/kader/balita" element={<ModePosyandu />} />
         <Route path="/kader/balita/:id" element={<DetailAnak />} />
         <Route path="/kader/laporan" element={<LaporanBulananKader />} />
       </Route>
