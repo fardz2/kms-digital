@@ -1,54 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import moment from 'moment';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
-import { overallStatus, STATUS } from '../pengukuran/statusGizi';
 
-const toZ = (v) => (v == null || v === '' ? null : Number(v));
-
-function classifyBalita(pengukuranList, currentBulan) {
-  const safe = pengukuranList ?? [];
-  const latest = safe
-    .slice()
-    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
-
-  const bulanIni = safe.filter(
-    (p) => moment(p.date).format('YYYY-MM') === currentBulan
-  );
-  const latestBulanIni = bulanIni
-    .slice()
-    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
-
-  const status = latest
-    ? overallStatus({
-        zScoreBB: toZ(latest.z_score_berat),
-        zScoreTB: toZ(latest.z_score_tinggi),
-        zScoreLK: toZ(latest.z_score_lingkar_kepala),
-        zScoreGizi: toZ(latest.z_score_gizi),
-      })
-    : STATUS.UNKNOWN;
-
-  const sudahDiukur = !!latestBulanIni;
-  const perluPerhatian =
-    status !== STATUS.NORMAL && status !== STATUS.UNKNOWN;
-
-  return { latest, latestBulanIni, status, sudahDiukur, perluPerhatian };
-}
-
-export default function BalitaCard({
-  anak,
-  pengukuranList,
-  currentBulan,
-  onUkur,
-  onUlang,
-  onLihat,
-}) {
-  const { latest, latestBulanIni, status, sudahDiukur, perluPerhatian } =
-    useMemo(() => classifyBalita(pengukuranList, currentBulan), [
-      pengukuranList,
-      currentBulan,
-    ]);
+export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
+  const { latest, latestBulanIni, status, sudahDiukur, perluPerhatian } = meta;
 
   const icon = perluPerhatian ? '\u26A0\uFE0F' : sudahDiukur ? '\u2705' : '\u26AA';
   const umurBulan = anak.tanggal_lahir

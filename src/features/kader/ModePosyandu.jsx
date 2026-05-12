@@ -4,44 +4,12 @@ import moment from 'moment';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
+import { classifyBalita, priority } from './classifyBalita';
 import Button from '../../components/ui/Button';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import { useSession } from '../auth/useSession';
 import { usePengukuranBulananKader } from '../../queries/usePengukuranBulananKader';
-import { overallStatus, STATUS } from '../pengukuran/statusGizi';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
-
-const toZ = (v) => (v == null || v === '' ? null : Number(v));
-
-function classify(pengukuranList, currentBulan) {
-  const safe = pengukuranList ?? [];
-  const latest = safe
-    .slice()
-    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
-  const bulanIni = safe.filter(
-    (p) => moment(p.date).format('YYYY-MM') === currentBulan
-  );
-  const latestBulanIni = bulanIni
-    .slice()
-    .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
-  const status = latest
-    ? overallStatus({
-        zScoreBB: toZ(latest.z_score_berat),
-        zScoreTB: toZ(latest.z_score_tinggi),
-        zScoreLK: toZ(latest.z_score_lingkar_kepala),
-        zScoreGizi: toZ(latest.z_score_gizi),
-      })
-    : STATUS.UNKNOWN;
-  const sudahDiukur = !!latestBulanIni;
-  const perluPerhatian = status !== STATUS.NORMAL && status !== STATUS.UNKNOWN;
-  return { latest, latestBulanIni, sudahDiukur, perluPerhatian };
-}
-
-function priority(meta) {
-  if (meta.perluPerhatian) return 0;
-  if (!meta.sudahDiukur) return 1;
-  return 2;
-}
 
 export default function ModePosyandu() {
   const navigate = useNavigate();
@@ -60,7 +28,7 @@ export default function ModePosyandu() {
   const balitaWithMeta = useMemo(() => {
     return (anakList ?? []).map((anak) => ({
       anak,
-      meta: classify(pengukuranByAnak[anak.id], currentBulan),
+      meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
     }));
   }, [anakList, pengukuranByAnak, currentBulan]);
 
@@ -145,9 +113,6 @@ export default function ModePosyandu() {
       <div
         style={{
           padding: 'var(--space-md) var(--space-lg) 0',
-          position: 'sticky',
-          top: 140,
-          zIndex: 5,
           background: 'var(--color-surface)',
         }}
       >
@@ -189,8 +154,7 @@ export default function ModePosyandu() {
             <BalitaCard
               key={anak.id}
               anak={anak}
-              pengukuranList={pengukuranByAnak[anak.id]}
-              currentBulan={currentBulan}
+              meta={meta}
               onUkur={(a) => handleUkur(a, meta.latest)}
               onUlang={handleUlang}
               onLihat={handleLihat}
