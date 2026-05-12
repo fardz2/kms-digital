@@ -37,6 +37,28 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Chart Z-Score menampilkan data point balita (titik hitam) di atas band WHO
 - [ ] Payload POST/PUT include `lila` dan `catatan` (null jika kosong)
 
+## Orang Tua (Plan 4)
+- [ ] `/orangtua/balita` landing baru BerandaOT dengan greeting + card anak
+- [ ] Tombol "+ Tambah Anak" buka modal FormInputDataAnak legacy
+- [ ] Klik card anak → DetailAnak (read-only, no edit/delete button)
+- [ ] Menu Forum & Artikel accessible
+- [ ] Tombol Keluar di navbar berfungsi
+
+## Tenaga Kesehatan (Plan 4)
+- [ ] Login tenkes redirect ke `/tenkes/beranda` (bukan `/tenkes/forum`)
+- [ ] `/tenkes/beranda` landing baru dengan 2 card (Forum + Artikel)
+- [ ] Klik Forum → `/tenkes/forum` legacy Post masih jalan
+
+## Admin (Plan 4)
+- [ ] Sidebar admin punya menu baru "Laporan Keseluruhan"
+- [ ] Klik menu → render placeholder "Fitur laporan sedang disiapkan"
+- [ ] Sub-page existing (Desa, Posyandu, Kader, Tenkes, Artikel) tidak regressions
+
+## Artikel Public
+- [ ] `/artikel` render ArtikelList baru (bukan legacy)
+- [ ] `/artikel/:id` render ArtikelDetailPage baru
+- [ ] Akses tanpa login (public) masih jalan
+
 ## Orang Tua (legacy pages, new routes)
 - [ ] `/orangtua/balita` render dashboard lama
 - [ ] `/orangtua/forum`, `/orangtua/forum/saya`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan

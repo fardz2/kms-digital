@@ -5,18 +5,21 @@ import RequireRole from './RequireRole';
 import BerandaKader from '../features/kader/BerandaKader';
 import DaftarAnak from '../features/anak/DaftarAnak';
 import DetailAnak from '../features/anak/DetailAnak';
+import BerandaOT from '../features/orangtua/BerandaOT';
+import BerandaTenkes from '../features/tenkes/BerandaTenkes';
+import ArtikelList from '../features/artikel/ArtikelList';
+import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
+import LaporanAdminPlaceholder from '../features/admin/LaporanAdminPlaceholder';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
 // Legacy pages (masih dipakai sampai migrasi selesai)
 import LandingPage from '../pages/LandingPage';
-import Dashboard from '../pages/Dashboard';
 import Desa from '../pages/Desa/desa';
 import DetailForum from '../pages/DetailForum';
 import SignUp from '../pages/SignUp';
 import Post from '../pages/Post';
 import MyPost from '../pages/MyPost';
 import NotFound from '../pages/NotFound';
-import Artikel from '../pages/Artikel';
 import DashboardLayout from '../components/layout/Dashboard/DashboardLayout';
 import DesaPage from '../pages/Admin/Desa/DesaPage';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
@@ -24,7 +27,6 @@ import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
 import InputAcara from '../pages/Desa/input_acara';
 import ArtikelAdmin from '../pages/AdminDashboard/ArtikelAdmin';
-import DetailArtikel from '../pages/Admin/DetailArtikel';
 
 export default function AppRoutes() {
   return (
@@ -33,8 +35,6 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/masuk" element={<LoginPortal />} />
       <Route path="/sign-up" element={<SignUp />} />
-      <Route path="/artikel" element={<Artikel />} />
-      <Route path="/artikel/:id" element={<DetailArtikel />} />
 
       {/* Legacy redirects */}
       {LEGACY_REDIRECTS.map(({ from, to }) => (
@@ -50,7 +50,7 @@ export default function AppRoutes() {
 
       {/* Role: Orang Tua (legacy pages, new routes) */}
       <Route element={<RequireRole allow={['ORANG_TUA']} />}>
-        <Route path="/orangtua/balita" element={<Dashboard />} />
+        <Route path="/orangtua/balita" element={<BerandaOT />} />
         <Route path="/orangtua/forum" element={<Post />} />
         <Route path="/orangtua/forum/saya" element={<MyPost />} />
         <Route path="/orangtua/forum/:id" element={<DetailForum />} />
@@ -71,13 +71,27 @@ export default function AppRoutes() {
           <Route path="kader-posyandu" element={<RegisterKaderPosyandu />} />
           <Route path="tenaga-kesehatan" element={<RegisterTenkes />} />
           <Route path="artikel" element={<ArtikelAdmin />} />
+          <Route path="laporan" element={<LaporanAdminPlaceholder />} />
         </Route>
       </Route>
 
       {/* Role: Tenaga Kesehatan (legacy) */}
       <Route element={<RequireRole allow={['TENAGA_KESEHATAN']} />}>
+        <Route path="/tenkes/beranda" element={<BerandaTenkes />} />
         <Route path="/tenkes/forum" element={<Post />} />
         <Route path="/tenkes/balita/:id" element={<DetailForum />} />
+      </Route>
+
+      {/* Artikel (accessible by any authenticated role) */}
+      <Route
+        element={
+          <RequireRole
+            allow={['ORANG_TUA', 'KADER_POSYANDU', 'TENAGA_KESEHATAN', 'DESA', 'ADMIN']}
+          />
+        }
+      >
+        <Route path="/artikel" element={<ArtikelList />} />
+        <Route path="/artikel/:id" element={<ArtikelDetailPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
