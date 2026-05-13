@@ -13,7 +13,6 @@ import {
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
 import useAuth from "../../hook/useAuth";
 
 export default function RegisterTenagaKesehatan() {
@@ -245,207 +244,74 @@ export default function RegisterTenagaKesehatan() {
 
   return (
     <>
-      <Container
-        fluid
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "20px",
-        }}
-      >
+      <div className="bg-white rounded-card shadow-card p-6">
         {contextHolder}
-
-        <Row justify="space-between">
-          <Col sm={24}>
-            <Button
-              type="primary"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-h2 font-display text-neutral-900">Kelola Tenaga Kesehatan</h1>
+            <button
               onClick={showModal}
-              style={{ marginBottom: 16 }}
               disabled={
                 createTenagaKesehatanMutation.isPending ||
                 deleteTenagaKesehatanMutation.isPending
               }
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
             >
-              Tambah Tenaga Kesehatan
-            </Button>
-            <Modal
-              title="Registrasi Tenaga Kesehatan"
-              open={isModalVisible}
-              onCancel={handleCancel}
-              footer={null}
-            >
-              <Form
-                form={form}
-                name="basic"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout="vertical"
-              >
-                <Form.Item
-                  label="Nama"
-                  name="nama"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nama masih kosong!",
-                      type: "string",
-                    },
-                  ]}
-                >
-                  <Input placeholder="Nama Lengkap" />
-                </Form.Item>
+              + Tambah Tenaga Kesehatan
+            </button>
+          </div>
+          <Modal
+            title={<span className="text-h3 font-display text-neutral-900">Registrasi Tenaga Kesehatan</span>}
+            open={isModalVisible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form form={form} name="basic" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off" layout="vertical">
+              <Form.Item label={<span className="text-caption text-neutral-700">Nama</span>} name="nama" rules={[{ required: true, message: "Nama masih kosong", type: "string" }]}>
+                <Input placeholder="Nama Lengkap" className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item label={<span className="text-caption text-neutral-700">Email</span>} name="email" rules={[{ required: true, message: "Email masih kosong" }, { type: "email", message: "Format email tidak valid" }]}>
+                <Input placeholder="email@contoh.com" className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item label={<span className="text-caption text-neutral-700">Kata Sandi</span>} name="password" rules={[{ required: true, message: "Kata sandi masih kosong" }, { pattern: "^.{8,}$", message: "Minimal 8 karakter" }]}>
+                <Input.Password placeholder="Kata sandi" className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>} name="confirm" dependencies={["password"]} rules={[{ required: true, message: "Konfirmasi kata sandi" }, ({ getFieldValue }) => ({ validator(_, value) { if (!value || getFieldValue("password") === value) return Promise.resolve(); return Promise.reject(new Error("Kata sandi tidak sesuai")); } })]}>
+                <Input.Password placeholder="Konfirmasi" className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item name="desa" label={<span className="text-caption text-neutral-700">Desa</span>} rules={[{ required: true, message: "Desa masih kosong" }]}>
+                <Select listHeight={100} optionFilterProp="children" showSearch placeholder="Pilih Desa" disabled={desaLoading} className="h-11">
+                  {dataDesa?.map((value) => (<Select.Option key={value.id} value={value.id}>{value.name}</Select.Option>))}
+                </Select>
+              </Form.Item>
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={handleCancel} disabled={createTenagaKesehatanMutation.isPending} className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60">Batal</button>
+                <button type="submit" disabled={createTenagaKesehatanMutation.isPending} className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60">Simpan</button>
+              </div>
+            </Form>
+          </Modal>
 
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Email masih kosong!",
-                    },
-                    {
-                      type: "email",
-                      message: "Email belum sesuai!",
-                    },
-                  ]}
-                >
-                  <Input placeholder="user@email.com" />
-                </Form.Item>
+          <Modal title={<span className="text-h3 font-display text-neutral-900">Konfirmasi Hapus</span>} open={isDeleteModalVisible} onOk={handleDeleteConfirm} onCancel={handleDeleteCancel} okText="Hapus" cancelText="Batal" okButtonProps={{ danger: true }}>
+            <p className="text-base">Apakah Anda yakin ingin menghapus Tenaga Kesehatan ini?</p>
+          </Modal>
 
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Password masih kosong!",
-                    },
-                    {
-                      pattern: "^.{8,}$",
-                      message: "Password minimal 8 karakter",
-                    },
-                  ]}
-                >
-                  <Input.Password placeholder="password" />
-                </Form.Item>
-
-                <Form.Item
-                  label="Confirm Password"
-                  name="confirm"
-                  dependencies={["password"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Silahkan Confirm Password Anda!",
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue("password") === value) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(
-                          new Error("Password tidak sesuai!")
-                        );
-                      },
-                    }),
-                  ]}
-                >
-                  <Input.Password placeholder="Confirm Password" />
-                </Form.Item>
-
-                <Form.Item
-                  name="desa"
-                  label="Desa"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Desa masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select
-                    listHeight={100}
-                    optionFilterProp="children"
-                    showSearch
-                    placeholder="Pilih Desa"
-                    disabled={desaLoading}
-                  >
-                    {dataDesa &&
-                      dataDesa.map((value) => (
-                        <Select.Option key={value.id} value={value.id}>
-                          {value.name}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={createTenagaKesehatanMutation.isPending}
-                  >
-                    Simpan
-                  </Button>
-                  <Button
-                    style={{ marginLeft: 8 }}
-                    onClick={handleCancel}
-                    disabled={createTenagaKesehatanMutation.isPending}
-                  >
-                    Batal
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-
-            <Modal
-              title="Konfirmasi Hapus"
-              open={isDeleteModalVisible}
-              onOk={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-              okText="Hapus"
-              cancelText="Batal"
-              okButtonProps={{ danger: true }}
-            >
-              <p>Apakah Anda yakin ingin menghapus Tenaga Kesehatan ini?</p>
-            </Modal>
-
-            <Table
-              title={() => (
-                <div className="flex justify-between items-center">
-                  <div className="flex justify-start items-center">
-                    <h2 className="text-sm font-semibold">
-                      Daftar Tenaga Kesehatan
-                    </h2>
-                  </div>
-                  <div className="flex justify-end items-center">
-                    <Input.Search
-                      placeholder="Search here ..."
-                      onSearch={(value) => {
-                        setSearchedText(value);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              dataSource={tenagaKesehatanData || []}
-              columns={columns}
-              loading={
-                tenagaKesehatanLoading ||
-                createTenagaKesehatanMutation.isPending ||
-                deleteTenagaKesehatanMutation.isPending
-              }
-              pagination={{ pageSize: 5 }}
-              rowKey="id"
-              locale={{
-                emptyText: "Tidak ada data Tenaga Kesehatan",
-              }}
-              scroll={{ x: "max-content" }}
-            />
-          </Col>
-        </Row>
-      </Container>
+          <Table
+            title={() => (
+              <div className="flex justify-between items-center gap-4 flex-wrap">
+                <h2 className="text-h3 font-display text-neutral-900">Daftar Tenaga Kesehatan</h2>
+                <Input.Search placeholder="Cari tenaga kesehatan..." onSearch={(value) => setSearchedText(value)} className="w-full md:w-64" allowClear />
+              </div>
+            )}
+            dataSource={tenagaKesehatanData || []}
+            columns={columns}
+            loading={tenagaKesehatanLoading || createTenagaKesehatanMutation.isPending || deleteTenagaKesehatanMutation.isPending}
+            pagination={{ pageSize: 5 }}
+            rowKey="id"
+            locale={{ emptyText: "Tidak ada data Tenaga Kesehatan" }}
+            scroll={{ x: "max-content" }}
+          />
+        </div>
+      </div>
     </>
   );
 }
