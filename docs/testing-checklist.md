@@ -106,6 +106,21 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Tailwind arbitrary selector untuk slider thumb render correct di Chrome + Firefox
 - [ ] 64 tests pass, build success tanpa new warnings
 
+## Legacy Pages Refresh (Plan 8)
+- [ ] LandingPage render dengan hero heading display font + CTA pink button
+- [ ] SignUp form Tailwind card with backdrop blur, redirect ke /masuk
+- [ ] NotFound 404 display number + CTA primary
+- [ ] Navbar legacy (OT/Tenkes forum) sticky top, role-based link list
+- [ ] Admin Sidebar 72 width, slide transition, active link primary-50
+- [ ] DashboardLayout mobile hamburger toggle
+- [ ] DropdownLink collapsible dengan chevron rotate
+- [ ] Table component: header primary-300 + overline caps, row hover primary-50/40
+- [ ] Pagination rounded-button, active page primary highlight
+- [ ] Form components (InputDataAnak, InputPost, InputDataExcel, UpdateArtikel) modal title + footer Tailwind
+- [ ] Forum post card hover lift + avatar + role tag colored
+- [ ] DetailForum post detail + comment form + comment list
+- [ ] Admin CMS pages (InputDesa, InputPosyandu, Register*, ArtikelAdmin, DesaPage) tetap render (inherit Inter font, antd default internal acceptable)
+
 ## Mode Posyandu (Plan 6)
 - [ ] Login kader → langsung render `/kader/balita` sebagai ModePosyandu (bukan BerandaKader)
 - [ ] Header pink menampilkan "Halo [nama]", nama posyandu, bulan berjalan
