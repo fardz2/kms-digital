@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { Modal as AntModal } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { AlertTriangle, Check } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -18,7 +18,7 @@ import {
 function confirmAction({ title, content, okText, onOk }) {
   AntModal.confirm({
     title,
-    icon: <ExclamationCircleOutlined />,
+    icon: <AlertTriangle size={20} className="text-danger" />,
     content,
     okText: okText ?? 'Ya',
     cancelText: 'Batal',
@@ -26,36 +26,41 @@ function confirmAction({ title, content, okText, onOk }) {
   });
 }
 
-function OrangTuaList({ data, isLoading, onApprove, onReject }) {
-  if (isLoading) return <div className="text-neutral-500">Memuat daftar orang tua...</div>;
-  if (!data || data.length === 0) {
-    return (
-      <div className="text-center py-8 text-neutral-500">
-        Tidak ada orang tua yang menunggu persetujuan 🎉
-      </div>
-    );
-  }
+function EmptyState({ label }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col items-center gap-[13px] py-[50px] text-graphite">
+      <Check size={32} strokeWidth={1.75} className="text-success" />
+      <span className="text-body-sm">Tidak ada {label} yang menunggu persetujuan</span>
+    </div>
+  );
+}
+
+function OrangTuaList({ data, isLoading, onApprove, onReject }) {
+  if (isLoading)
+    return <div className="text-body-sm text-graphite">Memuat daftar orang tua...</div>;
+  if (!data || data.length === 0) return <EmptyState label="orang tua" />;
+
+  return (
+    <div className="flex flex-col gap-[13px]">
       {data.map((ot) => (
-        <Card key={ot.id} className="p-4">
-          <div className="text-h3 font-display text-neutral-900">
+        <Card key={ot.id}>
+          <div className="text-heading-sm font-semibold text-deep-slate">
             {ot.nama ?? '-'}
           </div>
           {ot.email && (
-            <div className="text-caption text-neutral-500 mt-0.5">{ot.email}</div>
+            <div className="text-caption text-graphite mt-1">{ot.email}</div>
           )}
           {ot.alamat && (
-            <div className="text-caption text-neutral-500">{ot.alamat}</div>
+            <div className="text-caption text-graphite">{ot.alamat}</div>
           )}
           {ot.created_at && (
-            <div className="text-caption text-neutral-500 mt-1">
+            <div className="text-caption text-graphite mt-1">
               Daftar: {moment(ot.created_at).format('DD MMM YYYY')}
             </div>
           )}
-          <div className="flex gap-2 justify-end mt-3">
+          <div className="flex gap-[8px] justify-end mt-[17px]">
             <Button
-              variant="danger"
+              variant="destructive"
               size="sm"
               onClick={() =>
                 confirmAction({
@@ -68,8 +73,13 @@ function OrangTuaList({ data, isLoading, onApprove, onReject }) {
             >
               Tolak
             </Button>
-            <Button variant="primary" size="sm" onClick={() => onApprove(ot.id)}>
-              ✔ Setujui
+            <Button
+              variant="primary"
+              size="sm"
+              leadingIcon={<Check size={16} strokeWidth={1.75} />}
+              onClick={() => onApprove(ot.id)}
+            >
+              Setujui
             </Button>
           </div>
         </Card>
@@ -79,40 +89,36 @@ function OrangTuaList({ data, isLoading, onApprove, onReject }) {
 }
 
 function AnakList({ data, isLoading, onApprove, onReject }) {
-  if (isLoading) return <div className="text-neutral-500">Memuat daftar anak...</div>;
-  if (!data || data.length === 0) {
-    return (
-      <div className="text-center py-8 text-neutral-500">
-        Tidak ada anak yang menunggu persetujuan 🎉
-      </div>
-    );
-  }
+  if (isLoading)
+    return <div className="text-body-sm text-graphite">Memuat daftar anak...</div>;
+  if (!data || data.length === 0) return <EmptyState label="anak" />;
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-[13px]">
       {data.map((anak) => {
         const umurBulan = anak.tanggal_lahir
           ? moment().diff(moment(anak.tanggal_lahir), 'month')
           : null;
         return (
-          <Card key={anak.id} className="p-4">
-            <div className="text-h3 font-display text-neutral-900">
+          <Card key={anak.id}>
+            <div className="text-heading-sm font-semibold text-deep-slate">
               {anak.nama ?? '-'}
             </div>
-            <div className="text-caption text-neutral-500 mt-0.5">
+            <div className="text-caption text-graphite mt-1">
               {umurBulan != null ? `${umurBulan} bulan · ` : ''}
               {anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
             </div>
             {anak.nama_ortu && (
-              <div className="text-caption text-neutral-500">Ortu: {anak.nama_ortu}</div>
+              <div className="text-caption text-graphite">Ortu: {anak.nama_ortu}</div>
             )}
             {anak.created_at && (
-              <div className="text-caption text-neutral-500 mt-1">
+              <div className="text-caption text-graphite mt-1">
                 Daftar: {moment(anak.created_at).format('DD MMM YYYY')}
               </div>
             )}
-            <div className="flex gap-2 justify-end mt-3">
+            <div className="flex gap-[8px] justify-end mt-[17px]">
               <Button
-                variant="danger"
+                variant="destructive"
                 size="sm"
                 onClick={() =>
                   confirmAction({
@@ -125,8 +131,13 @@ function AnakList({ data, isLoading, onApprove, onReject }) {
               >
                 Tolak
               </Button>
-              <Button variant="primary" size="sm" onClick={() => onApprove(anak.id)}>
-                ✔ Setujui
+              <Button
+                variant="primary"
+                size="sm"
+                leadingIcon={<Check size={16} strokeWidth={1.75} />}
+                onClick={() => onApprove(anak.id)}
+              >
+                Setujui
               </Button>
             </div>
           </Card>
@@ -160,20 +171,20 @@ export default function ApproveModal({ open, onClose }) {
     <>
       {toast.contextHolder}
       <Modal title="Perlu Persetujuan" open={open} onCancel={onClose} footer={null} width={640}>
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-[8px] mb-[17px]">
           <Button
-            variant={tab === 'ot' ? 'primary' : 'secondary'}
+            variant={tab === 'ot' ? 'dark' : 'default'}
             size="sm"
             onClick={() => setTab('ot')}
           >
-            Orang Tua ({otCount})
+            Orang Tua · {otCount}
           </Button>
           <Button
-            variant={tab === 'anak' ? 'primary' : 'secondary'}
+            variant={tab === 'anak' ? 'dark' : 'default'}
             size="sm"
             onClick={() => setTab('anak')}
           >
-            Anak ({anakCount})
+            Anak · {anakCount}
           </Button>
         </div>
 

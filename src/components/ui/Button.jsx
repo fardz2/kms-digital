@@ -17,6 +17,8 @@ const VARIANTS = {
     'bg-transparent text-deep-slate hover:bg-polar-mist rounded-full',
   destructive:
     'bg-white border border-danger/30 text-danger hover:bg-danger hover:text-white rounded-button',
+  danger:
+    'bg-white border border-danger/30 text-danger hover:bg-danger hover:text-white rounded-button',
   link:
     'bg-transparent text-primary-600 hover:text-primary-700 hover:underline rounded-default px-0',
 };
