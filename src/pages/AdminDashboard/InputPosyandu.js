@@ -6,16 +6,15 @@ import {
   message,
   Row,
   Select,
-  Table,
   Modal,
 } from "antd";
+import DataTable from "../../components/ui/DataTable";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [selectedPosyandu, setSelectedPosyandu] = useState(null);
@@ -189,28 +188,26 @@ export default function InputPosyandu() {
 
   const columns = [
     {
-      title: "Nama Posyandu",
-      dataIndex: "nama",
-      key: "nama",
-      filteredValue: [searchText],
-      onFilter: (value, record) => {
-        return String(record.nama).toLowerCase().includes(value.toLowerCase());
-      },
+      accessorKey: "nama",
+      header: "Nama Posyandu",
+      enableSorting: true,
     },
     {
-      title: "Alamat",
-      dataIndex: "alamat",
-      key: "alamat",
+      accessorKey: "alamat",
+      header: "Alamat",
+      enableSorting: true,
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
+      id: "action",
+      header: "Aksi",
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
         <div>
           <Button
             type="default"
             size="small"
-            onClick={() => handleEdit(record)}
+            onClick={() => handleEdit(row.original)}
             style={{ marginRight: 8 }}
             disabled={
               createPosyanduMutation.isPending ||
@@ -224,7 +221,7 @@ export default function InputPosyandu() {
             type="dashed"
             danger
             size="small"
-            onClick={() => showDeleteConfirm(record.id, record.nama)}
+            onClick={() => showDeleteConfirm(row.original.id, row.original.nama)}
             disabled={
               createPosyanduMutation.isPending ||
               updatePosyanduMutation.isPending ||
@@ -363,30 +360,19 @@ export default function InputPosyandu() {
               </div>
             </Form>
           </Modal>
-          <Table
-            title={() => (
-              <div className="flex justify-between items-center gap-4 flex-wrap">
-                <h2 className="text-h3 font-display text-neutral-900">Daftar Posyandu</h2>
-                <Input.Search
-                  placeholder="Cari posyandu..."
-                  onSearch={(value) => setSearchedText(value)}
-                  className="w-full md:w-64"
-                  allowClear
-                />
-              </div>
-            )}
-            dataSource={dataSource || []}
+          <DataTable
             columns={columns}
+            data={dataSource || []}
             loading={
               posyanduLoading ||
               createPosyanduMutation.isPending ||
               updatePosyanduMutation.isPending ||
               deletePosyanduMutation.isPending
             }
-            pagination={{ pageSize: 5 }}
             rowKey="id"
-            locale={{ emptyText: "Tidak ada data Posyandu" }}
-            scroll={{ x: "max-content" }}
+            title={<h2 className="text-h3 font-display text-neutral-900">Daftar Posyandu</h2>}
+            searchPlaceholder="Cari posyandu..."
+            emptyText="Tidak ada data Posyandu"
           />
         </div>
       </div>
