@@ -1,6 +1,8 @@
 import { Form, Input, message, Modal } from "antd";
 import axios from "axios";
 import React, { useState } from "react";
+import { FileSpreadsheet } from "lucide-react";
+import Button from "../../ui/Button";
 import { readSession } from "../../../features/auth/session-storage";
 
 export default function FormInputDataExcel(props) {
@@ -9,6 +11,7 @@ export default function FormInputDataExcel(props) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [excelFile, setExcelFile] = useState(null);
+  const [isPending, setIsPending] = useState(false);
 
   function onOK() {
     form
@@ -22,6 +25,7 @@ export default function FormInputDataExcel(props) {
         if (user && user.user.role === "KADER_POSYANDU") {
           const formData = new FormData();
           formData.append("file", excelFile);
+          setIsPending(true);
 
           axios
             .post(
@@ -35,17 +39,19 @@ export default function FormInputDataExcel(props) {
               }
             )
             .then(() => {
-              messageApi.success("Data berhasil diupload");
+              messageApi.success("Data berhasil diunggah");
               form.resetFields();
               setExcelFile(null);
               setTimeout(() => {
+                setIsPending(false);
                 onCancel();
                 fetch?.();
               }, 1500);
             })
             .catch((err) => {
+              setIsPending(false);
               messageApi.error(
-                err.response?.data?.message || "Data gagal diupload"
+                err.response?.data?.message || "Data gagal diunggah"
               );
             });
         }
@@ -66,34 +72,28 @@ export default function FormInputDataExcel(props) {
         open={isOpen}
         onCancel={close}
         title={
-          <span className="text-h3 font-display text-neutral-900">
-            Upload Data Excel
+          <span className="text-heading font-semibold text-deep-slate">
+            Unggah Data Excel
           </span>
         }
         footer={
-          <div className="flex gap-2 justify-end">
-            <button
-              onClick={close}
-              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold transition-colors"
-            >
+          <div className="flex gap-[13px] justify-end">
+            <Button variant="default" size="md" onClick={close} disabled={isPending}>
               Batal
-            </button>
-            <button
-              onClick={onOK}
-              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm transition-colors"
-            >
-              Upload
-            </button>
+            </Button>
+            <Button variant="primary" size="md" onClick={onOK} disabled={isPending}>
+              {isPending ? "Mengunggah..." : "Unggah"}
+            </Button>
           </div>
         }
-        bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
       >
-        <div className="p-6 bg-primary-50 border-2 border-dashed border-primary-200 rounded-card text-center mb-2">
-          <p className="text-body-lg font-display font-semibold text-neutral-900 mb-2">
-            Pilih file Excel
+        <div className="p-[25px] bg-faint-fog border border-dashed border-light-ash rounded-default text-center">
+          <FileSpreadsheet size={40} strokeWidth={1.75} className="text-graphite mx-auto mb-[13px]" />
+          <p className="text-body-sm font-semibold text-deep-slate mb-1">
+            Pilih file Excel untuk diunggah
           </p>
-          <p className="text-caption text-neutral-600 mb-4">
-            Format .xlsx
+          <p className="text-caption text-graphite mb-[17px]">
+            Format .xlsx sesuai template yang disediakan.
           </p>
           <Form form={form} layout="vertical">
             <Form.Item
@@ -105,7 +105,7 @@ export default function FormInputDataExcel(props) {
                 type="file"
                 accept=".xlsx"
                 onChange={(e) => setExcelFile(e.target.files[0])}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-button file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-primary-600 file:cursor-pointer"
+                className="file:mr-[13px] file:py-[8px] file:px-[17px] file:rounded-default file:border file:border-light-ash file:text-body-sm file:font-medium file:bg-white file:text-deep-slate hover:file:bg-polar-mist file:cursor-pointer"
               />
             </Form.Item>
           </Form>

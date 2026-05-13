@@ -1,6 +1,7 @@
 import { DatePicker, Form, Input, message, Modal, Select } from "antd";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
+import Button from "../../ui/Button";
 import useAuth from "../../../hook/useAuth";
 
 export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
@@ -89,76 +90,83 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
         open={isOpen}
         onCancel={onCancel}
         title={
-          <span className="text-h3 font-display text-neutral-900">
+          <span className="text-heading font-semibold text-deep-slate">
             Tambah Data Anak
           </span>
         }
         footer={
-          <div className="flex gap-2 justify-end">
-            <button
+          <div className="flex gap-[13px] justify-end">
+            <Button
+              variant="default"
+              size="md"
               onClick={onCancel}
               disabled={createAnakMutation.isPending}
-              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
               onClick={onOK}
               disabled={createAnakMutation.isPending || orangTuaLoading}
-              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
             >
               {createAnakMutation.isPending ? "Menyimpan..." : "Simpan"}
-            </button>
+            </Button>
           </div>
         }
-        bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Nama</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Nama</span>}
             name="nama"
             rules={[{ required: true, message: "Nama masih kosong" }]}
           >
-            <Input className="h-11 text-base" />
+            <Input placeholder="Nama lengkap anak" className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Panggilan</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Panggilan</span>}
             name="panggilan"
             rules={[{ required: true, message: "Panggilan masih kosong" }]}
           >
-            <Input className="h-11 text-base" />
+            <Input placeholder="Nama panggilan" className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Jenis Kelamin</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Jenis Kelamin</span>}
             name="jenisKelamin"
             rules={[{ required: true, message: "Jenis Kelamin masih kosong" }]}
           >
-            <Select className="h-11">
+            <Select placeholder="Pilih jenis kelamin" className="h-[52px]">
               <Select.Option value="LAKI_LAKI">Laki-Laki</Select.Option>
               <Select.Option value="PEREMPUAN">Perempuan</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Tanggal Lahir</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Tanggal Lahir</span>}
             name="tanggalLahir"
             rules={[{ required: true, message: "Tanggal Lahir masih kosong" }]}
           >
-            <DatePicker className="w-full h-11 text-base" format="DD MMMM YYYY" />
+            <DatePicker className="w-full h-[52px] text-base" format="DD MMMM YYYY" placeholder="Pilih tanggal lahir" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Alamat</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Alamat</span>}
             name="alamat"
             rules={[{ required: true, message: "Alamat masih kosong" }]}
           >
-            <Input.TextArea rows={3} className="text-base" />
+            <Input.TextArea rows={3} className="text-base" placeholder="Alamat tempat tinggal" />
           </Form.Item>
           {user?.user?.role !== "ORANG_TUA" && (
             <Form.Item
-              label={<span className="text-caption text-neutral-700">Orang Tua</span>}
+              label={<span className="text-body-sm font-medium text-deep-slate">Orang Tua</span>}
               name="orangTua"
               rules={[{ required: true, message: "Pilih orang tua" }]}
             >
-              <Select className="h-11" loading={orangTuaLoading} showSearch optionFilterProp="children">
+              <Select
+                className="h-[52px]"
+                loading={orangTuaLoading}
+                showSearch
+                optionFilterProp="children"
+                placeholder="Pilih orang tua"
+              >
                 {dataOrangTua?.map((data) => (
                   <Select.Option key={data.id} value={data.id}>
                     {data.nama}

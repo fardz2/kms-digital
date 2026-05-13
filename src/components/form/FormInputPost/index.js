@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Modal, Input, message } from "antd";
+import Button from "../../ui/Button";
 import useAuth from "../../../hook/useAuth";
 
 export default function FormInputPost({ isOpen, onCancel }) {
@@ -56,44 +57,54 @@ export default function FormInputPost({ isOpen, onCancel }) {
         open={isOpen}
         onCancel={onCancel}
         title={
-          <span className="text-h3 font-display text-neutral-900">
+          <span className="text-heading font-semibold text-deep-slate">
             Tulis Pertanyaan
           </span>
         }
         footer={
-          <div className="flex gap-2 justify-end">
-            <button
+          <div className="flex gap-[13px] justify-end">
+            <Button
+              variant="default"
+              size="md"
               onClick={onCancel}
               disabled={saving}
-              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
               onClick={onOK}
               disabled={saving}
-              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
             >
               {saving ? "Menyimpan..." : "Simpan"}
-            </button>
+            </Button>
           </div>
         }
-        bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Judul</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Judul</span>}
             name="judul"
             rules={[{ required: true, message: "Judul masih kosong" }]}
           >
-            <Input disabled={saving} className="h-11 text-base" />
+            <Input
+              disabled={saving}
+              className="h-[52px] text-base"
+              placeholder="Tulis judul pertanyaan"
+            />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Pertanyaan</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Pertanyaan</span>}
             name="pertanyaan"
             rules={[{ required: true, message: "Pertanyaan masih kosong" }]}
           >
-            <Input.TextArea rows={4} disabled={saving} className="text-base" />
+            <Input.TextArea
+              rows={5}
+              disabled={saving}
+              className="text-base"
+              placeholder="Tuliskan pertanyaan Anda secara lengkap"
+            />
           </Form.Item>
         </Form>
       </Modal>

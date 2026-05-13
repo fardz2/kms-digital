@@ -1,31 +1,23 @@
-import {
-  Button,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Modal,
-  Row,
-  Select,
-} from "antd";
+import { Form, Input, message, Modal, Select } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import './style.css';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import "./style.css";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { UploadCloud } from "lucide-react";
+import Button from "../../ui/Button";
 import { readSession } from "../../../features/auth/session-storage";
 
 export default function FormUpdateDataArtikel(props) {
-  // eslint-disable-next-line
-  const [user, setUser] = useState(() => readSession());
+  const [user] = useState(() => readSession());
   const { isOpen, onCancel, fetch, data } = props;
   const [dataKategori, setDataKategori] = useState([]);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [imageFile, setImageFile] = useState(null);
-  const [valueContent, setValueContent] = useState('');
+  const [valueContent, setValueContent] = useState("");
   const [statePageKateogries, setStatePageKateogries] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -34,172 +26,93 @@ export default function FormUpdateDataArtikel(props) {
         kategori: data.kategori,
         penulis: data.penulis,
       });
-      setValueContent(data.content)
+      setValueContent(data.content);
     }
 
-     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/kategori`,
-      {
-          headers: { Authorization: `Bearer ${user.token.value}` },
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/api/kategori`, {
+        headers: { Authorization: `Bearer ${user?.token?.value}` },
       })
-      
       .then((response) => {
         setDataKategori(response.data.data);
         setStatePageKateogries(false);
       })
-      .catch((err) => {
+      .catch(() => {});
+  }, [form, data, user?.token?.value]);
+
+  function submitArtikel(values) {
+    setIsPending(true);
+    const formData = new FormData();
+    formData.append("judul", values.judul);
+    formData.append("kategori", values.kategori);
+    formData.append("penulis", values.penulis);
+    formData.append("content", valueContent);
+    if (imageFile) formData.append("image", imageFile);
+
+    axios
+      .post(
+        `${process.env.REACT_APP_BASE_URL}/api/artikel/${data.id}`,
+        formData,
+        { headers: { Authorization: `Bearer ${user.token.value}` } }
+      )
+      .then(() => {
+        messageApi.success("Data berhasil tersimpan");
+        setTimeout(() => {
+          onCancel();
+          setValueContent("");
+          setImageFile(null);
+          setIsPending(false);
+          fetch?.();
+        }, 1000);
+        form.resetFields();
+      })
+      .catch(() => {
+        setIsPending(false);
+        messageApi.error("Data gagal tersimpan");
+        setTimeout(() => {
+          setImageFile(null);
+          onCancel();
+        }, 1000);
       });
-  }, [form, data]);
+  }
+
+  function submitKategori(values) {
+    setIsPending(true);
+    axios
+      .post(`${process.env.REACT_APP_BASE_URL}/api/kategori`, values, {
+        headers: { Authorization: `Bearer ${user.token.value}` },
+      })
+      .then(() => {
+        messageApi.success("Data berhasil tersimpan");
+        setTimeout(() => {
+          onCancel();
+          setValueContent("");
+          setImageFile(null);
+          setIsPending(false);
+          fetch?.();
+        }, 1000);
+        form.resetFields();
+      })
+      .catch(() => {
+        setIsPending(false);
+        messageApi.error("Data gagal tersimpan");
+        setTimeout(() => {
+          setImageFile(null);
+          onCancel();
+        }, 1000);
+      });
+  }
 
   function onOK() {
     form
       .validateFields()
       .then((values) => {
-        console.log(values)
-      
-        if(!statePageKateogries){
-          if(imageFile){
-              let formData = new FormData();
-              formData.append('judul', values.judul);
-              formData.append('kategori', values.kategori);
-              formData.append('penulis', values.penulis);
-              formData.append('content', valueContent);
-              formData.append('image', imageFile);
-
-              if (user && user.user.role === "ADMIN") {
-              axios
-                  .post(
-                  `${process.env.REACT_APP_BASE_URL}/api/artikel/${data.id}`,formData,
-                  {
-                      headers: { Authorization: `Bearer ${user.token.value}` },
-                  }
-                  )
-                  .then((response) => {
-                  messageApi.open({
-                      type: "success",
-                      content: "Data berhasil tersimpan",
-                  });
-                  setTimeout(() => {
-                      onCancel();
-                      setValueContent('');
-                      setImageFile(null);
-                      window.location.reload()
-                      fetch();
-                  }, 1000);
-                  })
-                  .catch((err) => {
-                  console.log(err);
-                  messageApi.open({
-                      type: "error",
-                      content: "Data gagal tersimpan",
-                  });
-                  setTimeout(() => {
-                      setImageFile(null);
-                      onCancel();
-                  }, 1000);
-                  });
-                  
-                  form.resetFields();
-              }
-          } else {
-              let formData = new FormData();
-              formData.append('judul', values.judul);
-              formData.append('kategori', values.kategori);
-              formData.append('penulis', values.penulis);
-              formData.append('content', valueContent);
-
-              if (user && user.user.role === "ADMIN") {
-              axios
-                  .post(
-                  `${process.env.REACT_APP_BASE_URL}/api/artikel/${data.id}`,formData,
-                  {
-                      headers: { Authorization: `Bearer ${user.token.value}` },
-                  }
-                  )
-                  .then((response) => {
-                  messageApi.open({
-                      type: "success",
-                      content: "Data berhasil tersimpan",
-                  });
-                  setTimeout(() => {
-                      onCancel();
-                      setValueContent('');
-                      setImageFile(null);
-                      window.location.reload()
-                      fetch();
-                  }, 1000);
-                  })
-                  .catch((err) => {
-                  console.log(err);
-                  messageApi.open({
-                      type: "error",
-                      content: "Data gagal tersimpan",
-                  });
-                  setTimeout(() => {
-                      setImageFile(null);
-                      onCancel();
-                  }, 1000);
-                  });
-                  
-                  form.resetFields();
-              }
-          }
-        } else {
-          axios
-          .post(`${process.env.REACT_APP_BASE_URL}/api/kategori`,values,{
-              headers: { Authorization: `Bearer ${user.token.value}` },
-          })
-         .then((response) => {
-                  messageApi.open({
-                      type: "success",
-                      content: "Data berhasil tersimpan",
-                  });
-                  setTimeout(() => {
-                      onCancel();
-                      setValueContent('');
-                      setImageFile(null);
-                      window.location.reload()
-                      fetch();
-                  }, 1000);
-                  })
-                  .catch((err) => {
-                  console.log(err);
-                  messageApi.open({
-                      type: "error",
-                      content: "Data gagal tersimpan",
-                  });
-                  setTimeout(() => {
-                      setImageFile(null);
-                      onCancel();
-                  }, 1000);
-                  });
-                  
-                  form.resetFields();
-        }
-
+        if (!user || user.user.role !== "ADMIN") return;
+        if (statePageKateogries) submitKategori(values);
+        else submitArtikel(values);
       })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
+      .catch(() => {});
   }
-  const kategoris = [
-    {
-      nama : "Stungting",
-      value : "Stungting"
-    },
-    {
-      nama : "Gizi",
-      value : "gizi"
-    },
-    {
-      nama : "Kesehatan Anak",
-      value : "Kesehatan Anak"
-    },
-    {
-      nama : "Kesehatan Ibu",
-      value : "KesehatanIbu"
-    }
-  ];
 
   return (
     <>
@@ -209,170 +122,163 @@ export default function FormUpdateDataArtikel(props) {
           open={isOpen}
           onCancel={onCancel}
           title={
-            <span className="text-h3 font-display text-neutral-900">
-              Update Artikel
+            <span className="text-heading font-semibold text-deep-slate">
+              Ubah Artikel
             </span>
           }
           footer={
-            <div className="flex gap-2 justify-end">
-              <button
+            <div className="flex gap-[13px] justify-end">
+              <Button
+                variant="default"
+                size="md"
                 onClick={onCancel}
-                className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold"
+                disabled={isPending}
               >
                 Batal
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={onOK}
-                className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm"
+                disabled={isPending}
               >
-                Simpan
-              </button>
+                {isPending ? "Menyimpan..." : "Simpan"}
+              </Button>
             </div>
           }
-          bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
           width={720}
         >
           <Form form={form} layout="vertical">
             <Form.Item
               label={
-                <span className="text-caption text-neutral-700">
-                  Pilih kategori
+                <span className="text-body-sm font-medium text-deep-slate">
+                  Pilih Kategori
                 </span>
               }
               name="kategori"
               rules={[{ required: true, message: "Kategori masih kosong" }]}
             >
               <Select
-                size="4"
-                listHeight={100}
+                listHeight={200}
                 optionFilterProp="children"
                 showSearch
                 placeholder="Pilih Kategori"
-                className="h-11"
+                className="h-[52px]"
+                dropdownRender={(menu) => (
+                  <div>
+                    {menu}
+                    <div className="border-t border-light-ash p-[8px]">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setStatePageKateogries(true)}
+                      >
+                        + Tambah Kategori Baru
+                      </Button>
+                    </div>
+                  </div>
+                )}
               >
-                <Select.Option value="add">
-                  <Button
-                    onClick={() => {
-                      setStatePageKateogries(true);
-                    }}
-                  >
-                    Tambah Kategori
-                  </Button>
-                </Select.Option>
-
-                {statePageKateogries ? (
-                  <Select.Option></Select.Option>
-                ) : (
+                {!statePageKateogries &&
                   dataKategori.map((item) => (
                     <Select.Option key={item.id} value={item.name}>
                       {item.name}
                     </Select.Option>
-                  ))
-                )}
+                  ))}
               </Select>
             </Form.Item>
 
             {statePageKateogries && (
               <Form.Item
                 label={
-                  <span className="text-caption text-neutral-700">
-                    Tambah Kategori
+                  <span className="text-body-sm font-medium text-deep-slate">
+                    Nama Kategori Baru
                   </span>
                 }
                 name="name"
-                rules={[
-                  { required: true, message: "Nama Kategori masih kosong" },
-                ]}
+                rules={[{ required: true, message: "Nama Kategori masih kosong" }]}
               >
                 <Input
-                  placeholder="Masukkan Nama Kategori"
-                  className="h-11 text-base"
+                  placeholder="Masukkan nama kategori"
+                  className="h-[52px] text-base"
                 />
               </Form.Item>
             )}
 
             {!statePageKateogries && (
-              <div>
+              <>
                 <Form.Item
                   label={
-                    <span className="text-caption text-neutral-700">Judul</span>
+                    <span className="text-body-sm font-medium text-deep-slate">
+                      Judul
+                    </span>
                   }
                   name="judul"
                   rules={[{ required: true, message: "Judul masih kosong" }]}
                 >
-                  <Input placeholder="Masukkan judul" className="h-11 text-base" />
+                  <Input
+                    placeholder="Masukkan judul"
+                    className="h-[52px] text-base"
+                  />
                 </Form.Item>
+
                 <Form.Item
                   label={
-                    <span className="text-caption text-neutral-700">
-                      Nama penulis
+                    <span className="text-body-sm font-medium text-deep-slate">
+                      Nama Penulis
                     </span>
                   }
                   name="penulis"
                   rules={[{ required: true, message: "Penulis masih kosong" }]}
                 >
-                  <Input className="h-11 text-base" />
+                  <Input className="h-[52px] text-base" placeholder="Nama penulis" />
                 </Form.Item>
+
                 <Form.Item
                   label={
-                    <span className="text-caption text-neutral-700">
-                      Unggah cover artikel
+                    <span className="text-body-sm font-medium text-deep-slate">
+                      Ubah Cover Artikel
                     </span>
                   }
                   name="image"
                 >
                   <label
-                    htmlFor="import_pelanggan"
-                    className="flex flex-col justify-center items-center w-full h-56 bg-primary-50 rounded-card border-2 border-dashed border-primary-200 cursor-pointer hover:bg-primary-100 transition-colors"
+                    htmlFor="update_artikel_cover"
+                    className="flex flex-col justify-center items-center w-full h-[180px] bg-faint-fog rounded-default border border-dashed border-light-ash hover:border-primary-500 hover:bg-polar-mist cursor-pointer transition-colors duration-150"
                   >
                     {imageFile ? (
-                      <div className="flex flex-col justify-center items-center text-primary-700 font-medium">
-                        {imageFile?.name}
+                      <div className="flex flex-col items-center gap-1 text-deep-slate">
+                        <UploadCloud size={28} strokeWidth={1.75} className="text-primary-600" />
+                        <span className="text-body-sm font-medium">{imageFile.name}</span>
                       </div>
                     ) : (
-                      <div className="flex flex-col justify-center items-center">
-                        <svg
-                          aria-hidden="true"
-                          className="mb-3 w-10 h-10 text-primary-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                          />
-                        </svg>
-                        <p className="text-sm text-primary-700 font-semibold">
-                          Klik untuk unggah
-                        </p>
-                        <p className="text-xs text-primary-600 mt-1">
-                          atau tarik & lepas
-                        </p>
+                      <div className="flex flex-col items-center gap-1 text-graphite">
+                        <UploadCloud size={28} strokeWidth={1.75} />
+                        <span className="text-body-sm">
+                          <span className="font-semibold text-deep-slate">Klik untuk unggah</span> cover baru
+                        </span>
+                        <span className="text-caption">JPEG, PNG, JPG</span>
                       </div>
                     )}
                     <input
-                      id="import_pelanggan"
+                      id="update_artikel_cover"
                       type="file"
-                      accept=".jpg, .jpeg, .png"
+                      accept=".jpg,.jpeg,.png"
                       className="hidden"
-                      onChange={(e) => {
-                        setImageFile(e.target.files[0]);
-                      }}
+                      onChange={(e) => setImageFile(e.target.files[0])}
                     />
                   </label>
                 </Form.Item>
+
                 <Form.Item
                   label={
-                    <span className="text-caption text-neutral-700">
+                    <span className="text-body-sm font-medium text-deep-slate">
                       Konten Artikel
                     </span>
                   }
                   name="content"
                 >
-                  <div className="border border-neutral-200 rounded-button overflow-hidden">
+                  <div className="border border-light-ash rounded-default overflow-hidden">
                     <ReactQuill
                       theme="snow"
                       value={valueContent}
@@ -380,7 +286,7 @@ export default function FormUpdateDataArtikel(props) {
                     />
                   </div>
                 </Form.Item>
-              </div>
+              </>
             )}
           </Form>
         </Modal>
