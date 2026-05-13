@@ -1,9 +1,13 @@
 import { Form, Input, message, Modal } from "antd";
-import DataTable from "../../components/ui/DataTable";
-import Button from "../../components/ui/Button";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import DataTable from "../../components/ui/DataTable";
+import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import InlineStatBar from "../../components/ui/InlineStatBar";
+import { desaApi } from "../../api/desa.api";
+import { isThisMonth } from "../../utilities/isThisMonth";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
@@ -14,86 +18,60 @@ export default function InputDesa() {
   const { data: dataSource, isLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa`
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data desa");
-      const data = await response.json();
-      return data.data;
+      const res = await desaApi.list();
+      return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal mengambil data desa",
-      });
-    },
+    onError: (err) => messageApi.error(err?.message ?? "Gagal mengambil data desa"),
   });
 
   const deleteDesaMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa/${id}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error("Gagal menghapus desa");
-      return response.json();
-    },
+    mutationFn: (id) => desaApi.remove(id),
     onSuccess: () => {
       messageApi.success("Desa berhasil dihapus");
       queryClient.invalidateQueries(["desa"]);
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal menghapus desa");
-    },
+    onError: (err) => messageApi.error(err?.message ?? "Gagal menghapus desa"),
   });
 
   const createDesaMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: values.name,
-            password: values.password,
-            password_confirmation: values.password_confirmation,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Data gagal tersimpan");
-      return response.json();
-    },
+    mutationFn: (values) => desaApi.create({
+      name: values.name,
+      password: values.password,
+      password_confirmation: values.password_confirmation,
+    }),
     onSuccess: () => {
       messageApi.success("Desa dan akun berhasil disimpan");
       queryClient.invalidateQueries(["desa"]);
       form.resetFields();
       setIsModalVisible(false);
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Data gagal tersimpan");
-    },
+    onError: (err) => messageApi.error(err?.message ?? "Data gagal tersimpan"),
   });
+
+  const rows = dataSource ?? [];
+  const stats = [
+    { label: "Total Desa", value: rows.length },
+    {
+      label: "Baru Bulan Ini",
+      value: rows.filter((d) => isThisMonth(d.created_at)).length,
+      accent: "primary",
+    },
+  ];
 
   const showDeleteConfirm = (id, name) => {
     Modal.confirm({
-      title: "Konfirmasi Hapus",
-      content: `Apakah Anda yakin ingin menghapus desa "${name}"?`,
-      okText: "Hapus",
-      okType: "danger",
+      title: "Hapus desa?",
+      icon: <AlertTriangle size={20} className="text-danger" />,
+      content: `Desa '` + name + `' akan dihapus.`,
+      okText: "Ya, Hapus",
       cancelText: "Batal",
-      onOk() {
-        deleteDesaMutation.mutate(id);
-      },
+      okButtonProps: { danger: true },
+      onOk: () => deleteDesaMutation.mutate(id),
     });
   };
 
   const columns = [
-    {
-      accessorKey: "name",
-      header: "Nama Desa",
-      enableSorting: true,
-    },
+    { accessorKey: "name", header: "Nama Desa", enableSorting: true },
     {
       id: "action",
       header: "Aksi",
@@ -113,71 +91,47 @@ export default function InputDesa() {
     },
   ];
 
-  const onFinish = (values) => {
-    createDesaMutation.mutate(values);
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
 
   return (
-    <div className="space-y-[25px]">
+    <div>
       {contextHolder}
-      <div className="flex items-start justify-between gap-[25px] flex-wrap">
-        <div className="min-w-0 flex-1">
-          <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
-            Data Master
-          </p>
-          <h1 className="text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
-            Kelola Desa
-          </h1>
-          <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
-            Daftar desa yang terdaftar dalam sistem posyandu.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="lg"
-          leadingIcon={<Plus size={20} strokeWidth={2} />}
-          onClick={showModal}
-          disabled={createDesaMutation.isPending}
-        >
-          Tambah Desa
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Data Master"
+        title="Kelola Desa"
+        subtitle="Daftar desa yang terdaftar dalam sistem posyandu."
+        action={
+          <Button
+            variant="primary"
+            size="lg"
+            leadingIcon={<Plus size={20} strokeWidth={2} />}
+            onClick={() => setIsModalVisible(true)}
+            disabled={createDesaMutation.isPending}
+          >
+            Tambah Desa
+          </Button>
+        }
+        stats={<InlineStatBar items={stats} loading={isLoading} />}
+      />
 
-      <div className="bg-white border border-light-ash rounded-default p-[25px] shadow-card">
-        <DataTable
-          columns={columns}
-          data={dataSource || []}
-          loading={
-            isLoading ||
-            createDesaMutation.isPending ||
-            deleteDesaMutation.isPending
-          }
-          rowKey="id"
-          title={
-            <h2 className="text-heading font-semibold text-deep-slate">
-              Daftar Desa
-            </h2>
-          }
-          searchPlaceholder="Cari desa..."
-          emptyText="Tidak ada data desa"
-        />
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
+        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]">
+          <DataTable
+            columns={columns}
+            data={rows}
+            loading={isLoading || createDesaMutation.isPending || deleteDesaMutation.isPending}
+            rowKey="id"
+            searchPlaceholder="Cari desa..."
+            emptyText="Belum ada desa terdaftar"
+          />
+        </div>
       </div>
 
       <Modal
-        title={
-          <span className="text-heading font-semibold text-deep-slate">
-            Tambah Desa
-          </span>
-        }
+        title={<span className="text-heading font-semibold text-deep-slate">Tambah Desa</span>}
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
@@ -185,7 +139,7 @@ export default function InputDesa() {
         <Form
           form={form}
           name="tambah_desa"
-          onFinish={onFinish}
+          onFinish={(v) => createDesaMutation.mutate(v)}
           autoComplete="off"
           layout="vertical"
         >
@@ -207,11 +161,7 @@ export default function InputDesa() {
             <Input.Password placeholder="Minimal 8 karakter" className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={
-              <span className="text-body-sm font-medium text-deep-slate">
-                Konfirmasi Kata Sandi
-              </span>
-            }
+            label={<span className="text-body-sm font-medium text-deep-slate">Konfirmasi Kata Sandi</span>}
             name="password_confirmation"
             dependencies={["password"]}
             rules={[
@@ -228,20 +178,10 @@ export default function InputDesa() {
             <Input.Password placeholder="Ulangi kata sandi" className="h-[52px] text-base" />
           </Form.Item>
           <div className="flex gap-[13px] justify-end pt-[13px]">
-            <Button
-              variant="default"
-              size="md"
-              onClick={handleCancel}
-              disabled={createDesaMutation.isPending}
-            >
+            <Button variant="default" size="md" onClick={handleCancel} disabled={createDesaMutation.isPending}>
               Batal
             </Button>
-            <Button
-              variant="primary"
-              size="md"
-              type="submit"
-              disabled={createDesaMutation.isPending}
-            >
+            <Button variant="primary" size="md" type="submit" disabled={createDesaMutation.isPending}>
               {createDesaMutation.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </div>
