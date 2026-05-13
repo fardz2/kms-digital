@@ -10,6 +10,7 @@ import {
   BookOpen,
   BarChart3,
   Sparkles,
+  PlayCircle,
 } from "lucide-react";
 import landingPageImage from "../../assets/img/baby-banner.svg";
 import NavbarComp from "../../components/layout/Navbar";
@@ -178,6 +179,42 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Video intro */}
+        <section className="max-w-page mx-auto px-[17px] md:px-[25px] pt-[67px] pb-[33px] md:pt-[95px]">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr] gap-[33px] md:gap-[50px] items-center">
+            <div>
+              <p className="inline-flex items-center gap-[8px] text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[17px]">
+                <PlayCircle size={14} strokeWidth={2.25} />
+                Video Perkenalan
+              </p>
+              <h2 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight mb-[17px]">
+                Kenal dulu,
+                <br />
+                <span className="text-primary-600">baru daftar.</span>
+              </h2>
+              <p className="text-body-lg text-graphite leading-relaxed max-w-[460px]">
+                Tonton perkenalan singkat tentang KMS Digital dan bagaimana
+                aplikasi ini membantu memantau gizi balita di desa.
+              </p>
+            </div>
+            <div className="relative">
+              <div
+                aria-hidden
+                className="absolute -inset-[13px] md:-inset-[17px] bg-primary-100/50 rounded-default -z-10"
+              />
+              <div className="relative aspect-video rounded-default overflow-hidden bg-deep-slate border border-light-ash shadow-card">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/oYwKLxEDNXU?autoplay=0&mute=1&loop=1&playlist=oYwKLxEDNXU&iv_load_policy=3&rel=0&vq=hd1080"
+                  title="Video perkenalan KMS Digital"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
             </div>
           </div>
         </section>
