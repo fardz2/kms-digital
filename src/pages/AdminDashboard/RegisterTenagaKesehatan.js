@@ -6,10 +6,10 @@ import {
   message,
   Row,
   Select,
-  Table,
   Modal,
   Spin,
 } from "antd";
+import DataTable from "../../components/ui/DataTable";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,6 @@ import useAuth from "../../hook/useAuth";
 export default function RegisterTenagaKesehatan() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -185,34 +184,33 @@ export default function RegisterTenagaKesehatan() {
   // Table columns configuration
   const columns = [
     {
-      title: "Nama",
-      dataIndex: "nama",
-      key: "nama",
-      filteredValue: [searchText],
-      onFilter: (value, record) =>
-        String(record.nama).toLowerCase().includes(value.toLowerCase()),
+      accessorKey: "nama",
+      header: "Nama",
+      enableSorting: true,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      accessorKey: "email",
+      header: "Email",
+      enableSorting: true,
     },
     {
-      title: "Desa",
-      dataIndex: ["desa", "name"],
-      key: "desa",
-      render: (text) => text || "N/A",
+      id: "desa",
+      header: "Desa",
+      accessorFn: (row) => row.desa?.name ?? "N/A",
+      enableSorting: true,
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
+      id: "action",
+      header: "Aksi",
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
         <div>
           <Button
             type="dashed"
             danger
             size="small"
-            onClick={() => showDeleteConfirm(record.id)}
+            onClick={() => showDeleteConfirm(row.original.id)}
             disabled={
               createTenagaKesehatanMutation.isPending ||
               deleteTenagaKesehatanMutation.isPending
@@ -295,20 +293,18 @@ export default function RegisterTenagaKesehatan() {
             <p className="text-base">Apakah Anda yakin ingin menghapus Tenaga Kesehatan ini?</p>
           </Modal>
 
-          <Table
-            title={() => (
-              <div className="flex justify-between items-center gap-4 flex-wrap">
-                <h2 className="text-h3 font-display text-neutral-900">Daftar Tenaga Kesehatan</h2>
-                <Input.Search placeholder="Cari tenaga kesehatan..." onSearch={(value) => setSearchedText(value)} className="w-full md:w-64" allowClear />
-              </div>
-            )}
-            dataSource={tenagaKesehatanData || []}
+          <DataTable
             columns={columns}
-            loading={tenagaKesehatanLoading || createTenagaKesehatanMutation.isPending || deleteTenagaKesehatanMutation.isPending}
-            pagination={{ pageSize: 5 }}
+            data={tenagaKesehatanData || []}
+            loading={
+              tenagaKesehatanLoading ||
+              createTenagaKesehatanMutation.isPending ||
+              deleteTenagaKesehatanMutation.isPending
+            }
             rowKey="id"
-            locale={{ emptyText: "Tidak ada data Tenaga Kesehatan" }}
-            scroll={{ x: "max-content" }}
+            title={<h2 className="text-h3 font-display text-neutral-900">Daftar Tenaga Kesehatan</h2>}
+            searchPlaceholder="Cari tenaga kesehatan..."
+            emptyText="Tidak ada data Tenaga Kesehatan"
           />
         </div>
       </div>
