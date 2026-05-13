@@ -8,6 +8,8 @@ export default function PosyanduHeader({
   posyanduName,
   sudahCount,
   totalCount,
+  pendingCount = 0,
+  onApprove,
   onLaporan,
   onKeluar,
 }) {
@@ -49,7 +51,20 @@ export default function PosyanduHeader({
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+          {pendingCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onApprove}
+              style={{
+                color: '#FFFFFF',
+                background: 'rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              ✔ Perlu Approve ({pendingCount})
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={onLaporan} style={{ color: '#FFFFFF' }}>
             📊 Laporan
           </Button>

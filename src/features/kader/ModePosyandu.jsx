@@ -4,11 +4,16 @@ import moment from 'moment';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
+import ApproveModal from './ApproveModal';
 import { classifyBalita, priority } from './classifyBalita';
 import Button from '../../components/ui/Button';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import { useSession } from '../auth/useSession';
 import { usePengukuranBulananKader } from '../../queries/usePengukuranBulananKader';
+import {
+  usePendingOrangTua,
+  usePendingAnak,
+} from '../../queries/useApproveQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 
 export default function ModePosyandu() {
@@ -22,6 +27,11 @@ export default function ModePosyandu() {
   const [existingPengukuran, setExistingPengukuran] = useState(null);
   const [prefillFrom, setPrefillFrom] = useState(null);
   const [tambahOpen, setTambahOpen] = useState(false);
+  const [approveOpen, setApproveOpen] = useState(false);
+
+  const { data: pendingOT } = usePendingOrangTua(true);
+  const { data: pendingAnak } = usePendingAnak(true);
+  const pendingCount = (pendingOT?.length ?? 0) + (pendingAnak?.length ?? 0);
 
   const currentBulan = moment().format('YYYY-MM');
 
@@ -106,6 +116,8 @@ export default function ModePosyandu() {
         posyanduName={user?.posyandu_name}
         sudahCount={counts.semua - counts.belum}
         totalCount={counts.semua}
+        pendingCount={pendingCount}
+        onApprove={() => setApproveOpen(true)}
         onLaporan={() => navigate('/kader/laporan')}
         onKeluar={handleKeluar}
       />
@@ -200,6 +212,8 @@ export default function ModePosyandu() {
         isOpen={tambahOpen}
         onCancel={() => setTambahOpen(false)}
       />
+
+      <ApproveModal open={approveOpen} onClose={() => setApproveOpen(false)} />
     </div>
   );
 }
