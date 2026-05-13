@@ -1100,63 +1100,11 @@ const filteredKaderData = useMemo(() => {
 
 Note: search text filtering is now handled by DataTable's built-in global filter — remove the `searchText` state and its input. Wire status filter to a native `<select>` inside the custom toolbar.
 
-- [ ] **Step 4: Replace Table render with DataTable + custom toolbar**
+- [ ] **Step 4: Replace Table render with DataTable + status filter sibling**
+
+Because the page needs a status filter dropdown AND we want to keep DataTable's built-in search + column visibility, render the status filter as a sibling block above `<DataTable>` (do NOT use the `toolbar` prop, which would replace DataTable's default toolbar).
 
 Replace the `<Table ... />` block (lines 571-611) with:
-```jsx
-<DataTable
-  columns={columns}
-  data={filteredKaderData}
-  loading={
-    kaderLoading ||
-    createKaderMutation.isPending ||
-    updateKaderMutation.isPending ||
-    deleteKaderMutation.isPending
-  }
-  rowKey="id"
-  searchPlaceholder="Cari kader..."
-  emptyText="Tidak ada data Kader Posyandu"
-  toolbar={
-    <div className="flex items-center justify-between gap-4 flex-wrap">
-      <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
-      <div className="flex items-center gap-2 flex-wrap">
-        <select
-          value={statusFilter === null ? "" : String(statusFilter)}
-          onChange={(e) => {
-            const v = e.target.value;
-            setStatusFilter(v === "" ? null : v === "true");
-          }}
-          className="rounded-button border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
-          disabled={
-            createKaderMutation.isPending ||
-            updateKaderMutation.isPending ||
-            deleteKaderMutation.isPending
-          }
-        >
-          <option value="">Semua Status</option>
-          <option value="true">Approve</option>
-          <option value="false">Belum di Approve</option>
-        </select>
-        <button
-          onClick={resetFilters}
-          disabled={
-            createKaderMutation.isPending ||
-            updateKaderMutation.isPending ||
-            deleteKaderMutation.isPending
-          }
-          className="px-4 py-2 rounded-button bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium disabled:opacity-60 transition-colors"
-        >
-          Reset
-        </button>
-      </div>
-    </div>
-  }
-/>
-```
-
-Note: Because `toolbar` prop fully replaces the default toolbar, the built-in search + column visibility won't render. To keep search working for this page, provide a DataTable without custom toolbar is ideal, but this page needs the status dropdown. Alternative: set `toolbar={null}` and move the status filter above `<DataTable>`. Use the alternative:
-
-**Preferred implementation (replace the block above):**
 ```jsx
 <div className="flex items-center justify-between gap-4 flex-wrap">
   <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
@@ -1206,16 +1154,16 @@ Note: Because `toolbar` prop fully replaces the default toolbar, the built-in se
 />
 ```
 
-This keeps DataTable's built-in search + column visibility toggle and puts status filter in a sibling toolbar above.
+This keeps DataTable's built-in search + column visibility toggle. Status filter lives above as a sibling.
 
-Also update `resetFilters` (line 246-249) to drop `setSearchedText`:
+Also update `resetFilters` (lines 246-249 in the original file) to drop `setSearchedText`:
 ```js
 const resetFilters = () => {
   setStatusFilter(null);
 };
 ```
 
-Remove the `searchText` state (line 20) and `setSearchedText` references. The `filteredValue`/`onFilter` in columns are already removed above.
+Remove the `searchText` state declaration (line 20): delete `const [searchText, setSearchedText] = useState("");`. Remove any remaining references to `searchText` and `setSearchedText` in the file.
 
 - [ ] **Step 5: Run the build**
 
