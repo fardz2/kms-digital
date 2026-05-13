@@ -130,6 +130,7 @@ export default function ModePosyandu() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari nama balita..."
+              aria-label="Cari balita"
               className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-button text-base placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
             />
             <span

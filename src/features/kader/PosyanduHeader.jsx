@@ -42,7 +42,7 @@ export default function PosyanduHeader({
             {pendingCount > 0 && (
               <button
                 onClick={onApprove}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors duration-150"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
               >
                 <span aria-hidden>✔</span>
                 Approve
@@ -53,13 +53,13 @@ export default function PosyanduHeader({
             )}
             <button
               onClick={onLaporan}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
               📊 Laporan
             </button>
             <button
               onClick={onKeluar}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
               Keluar
             </button>
