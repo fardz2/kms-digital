@@ -389,290 +389,228 @@ export default function RegisterKaderPosyandu() {
 
   return (
     <>
-      <Container
-        fluid
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "20px",
-        }}
-      >
+      <div className="bg-white rounded-card shadow-card p-6">
         {contextHolder}
-
-        <Row justify="space-between">
-          <Col sm={24}>
-            <Button
-              type="primary"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-h2 font-display text-neutral-900">Kelola Kader Posyandu</h1>
+            <button
               onClick={showModal}
-              style={{ marginBottom: 16 }}
               disabled={
                 createKaderMutation.isPending ||
                 updateKaderMutation.isPending ||
                 deleteKaderMutation.isPending
               }
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
             >
-              Tambah Kader Posyandu
-            </Button>
-            <Modal
-              title={
-                modalMode === "add"
-                  ? "Registrasi Kader Posyandu"
-                  : "Edit Kader Posyandu"
-              }
-              open={isModalVisible}
-              onCancel={handleCancel}
-              footer={null}
+              + Tambah Kader Posyandu
+            </button>
+          </div>
+          <Modal
+            title={
+              <span className="text-h3 font-display text-neutral-900">
+                {modalMode === "add" ? "Registrasi Kader Posyandu" : "Edit Kader Posyandu"}
+              </span>
+            }
+            open={isModalVisible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form
+              form={form}
+              name="basic"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              layout="vertical"
             >
-              <Form
-                form={form}
-                name="basic"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout="vertical"
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Nama</span>}
+                name="nama"
+                rules={[{ required: true, message: "Nama masih kosong", type: "string" }]}
               >
-                <Form.Item
-                  label="Nama"
-                  name="nama"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nama masih kosong!",
-                      type: "string",
-                    },
-                  ]}
-                >
-                  <Input placeholder="Nama Lengkap" />
-                </Form.Item>
+                <Input placeholder="Nama Lengkap" className="h-11 text-base" />
+              </Form.Item>
 
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Email masih kosong!",
-                    },
-                    {
-                      type: "email",
-                      message: "Email belum sesuai!",
-                    },
-                  ]}
-                >
-                  <Input placeholder="user@email.com" />
-                </Form.Item>
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Email</span>}
+                name="email"
+                rules={[
+                  { required: true, message: "Email masih kosong" },
+                  { type: "email", message: "Format email tidak valid" },
+                ]}
+              >
+                <Input placeholder="email@contoh.com" className="h-11 text-base" />
+              </Form.Item>
 
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={
-                    modalMode === "add"
-                      ? [
-                          {
-                            required: true,
-                            message: "Password masih kosong!",
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Kata Sandi</span>}
+                name="password"
+                rules={
+                  modalMode === "add"
+                    ? [
+                        { required: true, message: "Kata sandi masih kosong" },
+                        { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+                      ]
+                    : [{ pattern: "^.{8,}$", message: "Minimal 8 karakter" }]
+                }
+              >
+                <Input.Password
+                  placeholder={modalMode === "add" ? "Kata sandi" : "Kosongkan jika tidak diubah"}
+                  className="h-11 text-base"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>}
+                name="confirm"
+                dependencies={["password"]}
+                rules={
+                  modalMode === "add" || form.getFieldValue("password")
+                    ? [
+                        { required: true, message: "Konfirmasi kata sandi" },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (!value || getFieldValue("password") === value)
+                              return Promise.resolve();
+                            return Promise.reject(new Error("Kata sandi tidak sesuai"));
                           },
-                          {
-                            pattern: "^.{8,}$",
-                            message: "Password minimal 8 karakter",
-                          },
-                        ]
-                      : [
-                          {
-                            pattern: "^.{8,}$",
-                            message: "Password minimal 8 karakter",
-                          },
-                        ]
-                  }
-                >
-                  <Input.Password placeholder="Password (kosongkan jika tidak diubah)" />
-                </Form.Item>
+                        }),
+                      ]
+                    : []
+                }
+              >
+                <Input.Password placeholder="Konfirmasi" className="h-11 text-base" />
+              </Form.Item>
 
-                <Form.Item
-                  label="Confirm Password"
-                  name="confirm"
-                  dependencies={["password"]}
-                  rules={
-                    modalMode === "add" || form.getFieldValue("password")
-                      ? [
-                          {
-                            required: true,
-                            message: "Silahkan Confirm Password Anda!",
-                          },
-                          ({ getFieldValue }) => ({
-                            validator(_, value) {
-                              if (
-                                !value ||
-                                getFieldValue("password") === value
-                              ) {
-                                return Promise.resolve();
-                              }
-                              return Promise.reject(
-                                new Error("Password tidak sesuai!")
-                              );
-                            },
-                          }),
-                        ]
-                      : []
-                  }
+              <Form.Item
+                name="desa"
+                label={<span className="text-caption text-neutral-700">Desa</span>}
+                rules={[{ required: true, message: "Desa masih kosong" }]}
+              >
+                <Select
+                  listHeight={100}
+                  optionFilterProp="children"
+                  showSearch
+                  placeholder="Pilih Desa"
+                  disabled={desaLoading}
+                  className="h-11"
                 >
-                  <Input.Password placeholder="Confirm Password" />
-                </Form.Item>
-
-                <Form.Item
-                  name="desa"
-                  label="Desa"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Desa masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select
-                    listHeight={100}
-                    optionFilterProp="children"
-                    showSearch
-                    placeholder="Pilih Desa"
-                    disabled={desaLoading}
-                  >
-                    {dataDesa &&
-                      dataDesa.map((value) => (
-                        <Select.Option key={value.id} value={value.id}>
-                          {value.name}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  name="posyandu"
-                  label="Posyandu"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Posyandu masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select
-                    listHeight={100}
-                    optionFilterProp="children"
-                    showSearch
-                    placeholder="Pilih Posyandu"
-                    disabled={posyanduLoading}
-                  >
-                    {dataSource &&
-                      dataSource.map((value) => (
-                        <Select.Option key={value.id} value={value.id}>
-                          {value.nama}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  name="status"
-                  label="Status"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Status masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select placeholder="Pilih Status">
-                    <Select.Option value={true}>Approve</Select.Option>
-                    <Select.Option value={false}>
-                      Belum di Approve
+                  {dataDesa?.map((value) => (
+                    <Select.Option key={value.id} value={value.id}>
+                      {value.name}
                     </Select.Option>
-                  </Select>
-                </Form.Item>
+                  ))}
+                </Select>
+              </Form.Item>
 
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
+              <Form.Item
+                name="posyandu"
+                label={<span className="text-caption text-neutral-700">Posyandu</span>}
+                rules={[{ required: true, message: "Posyandu masih kosong" }]}
+              >
+                <Select
+                  listHeight={100}
+                  optionFilterProp="children"
+                  showSearch
+                  placeholder="Pilih Posyandu"
+                  disabled={posyanduLoading}
+                  className="h-11"
+                >
+                  {dataSource?.map((value) => (
+                    <Select.Option key={value.id} value={value.id}>
+                      {value.nama}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="status"
+                label={<span className="text-caption text-neutral-700">Status</span>}
+                rules={[{ required: true, message: "Status masih kosong" }]}
+              >
+                <Select placeholder="Pilih Status" className="h-11">
+                  <Select.Option value={true}>Approve</Select.Option>
+                  <Select.Option value={false}>Belum di Approve</Select.Option>
+                </Select>
+              </Form.Item>
+
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
+                  className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
+                  className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
+                >
+                  Simpan
+                </button>
+              </div>
+            </Form>
+          </Modal>
+
+          <Modal
+            title={<span className="text-h3 font-display text-neutral-900">Konfirmasi Hapus</span>}
+            open={isDeleteModalVisible}
+            onOk={handleDeleteConfirm}
+            onCancel={handleDeleteCancel}
+            okText="Hapus"
+            cancelText="Batal"
+            okButtonProps={{ danger: true }}
+          >
+            <p className="text-base">Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
+          </Modal>
+
+          <Table
+            title={() => (
+              <div className="flex justify-between items-center gap-4 flex-wrap">
+                <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Input.Search
+                    placeholder="Cari kader..."
+                    value={searchText}
+                    onChange={(e) => setSearchedText(e.target.value)}
+                    onSearch={(value) => setSearchedText(value)}
+                    className="w-full md:w-64"
+                    allowClear
+                  />
+                  <button
+                    onClick={resetFilters}
                     disabled={
                       createKaderMutation.isPending ||
-                      updateKaderMutation.isPending
+                      updateKaderMutation.isPending ||
+                      deleteKaderMutation.isPending
                     }
+                    className="px-4 py-2 rounded-button bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium disabled:opacity-60 transition-colors"
                   >
-                    Simpan
-                  </Button>
-                  <Button
-                    style={{ marginLeft: 8 }}
-                    onClick={handleCancel}
-                    disabled={
-                      createKaderMutation.isPending ||
-                      updateKaderMutation.isPending
-                    }
-                  >
-                    Batal
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-
-            <Modal
-              title="Konfirmasi Hapus"
-              open={isDeleteModalVisible}
-              onOk={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-              okText="Hapus"
-              cancelText="Batal"
-              okButtonProps={{ danger: true }}
-            >
-              <p>Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
-            </Modal>
-
-            <Table
-              title={() => (
-                <div className="flex justify-between items-center">
-                  <div className="flex justify-start items-center">
-                    <h2 className="text-sm font-semibold">
-                      Daftar Kader Posyandu
-                    </h2>
-                  </div>
-                  <div className="flex justify-end items-center gap-2">
-                    <Input.Search
-                      placeholder="Search here ..."
-                      value={searchText}
-                      onChange={(e) => setSearchedText(e.target.value)}
-                      onSearch={(value) => setSearchedText(value)}
-                    />
-                    <Button
-                      onClick={resetFilters}
-                      disabled={
-                        createKaderMutation.isPending ||
-                        updateKaderMutation.isPending ||
-                        deleteKaderMutation.isPending
-                      }
-                    >
-                      Reset Filters
-                    </Button>
-                  </div>
+                    Reset
+                  </button>
                 </div>
-              )}
-              dataSource={kaderData || []}
-              columns={columns}
-              loading={
-                kaderLoading ||
-                createKaderMutation.isPending ||
-                updateKaderMutation.isPending ||
-                deleteKaderMutation.isPending
-              }
-              pagination={{ pageSize: 5 }}
-              rowKey="id"
-              onChange={handleTableChange}
-              locale={{
-                emptyText: "Tidak ada data Kader Posyandu",
-              }}
-              scroll={{ x: "max-content" }}
-            />
-          </Col>
-        </Row>
-      </Container>
+              </div>
+            )}
+            dataSource={kaderData || []}
+            columns={columns}
+            loading={
+              kaderLoading ||
+              createKaderMutation.isPending ||
+              updateKaderMutation.isPending ||
+              deleteKaderMutation.isPending
+            }
+            pagination={{ pageSize: 5 }}
+            rowKey="id"
+            onChange={handleTableChange}
+            locale={{ emptyText: "Tidak ada data Kader Posyandu" }}
+            scroll={{ x: "max-content" }}
+          />
+        </div>
+      </div>
     </>
   );
 }
