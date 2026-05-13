@@ -27,44 +27,33 @@ function confirmAction({ title, content, okText, onOk }) {
 }
 
 function OrangTuaList({ data, isLoading, onApprove, onReject }) {
-  if (isLoading) return <div>Memuat daftar orang tua...</div>;
+  if (isLoading) return <div className="text-neutral-500">Memuat daftar orang tua...</div>;
   if (!data || data.length === 0) {
     return (
-      <div style={{ color: 'var(--color-muted)', textAlign: 'center', padding: 'var(--space-lg)' }}>
+      <div className="text-center py-8 text-neutral-500">
         Tidak ada orang tua yang menunggu persetujuan 🎉
       </div>
     );
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+    <div className="flex flex-col gap-3">
       {data.map((ot) => (
-        <Card key={ot.id}>
-          <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)' }}>
+        <Card key={ot.id} className="p-4">
+          <div className="text-h3 font-display text-neutral-900">
             {ot.nama ?? '-'}
           </div>
           {ot.email && (
-            <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
-              {ot.email}
-            </div>
+            <div className="text-caption text-neutral-500 mt-0.5">{ot.email}</div>
           )}
           {ot.alamat && (
-            <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
-              {ot.alamat}
-            </div>
+            <div className="text-caption text-neutral-500">{ot.alamat}</div>
           )}
           {ot.created_at && (
-            <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
+            <div className="text-caption text-neutral-500 mt-1">
               Daftar: {moment(ot.created_at).format('DD MMM YYYY')}
             </div>
           )}
-          <div
-            style={{
-              display: 'flex',
-              gap: 'var(--space-sm)',
-              justifyContent: 'flex-end',
-              marginTop: 'var(--space-sm)',
-            }}
-          >
+          <div className="flex gap-2 justify-end mt-3">
             <Button
               variant="danger"
               size="sm"
@@ -90,47 +79,38 @@ function OrangTuaList({ data, isLoading, onApprove, onReject }) {
 }
 
 function AnakList({ data, isLoading, onApprove, onReject }) {
-  if (isLoading) return <div>Memuat daftar anak...</div>;
+  if (isLoading) return <div className="text-neutral-500">Memuat daftar anak...</div>;
   if (!data || data.length === 0) {
     return (
-      <div style={{ color: 'var(--color-muted)', textAlign: 'center', padding: 'var(--space-lg)' }}>
+      <div className="text-center py-8 text-neutral-500">
         Tidak ada anak yang menunggu persetujuan 🎉
       </div>
     );
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+    <div className="flex flex-col gap-3">
       {data.map((anak) => {
         const umurBulan = anak.tanggal_lahir
           ? moment().diff(moment(anak.tanggal_lahir), 'month')
           : null;
         return (
-          <Card key={anak.id}>
-            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)' }}>
+          <Card key={anak.id} className="p-4">
+            <div className="text-h3 font-display text-neutral-900">
               {anak.nama ?? '-'}
             </div>
-            <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
+            <div className="text-caption text-neutral-500 mt-0.5">
               {umurBulan != null ? `${umurBulan} bulan · ` : ''}
               {anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
             </div>
             {anak.nama_ortu && (
-              <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
-                Ortu: {anak.nama_ortu}
-              </div>
+              <div className="text-caption text-neutral-500">Ortu: {anak.nama_ortu}</div>
             )}
             {anak.created_at && (
-              <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
+              <div className="text-caption text-neutral-500 mt-1">
                 Daftar: {moment(anak.created_at).format('DD MMM YYYY')}
               </div>
             )}
-            <div
-              style={{
-                display: 'flex',
-                gap: 'var(--space-sm)',
-                justifyContent: 'flex-end',
-                marginTop: 'var(--space-sm)',
-              }}
-            >
+            <div className="flex gap-2 justify-end mt-3">
               <Button
                 variant="danger"
                 size="sm"
@@ -180,7 +160,7 @@ export default function ApproveModal({ open, onClose }) {
     <>
       {toast.contextHolder}
       <Modal title="Perlu Persetujuan" open={open} onCancel={onClose} footer={null} width={640}>
-        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+        <div className="flex gap-2 mb-4">
           <Button
             variant={tab === 'ot' ? 'primary' : 'secondary'}
             size="sm"
