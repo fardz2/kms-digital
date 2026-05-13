@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import Button from '../ui/Button';
 import { useSession } from '../../features/auth/useSession';
 
@@ -15,16 +16,16 @@ export default function AppShell({ children, menu = [], activeKey }) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <nav className="bg-white border-b border-neutral-200 px-4 md:px-6 py-3 flex items-center gap-4 flex-wrap">
-        <div className="font-display font-bold text-h3 text-neutral-900">
+    <div className="min-h-screen bg-faint-fog">
+      <nav className="bg-white border-b border-light-ash px-[17px] md:px-[25px] py-[13px] flex items-center gap-[17px] flex-wrap">
+        <div className="font-bold text-heading text-deep-slate">
           KMS Digital
         </div>
-        <div className="flex gap-2 flex-1 flex-wrap">
+        <div className="flex gap-[8px] flex-1 flex-wrap">
           {menu.map((item) => (
             <Button
               key={item.key}
-              variant={activeKey === item.key ? 'primary' : 'ghost'}
+              variant={activeKey === item.key ? 'dark' : 'ghost'}
               size="sm"
               onClick={() => navigate(item.path)}
             >
@@ -32,13 +33,18 @@ export default function AppShell({ children, menu = [], activeKey }) {
             </Button>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-[13px]">
           {user?.name && (
-            <span className="text-caption text-neutral-500 hidden md:inline">
+            <span className="text-caption text-graphite hidden md:inline">
               {user.name}
             </span>
           )}
-          <Button variant="secondary" size="sm" onClick={handleLogout}>
+          <Button
+            variant="default"
+            size="sm"
+            leadingIcon={<LogOut size={16} strokeWidth={1.75} />}
+            onClick={handleLogout}
+          >
             Keluar
           </Button>
         </div>

@@ -5,7 +5,7 @@ export default function Modal({ title, open, onCancel, footer, width, children }
   return (
     <AntModal
       title={
-        <span className="text-h3 font-display text-neutral-900">{title}</span>
+        <span className="text-heading font-semibold text-deep-slate">{title}</span>
       }
       open={open}
       onCancel={onCancel}
@@ -13,7 +13,6 @@ export default function Modal({ title, open, onCancel, footer, width, children }
       width={width ?? 560}
       destroyOnClose
       maskClosable={false}
-      bodyStyle={{ padding: '1.25rem', fontFamily: 'Inter, sans-serif', fontSize: '1rem' }}
     >
       {children}
     </AntModal>
