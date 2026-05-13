@@ -1,41 +1,25 @@
 import React from 'react';
 
-export default function StatCard({ label, value, icon, color = 'var(--color-primary)' }) {
+const ACCENT = {
+  primary: 'text-primary',
+  success: 'text-success',
+  warning: 'text-warning',
+  danger:  'text-danger',
+  accent:  'text-accent',
+  neutral: 'text-neutral-900',
+};
+
+export default function StatCard({ label, value, icon, accent = 'primary' }) {
+  const color = ACCENT[accent] ?? ACCENT.primary;
   return (
-    <div
-      style={{
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-card)',
-        padding: 'var(--space-md)',
-        textAlign: 'center',
-        boxShadow: 'var(--shadow-card)',
-      }}
-    >
+    <div className="bg-white border border-neutral-200 rounded-card shadow-card p-5 text-center">
       {icon && (
-        <div style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-xs)' }}>
-          {icon}
-        </div>
+        <div className="text-2xl mb-1" aria-hidden="true">{icon}</div>
       )}
-      <div
-        style={{
-          fontSize: 'var(--text-display)',
-          fontWeight: 'var(--font-weight-bold)',
-          color,
-          lineHeight: 1,
-        }}
-      >
+      <div className={`text-display font-display leading-none tabular-nums ${color}`}>
         {value}
       </div>
-      <div
-        style={{
-          fontSize: 'var(--text-base)',
-          color: 'var(--color-muted)',
-          marginTop: 'var(--space-xs)',
-        }}
-      >
-        {label}
-      </div>
+      <div className="text-caption text-neutral-500 mt-1">{label}</div>
     </div>
   );
 }

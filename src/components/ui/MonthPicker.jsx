@@ -11,7 +11,7 @@ export default function MonthPicker({ value, onChange }) {
       onChange={(v) => v && onChange?.(v.format('YYYY-MM'))}
       allowClear={false}
       format="MMMM YYYY"
-      style={{ height: 40, fontSize: 'var(--text-base)' }}
+      className="w-full h-11 text-base"
     />
   );
 }

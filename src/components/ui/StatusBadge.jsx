@@ -1,33 +1,30 @@
 import React from 'react';
 
-const STATUS_CONFIG = {
-  normal: { label: 'Normal', bg: 'var(--color-success)', icon: '\u2705' },
-  kurang: { label: 'Kurang', bg: 'var(--color-warning)', icon: '\u26A0\uFE0F' },
-  stunting: { label: 'Stunting', bg: 'var(--color-danger)', icon: '\uD83D\uDD34' },
-  obesitas: { label: 'Obesitas', bg: 'var(--color-danger)', icon: '\uD83D\uDD34' },
-  unknown: { label: '-', bg: 'var(--color-muted)', icon: '\u2753' },
+const STYLES = {
+  normal:   'bg-success-bg text-success',
+  kurang:   'bg-warning-bg text-amber-800',
+  stunting: 'bg-danger-bg text-danger',
+  obesitas: 'bg-danger-bg text-danger',
+  unknown:  'bg-neutral-100 text-neutral-500',
+};
+
+const LABELS = {
+  normal: 'Normal',
+  kurang: 'Kurang',
+  stunting: 'Stunting',
+  obesitas: 'Obesitas',
+  unknown: '-',
 };
 
 export default function StatusBadge({ status }) {
   const key = String(status || 'unknown').toLowerCase();
-  const config = STATUS_CONFIG[key] || STATUS_CONFIG.unknown;
-
+  const style = STYLES[key] || STYLES.unknown;
+  const label = LABELS[key] || LABELS.unknown;
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 'var(--space-xs)',
-        background: config.bg,
-        color: '#FFFFFF',
-        padding: 'var(--space-xs) var(--space-sm)',
-        borderRadius: 'var(--radius-button)',
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--font-weight-bold)',
-      }}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${style}`}
     >
-      <span aria-hidden="true">{config.icon}</span>
-      {config.label}
+      {label}
     </span>
   );
 }

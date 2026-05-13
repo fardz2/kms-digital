@@ -1,25 +1,26 @@
 import React from 'react';
 
-export default function Card({ title, footer, onClick, style: styleProp, children }) {
-  const style = {
-    background: 'var(--color-bg)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-card)',
-    boxShadow: 'var(--shadow-card)',
-    padding: 'var(--space-lg)',
-    cursor: onClick ? 'pointer' : 'default',
-    transition: 'transform 0.15s',
-    ...styleProp,
-  };
+export default function Card({
+  title,
+  footer,
+  onClick,
+  className = '',
+  children,
+}) {
+  const interactive = !!onClick;
+  const base =
+    'bg-white border border-neutral-200 rounded-card shadow-card p-6 transition-all duration-200 ease-out-quart';
+  const interactiveClasses = interactive
+    ? 'cursor-pointer hover:border-primary-200 hover:shadow-raised hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-primary-300'
+    : '';
 
   return (
     <div
       onClick={onClick}
-      style={style}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
       onKeyDown={
-        onClick
+        interactive
           ? (e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -28,14 +29,13 @@ export default function Card({ title, footer, onClick, style: styleProp, childre
             }
           : undefined
       }
+      className={`${base} ${interactiveClasses} ${className}`}
     >
       {title && (
-        <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--space-md)' }}>
-          {title}
-        </div>
+        <div className="text-h3 font-display text-neutral-900 mb-4">{title}</div>
       )}
       <div>{children}</div>
-      {footer && <div style={{ marginTop: 'var(--space-md)' }}>{footer}</div>}
+      {footer && <div className="mt-4">{footer}</div>}
     </div>
   );
 }
