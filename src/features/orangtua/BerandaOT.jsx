@@ -28,46 +28,25 @@ export default function BerandaOT() {
         subtitle="Pantau pertumbuhan anak Anda"
       />
 
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 720, margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 'var(--space-md)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 'var(--text-lg)',
-              fontWeight: 'var(--font-weight-bold)',
-              margin: 0,
-            }}
-          >
-            Anak Saya
-          </h2>
+      <div className="px-4 py-6 max-w-3xl mx-auto space-y-8">
+        <div className="flex justify-between items-center gap-3 flex-wrap">
+          <h2 className="text-h2 font-display text-neutral-900 m-0">Anak Saya</h2>
           <Button variant="primary" size="sm" onClick={() => setFormOpen(true)}>
             + Tambah Anak
           </Button>
         </div>
 
-        {isLoading && <div>Memuat...</div>}
+        {isLoading && <div className="text-neutral-500">Memuat...</div>}
 
         {!isLoading && (!anakList || anakList.length === 0) && (
           <Card>
-            <div
-              style={{
-                textAlign: 'center',
-                color: 'var(--color-muted)',
-                padding: 'var(--space-lg)',
-              }}
-            >
+            <div className="text-center py-6 text-neutral-500">
               Belum ada data anak
             </div>
           </Card>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+        <div className="flex flex-col gap-3">
           {(anakList ?? []).map((anak) => {
             const umurBulan = anak.tanggal_lahir
               ? moment().diff(moment(anak.tanggal_lahir), 'month')
@@ -76,75 +55,47 @@ export default function BerandaOT() {
               <Card
                 key={anak.id}
                 onClick={() => navigate(`/orangtua/balita/${anak.id}`)}
-                style={{ cursor: 'pointer' }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
+                <div className="flex justify-between items-center">
                   <div>
-                    <div
-                      style={{
-                        fontSize: 'var(--text-lg)',
-                        fontWeight: 'var(--font-weight-bold)',
-                      }}
-                    >
+                    <div className="text-h3 font-display text-neutral-900">
                       {anak.nama}
                     </div>
-                    <div
-                      style={{
-                        fontSize: 'var(--text-base)',
-                        color: 'var(--color-muted)',
-                      }}
-                    >
-                      {umurBulan != null ? `${umurBulan} bulan` : '-'} ·{' '}
+                    <div className="text-caption text-neutral-500 mt-0.5">
+                      {umurBulan != null ? `${umurBulan} bulan · ` : ''}
                       {anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
                     </div>
                   </div>
-                  <div style={{ fontSize: 'var(--text-xl)', color: 'var(--color-muted)' }}>
-                    ›
-                  </div>
+                  <div className="text-2xl text-neutral-300">›</div>
                 </div>
               </Card>
             );
           })}
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 'var(--space-md)',
-            marginTop: 'var(--space-xl)',
-          }}
-        >
-          <Card onClick={() => navigate('/orangtua/forum')}>
-            <div style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-sm)' }}>
-              💬
-            </div>
-            <div
-              style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-bold)',
-              }}
-            >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <Card
+            onClick={() => navigate('/orangtua/forum')}
+            className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+          >
+            <div className="text-display mb-2" aria-hidden>💬</div>
+            <div className="text-h3 font-display text-neutral-900">
               Forum Tanya Jawab
             </div>
-          </Card>
-          <Card onClick={() => navigate('/artikel')}>
-            <div style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-sm)' }}>
-              📰
+            <div className="text-caption text-neutral-600 mt-1">
+              Tanya tenaga kesehatan
             </div>
-            <div
-              style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-bold)',
-              }}
-            >
+          </Card>
+          <Card
+            onClick={() => navigate('/artikel')}
+            className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+          >
+            <div className="text-display mb-2" aria-hidden>📰</div>
+            <div className="text-h3 font-display text-neutral-900">
               Artikel Kesehatan
+            </div>
+            <div className="text-caption text-neutral-600 mt-1">
+              Baca artikel edukasi gizi
             </div>
           </Card>
         </div>

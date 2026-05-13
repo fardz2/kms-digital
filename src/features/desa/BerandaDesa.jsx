@@ -21,13 +21,12 @@ export default function BerandaDesa() {
         title={`Desa ${user?.nama_desa ?? user?.desa_name ?? ''}`}
         subtitle="Rekap gizi balita se-desa"
       />
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 960, margin: '0 auto' }}>
-        <div style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="px-4 py-6 max-w-5xl mx-auto">
+        <div className="mb-6">
           <Button variant="primary" size="md" onClick={() => navigate('/desa/acara')}>
             📅 Kelola Acara Posyandu
           </Button>
         </div>
-
         <LaporanDesa />
       </div>
     </AppShell>
