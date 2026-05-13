@@ -38,23 +38,28 @@ export default function BerandaTenkes() {
     <AppShell menu={MENU} activeKey="beranda">
       <PageHeader
         title={`Halo, ${user?.name ?? 'Tenaga Kesehatan'}`}
-        subtitle="Dashboard tenaga kesehatan"
+        eyebrow="Tenaga Kesehatan"
+        subtitle="Dashboard tenaga kesehatan."
       />
 
-      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[13px]">
-        <h2 className="text-overline text-graphite uppercase mb-[13px]">Tugas Anda</h2>
-        <QuickLink
-          Icon={MessageCircle}
-          title="Forum Tanya Jawab"
-          desc="Jawab pertanyaan orang tua"
-          onClick={() => navigate('/tenkes/forum')}
-        />
-        <QuickLink
-          Icon={Newspaper}
-          title="Artikel Kesehatan"
-          desc="Baca artikel edukasi gizi"
-          onClick={() => navigate('/artikel')}
-        />
+      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[21px]">
+        <p className="text-caption font-bold uppercase tracking-[0.12em] text-graphite">
+          Tugas Anda
+        </p>
+        <div className="flex flex-col gap-[8px]">
+          <QuickLink
+            Icon={MessageCircle}
+            title="Forum Tanya Jawab"
+            desc="Jawab pertanyaan orang tua"
+            onClick={() => navigate('/tenkes/forum')}
+          />
+          <QuickLink
+            Icon={Newspaper}
+            title="Artikel Kesehatan"
+            desc="Baca artikel edukasi gizi"
+            onClick={() => navigate('/artikel')}
+          />
+        </div>
       </div>
     </AppShell>
   );

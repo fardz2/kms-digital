@@ -45,17 +45,25 @@ export default function BerandaOT() {
     <AppShell menu={MENU} activeKey="balita">
       <PageHeader
         title={`Halo, ${user?.name ?? 'Orang Tua'}`}
-        subtitle="Pantau pertumbuhan anak Anda"
+        eyebrow="Orang Tua"
+        subtitle="Pantau pertumbuhan anak Anda."
       />
 
-      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[33px]">
-        <section className="space-y-[17px]">
+      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[50px]">
+        <section className="space-y-[21px]">
           <div className="flex justify-between items-center gap-[13px] flex-wrap">
-            <h2 className="text-heading font-semibold text-deep-slate m-0">Anak Saya</h2>
+            <div>
+              <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[6px]">
+                Data Anak
+              </p>
+              <h2 className="text-heading-lg font-bold text-deep-slate leading-[1.15] tracking-tight m-0">
+                Anak Saya
+              </h2>
+            </div>
             <Button
               variant="primary"
-              size="sm"
-              leadingIcon={<Plus size={16} strokeWidth={1.75} />}
+              size="md"
+              leadingIcon={<Plus size={20} strokeWidth={2} />}
               onClick={() => setFormOpen(true)}
             >
               Tambah Anak
@@ -102,8 +110,10 @@ export default function BerandaOT() {
           </div>
         </section>
 
-        <section className="space-y-[13px]">
-          <h2 className="text-overline text-graphite uppercase">Lainnya</h2>
+        <section className="space-y-[21px]">
+          <p className="text-caption font-bold uppercase tracking-[0.12em] text-graphite">
+            Lainnya
+          </p>
           <div className="flex flex-col gap-[8px]">
             <QuickLink
               Icon={MessageCircle}
