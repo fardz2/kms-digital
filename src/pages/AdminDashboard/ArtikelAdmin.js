@@ -7,9 +7,9 @@ import {
   Modal,
   Row,
   Select,
-  Table,
   Spin,
 } from "antd";
+import DataTable from "../../components/ui/DataTable";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +29,6 @@ export default function ArtikelAdmin() {
   const [statePage, setStatePage] = useState("Artikel");
   const [isOpenModalUpdateDataArtikel, setIsOpenModalUpdateDataArtikel] =
     useState(false);
-  const [searchText, setSearchedText] = useState("");
   const [statePageKateogries, setStatePageKateogries] = useState(false);
   const [dataArtikel, setDataArtikel] = useState(null);
   const queryClient = useQueryClient();
@@ -233,30 +232,29 @@ export default function ArtikelAdmin() {
 
   const columns = [
     {
-      title: "Judul Berita",
-      dataIndex: "judul",
-      key: "judul",
-      filteredValue: [searchText],
-      onFilter: (value, record) => {
-        return String(record.judul).toLowerCase().includes(value.toLowerCase());
-      },
+      accessorKey: "judul",
+      header: "Judul Berita",
+      enableSorting: true,
     },
     {
-      title: "Tanggal Upload",
-      dataIndex: "kategori",
-      key: "kategori",
-      render: (_, record) => formatDate2(record.updated_at),
+      id: "tanggal",
+      header: "Tanggal Upload",
+      accessorFn: (row) => row.updated_at,
+      cell: ({ getValue }) => formatDate2(getValue()),
+      enableSorting: true,
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
+      id: "action",
+      header: "Aksi",
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
         <div className="flex">
           <button
             type="button"
             className="buttonUpdateArtikel"
             onClick={() => {
-              setDataArtikel(record);
+              setDataArtikel(row.original);
               setIsOpenModalUpdateDataArtikel(true);
             }}
             disabled={
@@ -278,7 +276,7 @@ export default function ArtikelAdmin() {
                 okText: "Ya",
                 cancelText: "Tidak",
                 onOk: () => {
-                  deleteArtikelMutation.mutate(record.id);
+                  deleteArtikelMutation.mutate(row.original.id);
                 },
               });
             }}
@@ -554,42 +552,18 @@ export default function ArtikelAdmin() {
               </Form>
             ) : (
               <div className="overflow-x-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-sm font-semibold">Daftar Artikel</h2>
-                  <Input.Search
-                    placeholder="Search here ..."
-                    onSearch={(value) => setSearchedText(value)}
-                    className="w-full sm:w-64"
-                  />
-                </div>
-                <Table
-                  title={() => (
-                    <div className="flex justify-between items-center">
-                      <div className="flex justify-start items-center">
-                        <h2 className="text-sm font-semibold">
-                          Daftar Artikel
-                        </h2>
-                      </div>
-                      <div className="flex justify-end items-center">
-                        <Input.Search
-                          placeholder="Search here ..."
-                          onSearch={(value) => setSearchedText(value)}
-                          className="w-full sm:w-64"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  dataSource={dataSource || []}
+                <DataTable
                   columns={columns}
+                  data={dataSource || []}
                   loading={
                     artikelLoading ||
                     createArtikelMutation.isPending ||
                     createKategoriMutation.isPending ||
                     deleteArtikelMutation.isPending
                   }
-                  pagination={{ pageSize: 5 }}
-                  className="w-full"
-                  scroll={{ x: "max-content" }}
+                  title={<h2 className="text-h3 font-display text-neutral-900">Daftar Artikel</h2>}
+                  searchPlaceholder="Cari artikel..."
+                  emptyText="Tidak ada data artikel"
                 />
                 <div className="flex justify-center mt-4">
                   <button
