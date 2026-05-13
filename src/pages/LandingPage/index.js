@@ -3,42 +3,39 @@ import { Link } from "react-router-dom";
 import landingPageImage from "../../assets/img/baby-banner.svg";
 import bannerImage from "../../assets/img/banner_item.svg";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
-import background from "./login_bg.svg";
 import NavbarComp from "../../components/layout/Navbar";
+import Button from "../../components/ui/Button";
 
 export default function LandingPage() {
   return (
     <>
-      <div
-        className="fixed inset-0 -z-10 bg-no-repeat bg-center bg-cover"
-        style={{ backgroundImage: `url(${background})` }}
-      />
       <NavbarComp />
-      <main className="relative min-h-screen">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col items-center pt-8 md:pt-16">
-            <div className="flex flex-col lg:flex-row items-center w-full max-w-6xl gap-8">
+      <main className="min-h-screen bg-faint-fog">
+        <div className="max-w-page mx-auto px-[17px] md:px-[25px]">
+          <section className="pt-[67px] pb-[50px] md:pt-[90px] md:pb-[67px]">
+            <div className="flex flex-col lg:flex-row items-center gap-[50px]">
               <div className="w-full lg:w-1/2">
                 <div className="flex flex-col items-start text-left">
-                  <h1 className="text-h1 md:text-display font-display text-primary-700 leading-tight mb-4">
-                    Pantau Tumbuh Kembang Anak
-                    <br />
-                    Kapan Saja, Di Mana Saja
+                  <span className="text-caption font-semibold uppercase tracking-wider text-primary-600 mb-[13px]">
+                    KMS Digital · Posyandu
+                  </span>
+                  <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.1] mb-[17px]">
+                    Pantau tumbuh kembang anak,<br />
+                    dari posyandu ke genggaman.
                   </h1>
-                  <p className="text-body-lg text-neutral-700 mb-8 max-w-md">
-                    Catat pengukuran balita dan ikuti perkembangan gizi dengan
-                    KMS Digital.
+                  <p className="text-body-sm md:text-base text-graphite mb-[29px] max-w-[500px]">
+                    Catat pengukuran balita, akses artikel kesehatan, dan ikuti perkembangan gizi anak Anda bersama kader posyandu desa.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                  <div className="flex flex-col sm:flex-row gap-[13px] w-full max-w-[360px]">
                     <Link to="/masuk" className="flex-1">
-                      <button className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 min-h-[3.5rem] rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold text-body-lg shadow-raised active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2">
+                      <Button variant="primary" size="lg" className="w-full">
                         Masuk
-                      </button>
+                      </Button>
                     </Link>
                     <Link to="/sign-up" className="flex-1">
-                      <button className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 min-h-[3.5rem] rounded-button bg-white hover:bg-primary-50 text-primary-700 border border-primary-200 font-display font-semibold text-body-lg active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2">
+                      <Button variant="default" size="lg" className="w-full">
                         Daftar
-                      </button>
+                      </Button>
                     </Link>
                   </div>
                 </div>
@@ -51,8 +48,10 @@ export default function LandingPage() {
                 />
               </div>
             </div>
+          </section>
 
-            <div className="w-full md:w-3/4 lg:w-1/2 mx-auto bg-white rounded-card shadow-card overflow-hidden mt-12">
+          <section className="pb-[67px]">
+            <div className="w-full md:w-3/4 lg:w-2/3 mx-auto bg-white rounded-default border border-light-ash overflow-hidden">
               <div className="relative aspect-video">
                 <iframe
                   className="absolute inset-0 w-full h-full"
@@ -63,23 +62,28 @@ export default function LandingPage() {
                 />
               </div>
             </div>
+          </section>
 
-            <div className="flex justify-center w-full mt-12 px-4">
-              <img
-                src={bannerImage}
-                alt=""
-                className="w-full max-w-5xl h-auto"
-              />
-            </div>
-          </div>
+          <section className="flex justify-center pb-[90px]">
+            <img
+              src={bannerImage}
+              alt=""
+              className="w-full max-w-[900px] h-auto"
+            />
+          </section>
         </div>
 
-        <footer className="flex justify-center w-full mt-20 bg-primary-300 py-6">
-          <img
-            src={footerImage}
-            alt="Didukung oleh Telkom"
-            className="w-full max-w-[280px] h-auto"
-          />
+        <footer className="border-t border-light-ash bg-white py-[29px]">
+          <div className="max-w-page mx-auto px-[17px] md:px-[25px] flex flex-col sm:flex-row items-center justify-between gap-[17px]">
+            <p className="text-caption text-graphite">
+              © {new Date().getFullYear()} KMS Digital. Seluruh hak cipta dilindungi.
+            </p>
+            <img
+              src={footerImage}
+              alt="Didukung oleh Telkom"
+              className="h-[32px] w-auto opacity-70"
+            />
+          </div>
         </footer>
       </main>
     </>
