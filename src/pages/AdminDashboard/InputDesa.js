@@ -1,11 +1,11 @@
-import { Button, Form, Input, message, Table, Modal } from "antd";
+import { Button, Form, Input, message, Modal } from "antd";
+import DataTable from "../../components/ui/DataTable";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [searchText, setSearchedText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const queryClient = useQueryClient();
 
@@ -108,21 +108,19 @@ export default function InputDesa() {
 
   const columns = [
     {
-      title: "Nama Desa",
-      dataIndex: "name",
-      key: "name",
-      filteredValue: [searchText],
-      onFilter: (value, record) => {
-        return String(record.name).toLowerCase().includes(value.toLowerCase());
-      },
+      accessorKey: "name",
+      header: "Nama Desa",
+      enableSorting: true,
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
+      id: "action",
+      header: "Aksi",
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
         <Button
           className="button_delete"
-          onClick={() => showDeleteConfirm(record.id, record.name)}
+          onClick={() => showDeleteConfirm(row.original.id, row.original.name)}
           type="dashed"
           danger
           disabled={deleteDesaMutation.isPending}
@@ -232,27 +230,18 @@ export default function InputDesa() {
               </div>
             </Form>
           </Modal>
-          <Table
-            title={() => (
-              <div className="flex justify-between items-center gap-4 flex-wrap">
-                <h2 className="text-h3 font-display text-neutral-900">Daftar Desa</h2>
-                <Input.Search
-                  placeholder="Cari desa..."
-                  onSearch={(value) => setSearchedText(value)}
-                  className="w-full md:w-64"
-                  allowClear
-                />
-              </div>
-            )}
-            dataSource={dataSource || []}
+          <DataTable
             columns={columns}
+            data={dataSource || []}
             loading={
               isLoading ||
               createDesaMutation.isPending ||
               deleteDesaMutation.isPending
             }
-            pagination={{ pageSize: 5 }}
             rowKey="id"
+            title={<h2 className="text-h3 font-display text-neutral-900">Daftar Desa</h2>}
+            searchPlaceholder="Cari desa..."
+            emptyText="Tidak ada data desa"
           />
         </div>
       </div>
