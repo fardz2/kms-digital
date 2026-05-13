@@ -1,5 +1,7 @@
 import React from 'react';
 import moment from 'moment';
+import { CheckCheck, BarChart3, LogOut } from 'lucide-react';
+import Button from '../../components/ui/Button';
 
 export default function PosyanduHeader({
   userName,
@@ -11,86 +13,83 @@ export default function PosyanduHeader({
   onLaporan,
   onKeluar,
 }) {
-  const bulanLabel = moment().format('MMMM YYYY').toLowerCase();
+  const bulanLabel = moment().format('MMMM YYYY');
   const persen = totalCount ? Math.round((sudahCount / totalCount) * 100) : 0;
 
   return (
-    <header className="relative overflow-hidden bg-primary text-white rounded-b-hero shadow-hero">
-      <div
-        aria-hidden
-        className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary-300 opacity-50 blur-3xl pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-primary-500 opacity-30 blur-3xl pointer-events-none"
-      />
-
-      <div className="relative px-6 py-8 md:py-10 max-w-5xl mx-auto">
-        <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+    <header className="bg-white border-b border-light-ash">
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[25px] md:py-[33px]">
+        <div className="flex items-start justify-between gap-[17px] flex-wrap mb-[25px]">
           <div className="min-w-0 flex-1">
-            <p className="text-overline text-primary-100 mb-1">{bulanLabel}</p>
-            <h1 className="text-h1 font-display text-white truncate">
+            <p className="text-overline text-graphite uppercase mb-1">
+              {bulanLabel}
+            </p>
+            <h1 className="text-heading-lg font-bold text-deep-slate truncate">
               Halo, {userName ?? 'Kader'}
             </h1>
             {posyanduName && (
-              <p className="text-body-lg text-primary-100 mt-1">
+              <p className="text-body-sm text-graphite mt-1">
                 Posyandu {posyanduName}
               </p>
             )}
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-[8px] flex-wrap">
             {pendingCount > 0 && (
-              <button
+              <Button
+                variant="default"
+                size="sm"
+                leadingIcon={<CheckCheck size={16} strokeWidth={1.75} />}
                 onClick={onApprove}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
               >
-                <span aria-hidden>✔</span>
-                Approve
-                <span className="ml-1 px-2 py-0.5 bg-white/25 rounded-full text-xs font-semibold tabular-nums">
+                Setujui
+                <span className="ml-[6px] px-[8px] py-[1px] bg-primary-100 text-primary-700 rounded-full text-caption font-semibold tabular-nums">
                   {pendingCount}
                 </span>
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="default"
+              size="sm"
+              leadingIcon={<BarChart3 size={16} strokeWidth={1.75} />}
               onClick={onLaporan}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
-              📊 Laporan
-            </button>
-            <button
+              Laporan
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              leadingIcon={<LogOut size={16} strokeWidth={1.75} />}
               onClick={onKeluar}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-button backdrop-blur-sm border border-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
               Keluar
-            </button>
+            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-          <div className="text-display font-display text-white tabular-nums leading-none">
-            {sudahCount}
+        <div className="flex items-baseline gap-[17px] flex-wrap mb-[13px]">
+          <div className="flex items-baseline gap-[13px]">
+            <span className="text-display font-bold text-deep-slate tabular-nums leading-none">
+              {sudahCount}
+            </span>
+            <span className="text-body-sm text-graphite">
+              dari <span className="font-semibold text-deep-slate">{totalCount}</span> balita sudah diukur bulan ini
+            </span>
           </div>
-          <div>
-            <p className="text-body-lg font-medium text-white">
-              dari {totalCount} balita
-            </p>
-            <p className="text-caption text-primary-100">
-              sudah diukur bulan ini
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-h2 font-display text-white tabular-nums">{persen}%</div>
-          </div>
+          <span className="ml-auto text-heading font-bold text-primary-600 tabular-nums">
+            {persen}%
+          </span>
         </div>
 
-        <div className="mt-3 h-2 bg-white/20 rounded-full overflow-hidden">
+        <div
+          className="h-[6px] bg-polar-mist rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={persen}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
-            className="h-full bg-white rounded-full transition-[width] duration-400 ease-out-quart"
+            className="h-full bg-primary-500 rounded-full transition-[width] duration-400 ease-out-quart"
             style={{ width: `${persen}%` }}
-            role="progressbar"
-            aria-valuenow={persen}
-            aria-valuemin={0}
-            aria-valuemax={100}
           />
         </div>
       </div>

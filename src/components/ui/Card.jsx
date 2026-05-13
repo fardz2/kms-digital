@@ -9,9 +9,9 @@ export default function Card({
 }) {
   const interactive = !!onClick;
   const base =
-    'bg-white border border-neutral-200 rounded-card shadow-card p-6 transition-all duration-200 ease-out-quart';
+    'bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart';
   const interactiveClasses = interactive
-    ? 'cursor-pointer hover:border-primary-200 hover:shadow-raised hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-primary-300'
+    ? 'cursor-pointer hover:border-graphite/30 focus-within:ring-1 focus-within:ring-primary-500'
     : '';
 
   return (
@@ -32,10 +32,12 @@ export default function Card({
       className={`${base} ${interactiveClasses} ${className}`}
     >
       {title && (
-        <div className="text-h3 font-display text-neutral-900 mb-4">{title}</div>
+        <div className="text-heading font-semibold text-deep-slate mb-[17px]">
+          {title}
+        </div>
       )}
       <div>{children}</div>
-      {footer && <div className="mt-4">{footer}</div>}
+      {footer && <div className="mt-[17px]">{footer}</div>}
     </div>
   );
 }

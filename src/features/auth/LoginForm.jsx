@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, Input } from 'antd';
-import { MailOutlined, KeyOutlined } from '@ant-design/icons';
+import { Mail, KeyRound } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 const ROLE_LABELS = {
@@ -20,20 +20,20 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <h2 className="text-h2 font-display text-neutral-900 mb-4">
+      <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
         Masuk sebagai {ROLE_LABELS[role] ?? 'Pengguna'}
       </h2>
       {errorText && (
         <div
           role="alert"
-          className="bg-danger text-white px-4 py-3 rounded-button mb-4 text-base"
+          className="bg-danger/10 border border-danger/30 text-danger px-[17px] py-[13px] rounded-default mb-[17px] text-body-sm"
         >
           {errorText}
         </div>
       )}
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item
-          label={<span className="text-caption text-neutral-700">Email</span>}
+          label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}
           name="email"
           rules={[
             { required: true, message: 'Email masih kosong' },
@@ -41,20 +41,20 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
           ]}
         >
           <Input
-            prefix={<MailOutlined />}
+            prefix={<Mail size={16} strokeWidth={1.75} className="text-graphite" />}
             placeholder="email@contoh.com"
-            className="h-12 text-base"
+            className="h-[52px] text-base"
           />
         </Form.Item>
         <Form.Item
-          label={<span className="text-caption text-neutral-700">Kata Sandi</span>}
+          label={<span className="text-body-sm font-medium text-deep-slate">Kata Sandi</span>}
           name="password"
           rules={[{ required: true, message: 'Kata sandi masih kosong' }]}
         >
           <Input.Password
-            prefix={<KeyOutlined />}
+            prefix={<KeyRound size={16} strokeWidth={1.75} className="text-graphite" />}
             placeholder="Kata sandi"
-            className="h-12 text-base"
+            className="h-[52px] text-base"
           />
         </Form.Item>
         <Button
@@ -64,7 +64,7 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
           loading={loading}
           className="w-full"
         >
-          MASUK
+          Masuk
         </Button>
       </Form>
     </div>

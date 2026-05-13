@@ -1,25 +1,25 @@
 import React from 'react';
-import bgDashboard from '../../assets/img/bg-dashboard.svg';
 
 export default function PageHeader({ title, subtitle, action, children }) {
   return (
-    <header
-      className="relative overflow-hidden text-white rounded-b-hero shadow-hero px-6 py-10 md:py-12 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${bgDashboard})` }}
-    >
-      <div
-        aria-hidden
-        className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary-300 opacity-40 blur-3xl pointer-events-none"
-      />
-      <div className="relative max-w-4xl mx-auto">
-        {subtitle && (
-          <p className="text-overline text-primary-100 mb-1">{subtitle}</p>
-        )}
-        {title && (
-          <h1 className="text-h1 font-display text-white leading-tight">{title}</h1>
-        )}
-        {action && <div className="mt-6">{action}</div>}
-        {children}
+    <header className="bg-white border-b border-light-ash">
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[25px] md:py-[33px]">
+        <div className="flex items-start justify-between gap-[17px] flex-wrap">
+          <div className="min-w-0 flex-1">
+            {subtitle && (
+              <p className="text-overline text-graphite uppercase mb-1">
+                {subtitle}
+              </p>
+            )}
+            {title && (
+              <h1 className="text-heading-lg font-bold text-deep-slate leading-tight">
+                {title}
+              </h1>
+            )}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+        {children && <div className="mt-[17px]">{children}</div>}
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Users, Stethoscope, Building2, Shield, Heart, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
@@ -9,11 +10,11 @@ import { useSession } from './useSession';
 import { ROLE_HOME } from './roleHome';
 
 const ROLES = [
-  { key: 'ORANG_TUA', label: 'Orang Tua', icon: '\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67' },
-  { key: 'KADER_POSYANDU', label: 'Kader Posyandu', icon: '\uD83C\uDFE5' },
-  { key: 'TENAGA_KESEHATAN', label: 'Tenaga Kesehatan', icon: '\uD83D\uDC69\u200D\u2695\uFE0F' },
-  { key: 'DESA', label: 'Pemerintah Desa', icon: '\uD83C\uDFDB\uFE0F' },
-  { key: 'ADMIN', label: 'Admin', icon: '\u2699\uFE0F' },
+  { key: 'ORANG_TUA', label: 'Orang Tua', Icon: Heart },
+  { key: 'KADER_POSYANDU', label: 'Kader Posyandu', Icon: Users },
+  { key: 'TENAGA_KESEHATAN', label: 'Tenaga Kesehatan', Icon: Stethoscope },
+  { key: 'DESA', label: 'Pemerintah Desa', Icon: Building2 },
+  { key: 'ADMIN', label: 'Admin', Icon: Shield },
 ];
 
 export default function LoginPortal() {
@@ -44,7 +45,7 @@ export default function LoginPortal() {
           const userStatus = data?.user?.status;
 
           if (userStatus === 0) {
-            setErrorText('Akun Anda belum disetujui. Silakan hubungi admin/kader.');
+            setErrorText('Akun Anda belum disetujui. Silakan hubungi admin atau kader.');
             return;
           }
 
@@ -67,36 +68,37 @@ export default function LoginPortal() {
   return (
     <>
       {toast.contextHolder}
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
-          <h1 className="text-h1 font-display text-neutral-900 text-center mb-6">
+      <div className="min-h-screen bg-faint-fog flex items-center justify-center p-[17px]">
+        <div className="w-full max-w-[480px]">
+          <h1 className="text-heading-lg font-bold text-deep-slate text-center mb-[25px]">
             KMS Digital Lebakwangi
           </h1>
 
           {expired && (
             <div
               role="alert"
-              className="bg-warning-bg text-amber-900 px-4 py-3 rounded-button mb-4 text-center"
+              className="bg-warning/15 border border-warning/30 text-deep-slate px-[17px] py-[13px] rounded-default mb-[17px] text-body-sm text-center"
             >
-              Sesi Anda berakhir, silakan masuk kembali.
+              Sesi Anda berakhir. Silakan masuk kembali.
             </div>
           )}
 
           {!selectedRole ? (
-            <Card>
-              <h2 className="text-h3 font-display text-neutral-900 mb-4">Masuk sebagai:</h2>
-              <div className="flex flex-col gap-2">
-                {ROLES.map((r) => (
-                  <Button
-                    key={r.key}
-                    variant="secondary"
-                    size="lg"
-                    onClick={() => setSelectedRole(r.key)}
-                    className="justify-start w-full"
+            <Card title="Masuk sebagai">
+              <div className="flex flex-col gap-[8px]">
+                {ROLES.map(({ key, label, Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedRole(key)}
+                    className="flex items-center gap-[13px] w-full px-[17px] py-[17px] rounded-default border border-light-ash text-left text-body-sm font-medium text-deep-slate hover:border-primary-500 hover:bg-faint-fog transition-colors duration-150"
                   >
-                    <span className="mr-2">{r.icon}</span>
-                    {r.label}
-                  </Button>
+                    <span className="flex items-center justify-center w-[40px] h-[40px] rounded-full bg-polar-mist text-primary-600">
+                      <Icon size={20} strokeWidth={1.75} />
+                    </span>
+                    <span className="flex-1">{label}</span>
+                    <ArrowLeft size={16} strokeWidth={1.75} className="rotate-180 text-graphite" />
+                  </button>
                 ))}
               </div>
             </Card>
@@ -105,10 +107,11 @@ export default function LoginPortal() {
               <Button
                 variant="ghost"
                 size="sm"
+                leadingIcon={<ArrowLeft size={16} strokeWidth={1.75} />}
                 onClick={() => setSelectedRole(null)}
-                className="mb-4"
+                className="mb-[17px]"
               >
-                ← Kembali
+                Kembali
               </Button>
               <LoginForm
                 role={selectedRole}
