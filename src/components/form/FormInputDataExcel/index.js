@@ -1,4 +1,4 @@
-import { Col, Form, Input, message, Modal, Row } from "antd";
+import { Form, Input, message, Modal } from "antd";
 import axios from "axios";
 import React, { useState } from "react";
 import { readSession } from "../../../features/auth/session-storage";
@@ -15,16 +15,13 @@ export default function FormInputDataExcel(props) {
       .validateFields()
       .then(() => {
         if (!excelFile) {
-          messageApi.open({
-            type: "error",
-            content: "Pilih file terlebih dahulu!",
-          });
+          messageApi.error("Pilih file terlebih dahulu");
           return;
         }
 
         if (user && user.user.role === "KADER_POSYANDU") {
           const formData = new FormData();
-          formData.append("file", excelFile); // Append file to FormData
+          formData.append("file", excelFile);
 
           axios
             .post(
@@ -37,93 +34,82 @@ export default function FormInputDataExcel(props) {
                 },
               }
             )
-            .then((response) => {
-              messageApi.open({
-                type: "success",
-                content: "Data berhasil diupload",
-              });
+            .then(() => {
+              messageApi.success("Data berhasil diupload");
               form.resetFields();
               setExcelFile(null);
               setTimeout(() => {
                 onCancel();
-                fetch();
-              }, 2000);
+                fetch?.();
+              }, 1500);
             })
             .catch((err) => {
-              console.error("Upload error:", err);
-              messageApi.open({
-                type: "error",
-                content: err.response?.data?.message || "Data gagal diupload",
-              });
-              setTimeout(() => {
-                onCancel();
-              }, 3000); // Reduced timeout for better UX
+              messageApi.error(
+                err.response?.data?.message || "Data gagal diupload"
+              );
             });
         }
       })
-      .catch((info) => {
-        console.log("Validation Failed:", info);
-      });
+      .catch(() => {});
   }
+
+  const close = () => {
+    form.resetFields();
+    setExcelFile(null);
+    onCancel();
+  };
 
   return (
     <>
       {contextHolder}
       <Modal
         open={isOpen}
-        onCancel={() => {
-          form.resetFields();
-          setExcelFile(null);
-          onCancel();
-        }}
-        title="Upload Data Excel"
-        footer={[
-          <button
-            key="back"
-            type="button"
-            onClick={() => {
-              form.resetFields();
-              setExcelFile(null);
-              onCancel();
-            }}
-            className="batal_btn"
-          >
-            Batal
-          </button>,
-          <button
-            key="submit"
-            type="button"
-            onClick={onOK}
-            className="simpan_btn"
-          >
-            Upload
-          </button>,
-        ]}
+        onCancel={close}
+        title={
+          <span className="text-h3 font-display text-neutral-900">
+            Upload Data Excel
+          </span>
+        }
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={close}
+              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              onClick={onOK}
+              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm transition-colors"
+            >
+              Upload
+            </button>
+          </div>
+        }
+        bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
       >
-        <Row>
-          <Col span={24}>
-            <Form form={form} name="form_input_data_anak" layout="vertical">
-              <Form.Item
-                label="File"
-                name="file"
-                rules={[
-                  {
-                    required: true,
-                    message: "File masih kosong!",
-                  },
-                ]}
-              >
-                <Input
-                  type="file"
-                  accept=".xlsx" // Restrict to .xlsx for ICoDSA 2025
-                  onChange={(e) => {
-                    setExcelFile(e.target.files[0]);
-                  }}
-                />
-              </Form.Item>
-            </Form>
-          </Col>
-        </Row>
+        <div className="p-6 bg-primary-50 border-2 border-dashed border-primary-200 rounded-card text-center mb-2">
+          <p className="text-body-lg font-display font-semibold text-neutral-900 mb-2">
+            Pilih file Excel
+          </p>
+          <p className="text-caption text-neutral-600 mb-4">
+            Format .xlsx
+          </p>
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="file"
+              rules={[{ required: true, message: "File masih kosong" }]}
+              className="!mb-0"
+            >
+              <Input
+                type="file"
+                accept=".xlsx"
+                onChange={(e) => setExcelFile(e.target.files[0])}
+                className="file:mr-4 file:py-2 file:px-4 file:rounded-button file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-primary-600 file:cursor-pointer"
+              />
+            </Form.Item>
+          </Form>
+        </div>
       </Modal>
     </>
   );

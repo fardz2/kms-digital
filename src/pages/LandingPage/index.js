@@ -1,105 +1,87 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import landingPageImage from "../../assets/img/baby-banner.svg";
-import video from "../../assets/video/video_testing.mp4";
 import bannerImage from "../../assets/img/banner_item.svg";
 import footerImage from "../../assets/img/powered_by_telkom.svg";
 import background from "./login_bg.svg";
 import NavbarComp from "../../components/layout/Navbar";
-import { Container } from "react-bootstrap";
-import "./landingPage.css"; // Retain for custom button and description-banner styles
-
-const BackgroundComponent = () => (
-  <div
-    className="absolute top-[50px] left-0 w-full h-full min-h-screen z-[-10000] bg-no-repeat bg-center bg-cover"
-    style={{ backgroundImage: `url(${background})` }}
-  />
-);
-
-const BannerBackground = () => (
-  <div
-    className="absolute w-full max-w-[600px] h-auto aspect-[600/629] left-[940px] top-[150px] z-[-1] hidden lg:block"
-    style={{
-      backgroundImage: `url(${landingPageImage})`,
-      backgroundSize: "contain",
-      backgroundRepeat: "no-repeat",
-    }}
-  />
-);
 
 export default function LandingPage() {
   return (
     <>
-      <BackgroundComponent />
+      <div
+        className="fixed inset-0 -z-10 bg-no-repeat bg-center bg-cover"
+        style={{ backgroundImage: `url(${background})` }}
+      />
       <NavbarComp />
-      <Container fluid="md">
-        <div className=" flex flex-col items-center">
-          <div className="flex justify-center w-full mt-[30px]">
-            <div
-              className="flex flex-col lg:flex-row items-center w-full max-w-[1600px]"
-              style={{ backgroundColor: "transparent" }}
-            >
+      <main className="relative min-h-screen">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center pt-8 md:pt-16">
+            <div className="flex flex-col lg:flex-row items-center w-full max-w-6xl gap-8">
               <div className="w-full lg:w-1/2">
                 <div className="flex flex-col items-start text-left">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-[#b14444]">
-                    Track Your Child's Growth
-                  </h2>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-[#b14444]">
-                    Anywhere
-                  </h2>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-[#b14444]">
-                    Anytime
-                  </h2>
-                  <div className="description-banner text-base sm:text-lg mb-6">
-                    Keep track of children's growth and development using
-                    GiziBalita
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-[300px]">
-                    <div className="flex-1">
-                      <Link to="/sign-in">
-                        <button className="button w-full">Login</button>
-                      </Link>
-                    </div>
-                    <div className="flex-1">
-                      <Link to="/sign-up">
-                        <button className="button w-full">Sign Up</button>
-                      </Link>
-                    </div>
+                  <h1 className="text-h1 md:text-display font-display text-primary-700 leading-tight mb-4">
+                    Pantau Tumbuh Kembang Anak
+                    <br />
+                    Kapan Saja, Di Mana Saja
+                  </h1>
+                  <p className="text-body-lg text-neutral-700 mb-8 max-w-md">
+                    Catat pengukuran balita dan ikuti perkembangan gizi dengan
+                    KMS Digital.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                    <Link to="/masuk" className="flex-1">
+                      <button className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 min-h-[3.5rem] rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold text-body-lg shadow-raised active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2">
+                        Masuk
+                      </button>
+                    </Link>
+                    <Link to="/sign-up" className="flex-1">
+                      <button className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 min-h-[3.5rem] rounded-button bg-white hover:bg-primary-50 text-primary-700 border border-primary-200 font-display font-semibold text-body-lg active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2">
+                        Daftar
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
-              <div className="w-full lg:w-1/2"></div>
+              <div className="w-full lg:w-1/2 hidden lg:block">
+                <img
+                  src={landingPageImage}
+                  alt=""
+                  className="w-full max-w-[500px] mx-auto"
+                />
+              </div>
             </div>
-          </div>
-          <div className="md:w-1/2 w-[80%] mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mt-10">
-            <div className="relative aspect-video">
-              <iframe
-                className="absolute top-0 left-0 w-full h-full rounded-lg"
-                src="https://www.youtube.com/embed/oYwKLxEDNXU?autoplay=1&mute=1&loop=1&playlist=oYwKLxEDNXU&iv_load_policy=3&rel=0&vq=hd1080"
-                title="YouTube video player"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-          <div className="flex justify-center w-full mt-[50px]">
-            <img
-              src={bannerImage}
-              alt="Banner"
-              className="w-full max-w-[1180px] h-auto px-4 sm:px-6"
-            />
-          </div>
 
-          <BannerBackground />
+            <div className="w-full md:w-3/4 lg:w-1/2 mx-auto bg-white rounded-card shadow-card overflow-hidden mt-12">
+              <div className="relative aspect-video">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/oYwKLxEDNXU?autoplay=1&mute=1&loop=1&playlist=oYwKLxEDNXU&iv_load_policy=3&rel=0&vq=hd1080"
+                  title="Video perkenalan KMS Digital"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-center w-full mt-12 px-4">
+              <img
+                src={bannerImage}
+                alt=""
+                className="w-full max-w-5xl h-auto"
+              />
+            </div>
+          </div>
         </div>
-      </Container>
-      <div className="flex justify-center w-full mt-[100px] bg-[#FFB4B4] py-6">
-        <img
-          src={footerImage}
-          alt="Footer"
-          className="w-full max-w-[300px] h-auto"
-        />
-      </div>
+
+        <footer className="flex justify-center w-full mt-20 bg-primary-300 py-6">
+          <img
+            src={footerImage}
+            alt="Didukung oleh Telkom"
+            className="w-full max-w-[280px] h-auto"
+          />
+        </footer>
+      </main>
     </>
   );
 }

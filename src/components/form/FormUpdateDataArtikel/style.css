@@ -1,51 +1,7 @@
-.simpan_btn {
-  margin-left: 20px;
-  padding: 10px 20px;
-  border: 0;
-  border-radius: 100px;
-  background-color: #2ba8fb;
-  color: #ffffff;
-  font-weight: 600;
-  transition: all 0.5s;
-  -webkit-transition: all 0.5s;
-}
-
-.simpan_btn:hover {
-  background-color: #6fc5ff;
-  box-shadow: 0 0 20px #6fc5ff50;
-  transform: scale(1.1);
-}
-
-.simpan_btn:active {
-  background-color: #3d94cf;
-  transition: all 0.25s;
-  -webkit-transition: all 0.25s;
-  box-shadow: none;
-  transform: scale(0.98);
-}
-
-.batal_btn {
-  margin-left: 20px;
-  padding: 10px 20px;
-  border: 0;
-  border-radius: 100px;
-  background-color: #5ffb2b;
-  color: #ffffff;
-  font-weight: Bold;
-  transition: all 0.5s;
-  -webkit-transition: all 0.5s;
-}
-
-.batal_btn:hover {
-  background-color: #6fff80;
-  box-shadow: 0 0 20px #6fc5ff50;
-  transform: scale(1.1);
-}
-
-.batal_btn:active {
-  background-color: #3dcf53;
-  transition: all 0.25s;
-  -webkit-transition: all 0.25s;
-  box-shadow: none;
-  transform: scale(0.98);
+/* Quill editor body font override */
+.ql-editor {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 200px;
 }

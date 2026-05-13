@@ -1,33 +1,22 @@
-import { Divider, Form, Input, Spin } from "antd";
+import { Form, Input, Spin, message } from "antd";
 import axios from "axios";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
 import avatar from "../../assets/icon/user.png";
-import "./forum-style.css";
-import footerImage from "../../assets/img/powered_by_telkom.svg";
-import { message } from "antd";
 import { readSession } from "../../features/auth/session-storage";
 
 export default function DetailForum() {
-  const convertToGoodString = (str) => {
-    const words = str.split("_");
-    const capitalizedWords = words.map((word) => {
-      const firstLetter = word.charAt(0).toUpperCase();
-      const restOfWord = word.slice(1).toLowerCase();
-      return firstLetter + restOfWord;
-    });
-    return capitalizedWords.join(" ");
-  };
-
-  let { id } = useParams();
-  const [user, setUser] = useState(() => readSession());
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [user] = useState(() => readSession());
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(true);
   const [detailPost, setDetailPost] = useState({});
   const [comment, setComment] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     axios
@@ -36,9 +25,8 @@ export default function DetailForum() {
         setIsLoading(false);
         setDetailPost(response.data.data);
       })
-      .catch((err) => {
-        setIsLoading(false);
-      });
+      .catch(() => setIsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -51,144 +39,161 @@ export default function DetailForum() {
         );
         setComment(sortedData);
       })
-      .catch((err) => {
-        setIsLoading(false);
-      });
+      .catch(() => setIsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
 
   const onFinish = (values) => {
-    const data = {
-      user_id: user.user.id,
-      post_id: id,
-      content: values.comment,
-    };
     axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/comment`, data)
-      .then((response) => {
-        setRefreshKey((oldKey) => oldKey + 1);
-        form.resetFields();
-        message.success("Komentar berhasil dikirim!");
+      .post(`${process.env.REACT_APP_BASE_URL}/api/comment`, {
+        user_id: user.user.id,
+        post_id: id,
+        content: values.comment,
       })
-      .catch((err) => {
-        console.log(err);
-        message.error("Gagal mengirim komentar. Silakan coba lagi.");
-      });
-  };
-
-  const onFinishFailed = (values) => {
-    console.log(values);
+      .then(() => {
+        setRefreshKey((k) => k + 1);
+        form.resetFields();
+        messageApi.success("Komentar berhasil dikirim");
+      })
+      .catch(() => messageApi.error("Gagal mengirim komentar"));
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-neutral-50">
+      {contextHolder}
       <Navbar isLogin />
-      <div className="flex flex-col min-h-screen">
-        <div className="flex justify-center">
-          <Spin size="large" spinning={isLoading} />
-        </div>
-        {!isLoading && (
-          <div className="flex justify-center mt-8 sm:mt-10">
-            <div className="w-full max-w-[90%] sm:max-w-[800px] md:max-w-[1000px] lg:max-w-[1200px] bg-[#FCDEDE] shadow-lg rounded-3xl p-4 sm:p-6 mt-6">
-              <div className="flex items-start px-4 py-6">
-                <div className="w-full card-form-question text-base sm:text-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="font-semibold text-gray-900 text-xl sm:text-2xl md:text-3xl">
-                      {detailPost.title} -{" "}
-                      {moment(detailPost.time).format("DD MMMM YYYY")}
-                    </h2>
-                  </div>
-                  <p className="text-gray-800 text-sm sm:text-base">
-                    {detailPost.nama} -
-                    <span className="text-red-600">
-                      {detailPost.role === "ORANG_TUA"
-                        ? " orang tua"
-                        : " tenaga kesehatan"}
-                    </span>
-                  </p>
-                  <p className="mt-3 text-gray-700 text-sm sm:text-base">
-                    {detailPost.content}
-                  </p>
-                </div>
-              </div>
-            </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1 text-caption text-neutral-600 hover:text-primary-700 font-medium transition-colors"
+        >
+          ← Kembali ke forum
+        </button>
+
+        {isLoading && (
+          <div className="flex justify-center py-12">
+            <Spin size="large" />
           </div>
         )}
 
-        <div className="flex justify-center mt-6 sm:mt-8">
-          <div className="w-full max-w-[90%] sm:max-w-[800px] md:max-w-[1000px] p-4 sm:p-6">
-            <Form
-              form={form}
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
-              layout="horizontal"
-            >
-              <div className="w-full max-w-[90%] sm:max-w-[800px] md:max-w-[1000px] bg-transparent border-2 border-[#FCDEDE] shadow-lg rounded-3xl p-4 sm:p-6">
-                <div className="w-full">
-                  <Form.Item
-                    label="Comment"
-                    name="comment"
-                    rules={[
-                      { required: true, message: "comment masih kosong!" },
-                    ]}
-                    labelCol={{ className: "text-xl sm:text-2xl" }}
+        {!isLoading && detailPost?.title && (
+          <article className="bg-white border border-neutral-200 rounded-card p-6 shadow-card">
+            <div className="flex items-start gap-3 mb-4">
+              <img
+                src={avatar}
+                alt=""
+                className="w-10 h-10 rounded-full bg-neutral-100"
+              />
+              <div className="flex-1">
+                <p className="text-caption font-semibold text-neutral-900">
+                  {detailPost.nama}
+                </p>
+                <p className="text-xs text-neutral-500">
+                  <span
+                    className={`font-medium ${
+                      detailPost.role === "ORANG_TUA"
+                        ? "text-primary-700"
+                        : "text-accent"
+                    }`}
                   >
-                    <Input.TextArea rows={2} />
-                  </Form.Item>
-                  <Form.Item>
-                    <button type="submit" className="button_kirim">
-                      Kirim
-                    </button>
-                  </Form.Item>
-                </div>
+                    {detailPost.role === "ORANG_TUA"
+                      ? "Orang Tua"
+                      : "Tenaga Kesehatan"}
+                  </span>{" "}
+                  ·{" "}
+                  <span className="tabular-nums">
+                    {moment(detailPost.time).format("DD MMMM YYYY")}
+                  </span>
+                </p>
               </div>
-            </Form>
-          </div>
-        </div>
+            </div>
+            <h1 className="text-h2 font-display text-neutral-900 mb-3">
+              {detailPost.title}
+            </h1>
+            <p className="text-base text-neutral-700 whitespace-pre-wrap">
+              {detailPost.content}
+            </p>
+          </article>
+        )}
 
-        <Divider />
+        <section className="bg-white border border-neutral-200 rounded-card p-5">
+          <h2 className="text-h3 font-display text-neutral-900 mb-3">
+            Tulis komentar
+          </h2>
+          <Form form={form} onFinish={onFinish} layout="vertical">
+            <Form.Item
+              name="comment"
+              rules={[{ required: true, message: "Komentar masih kosong" }]}
+              className="!mb-3"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Bagikan jawaban atau tanggapan..."
+                className="text-base"
+              />
+            </Form.Item>
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+            >
+              Kirim
+            </button>
+          </Form>
+        </section>
 
-        <div className="flex justify-center">
-          <div className="w-full max-w-[90%] sm:max-w-[800px] md:max-w-[1000px]">
-            {comment.map((item) => (
-              <div
-                key={item.comment_id || item.time} // Use a unique key, assuming item has a unique identifier
-                className="w-full bg-[#FCDEDE] shadow-lg rounded-lg p-4 sm:p-6 my-4 sm:my-6"
+        <section className="space-y-3">
+          <h2 className="text-overline text-neutral-600">
+            Komentar ({comment.length})
+          </h2>
+          {comment.length === 0 ? (
+            <div className="text-center py-6 text-neutral-500 bg-white border border-neutral-200 rounded-card">
+              Belum ada komentar
+            </div>
+          ) : (
+            comment.map((item) => (
+              <article
+                key={item.comment_id || item.time}
+                className="bg-white border border-neutral-200 rounded-card p-4"
               >
-                <div className="flex items-start">
-                  <div className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <h2 className="text-sm sm:text-base font-medium text-gray-700">
+                <div className="flex items-start gap-3">
+                  <img
+                    src={avatar}
+                    alt=""
+                    className="w-9 h-9 rounded-full bg-neutral-100"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                      <p className="text-caption font-semibold text-neutral-900">
                         {item.nama}
-                      </h2>
-                      <small className="text-xs sm:text-sm text-gray-700">
-                        {moment(item.time).format("DD MMMM YYYY")}
-                      </small>
+                      </p>
+                      <p className="text-xs text-neutral-500 tabular-nums">
+                        {moment(item.time).format("DD MMM YYYY HH:mm")}
+                      </p>
                     </div>
-                    <p className="text-gray-800 text-sm sm:text-base">
-                      <span className="text-blue-600">
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      <span
+                        className={`font-medium ${
+                          item.role === "ORANG_TUA"
+                            ? "text-primary-700"
+                            : "text-accent"
+                        }`}
+                      >
                         {item.role === "ORANG_TUA"
-                          ? "orang tua"
-                          : "tenaga kesehatan"}
+                          ? "Orang Tua"
+                          : "Tenaga Kesehatan"}
                       </span>
                     </p>
-                    <Divider />
-                    <p className="mt-3 text-gray-700 text-sm sm:text-base">
+                    <p className="mt-2 text-base text-neutral-700 whitespace-pre-wrap">
                       {item.content}
                     </p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Uncomment if footer is needed */}
-        {/* <div className="flex justify-center w-full bg-[#FFB4B4] mt-12 sm:mt-16 lg:mt-24 py-4">
-          <img src={footerImage} alt="Powered by Telkom" className="h-8 sm:h-10" />
-        </div> */}
+              </article>
+            ))
+          )}
+        </section>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Form, Modal, Row, Col, Input } from "antd";
-import { message } from "antd";
+import { Form, Modal, Input, message } from "antd";
 import useAuth from "../../../hook/useAuth";
 
 export default function FormInputPost({ isOpen, onCancel }) {
@@ -9,10 +8,6 @@ export default function FormInputPost({ isOpen, onCancel }) {
   const queryClient = useQueryClient();
   const user = useAuth();
 
-  // Log for debugging
-  console.log("FormInputPost: isOpen:", isOpen, "User:", user);
-
-  // Mutation for creating a new post
   const createPostMutation = useMutation({
     mutationFn: async (values) => {
       if (!user?.token?.value || !user?.user?.id) {
@@ -37,99 +32,70 @@ export default function FormInputPost({ isOpen, onCancel }) {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Data berhasil tersimpan",
-      });
+      messageApi.success("Data berhasil tersimpan");
       form.resetFields();
       onCancel();
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
-    onError: (err) => {
-      console.error("FormInputPost: Error creating post:", err);
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal menyimpan data postingan",
-      });
-      setTimeout(() => {
-        onCancel();
-      }, 1000);
-    },
+    onError: (err) => messageApi.error(err.message || "Gagal menyimpan"),
   });
 
   const onOK = () => {
-    console.log("FormInputPost: Submitting form");
     form
       .validateFields()
-      .then((values) => {
-        createPostMutation.mutate(values);
-      })
-      .catch((info) => {
-        console.log("FormInputPost: Validation failed:", info);
-      });
+      .then((values) => createPostMutation.mutate(values))
+      .catch(() => {});
   };
+
+  const saving = createPostMutation.isPending;
 
   return (
     <>
       {contextHolder}
       <Modal
-        visible={isOpen} // Changed to visible for Ant Design < v4.17 compatibility
+        open={isOpen}
         onCancel={onCancel}
-        title="Input Pertanyaan"
-        footer={[
-          <button
-            key="back"
-            type="button"
-            onClick={onCancel}
-            className="batal_btn"
-            disabled={createPostMutation.isPending}
-          >
-            Batal
-          </button>,
-          <button
-            key="submit"
-            type="submit"
-            onClick={onOK}
-            className="simpan_btn"
-            disabled={createPostMutation.isPending}
-          >
-            Simpan
-          </button>,
-        ]}
+        title={
+          <span className="text-h3 font-display text-neutral-900">
+            Tulis Pertanyaan
+          </span>
+        }
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={onCancel}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
+            >
+              Batal
+            </button>
+            <button
+              onClick={onOK}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
+            >
+              {saving ? "Menyimpan..." : "Simpan"}
+            </button>
+          </div>
+        }
+        bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
       >
-        <Row>
-          <Col span={24}>
-            <Form form={form} name="form_input_post" layout="vertical">
-              <Form.Item
-                label="Judul"
-                name="judul"
-                rules={[
-                  {
-                    required: true,
-                    message: "Judul masih kosong!",
-                  },
-                ]}
-              >
-                <Input disabled={createPostMutation.isPending} />
-              </Form.Item>
-              <Form.Item
-                label="Pertanyaan"
-                name="pertanyaan"
-                rules={[
-                  {
-                    required: true,
-                    message: "Pertanyaan masih kosong!",
-                  },
-                ]}
-              >
-                <Input.TextArea
-                  rows={4}
-                  disabled={createPostMutation.isPending}
-                />
-              </Form.Item>
-            </Form>
-          </Col>
-        </Row>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label={<span className="text-caption text-neutral-700">Judul</span>}
+            name="judul"
+            rules={[{ required: true, message: "Judul masih kosong" }]}
+          >
+            <Input disabled={saving} className="h-11 text-base" />
+          </Form.Item>
+          <Form.Item
+            label={<span className="text-caption text-neutral-700">Pertanyaan</span>}
+            name="pertanyaan"
+            rules={[{ required: true, message: "Pertanyaan masih kosong" }]}
+          >
+            <Input.TextArea rows={4} disabled={saving} className="text-base" />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   );

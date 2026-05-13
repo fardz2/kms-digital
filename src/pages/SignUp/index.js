@@ -8,19 +8,11 @@ import { ROLE_HOME } from "../../features/auth/roleHome";
 import logo from "./GiziBalita_logo.png";
 import background from "./login_bg.svg";
 
-const BackgroundComponent = () => (
-  <div
-    className="fixed inset-0 z-[-10000] bg-center bg-no-repeat bg-cover "
-    style={{ backgroundImage: `url(${background})` }}
-  />
-);
-
 export default function SignUp() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [role, setRole] = useState(3);
 
-  // Check authentication status using useQuery
   const { isLoading: authLoading } = useQuery({
     queryKey: ["authCheck"],
     queryFn: () => {
@@ -30,12 +22,10 @@ export default function SignUp() {
 
       if (isAuthenticated) {
         const redirectPath = ROLE_HOME[userRole] ?? "/";
-
         messageApi.open({
           type: "info",
           content: "Anda sudah login. Mengarahkan ke dashboard...",
         });
-
         navigate(redirectPath, { replace: true });
       }
 
@@ -44,7 +34,6 @@ export default function SignUp() {
     retry: false,
   });
 
-  // Fetch desa data using useQuery
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
@@ -57,14 +46,10 @@ export default function SignUp() {
     },
     onError: (error) => {
       console.error("Error fetching desa:", error);
-      messageApi.open({
-        type: "error",
-        content: "Gagal memuat data desa",
-      });
+      messageApi.open({ type: "error", content: "Gagal memuat data desa" });
     },
   });
 
-  // Fetch posyandu data using useQuery
   const { data: dataPosyandu, isLoading: posyanduLoading } = useQuery({
     queryKey: ["posyandu"],
     queryFn: async () => {
@@ -77,14 +62,10 @@ export default function SignUp() {
     },
     onError: (error) => {
       console.error("Error fetching posyandu:", error);
-      messageApi.open({
-        type: "error",
-        content: "Gagal memuat data posyandu",
-      });
+      messageApi.open({ type: "error", content: "Gagal memuat data posyandu" });
     },
   });
 
-  // Register mutation for Kader Posyandu
   const posyanduRegisterMutation = useMutation({
     mutationFn: async (values) => {
       const response = await fetch(
@@ -105,16 +86,10 @@ export default function SignUp() {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Register Berhasil",
-      });
-      setTimeout(() => {
-        navigate("/sign-in");
-      }, 1000);
+      messageApi.open({ type: "success", content: "Register Berhasil" });
+      setTimeout(() => navigate("/masuk"), 1000);
     },
     onError: (error) => {
-      console.error("Registration error:", error);
       messageApi.open({
         type: "error",
         content: error.message || "Gagal Registrasi",
@@ -122,7 +97,6 @@ export default function SignUp() {
     },
   });
 
-  // Register mutation for Orang Tua
   const orangTuaRegisterMutation = useMutation({
     mutationFn: async (values) => {
       const response = await fetch(
@@ -144,16 +118,10 @@ export default function SignUp() {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Register Berhasil",
-      });
-      setTimeout(() => {
-        navigate("/sign-in");
-      }, 1000);
+      messageApi.open({ type: "success", content: "Register Berhasil" });
+      setTimeout(() => navigate("/masuk"), 1000);
     },
     onError: (error) => {
-      console.error("Registration error:", error);
       messageApi.open({
         type: "error",
         content: error.message || "Gagal Registrasi",
@@ -162,210 +130,188 @@ export default function SignUp() {
   });
 
   const onFinish = (values) => {
-    if (role === 4) {
-      posyanduRegisterMutation.mutate(values);
-    } else if (role === 3) {
-      orangTuaRegisterMutation.mutate(values);
-    }
+    if (role === 4) posyanduRegisterMutation.mutate(values);
+    else if (role === 3) orangTuaRegisterMutation.mutate(values);
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+  const loading =
+    posyanduRegisterMutation.isPending || orangTuaRegisterMutation.isPending;
 
   return (
     <>
       {contextHolder}
-      <BackgroundComponent />
+      <div
+        className="fixed inset-0 -z-10 bg-center bg-no-repeat bg-cover"
+        style={{ backgroundImage: `url(${background})` }}
+      />
+
       {(authLoading || desaLoading || posyanduLoading) && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/90 p-8 rounded-card shadow-card">
           <Spin size="large" />
         </div>
       )}
-      <div
-        className="flex items-center justify-center min-h-screen p-2 sm:p-4"
-        style={{ background: "transparent" }}
-      >
-        <div
-          className="w-full max-w-sm sm:max-w-md rounded-[20px] p-4 sm:p-6"
-          style={{
-            background:
-              "linear-gradient(137deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%)",
-            boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.20)",
-            backdropFilter: "blur(20px)",
-          }}
-        >
-          <div className="flex flex-col items-center">
-            <img
-              src={logo}
-              alt="Image"
-              className="w-32 sm:w-40 md:w-48 mb-2"
-              style={{ height: "auto" }}
-            />
-            <Form
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
-              layout="vertical"
-              className="w-full"
-            >
-              <Form.Item
-                label="Role"
-                name="role"
-                initialValue={role}
-                rules={[{ required: true, message: "Pilih role!" }]}
-              >
-                <Select
-                  placeholder="Pilih Role"
-                  onChange={(value) => setRole(value)}
-                >
-                  <Select.Option value={3}>Orang Tua</Select.Option>
-                  <Select.Option value={4}>Kader Posyandu</Select.Option>
-                </Select>
-              </Form.Item>
 
-              <Form.Item
-                label="Nama"
-                name="nama"
-                rules={[
-                  {
-                    required: true,
-                    message: "Nama masih kosong!",
-                    type: "string",
-                  },
-                ]}
-              >
-                <Input placeholder="Nama Lengkap" />
-              </Form.Item>
-
-              {role === 3 && (
-                <Form.Item
-                  label="Alamat"
-                  name="alamat"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Alamat masih kosong!",
-                      type: "string",
-                    },
-                  ]}
-                >
-                  <Input.TextArea rows={4} />
-                </Form.Item>
-              )}
-
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Email masih kosong!" },
-                  { type: "email", message: "Email belum sesuai!" },
-                ]}
-              >
-                <Input placeholder="user@email.com" />
-              </Form.Item>
-
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[
-                  { required: true, message: "Password masih kosong!" },
-                  {
-                    pattern: "^.{8,}$",
-                    message: "Password minimal 8 karakter",
-                  },
-                ]}
-              >
-                <Input.Password placeholder="password" />
-              </Form.Item>
-
-              <Form.Item
-                label="Confirm Password"
-                name="confirm"
-                dependencies={["password"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Silahkan Confirm Password Anda!",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("password") === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error("Password tidak sesuai!")
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password placeholder="Confirm Password" />
-              </Form.Item>
-
-              <Form.Item
-                name="desa"
-                label="Desa"
-                rules={[{ required: true, message: "Pilih Desa!" }]}
-              >
-                <Select
-                  placeholder="Pilih Desa"
-                  allowClear
-                  disabled={desaLoading}
-                >
-                  {dataDesa &&
-                    dataDesa.map((value) => (
-                      <Select.Option key={value.id} value={value.id}>
-                        {value.name}
-                      </Select.Option>
-                    ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                name="posyandu"
-                label="Posyandu"
-                rules={[{ required: true, message: "Pilih Posyandu!" }]}
-              >
-                <Select
-                  placeholder="Pilih Posyandu"
-                  allowClear
-                  disabled={posyanduLoading}
-                >
-                  {dataPosyandu &&
-                    dataPosyandu.map((value) => (
-                      <Select.Option key={value.id} value={value.id}>
-                        {value.nama}
-                      </Select.Option>
-                    ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item>
-                <button
-                  htmlType="submit"
-                  className="button__"
-                  style={{
-                    fontSize: "22px",
-                    height: 50,
-                    borderRadius: "20px",
-                    marginBottom: "20px",
-                    width: "100%",
-                  }}
-                  disabled={
-                    posyanduRegisterMutation.isPending ||
-                    orangTuaRegisterMutation.isPending
-                  }
-                >
-                  Daftar
-                </button>
-              </Form.Item>
-            </Form>
-            <p className="text-center">
-              Sudah punya akun? <Link to="/sign-in">Masuk</Link>
-            </p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-card shadow-hero p-6 md:p-8">
+          <div className="flex flex-col items-center mb-6">
+            <img src={logo} alt="KMS Digital" className="w-32 md:w-40 mb-3" />
+            <h1 className="text-h2 font-display text-neutral-900">
+              Buat Akun Baru
+            </h1>
           </div>
+
+          <Form
+            name="signup"
+            onFinish={onFinish}
+            autoComplete="off"
+            layout="vertical"
+          >
+            <Form.Item
+              label={<span className="text-caption text-neutral-700">Peran</span>}
+              name="role"
+              initialValue={role}
+              rules={[{ required: true, message: "Pilih peran" }]}
+            >
+              <Select
+                placeholder="Pilih peran"
+                onChange={(value) => setRole(value)}
+                className="h-11"
+              >
+                <Select.Option value={3}>Orang Tua</Select.Option>
+                <Select.Option value={4}>Kader Posyandu</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="text-caption text-neutral-700">Nama</span>}
+              name="nama"
+              rules={[{ required: true, message: "Nama masih kosong" }]}
+            >
+              <Input placeholder="Nama Lengkap" className="h-11 text-base" />
+            </Form.Item>
+
+            {role === 3 && (
+              <Form.Item
+                label={
+                  <span className="text-caption text-neutral-700">Alamat</span>
+                }
+                name="alamat"
+                rules={[{ required: true, message: "Alamat masih kosong" }]}
+              >
+                <Input.TextArea rows={3} className="text-base" />
+              </Form.Item>
+            )}
+
+            <Form.Item
+              label={<span className="text-caption text-neutral-700">Email</span>}
+              name="email"
+              rules={[
+                { required: true, message: "Email masih kosong" },
+                { type: "email", message: "Format email tidak valid" },
+              ]}
+            >
+              <Input placeholder="email@contoh.com" className="h-11 text-base" />
+            </Form.Item>
+
+            <Form.Item
+              label={
+                <span className="text-caption text-neutral-700">Kata Sandi</span>
+              }
+              name="password"
+              rules={[
+                { required: true, message: "Kata sandi masih kosong" },
+                { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+              ]}
+            >
+              <Input.Password placeholder="Kata sandi" className="h-11 text-base" />
+            </Form.Item>
+
+            <Form.Item
+              label={
+                <span className="text-caption text-neutral-700">
+                  Konfirmasi Kata Sandi
+                </span>
+              }
+              name="confirm"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: "Konfirmasi kata sandi" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Kata sandi tidak sesuai")
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password
+                placeholder="Ulangi kata sandi"
+                className="h-11 text-base"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="desa"
+              label={<span className="text-caption text-neutral-700">Desa</span>}
+              rules={[{ required: true, message: "Pilih desa" }]}
+            >
+              <Select
+                placeholder="Pilih desa"
+                allowClear
+                disabled={desaLoading}
+                className="h-11"
+              >
+                {dataDesa?.map((value) => (
+                  <Select.Option key={value.id} value={value.id}>
+                    {value.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="posyandu"
+              label={
+                <span className="text-caption text-neutral-700">Posyandu</span>
+              }
+              rules={[{ required: true, message: "Pilih posyandu" }]}
+            >
+              <Select
+                placeholder="Pilih posyandu"
+                allowClear
+                disabled={posyanduLoading}
+                className="h-11"
+              >
+                {dataPosyandu?.map((value) => (
+                  <Select.Option key={value.id} value={value.id}>
+                    {value.nama}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 min-h-[3.5rem] rounded-button bg-primary hover:bg-primary-600 active:bg-primary-700 text-white font-display font-semibold text-body-lg shadow-raised active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "Memuat..." : "Daftar"}
+            </button>
+          </Form>
+
+          <p className="text-center mt-4 text-base text-neutral-700">
+            Sudah punya akun?{" "}
+            <Link
+              to="/masuk"
+              className="text-primary-700 hover:text-primary-800 font-medium"
+            >
+              Masuk
+            </Link>
+          </p>
         </div>
       </div>
     </>

@@ -1,25 +1,24 @@
-function GlobalFilter(props) {
-  const { preGlobalFilteredRows, globalFilter, setGlobalFilter } = props;
+import React from "react";
+
+export default function GlobalFilter(props) {
+  const { globalFilter, setGlobalFilter } = props;
 
   return (
-    <div class="input-group">
-      <input 
-        value={globalFilter || ''}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        placeholder={`Cari data`}
-        class="form-control py-4 border-right-0 border" style={{alignContent:"center", boxShadow:"0px 6px 0px 0px #ffb4b4", border:"1px solid #b14444"}}/>
-      
-</div>
-    // <label className="flex gap-x-10 items-baseline">
-    //   <input
-    //     type="text"
-    //     className="rounded-md border-gray-100 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-    //     value={globalFilter || ''}
-    //     onChange={(e) => setGlobalFilter(e.target.value)}
-    //     placeholder={`${count} data...`}
-    //   />
-    // </label>
+    <div className="relative">
+      <input
+        type="search"
+        value={globalFilter || ""}
+        onChange={(e) => setGlobalFilter(e.target.value || undefined)}
+        placeholder="Cari data..."
+        aria-label="Cari data tabel"
+        className="w-full md:w-72 pl-10 pr-4 py-2.5 bg-white border border-neutral-200 rounded-button text-base placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
+      />
+      <span
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+        aria-hidden
+      >
+        🔍
+      </span>
+    </div>
   );
 }
-
-export default GlobalFilter;

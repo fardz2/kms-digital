@@ -737,79 +737,77 @@ function Table({
         </div>
       </div>
       {ButtonCus && (
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 my-4">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 my-4">
           <button
-            className="button2"
             onClick={() => toggleModal("anakBelumApprove", true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold transition-colors"
           >
             Lihat Anak Belum Approve
           </button>
           <button
-            className="button2"
             onClick={() => exportDataAnakMutation.mutate()}
             disabled={exportDataAnakMutation.isLoading}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
           >
             {exportDataAnakMutation.isLoading
               ? "Mengunduh..."
               : "Unduh Data Anak"}
           </button>
           <button
-            className="button2"
             onClick={() => toggleModal("orangTua", true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold transition-colors"
           >
             Lihat Orang Tua
           </button>
         </div>
       )}
-      <div className="mt-4 flex flex-col">
-        <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
-          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="overflow-hidden border-b border-gray-200 sm:rounded-full">
-              <table
-                {...getTableProps()}
-                className="w-full divide-y divide-gray-200 border"
-              >
-                <thead style={{ background: "#ffb4b4", color: "white" }}>
-                  {headerGroups.map((headerGroup) => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                      {headerGroup.headers
-                        .filter((col) => col.show !== false)
-                        .map((column) => (
-                          <th
-                            scope="col"
-                            className="group px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            {...column.getHeaderProps(
-                              column.getSortByToggleProps()
+      <div className="mt-4 overflow-x-auto">
+        <div className="rounded-card border border-neutral-200 bg-white shadow-card overflow-hidden">
+          <table
+            {...getTableProps()}
+            className="w-full divide-y divide-neutral-200"
+          >
+            <thead className="bg-primary-300 text-white">
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers
+                    .filter((col) => col.show !== false)
+                    .map((column) => (
+                      <th
+                        scope="col"
+                        className="group px-4 py-3 text-left text-overline text-white"
+                        {...column.getHeaderProps(
+                          column.getSortByToggleProps()
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          {column.render("Header")}
+                          <span>
+                            {column.isSorted ? (
+                              column.isSortedDesc ? (
+                                <SortDownIcon className="w-4 h-4 text-white/80" />
+                              ) : (
+                                <SortUpIcon className="w-4 h-4 text-white/80" />
+                              )
+                            ) : (
+                              <SortIcon className="w-4 h-4 text-white/60 opacity-0 group-hover:opacity-100" />
                             )}
-                          >
-                            <div className="flex items-center justify-between">
-                              {column.render("Header")}
-                              <span>
-                                {column.isSorted ? (
-                                  column.isSortedDesc ? (
-                                    <SortDownIcon className="w-4 h-4 text-gray-400" />
-                                  ) : (
-                                    <SortUpIcon className="w-4 h-4 text-gray-400" />
-                                  )
-                                ) : (
-                                  <SortIcon className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100" />
-                                )}
-                              </span>
-                            </div>
-                          </th>
-                        ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody
-                  {...getTableBodyProps()}
-                  className="bg-white divide-y divide-gray-200"
-                >
-                  {data?.length === 0 && (
-                    <tr>
-                      <td className="text-center py-4" colSpan={columns.length}>
-                        Tidak ada data
-                      </td>
+                          </span>
+                        </div>
+                      </th>
+                    ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody
+              {...getTableBodyProps()}
+              className="bg-white divide-y divide-neutral-100"
+            >
+              {data?.length === 0 && (
+                <tr>
+                  <td className="text-center py-8 text-neutral-500" colSpan={columns.length}>
+                    Tidak ada data
+                  </td>
                     </tr>
                   )}
                   {page.map((row, i) => {
@@ -817,32 +815,30 @@ function Table({
                     return (
                       <tr
                         {...row.getRowProps()}
-                        className={i % 2 === 0 ? "bg-gray-100" : ""}
+                        className="hover:bg-primary-50/40 transition-colors"
                       >
                         {row.cells.map((cell) => {
                           if (cell.column.show === false) return null;
                           if (cell.column.id === "no") {
                             return (
                               <td
-                                className="px-6 py-4 whitespace-nowrap"
+                                className="px-4 py-3 whitespace-nowrap text-sm text-neutral-700 tabular-nums"
                                 key={i}
                               >
-                                <div className="text-sm text-gray-900">
-                                  {pageIndex * pageSize + i + 1}
-                                </div>
+                                {pageIndex * pageSize + i + 1}
                               </td>
                             );
                           }
                           return (
                             <td
                               {...cell.getCellProps()}
-                              className="px-4 py-2 whitespace-nowrap"
+                              className="px-4 py-3 whitespace-nowrap text-sm text-neutral-700"
                               role="cell"
                             >
                               {cell.column.Cell?.name === "defaultRenderer" ? (
-                                <div className="text-sm text-gray-700">
+                                <span>
                                   {cell.render("Cell")} {cell.column?.postFix}
-                                </div>
+                                </span>
                               ) : (
                                 cell.render("Cell")
                               )}
@@ -856,90 +852,66 @@ function Table({
               </table>
             </div>
           </div>
+      <div className="py-4 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-x-4 items-baseline">
+          <span className="text-sm text-neutral-600">
+            Halaman <span className="font-semibold">{pageIndex + 1}</span> dari{" "}
+            <span className="font-semibold">{pageOptions.length}</span>
+          </span>
+          <label>
+            <span className="sr-only">Item per halaman</span>
+            <select
+              className="rounded-button border border-neutral-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+            >
+              {[5, 10, 20].map((size) => (
+                <option key={size} value={size}>
+                  Tampilkan {size}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-      </div>
-      <div className="py-3 flex items-center justify-end">
-        <div className="flex-1 flex justify-between sm:hidden">
-          <Button
+        <nav
+          className="relative z-0 inline-flex -space-x-px rounded-button overflow-hidden"
+          aria-label="Pagination"
+        >
+          <PageButton
+            onClick={() => gotoPage(0)}
+            disabled={!canPreviousPage}
+          >
+            <span className="sr-only">First</span>«
+          </PageButton>
+          <PageButton
             onClick={() => previousPage()}
             disabled={!canPreviousPage}
-            icon={false}
           >
-            Previous
-          </Button>
-          <Button
-            onClick={() => nextPage()}
-            disabled={!canNextPage}
-            icon={false}
-          >
-            Next
-          </Button>
-        </div>
-        <div className="sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div className="flex gap-x-2 items-baseline">
-            <span className="text-sm text-gray-700">
-              Page <span className="font-medium">{pageIndex + 1}</span> of{" "}
-              <span className="font-medium">{pageOptions.length}</span>
-            </span>
-            <label>
-              <span className="sr-only">Items Per Page</span>
-              <select
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-              >
-                {[5, 10, 20].map((size) => (
-                  <option key={size} value={size}>
-                    Show {size}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div>
-            <nav
-              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
+            <span className="sr-only">Previous</span>‹
+          </PageButton>
+          {Array.from({ length: pageCount }, (_, index) => (
+            <PageButton
+              key={index}
+              onClick={() => gotoPage(index)}
+              className={
+                pageIndex === index
+                  ? "bg-primary text-white hover:bg-primary-600"
+                  : ""
+              }
             >
-              <PageButton
-                className="rounded-l-md"
-                onClick={() => gotoPage(0)}
-                disabled={!canPreviousPage}
-              >
-                <span className="sr-only">First</span>«
-              </PageButton>
-              <PageButton
-                onClick={() => previousPage()}
-                disabled={!canPreviousPage}
-              >
-                <span className="sr-only">Previous</span>‹
-              </PageButton>
-              {Array.from({ length: pageCount }, (_, index) => (
-                <PageButton
-                  key={index}
-                  onClick={() => gotoPage(index)}
-                  className={
-                    pageIndex === index
-                      ? "bg-indigo-600 text-black"
-                      : "bg-white text-gray-300"
-                  }
-                >
-                  {index + 1}
-                </PageButton>
-              ))}
-              <PageButton onClick={() => nextPage()} disabled={!canNextPage}>
-                <span className="sr-only">Next</span>›
-              </PageButton>
-              <PageButton
-                className="rounded-r-md"
-                onClick={() => gotoPage(pageCount - 1)}
-                disabled={!canNextPage}
-              >
-                <span className="sr-only">Last</span>»
-              </PageButton>
-            </nav>
-          </div>
-        </div>
+              {index + 1}
+            </PageButton>
+          ))}
+          <PageButton onClick={() => nextPage()} disabled={!canNextPage}>
+            <span className="sr-only">Next</span>›
+          </PageButton>
+          <PageButton
+            onClick={() => gotoPage(pageCount - 1)}
+            disabled={!canNextPage}
+          >
+            <span className="sr-only">Last</span>»
+          </PageButton>
+        </nav>
       </div>
       <Col sm="12" className="d-flex">
         <FormInputDataExcel
