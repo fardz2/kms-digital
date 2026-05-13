@@ -51,66 +51,52 @@ export default function LaporanBulananKader() {
   const isLoading = anakLoading || isFetchingPengukuran;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
+    <div className="min-h-screen bg-neutral-50">
       <PageHeader title="Laporan Bulanan" subtitle="Rekap posyandu Anda" />
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 960, margin: '0 auto' }}>
+
+      <div className="px-4 py-6 max-w-5xl mx-auto">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          style={{ marginBottom: 'var(--space-md)' }}
+          className="mb-4"
         >
           ← Kembali
         </Button>
 
-        <div style={{ marginBottom: 'var(--space-lg)' }}>
-          <div
-            style={{
-              fontSize: 'var(--text-base)',
-              marginBottom: 'var(--space-xs)',
-              color: 'var(--color-muted)',
-            }}
-          >
-            Bulan:
-          </div>
+        <div className="mb-6">
+          <div className="text-caption text-neutral-500 mb-1">Bulan:</div>
           <MonthPicker value={bulan} onChange={setBulan} />
         </div>
 
         {isLoading ? (
-          <div>Memuat data laporan...</div>
+          <div className="text-neutral-500">Memuat data laporan...</div>
         ) : (
           <>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: 'var(--space-md)',
-                marginBottom: 'var(--space-lg)',
-              }}
-            >
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4 mb-6">
               <StatCard label="Total Balita" value={laporan.totalBalita} icon="👶" />
               <StatCard
                 label="Sudah Diukur"
                 value={laporan.sudahDiukur}
                 icon="✅"
-                color="var(--color-success)"
+                accent="success"
               />
               <StatCard
                 label="Belum Diukur"
                 value={laporan.belumDiukur}
                 icon="⚠️"
-                color="var(--color-warning)"
+                accent="warning"
               />
             </div>
 
-            <Card title="Partisipasi Bulan Ini" style={{ marginBottom: 'var(--space-lg)' }}>
+            <Card title="Partisipasi Bulan Ini" className="mb-6">
               <ProgressBar
                 value={laporan.sudahDiukur}
                 max={laporan.totalBalita || 1}
               />
             </Card>
 
-            <Card title="Sebaran Status Gizi" style={{ marginBottom: 'var(--space-lg)' }}>
+            <Card title="Sebaran Status Gizi" className="mb-6">
               <StatusDistribution
                 distribusi={laporan.distribusi}
                 total={Object.values(laporan.distribusi).reduce((a, b) => a + b, 0)}
@@ -119,16 +105,16 @@ export default function LaporanBulananKader() {
 
             <Card
               title={`Belum Diukur Bulan Ini (${laporan.belumDiukurList.length})`}
-              style={{ marginBottom: 'var(--space-lg)' }}
+              className="mb-6"
             >
               {laporan.belumDiukurList.length === 0 ? (
-                <div style={{ color: 'var(--color-muted)' }}>
+                <div className="text-neutral-500">
                   Semua balita sudah diukur 🎉
                 </div>
               ) : (
-                <ul style={{ paddingLeft: 'var(--space-lg)', margin: 0 }}>
+                <ul className="pl-5 m-0 space-y-1">
                   {laporan.belumDiukurList.map((item) => (
-                    <li key={item.id} style={{ padding: 'var(--space-xs) 0' }}>
+                    <li key={item.id} className="text-base text-neutral-700">
                       {item.nama}
                       {item.umurBulan != null && ` (${item.umurBulan} bulan)`}
                     </li>
@@ -139,13 +125,13 @@ export default function LaporanBulananKader() {
 
             <Card title={`Perlu Perhatian (${laporan.perluPerhatian.length})`}>
               {laporan.perluPerhatian.length === 0 ? (
-                <div style={{ color: 'var(--color-muted)' }}>
+                <div className="text-neutral-500">
                   Tidak ada balita yang perlu perhatian khusus 🎉
                 </div>
               ) : (
-                <ul style={{ paddingLeft: 'var(--space-lg)', margin: 0 }}>
+                <ul className="pl-5 m-0 space-y-1">
                   {laporan.perluPerhatian.map((item) => (
-                    <li key={item.id} style={{ padding: 'var(--space-xs) 0' }}>
+                    <li key={item.id} className="text-base text-neutral-700">
                       ⚠️ {item.nama} — {item.status}
                     </li>
                   ))}

@@ -65,7 +65,7 @@ export default function DetailAnak() {
   return (
     <>
       {toast.contextHolder}
-      <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
+      <div className="min-h-screen bg-neutral-50">
         <PageHeader
           title={anakLoading ? 'Memuat...' : (anak?.nama ?? '-')}
           subtitle={
@@ -75,12 +75,12 @@ export default function DetailAnak() {
           }
         />
 
-        <div style={{ padding: 'var(--space-lg)', maxWidth: 960, margin: '0 auto' }}>
+        <div className="px-4 py-6 max-w-4xl mx-auto">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(-1)}
-            style={{ marginBottom: 'var(--space-md)' }}
+            className="mb-4"
           >
             ← Kembali
           </Button>
@@ -90,46 +90,27 @@ export default function DetailAnak() {
               variant="primary"
               size="lg"
               onClick={handleAdd}
-              style={{ width: '100%', marginBottom: 'var(--space-lg)' }}
+              className="w-full mb-6"
             >
               + Ukur Pengukuran Baru
             </Button>
           )}
 
-          <h2
-            style={{
-              fontSize: 'var(--text-lg)',
-              fontWeight: 'var(--font-weight-bold)',
-              marginBottom: 'var(--space-md)',
-            }}
-          >
+          <h2 className="text-h2 font-display text-neutral-900 mb-4">
             Riwayat Pengukuran
           </h2>
 
-          {pengukuranLoading && <div style={{ padding: 'var(--space-lg)' }}>Memuat...</div>}
+          {pengukuranLoading && (
+            <div className="text-neutral-500 py-6">Memuat...</div>
+          )}
 
           {!pengukuranLoading && (!pengukuran || pengukuran.length === 0) && (
-            <div
-              style={{
-                padding: 'var(--space-xl)',
-                textAlign: 'center',
-                background: 'var(--color-bg)',
-                borderRadius: 'var(--radius-card)',
-                color: 'var(--color-muted)',
-              }}
-            >
+            <div className="p-8 text-center bg-white border border-neutral-200 rounded-card text-neutral-500">
               Belum ada data pengukuran
             </div>
           )}
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'var(--space-sm)',
-              marginBottom: 'var(--space-xl)',
-            }}
-          >
+          <div className="flex flex-col gap-3 mb-10">
             {[...(pengukuran ?? [])]
               .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
               .map((p) => (
@@ -145,13 +126,7 @@ export default function DetailAnak() {
 
           {pengukuran && pengukuran.length > 0 && (
             <>
-              <h2
-                style={{
-                  fontSize: 'var(--text-lg)',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--space-md)',
-                }}
-              >
+              <h2 className="text-h2 font-display text-neutral-900 mb-4">
                 Grafik Pertumbuhan (WHO)
               </h2>
               <ChartWHO anak={anak} pengukuran={pengukuran} />

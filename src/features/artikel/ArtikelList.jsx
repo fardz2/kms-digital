@@ -11,58 +11,40 @@ export default function ArtikelList() {
   const { data: artikel, isLoading } = useArtikelList();
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
+    <div className="min-h-screen bg-neutral-50">
       <PageHeader title="Artikel Kesehatan" subtitle="Edukasi gizi dan pengasuhan balita" />
 
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 720, margin: '0 auto' }}>
+      <div className="px-4 py-6 max-w-3xl mx-auto">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          style={{ marginBottom: 'var(--space-md)' }}
+          className="mb-4"
         >
           ← Kembali
         </Button>
 
-        {isLoading && <div>Memuat...</div>}
+        {isLoading && <div className="text-neutral-500">Memuat...</div>}
 
         {!isLoading && (!artikel || artikel.length === 0) && (
           <Card>
-            <div
-              style={{
-                textAlign: 'center',
-                color: 'var(--color-muted)',
-                padding: 'var(--space-lg)',
-              }}
-            >
+            <div className="text-center py-6 text-neutral-500">
               Belum ada artikel
             </div>
           </Card>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+        <div className="flex flex-col gap-3">
           {(artikel ?? []).map((item) => (
             <Card
               key={item.id}
               onClick={() => navigate(`/artikel/${item.id}`)}
-              style={{ cursor: 'pointer' }}
             >
-              <div
-                style={{
-                  fontSize: 'var(--text-lg)',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
+              <div className="text-h3 font-display text-neutral-900 mb-1">
                 {item.judul ?? item.title ?? '-'}
               </div>
               {item.created_at && (
-                <div
-                  style={{
-                    fontSize: 'var(--text-base)',
-                    color: 'var(--color-muted)',
-                  }}
-                >
+                <div className="text-caption text-neutral-500">
                   {moment(item.created_at).format('DD MMMM YYYY')}
                 </div>
               )}

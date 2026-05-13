@@ -29,28 +29,14 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
 
   return (
     <Card>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 'var(--space-sm)',
-        }}
-      >
-        <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)' }}>
+      <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
+        <div className="text-h3 font-display text-neutral-900">
           {date ? moment(date).format('DD MMMM YYYY') : '-'}
         </div>
         <StatusBadge status={status} />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: 'var(--space-sm)',
-          marginBottom: 'var(--space-sm)',
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3 mb-3 text-base">
         <div>
           <strong>⚖️ BB:</strong> {berat} kg
         </div>
@@ -68,21 +54,13 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
       </div>
 
       {catatan && (
-        <div
-          style={{
-            padding: 'var(--space-sm) var(--space-md)',
-            background: 'var(--color-surface)',
-            borderRadius: 'var(--radius-button)',
-            fontSize: 'var(--text-base)',
-            marginBottom: 'var(--space-sm)',
-          }}
-        >
+        <div className="px-4 py-3 bg-primary-50 rounded-button text-base mb-3">
           📝 {catatan}
         </div>
       )}
 
       {canEdit && (
-        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+        <div className="flex gap-2 justify-end">
           <Button variant="ghost" size="sm" onClick={() => onEdit?.(pengukuran)}>
             Ubah
           </Button>

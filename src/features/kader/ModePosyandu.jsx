@@ -110,7 +110,7 @@ export default function ModePosyandu() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)', paddingBottom: 80 }}>
+    <div className="min-h-screen bg-neutral-50 pb-24">
       <PosyanduHeader
         userName={user?.name}
         posyanduName={user?.posyandu_name}
@@ -122,78 +122,65 @@ export default function ModePosyandu() {
         onKeluar={handleKeluar}
       />
 
-      <div
-        style={{
-          padding: 'var(--space-md) var(--space-lg) 0',
-          background: 'var(--color-surface)',
-        }}
-      >
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="🔍 Cari nama balita..."
-          style={{
-            width: '100%',
-            padding: 'var(--space-md)',
-            fontSize: 'var(--text-base)',
-            borderRadius: 'var(--radius-button)',
-            border: '1px solid var(--color-border)',
-            marginBottom: 'var(--space-sm)',
-          }}
-        />
-        <FilterChip value={filter} onChange={setFilter} counts={counts} />
-      </div>
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        <div className="space-y-3">
+          <div className="relative">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari nama balita..."
+              aria-label="Cari balita"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-button text-base placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
+            />
+            <span
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+              aria-hidden
+            >
+              🔍
+            </span>
+          </div>
+          <FilterChip value={filter} onChange={setFilter} counts={counts} />
+        </div>
 
-      <div style={{ padding: 'var(--space-md) var(--space-lg)', maxWidth: 960, margin: '0 auto' }}>
-        {isLoading && <div>Memuat data balita...</div>}
+        {isLoading && (
+          <div className="text-neutral-500">Memuat data balita...</div>
+        )}
+
         {!isLoading && filtered.length === 0 && (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: 'var(--space-xl)',
-              color: 'var(--color-muted)',
-            }}
-          >
+          <div className="text-center py-12 text-neutral-500">
             {balitaWithMeta.length === 0
               ? 'Belum ada data balita. Tambah balita baru di tombol bawah.'
               : 'Tidak ada balita yang cocok dengan filter.'}
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-          {filtered.map(({ anak, meta }) => (
-            <BalitaCard
+        <div className="flex flex-col gap-2">
+          {filtered.map(({ anak, meta }, i) => (
+            <div
               key={anak.id}
-              anak={anak}
-              meta={meta}
-              onUkur={(a) => handleUkur(a, meta.latest)}
-              onUlang={handleUlang}
-              onLihat={handleLihat}
-            />
+              className="animate-in fade-in slide-in-from-bottom-1 duration-250"
+              style={{ animationDelay: `${i * 30}ms`, animationFillMode: 'backwards' }}
+            >
+              <BalitaCard
+                anak={anak}
+                meta={meta}
+                onUkur={(a) => handleUkur(a, meta.latest)}
+                onUlang={handleUlang}
+                onLihat={handleLihat}
+              />
+            </div>
           ))}
         </div>
       </div>
 
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: 'var(--space-md)',
-          background: 'var(--color-bg)',
-          borderTop: '1px solid var(--color-border)',
-          boxShadow: '0 -2px 8px rgba(0,0,0,0.05)',
-          zIndex: 10,
-        }}
-      >
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-neutral-200 p-4 z-20">
+        <div className="max-w-3xl mx-auto">
           <Button
             variant="primary"
             size="lg"
             onClick={() => setTambahOpen(true)}
-            style={{ width: '100%' }}
+            className="w-full"
           >
             + Tambah Balita Baru
           </Button>

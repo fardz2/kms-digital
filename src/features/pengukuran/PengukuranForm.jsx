@@ -120,7 +120,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
         onCancel={onClose}
         width={560}
         footer={
-          <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+          <div className="flex gap-2 justify-end">
             <Button variant="secondary" onClick={onClose} disabled={isSaving}>
               Batal
             </Button>
@@ -130,28 +130,22 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div className="flex flex-col gap-4">
           <div>
-            <div
-              style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-bold)',
-                marginBottom: 'var(--space-sm)',
-              }}
-            >
+            <label className="text-overline text-neutral-600 mb-2 block">
               📅 Tanggal Pengukuran
-            </div>
+            </label>
             <DatePicker
               value={tanggal}
               onChange={(v) => v && setTanggal(v)}
               allowClear={false}
-              style={{ width: '100%', height: 48, fontSize: 'var(--text-base)' }}
+              className="w-full h-12 text-base"
               format="DD MMMM YYYY"
             />
             {umurBulan != null && (
-              <div style={{ marginTop: 'var(--space-xs)', color: 'var(--color-muted)' }}>
+              <p className="text-caption text-neutral-500 mt-1">
                 Umur saat diukur: {umurBulan} bulan
-              </div>
+              </p>
             )}
           </div>
 
@@ -199,19 +193,10 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
           <CatatanField value={catatan} onChange={setCatatan} />
 
-          <div
-            style={{
-              padding: 'var(--space-md)',
-              background: 'var(--color-surface)',
-              borderRadius: 'var(--radius-card)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-md)',
-            }}
-          >
-            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)' }}>
+          <div className="p-4 bg-primary-50 rounded-card flex items-center gap-3">
+            <span className="text-body-lg font-display font-semibold">
               Status Gizi:
-            </div>
+            </span>
             <StatusBadge status={status} />
           </div>
         </div>

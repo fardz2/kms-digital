@@ -1,45 +1,25 @@
 import React from 'react';
 
-export default function ProgressBar({
-  value = 0,
-  max = 100,
-  label,
-  color = 'var(--color-primary)',
-}) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+export default function ProgressBar({ value = 0, max = 100, label, color = 'bg-primary' }) {
+  const pct = Math.min(100, Math.max(0, (value / Math.max(max, 1)) * 100));
   return (
     <div>
       {label && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: 'var(--space-xs)',
-            fontSize: 'var(--text-base)',
-          }}
-        >
+        <div className="flex justify-between text-caption text-neutral-700 mb-2">
           <span>{label}</span>
-          <span>
+          <span className="tabular-nums">
             {value}/{max} ({pct.toFixed(0)}%)
           </span>
         </div>
       )}
-      <div
-        style={{
-          width: '100%',
-          height: 12,
-          background: 'var(--color-border)',
-          borderRadius: 'var(--radius-button)',
-          overflow: 'hidden',
-        }}
-      >
+      <div className="w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
         <div
-          style={{
-            width: `${pct}%`,
-            height: '100%',
-            background: color,
-            transition: 'width 0.3s',
-          }}
+          className={`h-full ${color} rounded-full transition-[width] duration-400 ease-out-quart`}
+          style={{ width: `${pct}%` }}
+          role="progressbar"
+          aria-valuenow={Math.round(pct)}
+          aria-valuemin={0}
+          aria-valuemax={100}
         />
       </div>
     </div>

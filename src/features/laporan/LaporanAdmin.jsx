@@ -4,21 +4,23 @@ import Card from '../../components/ui/Card';
 
 export default function LaporanAdmin() {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
+    <div className="min-h-screen bg-neutral-50">
       <PageHeader
         title="Laporan Keseluruhan"
         subtitle="Rekap bulanan semua desa & posyandu"
       />
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 960, margin: '0 auto' }}>
+      <div className="px-4 py-6 max-w-3xl mx-auto">
         <Card title="Informasi">
-          <p style={{ marginBottom: 'var(--space-md)' }}>
+          <p className="mb-4 text-base text-neutral-700">
             Rekap per-desa tersedia di dashboard masing-masing akun Desa.
           </p>
-          <p style={{ color: 'var(--color-muted)' }}>
-            Agregasi lintas-desa untuk role Admin akan ditambahkan pada rilis berikutnya
-            setelah backend menyediakan endpoint rekap admin{' '}
-            (<code>GET /api/admin/laporan/bulanan</code>). Saat ini, silakan gunakan menu
-            "Desa" untuk melihat data per desa.
+          <p className="text-neutral-500 text-base">
+            Agregasi lintas-desa untuk role Admin akan ditambahkan pada rilis
+            berikutnya setelah backend menyediakan endpoint rekap admin (
+            <code className="text-caption bg-neutral-100 px-1.5 py-0.5 rounded">
+              GET /api/admin/laporan/bulanan
+            </code>
+            ). Saat ini, silakan gunakan menu "Desa" untuk melihat data per desa.
           </p>
         </Card>
       </div>

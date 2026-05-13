@@ -3,28 +3,24 @@ import bgDashboard from '../../assets/img/bg-dashboard.svg';
 
 export default function PageHeader({ title, subtitle, action, children }) {
   return (
-    <div
-      style={{
-        position: 'relative',
-        minHeight: 200,
-        padding: 'var(--space-xl) var(--space-lg)',
-        borderBottomLeftRadius: 'var(--radius-hero)',
-        borderBottomRightRadius: 'var(--radius-hero)',
-        boxShadow: 'var(--shadow-hero)',
-        backgroundImage: `url(${bgDashboard})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        color: '#FFFFFF',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
+    <header
+      className="relative overflow-hidden text-white rounded-b-hero shadow-hero px-6 py-10 md:py-12 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgDashboard})` }}
     >
-      {title && <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-weight-bold)', margin: 0 }}>{title}</h1>}
-      {subtitle && <p style={{ fontSize: 'var(--text-lg)', margin: 'var(--space-sm) 0 0' }}>{subtitle}</p>}
-      {action && <div style={{ marginTop: 'var(--space-lg)' }}>{action}</div>}
-      {children}
-    </div>
+      <div
+        aria-hidden
+        className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary-300 opacity-40 blur-3xl pointer-events-none"
+      />
+      <div className="relative max-w-4xl mx-auto">
+        {subtitle && (
+          <p className="text-overline text-primary-100 mb-1">{subtitle}</p>
+        )}
+        {title && (
+          <h1 className="text-h1 font-display text-white leading-tight">{title}</h1>
+        )}
+        {action && <div className="mt-6">{action}</div>}
+        {children}
+      </div>
+    </header>
   );
 }

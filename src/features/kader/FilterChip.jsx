@@ -1,47 +1,38 @@
 import React from 'react';
-import Button from '../../components/ui/Button';
 
 const OPTIONS = [
   { key: 'semua', label: 'Semua' },
   { key: 'belum', label: 'Belum diukur' },
-  { key: 'perhatian', label: '\u26A0\uFE0F Perhatian' },
+  { key: 'perhatian', label: '\u26A0 Perhatian' },
 ];
 
 export default function FilterChip({ value = 'semua', onChange, counts = {} }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 'var(--space-sm)',
-        flexWrap: 'wrap',
-        padding: 'var(--space-sm) 0',
-      }}
-    >
+    <div className="flex gap-2 flex-wrap">
       {OPTIONS.map((opt) => {
         const count = counts[opt.key];
-        const isActive = value === opt.key;
+        const active = value === opt.key;
         return (
-          <Button
+          <button
             key={opt.key}
-            variant={isActive ? 'primary' : 'secondary'}
-            size="sm"
             onClick={() => onChange?.(opt.key)}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 ${
+              active
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-200 hover:text-primary-700'
+            }`}
           >
             {opt.label}
             {count != null && (
               <span
-                style={{
-                  marginLeft: 'var(--space-xs)',
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: isActive ? 'rgba(255,255,255,0.3)' : 'var(--color-surface)',
-                  fontSize: 'var(--text-base)',
-                }}
+                className={`px-2 py-0.5 rounded-full text-xs font-semibold tabular-nums ${
+                  active ? 'bg-white/25' : 'bg-neutral-100'
+                }`}
               >
                 {count}
               </span>
             )}
-          </Button>
+          </button>
         );
       })}
     </div>

@@ -1,32 +1,20 @@
 import React from 'react';
 
 const VARIANTS = {
-  primary: {
-    background: 'var(--color-primary)',
-    color: '#FFFFFF',
-    border: 'none',
-  },
-  secondary: {
-    background: 'var(--color-surface)',
-    color: 'var(--color-text)',
-    border: '1px solid var(--color-border)',
-  },
-  danger: {
-    background: 'var(--color-danger)',
-    color: '#FFFFFF',
-    border: 'none',
-  },
-  ghost: {
-    background: 'transparent',
-    color: 'var(--color-text)',
-    border: 'none',
-  },
+  primary:
+    'bg-primary hover:bg-primary-600 active:bg-primary-700 text-white font-display font-semibold shadow-sm hover:shadow-raised',
+  secondary:
+    'bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold',
+  ghost:
+    'bg-transparent hover:bg-neutral-100 text-neutral-700 font-medium',
+  danger:
+    'bg-danger hover:bg-red-600 active:bg-red-700 text-white font-display font-semibold shadow-sm',
 };
 
 const SIZES = {
-  sm: { padding: '8px 16px', fontSize: 'var(--text-base)', minHeight: '36px' },
-  md: { padding: '12px 24px', fontSize: 'var(--text-base)', minHeight: 'var(--space-tap)' },
-  lg: { padding: '16px 32px', fontSize: 'var(--text-lg)', minHeight: '56px' },
+  sm: 'px-3 py-1.5 text-sm min-h-[2.25rem]',
+  md: 'px-5 py-3 text-base min-h-tap',
+  lg: 'px-6 py-4 text-body-lg min-h-[3.5rem]',
 };
 
 export default function Button({
@@ -36,28 +24,22 @@ export default function Button({
   disabled = false,
   icon = null,
   type = 'button',
+  className = '',
   onClick,
-  style: styleProp,
   children,
   ...rest
 }) {
-  const style = {
-    ...VARIANTS[variant],
-    ...SIZES[size],
-    borderRadius: 'var(--radius-button)',
-    fontWeight: 'var(--font-weight-bold)',
-    cursor: disabled || loading ? 'not-allowed' : 'pointer',
-    opacity: disabled || loading ? 0.6 : 1,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--space-sm)',
-    transition: 'opacity 0.15s',
-    ...styleProp,
-  };
+  const base =
+    'inline-flex items-center justify-center gap-2 rounded-button transition-all duration-150 ease-out-quart active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100';
 
   return (
-    <button type={type} onClick={onClick} disabled={disabled || loading} style={style} {...rest}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`${base} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      {...rest}
+    >
       {icon && !loading && <span aria-hidden="true">{icon}</span>}
       {loading ? 'Memuat...' : children}
     </button>

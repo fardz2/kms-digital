@@ -22,54 +22,30 @@ export default function BerandaTenkes() {
         subtitle="Dashboard tenaga kesehatan"
       />
 
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 720, margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 'var(--space-md)',
-          }}
-        >
-          <Card onClick={() => navigate('/tenkes/forum')}>
-            <div style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-sm)' }}>
-              💬
-            </div>
-            <div
-              style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-bold)',
-              }}
-            >
+      <div className="px-4 py-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+          <Card
+            onClick={() => navigate('/tenkes/forum')}
+            className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+          >
+            <div className="text-display mb-2" aria-hidden>💬</div>
+            <div className="text-h3 font-display text-neutral-900">
               Forum Tanya Jawab
             </div>
-            <div
-              style={{
-                fontSize: 'var(--text-base)',
-                color: 'var(--color-muted)',
-              }}
-            >
+            <div className="text-caption text-neutral-600 mt-1">
               Jawab pertanyaan orang tua
             </div>
           </Card>
 
-          <Card onClick={() => navigate('/artikel')}>
-            <div style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-sm)' }}>
-              📰
-            </div>
-            <div
-              style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-bold)',
-              }}
-            >
+          <Card
+            onClick={() => navigate('/artikel')}
+            className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
+          >
+            <div className="text-display mb-2" aria-hidden>📰</div>
+            <div className="text-h3 font-display text-neutral-900">
               Artikel Kesehatan
             </div>
-            <div
-              style={{
-                fontSize: 'var(--text-base)',
-                color: 'var(--color-muted)',
-              }}
-            >
+            <div className="text-caption text-neutral-600 mt-1">
               Baca artikel edukasi gizi
             </div>
           </Card>

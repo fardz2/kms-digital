@@ -74,28 +74,31 @@ export default function KelolaAcara() {
         subtitle="Buat pengingat acara untuk kader dan orang tua"
       />
 
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 720, margin: '0 auto' }}>
-        <Card title="Tambah Acara Baru" style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="px-4 py-6 max-w-3xl mx-auto space-y-6">
+        <Card title="Tambah Acara Baru">
           <Form form={form} layout="vertical" onFinish={onSubmit}>
             <Form.Item
-              label="Judul Acara"
+              label={<span className="text-caption text-neutral-700">Judul Acara</span>}
               name="judul"
               rules={[{ required: true, message: 'Judul masih kosong' }]}
             >
-              <Input placeholder="Contoh: Posyandu Bulan Ini" style={{ height: 44 }} />
+              <Input placeholder="Contoh: Posyandu Bulan Ini" className="h-11" />
             </Form.Item>
-            <Form.Item label="Deskripsi" name="deskripsi">
+            <Form.Item
+              label={<span className="text-caption text-neutral-700">Deskripsi</span>}
+              name="deskripsi"
+            >
               <Input.TextArea rows={2} placeholder="Detail tambahan (opsional)" />
             </Form.Item>
             <Form.Item
-              label="Tanggal"
+              label={<span className="text-caption text-neutral-700">Tanggal</span>}
               name="tanggal"
               rules={[{ required: true, message: 'Tanggal masih kosong' }]}
             >
               <DatePicker
                 format="DD MMMM YYYY"
                 allowClear={false}
-                style={{ width: '100%', height: 44 }}
+                className="w-full h-11"
               />
             </Form.Item>
             <Button
@@ -110,50 +113,29 @@ export default function KelolaAcara() {
         </Card>
 
         <Card title={`Daftar Acara (${sorted.length})`}>
-          {isLoading && <div>Memuat...</div>}
+          {isLoading && <div className="text-neutral-500">Memuat...</div>}
           {!isLoading && sorted.length === 0 && (
-            <div
-              style={{
-                color: 'var(--color-muted)',
-                textAlign: 'center',
-                padding: 'var(--space-md)',
-              }}
-            >
+            <div className="text-center py-4 text-neutral-500">
               Belum ada acara
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          <div className="flex flex-col gap-2">
             {sorted.map((acara) => (
               <div
                 key={acara.id}
-                style={{
-                  padding: 'var(--space-md)',
-                  background: 'var(--color-surface)',
-                  borderRadius: 'var(--radius-button)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 'var(--space-sm)',
-                }}
+                className="p-4 bg-primary-50 rounded-button flex justify-between items-center gap-3"
               >
                 <div>
-                  <div
-                    style={{
-                      fontSize: 'var(--text-lg)',
-                      fontWeight: 'var(--font-weight-bold)',
-                    }}
-                  >
+                  <div className="text-body-lg font-display font-semibold text-neutral-900">
                     {acara.judul}
                   </div>
-                  <div style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
+                  <div className="text-caption text-neutral-500">
                     {acara.tanggal_reminder
                       ? moment(acara.tanggal_reminder).format('DD MMMM YYYY')
                       : '-'}
                   </div>
                   {acara.deskripsi && (
-                    <div style={{ fontSize: 'var(--text-base)', marginTop: 'var(--space-xs)' }}>
-                      {acara.deskripsi}
-                    </div>
+                    <div className="text-base mt-1">{acara.deskripsi}</div>
                   )}
                 </div>
                 <Button

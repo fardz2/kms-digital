@@ -19,28 +19,21 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: 420, margin: '0 auto' }}>
-      <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--space-sm)' }}>
+    <div className="w-full max-w-md mx-auto">
+      <h2 className="text-h2 font-display text-neutral-900 mb-4">
         Masuk sebagai {ROLE_LABELS[role] ?? 'Pengguna'}
       </h2>
       {errorText && (
         <div
           role="alert"
-          style={{
-            background: 'var(--color-danger)',
-            color: '#FFFFFF',
-            padding: 'var(--space-sm) var(--space-md)',
-            borderRadius: 'var(--radius-button)',
-            marginBottom: 'var(--space-md)',
-            fontSize: 'var(--text-base)',
-          }}
+          className="bg-danger text-white px-4 py-3 rounded-button mb-4 text-base"
         >
           {errorText}
         </div>
       )}
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item
-          label="Email"
+          label={<span className="text-caption text-neutral-700">Email</span>}
           name="email"
           rules={[
             { required: true, message: 'Email masih kosong' },
@@ -50,21 +43,27 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
           <Input
             prefix={<MailOutlined />}
             placeholder="email@contoh.com"
-            style={{ height: 48, fontSize: 'var(--text-base)' }}
+            className="h-12 text-base"
           />
         </Form.Item>
         <Form.Item
-          label="Kata Sandi"
+          label={<span className="text-caption text-neutral-700">Kata Sandi</span>}
           name="password"
           rules={[{ required: true, message: 'Kata sandi masih kosong' }]}
         >
           <Input.Password
             prefix={<KeyOutlined />}
             placeholder="Kata sandi"
-            style={{ height: 48, fontSize: 'var(--text-base)' }}
+            className="h-12 text-base"
           />
         </Form.Item>
-        <Button type="submit" variant="primary" size="lg" loading={loading} style={{ width: '100%' }}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={loading}
+          className="w-full"
+        >
           MASUK
         </Button>
       </Form>

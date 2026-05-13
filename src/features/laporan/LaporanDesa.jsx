@@ -63,10 +63,10 @@ const LABEL_MAP = {
 function Distribusi({ distribusi, total }) {
   const entries = Object.entries(distribusi);
   if (entries.length === 0 || total === 0) {
-    return <div style={{ color: 'var(--color-muted)' }}>Belum ada data</div>;
+    return <div className="text-neutral-500">Belum ada data</div>;
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+    <div className="flex flex-col gap-3">
       {entries.map(([k, v]) => (
         <ProgressBar
           key={k}
@@ -89,7 +89,7 @@ export default function LaporanDesa() {
   if (!idDesa) {
     return (
       <Card>
-        <div style={{ color: 'var(--color-muted)', textAlign: 'center' }}>
+        <div className="text-center text-neutral-500">
           Data desa tidak tersedia
         </div>
       </Card>
@@ -97,32 +97,26 @@ export default function LaporanDesa() {
   }
 
   if (isLoading) {
-    return <div>Memuat laporan...</div>;
+    return <div className="text-neutral-500">Memuat laporan...</div>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 'var(--space-md)',
-        }}
-      >
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
         <StatCard label="Total Balita" value={agg.totalBalita} icon="👶" />
         <StatCard
           label="Posyandu Aktif"
           value={agg.perPosyandu.length}
           icon="🏥"
-          color="var(--color-accent)"
+          accent="accent"
         />
       </div>
 
       <Card title="Rekap per Posyandu">
         {agg.perPosyandu.length === 0 ? (
-          <div style={{ color: 'var(--color-muted)' }}>Belum ada data</div>
+          <div className="text-neutral-500">Belum ada data</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div className="flex flex-col gap-4">
             {agg.perPosyandu.map((p) => (
               <ProgressBar
                 key={p.id}

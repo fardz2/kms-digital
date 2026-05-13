@@ -14,7 +14,7 @@ export default function ArtikelDetailPage() {
   const content = artikel?.content ?? artikel?.isi ?? '';
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
+    <div className="min-h-screen bg-neutral-50">
       <PageHeader
         title={isLoading ? 'Memuat...' : title}
         subtitle={
@@ -22,28 +22,21 @@ export default function ArtikelDetailPage() {
         }
       />
 
-      <div style={{ padding: 'var(--space-lg)', maxWidth: 720, margin: '0 auto' }}>
+      <div className="px-4 py-6 max-w-reading mx-auto">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          style={{ marginBottom: 'var(--space-md)' }}
+          className="mb-4"
         >
           ← Kembali
         </Button>
 
         {isLoading ? (
-          <div>Memuat artikel...</div>
+          <div className="text-neutral-500">Memuat artikel...</div>
         ) : (
           <div
-            style={{
-              background: 'var(--color-bg)',
-              padding: 'var(--space-lg)',
-              borderRadius: 'var(--radius-card)',
-              boxShadow: 'var(--shadow-card)',
-              fontSize: 'var(--text-base)',
-              lineHeight: 1.7,
-            }}
+            className="bg-white p-6 rounded-card shadow-card text-base text-neutral-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}

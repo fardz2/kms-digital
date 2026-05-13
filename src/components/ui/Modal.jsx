@@ -4,14 +4,16 @@ import { Modal as AntModal } from 'antd';
 export default function Modal({ title, open, onCancel, footer, width, children }) {
   return (
     <AntModal
-      title={<span style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-bold)' }}>{title}</span>}
+      title={
+        <span className="text-h3 font-display text-neutral-900">{title}</span>
+      }
       open={open}
       onCancel={onCancel}
       footer={footer}
       width={width ?? 560}
       destroyOnClose
       maskClosable={false}
-      bodyStyle={{ padding: 'var(--space-lg)', fontSize: 'var(--text-base)' }}
+      bodyStyle={{ padding: '1.25rem', fontFamily: 'Inter, sans-serif', fontSize: '1rem' }}
     >
       {children}
     </AntModal>

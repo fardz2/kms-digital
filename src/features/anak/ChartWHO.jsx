@@ -271,7 +271,7 @@ export default function ChartWHO({ anak, pengukuran }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)', flexWrap: 'wrap' }}>
+      <div className="flex gap-2 mb-4 flex-wrap">
         {[
           { key: 'BB', label: 'Berat Badan' },
           { key: 'TB', label: 'Tinggi Badan' },
@@ -288,16 +288,7 @@ export default function ChartWHO({ anak, pengukuran }) {
           </Button>
         ))}
       </div>
-      <div
-        style={{
-          width: '100%',
-          minHeight: 500,
-          padding: 'var(--space-md)',
-          background: 'var(--color-bg)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-card)',
-        }}
-      >
+      <div className="w-full min-h-[500px] p-4 bg-white border border-neutral-200 rounded-card">
         <Line data={current.data} options={current.options} />
       </div>
     </div>
