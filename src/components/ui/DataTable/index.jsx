@@ -60,7 +60,7 @@ export default function DataTable({
   const visibleColumns = table.getVisibleLeafColumns();
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-[17px]">
       {toolbar !== null ? (
         toolbar
       ) : (
@@ -74,24 +74,24 @@ export default function DataTable({
       )}
 
       <div className="overflow-x-auto">
-        <div className="rounded-card border border-neutral-200 bg-white shadow-card overflow-hidden">
-          <table className="w-full divide-y divide-neutral-200">
-            <thead className="bg-primary-300 text-white">
+        <div className="rounded-default border border-light-ash bg-white overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-polar-mist">
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <tr key={headerGroup.id} className="border-b border-light-ash">
                   {headerGroup.headers.map((header) => (
                     <DataTableColumnHeader key={header.id} header={header} />
                   ))}
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-neutral-100">
+            <tbody>
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <tr key={`skeleton-${i}`} className="animate-pulse">
+                  <tr key={`skeleton-${i}`} className="border-b border-light-ash animate-pulse">
                     {visibleColumns.map((col) => (
-                      <td key={col.id} className="px-4 py-3">
-                        <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                      <td key={col.id} className="px-[17px] py-[13px]">
+                        <div className="h-4 bg-polar-mist rounded-default w-3/4" />
                       </td>
                     ))}
                   </tr>
@@ -99,7 +99,7 @@ export default function DataTable({
               ) : rows.length === 0 ? (
                 <tr>
                   <td
-                    className="text-center py-8 text-neutral-500"
+                    className="text-center py-[50px] text-body-sm text-graphite"
                     colSpan={visibleColumns.length}
                   >
                     {emptyText}
@@ -109,12 +109,12 @@ export default function DataTable({
                 rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-primary-50/40 transition-colors"
+                    className="border-b border-light-ash last:border-b-0 hover:bg-faint-fog transition-colors duration-150"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-4 py-3 whitespace-nowrap text-sm text-neutral-700"
+                        className="px-[17px] py-[13px] whitespace-nowrap text-body-sm text-deep-slate"
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>

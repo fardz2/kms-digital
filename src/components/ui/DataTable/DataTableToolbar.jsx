@@ -10,13 +10,13 @@ function SearchInput({ value, onChange, placeholder }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label="Cari data tabel"
-        className="w-full md:w-72 pl-10 pr-4 py-2.5 bg-white border border-neutral-200 rounded-button text-base placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
+        className="w-full md:w-72 h-[44px] pl-[42px] pr-[17px] bg-white border border-light-ash rounded-default text-body-sm text-deep-slate placeholder:text-graphite focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-colors"
       />
       <span
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+        className="absolute left-[13px] top-1/2 -translate-y-1/2 text-graphite pointer-events-none"
         aria-hidden
       >
-        <Search className="w-4 h-4" />
+        <Search className="w-4 h-4" strokeWidth={1.75} />
       </span>
     </div>
   );
@@ -49,14 +49,14 @@ function ColumnVisibilityMenu({ table }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-button bg-white border border-neutral-200 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
+        className="inline-flex items-center gap-2 h-[44px] px-[17px] rounded-default bg-white border border-light-ash text-body-sm font-medium text-deep-slate hover:bg-faint-fog transition-colors duration-150"
       >
         Kolom
-        <ChevronDown className="w-4 h-4" />
+        <ChevronDown className="w-4 h-4 text-graphite" strokeWidth={1.75} />
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-56 rounded-card border border-neutral-200 bg-white shadow-card z-10">
-          <div className="py-2">
+        <div className="absolute right-0 mt-1 w-56 rounded-default border border-light-ash bg-white z-10">
+          <div className="py-[8px]">
             {hideableColumns.map((col) => {
               const header = typeof col.columnDef.header === 'string'
                 ? col.columnDef.header
@@ -64,13 +64,13 @@ function ColumnVisibilityMenu({ table }) {
               return (
                 <label
                   key={col.id}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                  className="flex items-center gap-2 px-[17px] py-[8px] text-body-sm text-deep-slate hover:bg-faint-fog cursor-pointer transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={col.getIsVisible()}
                     onChange={col.getToggleVisibilityHandler()}
-                    className="rounded border-neutral-300 text-primary focus:ring-primary-300"
+                    className="rounded border-light-ash text-primary-500 focus:ring-primary-500"
                   />
                   {header}
                 </label>
@@ -93,9 +93,9 @@ export default function DataTableToolbar({
   const globalFilter = table.getState().globalFilter ?? '';
 
   return (
-    <div className="flex items-center justify-between gap-4 flex-wrap">
+    <div className="flex items-center justify-between gap-[17px] flex-wrap">
       <div className="flex items-center">{title}</div>
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-[8px] flex-wrap">
         {enableGlobalFilter && (
           <SearchInput
             value={globalFilter}
