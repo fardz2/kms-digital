@@ -6,7 +6,7 @@ import ModePosyandu from '../features/kader/ModePosyandu';
 import DetailAnak from '../features/anak/DetailAnak';
 import BerandaOT from '../features/orangtua/BerandaOT';
 import BerandaTenkes from '../features/tenkes/BerandaTenkes';
-import ArtikelList from '../features/artikel/ArtikelList';
+import ArtikelPublic from '../features/artikel/ArtikelList';
 import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
 import LaporanAdmin from '../features/laporan/LaporanAdmin';
@@ -26,7 +26,8 @@ import DesaPage from '../pages/Admin/Desa/DesaPage';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
 import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu';
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
-import ArtikelAdmin from '../pages/AdminDashboard/ArtikelAdmin';
+import ArtikelList from '../pages/AdminDashboard/ArtikelList';
+import ArtikelForm from '../pages/AdminDashboard/ArtikelForm';
 import AdminDashboard from '../features/admin/AdminDashboard';
 
 export default function AppRoutes() {
@@ -72,7 +73,8 @@ export default function AppRoutes() {
           <Route path="posyandu" element={<InputPosyandu />} />
           <Route path="kader-posyandu" element={<RegisterKaderPosyandu />} />
           <Route path="tenaga-kesehatan" element={<RegisterTenkes />} />
-          <Route path="artikel" element={<ArtikelAdmin />} />
+          <Route path="artikel" element={<ArtikelList />} />
+          <Route path="artikel/baru" element={<ArtikelForm />} />
           <Route path="laporan" element={<LaporanAdmin />} />
         </Route>
       </Route>
@@ -92,7 +94,7 @@ export default function AppRoutes() {
           />
         }
       >
-        <Route path="/artikel" element={<ArtikelList />} />
+        <Route path="/artikel" element={<ArtikelPublic />} />
         <Route path="/artikel/:id" element={<ArtikelDetailPage />} />
       </Route>
 
