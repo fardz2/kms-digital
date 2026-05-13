@@ -13,7 +13,6 @@ import {
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -298,54 +297,34 @@ export default function ArtikelAdmin() {
 
   return (
     <>
-      <Container
-        fluid
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "20px",
-        }}
-      >
+      <div className="bg-white rounded-card shadow-card p-6">
         {contextHolder}
         {(artikelLoading || kategoriLoading) && (
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-lg">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/80 p-8 rounded-card shadow-card">
             <Spin size="large" />
           </div>
         )}
-        <Row justify="space-between">
-          <Col span={24}>
-            <div
-              style={{
-                justifyContent: "center",
-                display: "flex",
-                marginBottom: "20px",
-              }}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-h2 font-display text-neutral-900">Kelola Artikel</h1>
+          </div>
+          <div className="flex justify-center gap-3 mb-4">
+            <button
+              onClick={() => setStatePage("Artikel")}
+              disabled={createArtikelMutation.isPending || createKategoriMutation.isPending || deleteArtikelMutation.isPending}
+              className={`px-5 py-2.5 rounded-button font-display font-semibold transition-colors disabled:opacity-60 ${statePage === "Artikel" ? "bg-primary text-white shadow-sm" : "bg-primary-50 text-primary-700 border border-primary-200 hover:bg-primary-100"}`}
             >
-              <button
-                className="button_kirim"
-                onClick={() => setStatePage("Artikel")}
-                disabled={
-                  createArtikelMutation.isPending ||
-                  createKategoriMutation.isPending ||
-                  deleteArtikelMutation.isPending
-                }
-              >
-                Artikel
-              </button>
-              <button
-                className="button_kirim"
-                onClick={() => setStatePage("Riwayat")}
-                disabled={
-                  createArtikelMutation.isPending ||
-                  createKategoriMutation.isPending ||
-                  deleteArtikelMutation.isPending
-                }
-              >
-                Riwayat
-              </button>
-            </div>
-          </Col>
-          <Col span={24}>
+              Artikel
+            </button>
+            <button
+              onClick={() => setStatePage("Riwayat")}
+              disabled={createArtikelMutation.isPending || createKategoriMutation.isPending || deleteArtikelMutation.isPending}
+              className={`px-5 py-2.5 rounded-button font-display font-semibold transition-colors disabled:opacity-60 ${statePage === "Riwayat" ? "bg-primary text-white shadow-sm" : "bg-primary-50 text-primary-700 border border-primary-200 hover:bg-primary-100"}`}
+            >
+              Riwayat
+            </button>
+          </div>
+
             {statePage === "Artikel" ? (
               <Form
                 form={form}
@@ -543,15 +522,15 @@ export default function ArtikelAdmin() {
                     </Form.Item>
                   </>
                 )}
-                <Col span={24} align="center">
-                  <Form.Item>
+                <div className="flex justify-center gap-3 mt-4">
+                  <Form.Item className="!mb-0">
                     <button
                       type="submit"
-                      className="button_kirim mx-5"
                       disabled={
                         createArtikelMutation.isPending ||
                         createKategoriMutation.isPending
                       }
+                      className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
                     >
                       {statePageKateogries
                         ? "Tambah kategori"
@@ -560,18 +539,18 @@ export default function ArtikelAdmin() {
                     {statePageKateogries && (
                       <button
                         type="button"
-                        className="button_kirim mx-5"
                         onClick={() => setStatePageKateogries(false)}
                         disabled={
                           createArtikelMutation.isPending ||
                           createKategoriMutation.isPending
                         }
+                        className="ml-3 px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60 transition-colors"
                       >
                         Batal
                       </button>
                     )}
                   </Form.Item>
-                </Col>
+                </div>
               </Form>
             ) : (
               <div className="overflow-x-auto">
@@ -627,17 +606,15 @@ export default function ArtikelAdmin() {
                 </div>
               </div>
             )}
-          </Col>
-          <Col>
+
             <FormUpdateDataArtikel
               isOpen={isOpenModalUpdateDataArtikel}
               onCancel={() => setIsOpenModalUpdateDataArtikel(false)}
               fetch={() => queryClient.invalidateQueries(["artikel"])}
               data={dataArtikel}
             />
-          </Col>
-        </Row>
-      </Container>
+        </div>
+      </div>
     </>
   );
 }
