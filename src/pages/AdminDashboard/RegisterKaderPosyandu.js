@@ -1,18 +1,16 @@
-import {
-  Button,
-  Col,
-  Form,
-  Input,
-  message,
-  Row,
-  Select,
-  Modal,
-} from "antd";
+import { Form, Input, message, Select, Modal } from "antd";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/ui/DataTable";
+import Button from "../../components/ui/Button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Container from "react-bootstrap/Container";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import useAuth from "../../hook/useAuth";
+
+const normalizeStatus = (status) => {
+  if (typeof status === "string") return status === "true" || status === "1";
+  if (typeof status === "number") return status === 1;
+  return !!status;
+};
 
 export default function RegisterKaderPosyandu() {
   const [form] = Form.useForm();
@@ -27,72 +25,51 @@ export default function RegisterKaderPosyandu() {
 
   const user = useAuth();
 
-  // Fetch desa data using useQuery
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa`
-      );
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/desa`);
       if (!response.ok) throw new Error("Gagal mengambil data desa");
       const data = await response.json();
       return data.data;
     },
     onError: (err) => {
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal mengambil data desa",
-      });
+      messageApi.error(err.message || "Gagal mengambil data desa");
     },
     enabled: !!user?.token?.value,
   });
 
-  // Fetch posyandu data using useQuery
   const { data: dataSource, isLoading: posyanduLoading } = useQuery({
     queryKey: ["posyandu"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
-      );
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/posyandu`);
       if (!response.ok) throw new Error("Gagal mengambil data posyandu");
       const data = await response.json();
       return data.data;
     },
     onError: (err) => {
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal mengambil data posyandu",
-      });
+      messageApi.error(err.message || "Gagal mengambil data posyandu");
     },
     enabled: !!user?.token?.value,
   });
 
-  // Fetch kader-posyandu data using useQuery
   const { data: kaderData, isLoading: kaderLoading } = useQuery({
     queryKey: ["kader-posyandu"],
     queryFn: async () => {
       const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/posyandu/kader-posyandu`,
-        {
-          headers: { Authorization: `Bearer ${user?.token?.value}` },
-        }
+        { headers: { Authorization: `Bearer ${user?.token?.value}` } }
       );
       if (!response.ok) throw new Error("Gagal mengambil data Kader Posyandu");
       const data = await response.json();
-      console.log("Kader Data:", data.data); // Debug log
       return data.data;
     },
     onError: (err) => {
-      console.error("Fetch Error:", err);
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal mengambil data Kader Posyandu",
-      });
+      messageApi.error(err.message || "Gagal mengambil data Kader Posyandu");
     },
     enabled: !!user?.token?.value,
   });
 
-  // Mutation for creating a new Kader Posyandu
   const createKaderMutation = useMutation({
     mutationFn: async (values) => {
       const response = await fetch(
@@ -127,24 +104,16 @@ export default function RegisterKaderPosyandu() {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Register Berhasil",
-      });
+      messageApi.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
       queryClient.invalidateQueries(["kader-posyandu"]);
     },
     onError: (error) => {
-      console.error("Register Error:", error);
-      messageApi.open({
-        type: "error",
-        content: error.message || "Gagal Registrasi",
-      });
+      messageApi.error(error.message || "Gagal Registrasi");
     },
   });
 
-  // Mutation for updating a Kader Posyandu
   const updateKaderMutation = useMutation({
     mutationFn: async ({ id, values }) => {
       const response = await fetch(
@@ -170,10 +139,7 @@ export default function RegisterKaderPosyandu() {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Kader Posyandu berhasil diperbarui",
-      });
+      messageApi.success("Kader Posyandu berhasil diperbarui");
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
@@ -181,15 +147,10 @@ export default function RegisterKaderPosyandu() {
       queryClient.invalidateQueries(["kader-posyandu"]);
     },
     onError: (error) => {
-      console.error("Update Error:", error);
-      messageApi.open({
-        type: "error",
-        content: error.message || "Gagal memperbarui Kader Posyandu",
-      });
+      messageApi.error(error.message || "Gagal memperbarui Kader Posyandu");
     },
   });
 
-  // Mutation for deleting a Kader Posyandu
   const deleteKaderMutation = useMutation({
     mutationFn: async (id) => {
       const response = await fetch(
@@ -203,71 +164,57 @@ export default function RegisterKaderPosyandu() {
       return response.json();
     },
     onSuccess: () => {
-      messageApi.open({
-        type: "success",
-        content: "Kader Posyandu berhasil dihapus",
-      });
+      messageApi.success("Kader Posyandu berhasil dihapus");
       queryClient.invalidateQueries(["kader-posyandu"]);
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
     onError: (err) => {
-      console.error("Delete Error:", err);
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal menghapus Kader Posyandu",
-      });
+      messageApi.error(err.message || "Gagal menghapus Kader Posyandu");
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
   });
 
-  // Function to show delete confirmation modal
+  const isBusy =
+    createKaderMutation.isPending ||
+    updateKaderMutation.isPending ||
+    deleteKaderMutation.isPending;
+
   const showDeleteConfirm = (id) => {
     setUserToDelete(id);
     setIsDeleteModalVisible(true);
   };
 
-  // Function to handle delete confirmation
   const handleDeleteConfirm = () => {
-    if (userToDelete) {
-      deleteKaderMutation.mutate(userToDelete);
-    }
+    if (userToDelete) deleteKaderMutation.mutate(userToDelete);
   };
 
-  // Function to handle delete cancellation
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setUserToDelete(null);
   };
 
-  // Function to reset filters
   const resetFilters = () => {
     setStatusFilter(null);
   };
 
-  // Normalize status for filtering
-  const normalizeStatus = (status) => {
-    if (typeof status === "string") {
-      return status === "true" || status === "1";
-    }
-    if (typeof status === "number") {
-      return status === 1;
-    }
-    return !!status; // Convert to boolean for null/undefined/false
+  const handleEdit = (record) => {
+    setModalMode("edit");
+    setSelectedUser(record);
+    form.setFieldsValue({
+      nama: record.nama,
+      email: record.email,
+      desa: record.desa?.id,
+      posyandu: record.posyandu?.id,
+      status: normalizeStatus(record.status),
+    });
+    setIsModalVisible(true);
   };
 
   const columns = [
-    {
-      accessorKey: "nama",
-      header: "Nama",
-      enableSorting: true,
-    },
-    {
-      accessorKey: "email",
-      header: "Email",
-      enableSorting: true,
-    },
+    { accessorKey: "nama", header: "Nama", enableSorting: true },
+    { accessorKey: "email", header: "Email", enableSorting: true },
     {
       id: "desa",
       header: "Desa",
@@ -284,8 +231,20 @@ export default function RegisterKaderPosyandu() {
       accessorKey: "status",
       header: "Status",
       enableSorting: true,
-      cell: ({ getValue }) =>
-        normalizeStatus(getValue()) ? "Approve" : "Belum di Approve",
+      cell: ({ getValue }) => {
+        const approved = normalizeStatus(getValue());
+        return (
+          <span
+            className={`inline-flex items-center px-[13px] py-1 rounded-full text-caption font-medium ${
+              approved
+                ? "bg-success/10 text-success"
+                : "bg-polar-mist text-graphite"
+            }`}
+          >
+            {approved ? "Approve" : "Belum di Approve"}
+          </span>
+        );
+      },
     },
     {
       id: "action",
@@ -293,32 +252,24 @@ export default function RegisterKaderPosyandu() {
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
-        <div>
+        <div className="flex gap-2">
           <Button
-            type="default"
-            size="small"
+            variant="default"
+            size="sm"
+            leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
             onClick={() => handleEdit(row.original)}
-            style={{ marginRight: 8 }}
-            disabled={
-              createKaderMutation.isPending ||
-              updateKaderMutation.isPending ||
-              deleteKaderMutation.isPending
-            }
+            disabled={isBusy}
           >
             Edit
           </Button>
           <Button
-            type="dashed"
-            danger
-            size="small"
+            variant="destructive"
+            size="sm"
+            leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
             onClick={() => showDeleteConfirm(row.original.id)}
-            disabled={
-              createKaderMutation.isPending ||
-              updateKaderMutation.isPending ||
-              deleteKaderMutation.isPending
-            }
+            disabled={isBusy}
           >
-            Delete
+            Hapus
           </Button>
         </div>
       ),
@@ -333,27 +284,10 @@ export default function RegisterKaderPosyandu() {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Form Failed:", errorInfo);
-  };
-
   const showModal = () => {
     setModalMode("add");
     setSelectedUser(null);
     form.resetFields();
-    setIsModalVisible(true);
-  };
-
-  const handleEdit = (record) => {
-    setModalMode("edit");
-    setSelectedUser(record);
-    form.setFieldsValue({
-      nama: record.nama,
-      email: record.email,
-      desa: record.desa?.id,
-      posyandu: record.posyandu?.id,
-      status: normalizeStatus(record.status),
-    });
     setIsModalVisible(true);
   };
 
@@ -373,234 +307,234 @@ export default function RegisterKaderPosyandu() {
   }, [kaderData, statusFilter]);
 
   return (
-    <>
-      <div className="bg-white rounded-card shadow-card p-6">
-        {contextHolder}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h1 className="text-h2 font-display text-neutral-900">Kelola Kader Posyandu</h1>
-            <button
-              onClick={showModal}
-              disabled={
-                createKaderMutation.isPending ||
-                updateKaderMutation.isPending ||
-                deleteKaderMutation.isPending
-              }
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
+    <div className="space-y-[25px]">
+      {contextHolder}
+      <div className="flex items-center justify-between gap-[17px] flex-wrap">
+        <div>
+          <h1 className="text-heading-lg font-bold text-deep-slate">
+            Kelola Kader Posyandu
+          </h1>
+          <p className="text-body-sm text-graphite mt-1">
+            Daftar kader yang membantu operasional posyandu di desa.
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          size="md"
+          leadingIcon={<Plus size={20} strokeWidth={1.75} />}
+          onClick={showModal}
+          disabled={isBusy}
+        >
+          Tambah Kader Posyandu
+        </Button>
+      </div>
+
+      <div className="bg-white border border-light-ash rounded-default p-[25px] space-y-[17px]">
+        <div className="flex items-center justify-between gap-[17px] flex-wrap">
+          <h2 className="text-heading font-semibold text-deep-slate">
+            Daftar Kader Posyandu
+          </h2>
+          <div className="flex items-center gap-[8px] flex-wrap">
+            <select
+              value={statusFilter === null ? "" : String(statusFilter)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setStatusFilter(v === "" ? null : v === "true");
+              }}
+              disabled={isBusy}
+              className="h-[44px] rounded-default border border-light-ash bg-white px-[13px] text-body-sm text-deep-slate focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors"
             >
-              + Tambah Kader Posyandu
-            </button>
+              <option value="">Semua Status</option>
+              <option value="true">Approve</option>
+              <option value="false">Belum di Approve</option>
+            </select>
+            <Button variant="ghost" size="sm" onClick={resetFilters} disabled={isBusy}>
+              Reset
+            </Button>
           </div>
-          <Modal
-            title={
-              <span className="text-h3 font-display text-neutral-900">
-                {modalMode === "add" ? "Registrasi Kader Posyandu" : "Edit Kader Posyandu"}
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={filteredKaderData}
+          loading={kaderLoading || isBusy}
+          rowKey="id"
+          searchPlaceholder="Cari kader..."
+          emptyText="Tidak ada data Kader Posyandu"
+        />
+      </div>
+
+      <Modal
+        title={
+          <span className="text-heading font-semibold text-deep-slate">
+            {modalMode === "add" ? "Registrasi Kader Posyandu" : "Edit Kader Posyandu"}
+          </span>
+        }
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Form
+          form={form}
+          name="input_kader"
+          onFinish={onFinish}
+          autoComplete="off"
+          layout="vertical"
+        >
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Nama</span>}
+            name="nama"
+            rules={[{ required: true, message: "Nama masih kosong", type: "string" }]}
+          >
+            <Input placeholder="Nama Lengkap" className="h-[52px] text-base" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}
+            name="email"
+            rules={[
+              { required: true, message: "Email masih kosong" },
+              { type: "email", message: "Format email tidak valid" },
+            ]}
+          >
+            <Input placeholder="email@contoh.com" className="h-[52px] text-base" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Kata Sandi</span>}
+            name="password"
+            rules={
+              modalMode === "add"
+                ? [
+                    { required: true, message: "Kata sandi masih kosong" },
+                    { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+                  ]
+                : [{ pattern: "^.{8,}$", message: "Minimal 8 karakter" }]
+            }
+          >
+            <Input.Password
+              placeholder={modalMode === "add" ? "Minimal 8 karakter" : "Kosongkan jika tidak diubah"}
+              className="h-[52px] text-base"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={
+              <span className="text-body-sm font-medium text-deep-slate">
+                Konfirmasi Kata Sandi
               </span>
             }
-            open={isModalVisible}
-            onCancel={handleCancel}
-            footer={null}
-          >
-            <Form
-              form={form}
-              name="basic"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
-              layout="vertical"
-            >
-              <Form.Item
-                label={<span className="text-caption text-neutral-700">Nama</span>}
-                name="nama"
-                rules={[{ required: true, message: "Nama masih kosong", type: "string" }]}
-              >
-                <Input placeholder="Nama Lengkap" className="h-11 text-base" />
-              </Form.Item>
-
-              <Form.Item
-                label={<span className="text-caption text-neutral-700">Email</span>}
-                name="email"
-                rules={[
-                  { required: true, message: "Email masih kosong" },
-                  { type: "email", message: "Format email tidak valid" },
-                ]}
-              >
-                <Input placeholder="email@contoh.com" className="h-11 text-base" />
-              </Form.Item>
-
-              <Form.Item
-                label={<span className="text-caption text-neutral-700">Kata Sandi</span>}
-                name="password"
-                rules={
-                  modalMode === "add"
-                    ? [
-                        { required: true, message: "Kata sandi masih kosong" },
-                        { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
-                      ]
-                    : [{ pattern: "^.{8,}$", message: "Minimal 8 karakter" }]
-                }
-              >
-                <Input.Password
-                  placeholder={modalMode === "add" ? "Kata sandi" : "Kosongkan jika tidak diubah"}
-                  className="h-11 text-base"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>}
-                name="confirm"
-                dependencies={["password"]}
-                rules={
-                  modalMode === "add" || form.getFieldValue("password")
-                    ? [
-                        { required: true, message: "Konfirmasi kata sandi" },
-                        ({ getFieldValue }) => ({
-                          validator(_, value) {
-                            if (!value || getFieldValue("password") === value)
-                              return Promise.resolve();
-                            return Promise.reject(new Error("Kata sandi tidak sesuai"));
-                          },
-                        }),
-                      ]
-                    : []
-                }
-              >
-                <Input.Password placeholder="Konfirmasi" className="h-11 text-base" />
-              </Form.Item>
-
-              <Form.Item
-                name="desa"
-                label={<span className="text-caption text-neutral-700">Desa</span>}
-                rules={[{ required: true, message: "Desa masih kosong" }]}
-              >
-                <Select
-                  listHeight={100}
-                  optionFilterProp="children"
-                  showSearch
-                  placeholder="Pilih Desa"
-                  disabled={desaLoading}
-                  className="h-11"
-                >
-                  {dataDesa?.map((value) => (
-                    <Select.Option key={value.id} value={value.id}>
-                      {value.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                name="posyandu"
-                label={<span className="text-caption text-neutral-700">Posyandu</span>}
-                rules={[{ required: true, message: "Posyandu masih kosong" }]}
-              >
-                <Select
-                  listHeight={100}
-                  optionFilterProp="children"
-                  showSearch
-                  placeholder="Pilih Posyandu"
-                  disabled={posyanduLoading}
-                  className="h-11"
-                >
-                  {dataSource?.map((value) => (
-                    <Select.Option key={value.id} value={value.id}>
-                      {value.nama}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                name="status"
-                label={<span className="text-caption text-neutral-700">Status</span>}
-                rules={[{ required: true, message: "Status masih kosong" }]}
-              >
-                <Select placeholder="Pilih Status" className="h-11">
-                  <Select.Option value={true}>Approve</Select.Option>
-                  <Select.Option value={false}>Belum di Approve</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <div className="flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
-                  className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
-                  className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
-                >
-                  Simpan
-                </button>
-              </div>
-            </Form>
-          </Modal>
-
-          <Modal
-            title={<span className="text-h3 font-display text-neutral-900">Konfirmasi Hapus</span>}
-            open={isDeleteModalVisible}
-            onOk={handleDeleteConfirm}
-            onCancel={handleDeleteCancel}
-            okText="Hapus"
-            cancelText="Batal"
-            okButtonProps={{ danger: true }}
-          >
-            <p className="text-base">Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
-          </Modal>
-
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
-            <div className="flex items-center gap-2 flex-wrap">
-              <select
-                value={statusFilter === null ? "" : String(statusFilter)}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setStatusFilter(v === "" ? null : v === "true");
-                }}
-                className="rounded-button border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
-                disabled={
-                  createKaderMutation.isPending ||
-                  updateKaderMutation.isPending ||
-                  deleteKaderMutation.isPending
-                }
-              >
-                <option value="">Semua Status</option>
-                <option value="true">Approve</option>
-                <option value="false">Belum di Approve</option>
-              </select>
-              <button
-                onClick={resetFilters}
-                disabled={
-                  createKaderMutation.isPending ||
-                  updateKaderMutation.isPending ||
-                  deleteKaderMutation.isPending
-                }
-                className="px-4 py-2 rounded-button bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium disabled:opacity-60 transition-colors"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-          <DataTable
-            columns={columns}
-            data={filteredKaderData}
-            loading={
-              kaderLoading ||
-              createKaderMutation.isPending ||
-              updateKaderMutation.isPending ||
-              deleteKaderMutation.isPending
+            name="confirm"
+            dependencies={["password"]}
+            rules={
+              modalMode === "add" || form.getFieldValue("password")
+                ? [
+                    { required: true, message: "Konfirmasi kata sandi" },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue("password") === value)
+                          return Promise.resolve();
+                        return Promise.reject(new Error("Kata sandi tidak sesuai"));
+                      },
+                    }),
+                  ]
+                : []
             }
-            rowKey="id"
-            searchPlaceholder="Cari kader..."
-            emptyText="Tidak ada data Kader Posyandu"
-          />
-        </div>
-      </div>
-    </>
+          >
+            <Input.Password placeholder="Ulangi kata sandi" className="h-[52px] text-base" />
+          </Form.Item>
+
+          <Form.Item
+            name="desa"
+            label={<span className="text-body-sm font-medium text-deep-slate">Desa</span>}
+            rules={[{ required: true, message: "Desa masih kosong" }]}
+          >
+            <Select
+              listHeight={200}
+              optionFilterProp="children"
+              showSearch
+              placeholder="Pilih Desa"
+              disabled={desaLoading}
+              className="h-[52px]"
+            >
+              {dataDesa?.map((value) => (
+                <Select.Option key={value.id} value={value.id}>
+                  {value.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="posyandu"
+            label={<span className="text-body-sm font-medium text-deep-slate">Posyandu</span>}
+            rules={[{ required: true, message: "Posyandu masih kosong" }]}
+          >
+            <Select
+              listHeight={200}
+              optionFilterProp="children"
+              showSearch
+              placeholder="Pilih Posyandu"
+              disabled={posyanduLoading}
+              className="h-[52px]"
+            >
+              {dataSource?.map((value) => (
+                <Select.Option key={value.id} value={value.id}>
+                  {value.nama}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="status"
+            label={<span className="text-body-sm font-medium text-deep-slate">Status</span>}
+            rules={[{ required: true, message: "Status masih kosong" }]}
+          >
+            <Select placeholder="Pilih Status" className="h-[52px]">
+              <Select.Option value={true}>Approve</Select.Option>
+              <Select.Option value={false}>Belum di Approve</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <div className="flex gap-[13px] justify-end pt-[13px]">
+            <Button
+              variant="default"
+              size="md"
+              onClick={handleCancel}
+              disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
+            >
+              Simpan
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={
+          <span className="text-heading font-semibold text-deep-slate">
+            Konfirmasi Hapus
+          </span>
+        }
+        open={isDeleteModalVisible}
+        onOk={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        okText="Hapus"
+        cancelText="Batal"
+        okButtonProps={{ danger: true }}
+      >
+        <p className="text-body-sm text-deep-slate">
+          Apakah Anda yakin ingin menghapus Kader Posyandu ini?
+        </p>
+      </Modal>
+    </div>
   );
 }
