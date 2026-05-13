@@ -1,4 +1,10 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
+import {
+  Baby,
+  Building2,
+  CheckCircle2,
+  AlertTriangle,
+} from 'lucide-react';
 import Card from '../../components/ui/Card';
 import StatCard from '../../components/ui/StatCard';
 import ProgressBar from '../../components/ui/ProgressBar';
@@ -10,7 +16,7 @@ function sumCategory(cat) {
   return Object.values(cat).reduce((acc, v) => acc + Number(v || 0), 0);
 }
 
-function aggregateDesa(statistik) {
+export function aggregateDesa(statistik) {
   if (!Array.isArray(statistik) || statistik.length === 0) {
     return {
       totalBalita: 0,
@@ -63,10 +69,10 @@ const LABEL_MAP = {
 function Distribusi({ distribusi, total }) {
   const entries = Object.entries(distribusi);
   if (entries.length === 0 || total === 0) {
-    return <div className="text-neutral-500">Belum ada data</div>;
+    return <div className="text-body-sm text-graphite">Belum ada data</div>;
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-[13px]">
       {entries.map(([k, v]) => (
         <ProgressBar
           key={k}
@@ -79,7 +85,7 @@ function Distribusi({ distribusi, total }) {
   );
 }
 
-export default function LaporanDesa() {
+const LaporanDesa = forwardRef(function LaporanDesa(_props, ref) {
   const { user } = useSession();
   const idDesa = user?.id_desa ?? user?.desa_id;
   const { data, isLoading } = useStatistikGiziDesa(idDesa);
@@ -89,34 +95,45 @@ export default function LaporanDesa() {
   if (!idDesa) {
     return (
       <Card>
-        <div className="text-center text-neutral-500">
-          Data desa tidak tersedia
+        <div className="flex items-center gap-[13px] text-body-sm text-graphite">
+          <AlertTriangle size={20} strokeWidth={2} className="text-warning" />
+          Data desa tidak tersedia.
         </div>
       </Card>
     );
   }
 
   if (isLoading) {
-    return <div className="text-neutral-500">Memuat laporan...</div>;
+    return (
+      <div className="text-body-sm text-graphite">Memuat laporan desa...</div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
-        <StatCard label="Total Balita" value={agg.totalBalita} icon="👶" />
+    <div ref={ref} className="flex flex-col gap-[17px] bg-faint-fog">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[17px]">
+        <StatCard
+          label="Total Balita"
+          value={agg.totalBalita}
+          icon={<Baby size={22} strokeWidth={1.75} />}
+          accent="neutral"
+        />
         <StatCard
           label="Posyandu Aktif"
           value={agg.perPosyandu.length}
-          icon="🏥"
-          accent="accent"
+          icon={<Building2 size={22} strokeWidth={1.75} />}
+          accent="primary"
         />
       </div>
 
       <Card title="Rekap per Posyandu">
         {agg.perPosyandu.length === 0 ? (
-          <div className="text-neutral-500">Belum ada data</div>
+          <div className="flex items-center gap-[13px] text-body-sm text-graphite">
+            <AlertTriangle size={18} strokeWidth={2} />
+            Belum ada data
+          </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-[17px]">
             {agg.perPosyandu.map((p) => (
               <ProgressBar
                 key={p.id}
@@ -140,6 +157,17 @@ export default function LaporanDesa() {
       <Card title="Sebaran Lingkar Kepala (total desa)">
         <Distribusi distribusi={agg.distribusiLK} total={agg.totalBalita} />
       </Card>
+
+      {agg.perPosyandu.length > 0 && agg.totalBalita > 0 && (
+        <Card>
+          <div className="flex items-center gap-[13px] text-body-sm text-success">
+            <CheckCircle2 size={18} strokeWidth={2} />
+            Data rekap desa sudah lengkap.
+          </div>
+        </Card>
+      )}
     </div>
   );
-}
+});
+
+export default LaporanDesa;
