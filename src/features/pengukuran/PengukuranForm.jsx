@@ -193,8 +193,8 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
           <CatatanField value={catatan} onChange={setCatatan} />
 
-          <div className="p-4 bg-primary-50 rounded-card flex items-center gap-3">
-            <span className="text-body-lg font-display font-semibold">
+          <div className="p-[17px] bg-polar-mist rounded-default flex items-center gap-[13px]">
+            <span className="text-body-sm font-semibold text-deep-slate">
               Status Gizi:
             </span>
             <StatusBadge status={status} />

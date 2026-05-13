@@ -11,7 +11,7 @@ export default function LaporanAdmin() {
       />
       <div className="px-4 py-6 max-w-3xl mx-auto">
         <Card title="Informasi">
-          <p className="mb-4 text-base text-neutral-700">
+          <p className="mb-[17px] text-body-sm text-deep-slate">
             Rekap per-desa tersedia di dashboard masing-masing akun Desa.
           </p>
           <p className="text-neutral-500 text-base">

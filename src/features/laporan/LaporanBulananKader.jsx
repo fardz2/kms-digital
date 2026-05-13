@@ -114,7 +114,7 @@ export default function LaporanBulananKader() {
               ) : (
                 <ul className="pl-5 m-0 space-y-1">
                   {laporan.belumDiukurList.map((item) => (
-                    <li key={item.id} className="text-base text-neutral-700">
+                    <li key={item.id} className="text-body-sm text-deep-slate">
                       {item.nama}
                       {item.umurBulan != null && ` (${item.umurBulan} bulan)`}
                     </li>
@@ -131,7 +131,7 @@ export default function LaporanBulananKader() {
               ) : (
                 <ul className="pl-5 m-0 space-y-1">
                   {laporan.perluPerhatian.map((item) => (
-                    <li key={item.id} className="text-base text-neutral-700">
+                    <li key={item.id} className="text-body-sm text-deep-slate">
                       ⚠️ {item.nama} — {item.status}
                     </li>
                   ))}

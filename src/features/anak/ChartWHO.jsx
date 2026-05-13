@@ -288,7 +288,7 @@ export default function ChartWHO({ anak, pengukuran }) {
           </Button>
         ))}
       </div>
-      <div className="w-full min-h-[500px] p-4 bg-white border border-neutral-200 rounded-card">
+      <div className="w-full min-h-[500px] p-[17px] bg-white border border-light-ash rounded-default">
         <Line data={current.data} options={current.options} />
       </div>
     </div>

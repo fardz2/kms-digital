@@ -78,20 +78,20 @@ export default function KelolaAcara() {
         <Card title="Tambah Acara Baru">
           <Form form={form} layout="vertical" onFinish={onSubmit}>
             <Form.Item
-              label={<span className="text-caption text-neutral-700">Judul Acara</span>}
+              label={<span className="text-body-sm font-medium text-deep-slate">Judul Acara</span>}
               name="judul"
               rules={[{ required: true, message: 'Judul masih kosong' }]}
             >
               <Input placeholder="Contoh: Posyandu Bulan Ini" className="h-11" />
             </Form.Item>
             <Form.Item
-              label={<span className="text-caption text-neutral-700">Deskripsi</span>}
+              label={<span className="text-body-sm font-medium text-deep-slate">Deskripsi</span>}
               name="deskripsi"
             >
               <Input.TextArea rows={2} placeholder="Detail tambahan (opsional)" />
             </Form.Item>
             <Form.Item
-              label={<span className="text-caption text-neutral-700">Tanggal</span>}
+              label={<span className="text-body-sm font-medium text-deep-slate">Tanggal</span>}
               name="tanggal"
               rules={[{ required: true, message: 'Tanggal masih kosong' }]}
             >
@@ -123,10 +123,10 @@ export default function KelolaAcara() {
             {sorted.map((acara) => (
               <div
                 key={acara.id}
-                className="p-4 bg-primary-50 rounded-button flex justify-between items-center gap-3"
+                className="p-[17px] bg-polar-mist rounded-default flex justify-between items-center gap-[13px]"
               >
                 <div>
-                  <div className="text-body-lg font-display font-semibold text-neutral-900">
+                  <div className="text-body-sm font-semibold text-deep-slate">
                     {acara.judul}
                   </div>
                   <div className="text-caption text-neutral-500">

@@ -96,7 +96,7 @@ export default function DetailAnak() {
             </Button>
           )}
 
-          <h2 className="text-h2 font-display text-neutral-900 mb-4">
+          <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
             Riwayat Pengukuran
           </h2>
 
@@ -105,7 +105,7 @@ export default function DetailAnak() {
           )}
 
           {!pengukuranLoading && (!pengukuran || pengukuran.length === 0) && (
-            <div className="p-8 text-center bg-white border border-neutral-200 rounded-card text-neutral-500">
+            <div className="p-[33px] text-center bg-white border border-light-ash rounded-default text-body-sm text-graphite">
               Belum ada data pengukuran
             </div>
           )}
@@ -126,7 +126,7 @@ export default function DetailAnak() {
 
           {pengukuran && pengukuran.length > 0 && (
             <>
-              <h2 className="text-h2 font-display text-neutral-900 mb-4">
+              <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
                 Grafik Pertumbuhan (WHO)
               </h2>
               <ChartWHO anak={anak} pengukuran={pengukuran} />

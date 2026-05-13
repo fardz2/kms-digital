@@ -30,7 +30,7 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
   return (
     <Card>
       <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
-        <div className="text-h3 font-display text-neutral-900">
+        <div className="text-heading-sm font-semibold text-deep-slate">
           {date ? moment(date).format('DD MMMM YYYY') : '-'}
         </div>
         <StatusBadge status={status} />
@@ -54,7 +54,7 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
       </div>
 
       {catatan && (
-        <div className="px-4 py-3 bg-primary-50 rounded-button text-base mb-3">
+        <div className="px-[17px] py-[13px] bg-polar-mist rounded-default text-body-sm text-deep-slate mb-[13px]">
           📝 {catatan}
         </div>
       )}

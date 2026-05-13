@@ -19,7 +19,7 @@ export default function FilterChip({ value = 'semua', onChange, counts = {} }) {
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 ${
               active
                 ? 'bg-primary text-white shadow-sm'
-                : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-200 hover:text-primary-700'
+                : 'bg-white text-deep-slate border border-light-ash hover:border-graphite/30 hover:bg-faint-fog'
             }`}
           >
             {opt.label}

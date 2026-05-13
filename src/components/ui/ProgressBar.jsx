@@ -5,7 +5,7 @@ export default function ProgressBar({ value = 0, max = 100, label, color = 'bg-p
   return (
     <div>
       {label && (
-        <div className="flex justify-between text-caption text-neutral-700 mb-2">
+        <div className="flex justify-between text-caption text-graphite mb-2">
           <span>{label}</span>
           <span className="tabular-nums">
             {value}/{max} ({pct.toFixed(0)}%)

@@ -36,7 +36,7 @@ export default function ArtikelDetailPage() {
           <div className="text-neutral-500">Memuat artikel...</div>
         ) : (
           <div
-            className="bg-white p-6 rounded-card shadow-card text-base text-neutral-700 leading-relaxed"
+            className="bg-white p-[25px] rounded-default border border-light-ash text-base text-deep-slate leading-relaxed"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}
