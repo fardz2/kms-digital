@@ -27,6 +27,7 @@ import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
 import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu';
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
 import ArtikelAdmin from '../pages/AdminDashboard/ArtikelAdmin';
+import AdminDashboard from '../features/admin/AdminDashboard';
 
 export default function AppRoutes() {
   return (
@@ -66,6 +67,7 @@ export default function AppRoutes() {
       {/* Role: Admin (legacy) */}
       <Route element={<RequireRole allow={['ADMIN']} />}>
         <Route path="/admin/dashboard" element={<DashboardLayout />}>
+          <Route index element={<AdminDashboard />} />
           <Route path="desa" element={<DesaPage />} />
           <Route path="posyandu" element={<InputPosyandu />} />
           <Route path="kader-posyandu" element={<RegisterKaderPosyandu />} />

@@ -37,7 +37,7 @@ const useAuth = (expectedRole) => {
       KADER_POSYANDU: "/kader/balita",
       TENAGA_KESEHATAN: "/tenkes/beranda",
       DESA: "/desa/beranda",
-      ADMIN: "/admin/dashboard/desa",
+      ADMIN: "/admin/dashboard",
     };
 
     if (expectedRole && userRole !== expectedRole) {
