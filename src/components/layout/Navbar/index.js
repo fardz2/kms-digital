@@ -227,13 +227,6 @@ export default function NavbarComp({ isLogin }) {
             </button>
 
             <div className="hidden md:flex items-center gap-[8px] flex-1 justify-center">
-              {!isLogin && (
-                <NavLink
-                  to="/"
-                  label="Beranda"
-                  active={location.pathname === "/"}
-                />
-              )}
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
@@ -299,22 +292,6 @@ export default function NavbarComp({ isLogin }) {
 
           {mobileOpen && (
             <div className="md:hidden pb-[21px] space-y-[4px] border-t border-light-ash pt-[13px]">
-              {!isLogin && (
-                <Link
-                  to="/"
-                  className={`flex items-center justify-between px-[17px] py-[13px] rounded-default text-body-sm font-medium transition-colors ${
-                    location.pathname === "/"
-                      ? "bg-primary-50 text-primary-700 font-semibold"
-                      : "text-deep-slate hover:bg-faint-fog"
-                  }`}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <span>Beranda</span>
-                  {location.pathname === "/" && (
-                    <span className="w-[6px] h-[6px] rounded-full bg-primary-500" />
-                  )}
-                </Link>
-              )}
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
