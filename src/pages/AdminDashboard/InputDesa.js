@@ -1,7 +1,6 @@
-import { Button, Col, Form, Input, message, Row, Table, Modal } from "antd";
+import { Button, Form, Input, message, Table, Modal } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Container from "react-bootstrap/Container";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
@@ -153,137 +152,110 @@ export default function InputDesa() {
 
   return (
     <>
-      <Container
-        fluid
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "20px",
-        }}
-      >
+      <div className="bg-white rounded-card shadow-card p-6">
         {contextHolder}
-        <Row justify="space-between">
-          <Col span={24}>
-            <Button
-              type="primary"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-h2 font-display text-neutral-900">Kelola Desa</h1>
+            <button
               onClick={showModal}
-              style={{ marginBottom: 16 }}
               disabled={createDesaMutation.isPending}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
             >
-              Tambah Desa
-            </Button>
-            <Modal
-              title="Tambah Desa"
-              open={isModalVisible}
-              onCancel={handleCancel}
-              footer={null}
+              + Tambah Desa
+            </button>
+          </div>
+          <Modal
+            title={<span className="text-h3 font-display text-neutral-900">Tambah Desa</span>}
+            open={isModalVisible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form
+              form={form}
+              name="basic"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              layout="vertical"
             >
-              <Form
-                form={form}
-                name="basic"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout="vertical"
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Nama Desa</span>}
+                name="name"
+                rules={[{ required: true, message: "Nama Desa masih kosong" }]}
               >
-                <Form.Item
-                  label="Nama Desa"
-                  name="name"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nama Desa masih kosong!",
+                <Input className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Kata Sandi</span>}
+                name="password"
+                rules={[
+                  { required: true, message: "Kata sandi masih kosong" },
+                  { min: 8, message: "Minimal 8 karakter" },
+                ]}
+              >
+                <Input.Password placeholder="Kata sandi" className="h-11 text-base" />
+              </Form.Item>
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>}
+                name="password_confirmation"
+                dependencies={["password"]}
+                rules={[
+                  { required: true, message: "Konfirmasi kata sandi" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("password") === value)
+                        return Promise.resolve();
+                      return Promise.reject(new Error("Kata sandi tidak sesuai"));
                     },
-                  ]}
+                  }),
+                ]}
+              >
+                <Input.Password placeholder="Konfirmasi" className="h-11 text-base" />
+              </Form.Item>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={createDesaMutation.isPending}
+                  className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
                 >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Password masih kosong!",
-                    },
-                    {
-                      min: 8,
-                      message: "Password minimal 8 karakter",
-                    },
-                  ]}
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={createDesaMutation.isPending}
+                  className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
                 >
-                  <Input.Password placeholder="Password" />
-                </Form.Item>
-                <Form.Item
-                  label="Confirm Password"
-                  name="password_confirmation"
-                  dependencies={["password"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Silakan konfirmasi password!",
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue("password") === value) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(
-                          new Error("Password tidak sesuai!")
-                        );
-                      },
-                    }),
-                  ]}
-                >
-                  <Input.Password placeholder="Konfirmasi Password" />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={createDesaMutation.isPending}
-                  >
-                    Simpan
-                  </Button>
-                  <Button
-                    style={{ marginLeft: 8 }}
-                    onClick={handleCancel}
-                    disabled={createDesaMutation.isPending}
-                  >
-                    Batal
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-            <Table
-              title={() => (
-                <div className="flex justify-between items-center">
-                  <div className="flex justify-start items-center">
-                    <h2 className="text-sm font-semibold">Daftar Desa</h2>
-                  </div>
-                  <div className="flex justify-end items-center">
-                    <Input.Search
-                      placeholder="Search here ..."
-                      onSearch={(value) => {
-                        setSearchedText(value);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              dataSource={dataSource || []}
-              columns={columns}
-              loading={
-                isLoading ||
-                createDesaMutation.isPending ||
-                deleteDesaMutation.isPending
-              }
-              pagination={{ pageSize: 5 }}
-              rowKey="id"
-            />
-          </Col>
-        </Row>
-      </Container>
+                  {createDesaMutation.isPending ? "Menyimpan..." : "Simpan"}
+                </button>
+              </div>
+            </Form>
+          </Modal>
+          <Table
+            title={() => (
+              <div className="flex justify-between items-center gap-4 flex-wrap">
+                <h2 className="text-h3 font-display text-neutral-900">Daftar Desa</h2>
+                <Input.Search
+                  placeholder="Cari desa..."
+                  onSearch={(value) => setSearchedText(value)}
+                  className="w-full md:w-64"
+                  allowClear
+                />
+              </div>
+            )}
+            dataSource={dataSource || []}
+            columns={columns}
+            loading={
+              isLoading ||
+              createDesaMutation.isPending ||
+              deleteDesaMutation.isPending
+            }
+            pagination={{ pageSize: 5 }}
+            rowKey="id"
+          />
+        </div>
+      </div>
     </>
   );
 }
