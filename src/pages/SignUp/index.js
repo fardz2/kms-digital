@@ -133,13 +133,16 @@ export default function SignUp() {
       )}
 
       <div className="min-h-screen flex items-center justify-center bg-faint-fog p-[17px]">
-        <div className="w-full max-w-[480px] bg-white rounded-default border border-light-ash p-[29px] md:p-[38px]">
-          <div className="flex flex-col items-center mb-[25px]">
-            <img src={logo} alt="KMS Digital" className="w-[120px] mb-[13px]" />
-            <h1 className="text-heading-lg font-bold text-deep-slate">
+        <div className="w-full max-w-[480px] bg-white rounded-default border border-light-ash shadow-card p-[29px] md:p-[38px]">
+          <div className="flex flex-col items-center mb-[29px] text-center">
+            <img src={logo} alt="KMS Digital" className="w-[100px] mb-[17px]" />
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[8px]">
+              Bergabung
+            </p>
+            <h1 className="text-heading-lg font-bold text-deep-slate leading-[1.1] tracking-tight">
               Buat Akun Baru
             </h1>
-            <p className="text-body-sm text-graphite mt-1 text-center">
+            <p className="text-body-sm text-graphite mt-[8px]">
               Daftar untuk mulai menggunakan KMS Digital.
             </p>
           </div>

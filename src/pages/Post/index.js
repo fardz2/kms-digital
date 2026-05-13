@@ -59,20 +59,23 @@ export default function Post() {
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
-        <header className="flex items-center justify-between gap-[17px] flex-wrap">
-          <div>
-            <h1 className="text-heading-lg font-bold text-deep-slate">
-              Forum Tanya Jawab
+        <header className="flex items-start justify-between gap-[17px] flex-wrap">
+          <div className="min-w-0 flex-1">
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
+              Forum
+            </p>
+            <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
+              Tanya Jawab
             </h1>
-            <p className="text-body-sm text-graphite mt-1">
+            <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
               Tanyakan kepada tenaga kesehatan tentang perkembangan anak Anda.
             </p>
           </div>
           {user?.user?.role === "ORANG_TUA" && (
             <Button
               variant="primary"
-              size="md"
-              leadingIcon={<Plus size={20} strokeWidth={1.75} />}
+              size="lg"
+              leadingIcon={<Plus size={20} strokeWidth={2} />}
               onClick={() => setIsOpenModalInputPost(true)}
             >
               Tulis Pertanyaan

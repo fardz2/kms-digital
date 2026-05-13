@@ -70,9 +70,15 @@ export default function LoginPortal() {
       {toast.contextHolder}
       <div className="min-h-screen bg-faint-fog flex items-center justify-center p-[17px]">
         <div className="w-full max-w-[480px]">
-          <h1 className="text-heading-lg font-bold text-deep-slate text-center mb-[25px]">
-            KMS Digital Lebakwangi
-          </h1>
+          <div className="text-center mb-[33px]">
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
+              Masuk ke akun Anda
+            </p>
+            <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
+              KMS Digital<br />
+              <span className="text-primary-600">Lebakwangi</span>
+            </h1>
+          </div>
 
           {expired && (
             <div
@@ -84,17 +90,17 @@ export default function LoginPortal() {
           )}
 
           {!selectedRole ? (
-            <Card title="Masuk sebagai">
+            <Card title="Saya masuk sebagai">
               <div className="flex flex-col gap-[8px]">
                 {ROLES.map(({ key, label, Icon }) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => setSelectedRole(key)}
-                    className="flex items-center gap-[13px] w-full px-[17px] py-[17px] rounded-default border border-light-ash text-left text-body-sm font-medium text-deep-slate hover:border-primary-500 hover:bg-faint-fog transition-colors duration-150"
+                    className="flex items-center gap-[13px] w-full px-[17px] py-[17px] rounded-default border border-light-ash text-left text-body-sm font-semibold text-deep-slate hover:border-primary-300 hover:bg-primary-50/40 hover:shadow-card transition-all duration-150"
                   >
-                    <span className="flex items-center justify-center w-[40px] h-[40px] rounded-full bg-polar-mist text-primary-600">
-                      <Icon size={20} strokeWidth={1.75} />
+                    <span className="flex items-center justify-center w-[44px] h-[44px] rounded-full bg-primary-50 text-primary-600 shrink-0">
+                      <Icon size={22} strokeWidth={2} />
                     </span>
                     <span className="flex-1">{label}</span>
                     <ArrowLeft size={16} strokeWidth={1.75} className="rotate-180 text-graphite" />

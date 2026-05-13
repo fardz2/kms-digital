@@ -12,18 +12,18 @@ export default function LandingPage() {
       <NavbarComp />
       <main className="min-h-screen bg-faint-fog">
         <div className="max-w-page mx-auto px-[17px] md:px-[25px]">
-          <section className="pt-[67px] pb-[50px] md:pt-[90px] md:pb-[67px]">
+          <section className="pt-[67px] pb-[50px] md:pt-[95px] md:pb-[67px]">
             <div className="flex flex-col lg:flex-row items-center gap-[50px]">
               <div className="w-full lg:w-1/2">
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-caption font-semibold uppercase tracking-wider text-primary-600 mb-[13px]">
-                    KMS Digital · Posyandu
+                  <span className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[17px]">
+                    KMS Digital · Posyandu Lebakwangi
                   </span>
-                  <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.1] mb-[17px]">
+                  <h1 className="text-display-lg font-bold text-deep-slate leading-[1.0] tracking-tight mb-[21px]">
                     Pantau tumbuh kembang anak,<br />
-                    dari posyandu ke genggaman.
+                    <span className="text-primary-600">dari posyandu</span> ke genggaman.
                   </h1>
-                  <p className="text-body-sm md:text-base text-graphite mb-[29px] max-w-[500px]">
+                  <p className="text-body-lg text-graphite mb-[33px] max-w-[520px] leading-relaxed">
                     Catat pengukuran balita, akses artikel kesehatan, dan ikuti perkembangan gizi anak Anda bersama kader posyandu desa.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-[13px] w-full max-w-[360px]">
@@ -34,7 +34,7 @@ export default function LandingPage() {
                     </Link>
                     <Link to="/sign-up" className="flex-1">
                       <Button variant="default" size="lg" className="w-full">
-                        Daftar
+                        Daftar Sekarang
                       </Button>
                     </Link>
                   </div>

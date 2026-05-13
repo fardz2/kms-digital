@@ -39,19 +39,22 @@ export default function MyPost() {
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
-        <header className="flex items-center justify-between gap-[17px] flex-wrap">
-          <div>
-            <h1 className="text-heading-lg font-bold text-deep-slate">
+        <header className="flex items-start justify-between gap-[17px] flex-wrap">
+          <div className="min-w-0 flex-1">
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
+              Riwayat
+            </p>
+            <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
               Pertanyaan Saya
             </h1>
-            <p className="text-body-sm text-graphite mt-1">
+            <p className="text-body-lg text-graphite mt-[13px]">
               Riwayat pertanyaan yang Anda ajukan.
             </p>
           </div>
           <Button
             variant="primary"
-            size="md"
-            leadingIcon={<Plus size={20} strokeWidth={1.75} />}
+            size="lg"
+            leadingIcon={<Plus size={20} strokeWidth={2} />}
             onClick={() => setIsOpenModalInputPost(true)}
           >
             Tulis Pertanyaan
