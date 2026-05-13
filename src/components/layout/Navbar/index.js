@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar, Modal, Form, Input, message } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { User, Menu, X, LogOut } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../../../hook/useAuth";
-import { clearSession, readSession, writeSession } from "../../../features/auth/session-storage";
+import Button from "../../ui/Button";
+import {
+  clearSession,
+  readSession,
+  writeSession,
+} from "../../../features/auth/session-storage";
 
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
@@ -27,7 +32,7 @@ const LINKS_BY_ROLE = {
   ],
 };
 
-function RoleLabel({ role }) {
+function roleLabel(role) {
   if (!role) return "Tamu";
   if (role === "ORANG_TUA") return "Orang Tua";
   if (role === "KADER_POSYANDU") return "Kader Posyandu";
@@ -37,8 +42,7 @@ function RoleLabel({ role }) {
   return role;
 }
 
-export default function NavbarComp(props) {
-  const { isLogin } = props;
+export default function NavbarComp({ isLogin }) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -52,7 +56,11 @@ export default function NavbarComp(props) {
     if (user?.user?.name) form.setFieldsValue({ nama: user.user.name });
   }, [user?.user?.name, form]);
 
-  const { data: profileData, isLoading: isProfileLoading, refetch } = useQuery({
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       if (user?.user?.role === "ADMIN") return null;
@@ -108,7 +116,8 @@ export default function NavbarComp(props) {
       form.resetFields();
       setIsProfileModalOpen(false);
     },
-    onError: (err) => messageApi.error(err.message || "Gagal memperbarui profil"),
+    onError: (err) =>
+      messageApi.error(err.message || "Gagal memperbarui profil"),
   });
 
   const handleLogout = () => {
@@ -128,22 +137,27 @@ export default function NavbarComp(props) {
       .catch(() => {});
   };
 
-  const navLinks = isLogin && user?.user?.role ? LINKS_BY_ROLE[user.user.role] ?? [] : [];
+  const navLinks =
+    isLogin && user?.user?.role ? LINKS_BY_ROLE[user.user.role] ?? [] : [];
   const isActive = (to) => location.pathname.startsWith(to);
 
-  const displayName = profileData?.data?.user?.name ?? user?.user?.name ?? "User";
+  const displayName =
+    profileData?.data?.user?.name ?? user?.user?.name ?? "User";
 
   return (
     <>
       {contextHolder}
-      <nav className="sticky top-0 z-40 bg-primary-300 text-white shadow-card">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between gap-4 h-16">
-            <Link to="/" className="font-display font-bold text-body-lg md:text-h3">
+      <nav className="sticky top-0 z-40 bg-white border-b border-light-ash">
+        <div className="max-w-page mx-auto px-[17px] md:px-[25px]">
+          <div className="flex items-center justify-between gap-[17px] h-[76px]">
+            <Link
+              to="/"
+              className="font-bold text-heading text-deep-slate flex items-center gap-2"
+            >
               KMS Digital
               {user?.user?.desa_name && (
-                <span className="ml-2 text-primary-700 font-bold">
-                  {user.user.desa_name}
+                <span className="text-body-sm font-medium text-primary-600">
+                  · {user.user.desa_name}
                 </span>
               )}
             </Link>
@@ -151,31 +165,34 @@ export default function NavbarComp(props) {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden p-2 rounded-button hover:bg-white/20 transition-colors"
-              aria-label="Buka menu"
+              className="md:hidden p-[13px] rounded-default text-deep-slate hover:bg-faint-fog transition-colors"
+              aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={mobileOpen}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 6h18M3 12h18M3 18h18" />
-              </svg>
+              {mobileOpen ? (
+                <X size={20} strokeWidth={1.75} />
+              ) : (
+                <Menu size={20} strokeWidth={1.75} />
+              )}
             </button>
 
             <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
               {!isLogin && (
-                <>
-                  <Link to="/" className="px-3 py-2 rounded-button text-white/90 hover:bg-white/10 hover:text-white font-medium transition-colors">
-                    Beranda
-                  </Link>
-                </>
+                <Link
+                  to="/"
+                  className="px-[17px] py-[8px] rounded-default text-body-sm font-medium text-deep-slate hover:bg-faint-fog transition-colors"
+                >
+                  Beranda
+                </Link>
               )}
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-3 py-2 rounded-button font-medium transition-colors ${
+                  className={`px-[17px] py-[8px] rounded-default text-body-sm font-medium transition-colors ${
                     isActive(link.to)
-                      ? "bg-white/20 text-white"
-                      : "text-white/90 hover:bg-white/10 hover:text-white"
+                      ? "bg-polar-mist text-deep-slate font-semibold"
+                      : "text-deep-slate hover:bg-faint-fog"
                   }`}
                 >
                   {link.label}
@@ -183,46 +200,54 @@ export default function NavbarComp(props) {
               ))}
             </div>
 
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-[13px]">
               {isLogin ? (
                 <>
                   <button
                     type="button"
                     onClick={handleProfileClick}
-                    className="flex items-center gap-2 p-1.5 rounded-button hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-[8px] p-[6px] rounded-full hover:bg-faint-fog transition-colors"
                   >
                     <div className="text-right leading-tight">
-                      <div className="text-caption font-semibold">{displayName}</div>
-                      <div className="text-xs opacity-80">
-                        <RoleLabel role={user?.user?.role} />
+                      <div className="text-body-sm font-semibold text-deep-slate">
+                        {displayName}
+                      </div>
+                      <div className="text-caption text-graphite">
+                        {roleLabel(user?.user?.role)}
                       </div>
                     </div>
-                    <Avatar icon={<UserOutlined />} className="bg-primary-500" />
+                    <Avatar
+                      icon={<User size={16} strokeWidth={1.75} />}
+                      className="bg-polar-mist text-deep-slate"
+                    />
                   </button>
-                  <button
+                  <Button
+                    variant="dark"
+                    size="sm"
+                    leadingIcon={<LogOut size={16} strokeWidth={1.75} />}
                     onClick={handleLogout}
-                    className="px-4 py-2 rounded-button bg-primary-500 hover:bg-primary-600 text-white font-display font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   >
                     Keluar
-                  </button>
+                  </Button>
                 </>
               ) : (
-                <Link
-                  to="/masuk"
-                  className="px-4 py-2 rounded-button bg-white hover:bg-neutral-50 text-primary-700 font-display font-semibold text-sm transition-colors"
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate("/masuk")}
                 >
                   Masuk
-                </Link>
+                </Button>
               )}
             </div>
           </div>
 
           {mobileOpen && (
-            <div className="md:hidden pb-4 space-y-1 border-t border-white/20 pt-2">
+            <div className="md:hidden pb-[17px] space-y-1 border-t border-light-ash pt-[13px]">
               {!isLogin && (
                 <Link
                   to="/"
-                  className="block px-3 py-2 rounded-button text-white/90 hover:bg-white/10 hover:text-white font-medium"
+                  className="block px-[17px] py-[13px] rounded-default text-body-sm font-medium text-deep-slate hover:bg-faint-fog transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   Beranda
@@ -233,44 +258,53 @@ export default function NavbarComp(props) {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className={`block px-3 py-2 rounded-button font-medium ${
+                  className={`block px-[17px] py-[13px] rounded-default text-body-sm font-medium transition-colors ${
                     isActive(link.to)
-                      ? "bg-white/20 text-white"
-                      : "text-white/90 hover:bg-white/10"
+                      ? "bg-polar-mist text-deep-slate font-semibold"
+                      : "text-deep-slate hover:bg-faint-fog"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
               {isLogin ? (
-                <div className="flex gap-2 pt-2">
-                  <button
+                <div className="flex gap-[8px] pt-[13px]">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => {
                       handleProfileClick();
                       setMobileOpen(false);
                     }}
-                    className="flex-1 px-4 py-2 rounded-button bg-white/20 hover:bg-white/30 text-white font-medium"
                   >
                     Profil
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="dark"
+                    size="sm"
+                    className="flex-1"
+                    leadingIcon={<LogOut size={16} strokeWidth={1.75} />}
                     onClick={() => {
                       handleLogout();
                       setMobileOpen(false);
                     }}
-                    className="flex-1 px-4 py-2 rounded-button bg-primary-500 hover:bg-primary-600 text-white font-medium"
                   >
                     Keluar
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <Link
-                  to="/masuk"
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-2 rounded-button bg-white text-primary-700 font-display font-semibold text-center"
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full"
+                  onClick={() => {
+                    navigate("/masuk");
+                    setMobileOpen(false);
+                  }}
                 >
                   Masuk
-                </Link>
+                </Button>
               )}
             </div>
           )}
@@ -278,62 +312,87 @@ export default function NavbarComp(props) {
       </nav>
 
       <Modal
-        title={<span className="text-h3 font-display text-neutral-900">Profil Pengguna</span>}
+        title={
+          <span className="text-heading font-semibold text-deep-slate">
+            Profil Pengguna
+          </span>
+        }
         open={isProfileModalOpen}
         onCancel={() => {
           form.resetFields();
           setIsProfileModalOpen(false);
         }}
         footer={
-          <div className="flex gap-2 justify-end">
-            <button
+          <div className="flex gap-[13px] justify-end">
+            <Button
+              variant="default"
+              size="md"
               onClick={() => {
                 form.resetFields();
                 setIsProfileModalOpen(false);
               }}
               disabled={updateProfileMutation.isPending}
-              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
               onClick={handleUpdateProfile}
               disabled={updateProfileMutation.isPending || isProfileLoading}
-              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
             >
-              {updateProfileMutation.isPending ? "Menyimpan..." : "Update"}
-            </button>
+              {updateProfileMutation.isPending ? "Menyimpan..." : "Simpan"}
+            </Button>
           </div>
         }
       >
         <Form form={form} layout="vertical" name="profile_form">
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Nama</span>}
+            label={
+              <span className="text-body-sm font-medium text-deep-slate">
+                Nama
+              </span>
+            }
             name="nama"
             rules={[{ required: true, message: "Nama wajib diisi" }]}
           >
-            <Input disabled={isProfileLoading} className="h-11 text-base" />
+            <Input disabled={isProfileLoading} className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Kata Sandi Baru</span>}
+            label={
+              <span className="text-body-sm font-medium text-deep-slate">
+                Kata Sandi Baru
+              </span>
+            }
             name="password"
             rules={[{ min: 8, message: "Minimal 8 karakter" }]}
           >
-            <Input.Password className="h-11 text-base" />
+            <Input.Password
+              placeholder="Kosongkan jika tidak diubah"
+              className="h-[52px] text-base"
+            />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>}
+            label={
+              <span className="text-body-sm font-medium text-deep-slate">
+                Konfirmasi Kata Sandi
+              </span>
+            }
             name="password_confirmation"
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value) return Promise.resolve();
+                  if (!value || getFieldValue("password") === value)
+                    return Promise.resolve();
                   return Promise.reject(new Error("Kata sandi tidak cocok"));
                 },
               }),
             ]}
           >
-            <Input.Password className="h-11 text-base" />
+            <Input.Password
+              placeholder="Ulangi kata sandi"
+              className="h-[52px] text-base"
+            />
           </Form.Item>
         </Form>
       </Modal>
