@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
+import { Modal } from 'antd';
+import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
@@ -69,10 +71,18 @@ export default function ModePosyandu() {
   }, [balitaWithMeta, search, filter]);
 
   const handleKeluar = () => {
-    if (window.confirm('Keluar dari akun?')) {
-      logout();
-      navigate('/masuk', { replace: true });
-    }
+    Modal.confirm({
+      title: 'Keluar dari akun?',
+      icon: <AlertTriangle size={20} className="text-danger" />,
+      content: 'Anda perlu masuk kembali untuk menggunakan aplikasi.',
+      okText: 'Ya, Keluar',
+      cancelText: 'Batal',
+      okButtonProps: { danger: true },
+      onOk: () => {
+        logout();
+        navigate('/masuk', { replace: true });
+      },
+    });
   };
 
   const handleUkur = (anak, latest) => {
@@ -110,7 +120,7 @@ export default function ModePosyandu() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 pb-24">
+    <div className="min-h-screen bg-faint-fog pb-[95px]">
       <PosyanduHeader
         userName={user?.name}
         posyanduName={user?.posyandu_name}
@@ -122,8 +132,8 @@ export default function ModePosyandu() {
         onKeluar={handleKeluar}
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        <div className="space-y-3">
+      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
+        <div className="space-y-[13px]">
           <div className="relative">
             <input
               type="search"
@@ -131,31 +141,31 @@ export default function ModePosyandu() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari nama balita..."
               aria-label="Cari balita"
-              className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-button text-base placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
+              className="w-full h-[52px] pl-[42px] pr-[17px] bg-white border border-light-ash rounded-default text-base text-deep-slate placeholder:text-graphite focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             />
             <span
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+              className="absolute left-[13px] top-1/2 -translate-y-1/2 text-graphite pointer-events-none"
               aria-hidden
             >
-              🔍
+              <Search size={18} strokeWidth={1.75} />
             </span>
           </div>
           <FilterChip value={filter} onChange={setFilter} counts={counts} />
         </div>
 
         {isLoading && (
-          <div className="text-neutral-500">Memuat data balita...</div>
+          <div className="text-body-sm text-graphite">Memuat data balita...</div>
         )}
 
         {!isLoading && filtered.length === 0 && (
-          <div className="text-center py-12 text-neutral-500">
+          <div className="text-center py-[50px] text-body-sm text-graphite">
             {balitaWithMeta.length === 0
               ? 'Belum ada data balita. Tambah balita baru di tombol bawah.'
               : 'Tidak ada balita yang cocok dengan filter.'}
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-[8px]">
           {filtered.map(({ anak, meta }, i) => (
             <div
               key={anak.id}
@@ -174,15 +184,16 @@ export default function ModePosyandu() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-neutral-200 p-4 z-20">
-        <div className="max-w-3xl mx-auto">
+      <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-light-ash p-[17px] z-20">
+        <div className="max-w-[720px] mx-auto">
           <Button
             variant="primary"
             size="lg"
+            leadingIcon={<Plus size={20} strokeWidth={2} />}
             onClick={() => setTambahOpen(true)}
             className="w-full"
           >
-            + Tambah Balita Baru
+            Tambah Balita Baru
           </Button>
         </div>
       </div>
