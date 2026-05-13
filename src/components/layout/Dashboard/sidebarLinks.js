@@ -1,4 +1,5 @@
 import {
+  LayoutDashboard,
   Home,
   FileText,
   Building2,
@@ -9,6 +10,12 @@ import {
 } from 'lucide-react';
 
 export const sidebarlink = [
+  {
+    title: 'Utama',
+    links: [
+      { title: 'Dashboard', path: '', icon: LayoutDashboard, exact: true },
+    ],
+  },
   {
     title: 'Input Data',
     links: [
@@ -32,5 +39,4 @@ export const sidebarlink = [
   },
 ];
 
-// FileText reserved for future menu items needing a document-style icon.
 export const _reservedIcons = { FileText };
