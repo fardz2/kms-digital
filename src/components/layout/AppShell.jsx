@@ -15,28 +15,12 @@ export default function AppShell({ children, menu = [], activeKey }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-surface)' }}>
-      <nav
-        style={{
-          background: 'var(--color-bg)',
-          padding: 'var(--space-md) var(--space-lg)',
-          boxShadow: 'var(--shadow-card)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-md)',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 'var(--font-weight-bold)',
-            fontSize: 'var(--text-lg)',
-          }}
-        >
+    <div className="min-h-screen bg-neutral-50">
+      <nav className="bg-white border-b border-neutral-200 px-4 md:px-6 py-3 flex items-center gap-4 flex-wrap">
+        <div className="font-display font-bold text-h3 text-neutral-900">
           KMS Digital
         </div>
-
-        <div style={{ display: 'flex', gap: 'var(--space-sm)', flex: 1, flexWrap: 'wrap' }}>
+        <div className="flex gap-2 flex-1 flex-wrap">
           {menu.map((item) => (
             <Button
               key={item.key}
@@ -48,10 +32,9 @@ export default function AppShell({ children, menu = [], activeKey }) {
             </Button>
           ))}
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+        <div className="flex items-center gap-3">
           {user?.name && (
-            <span style={{ fontSize: 'var(--text-base)', color: 'var(--color-muted)' }}>
+            <span className="text-caption text-neutral-500 hidden md:inline">
               {user.name}
             </span>
           )}
@@ -60,7 +43,6 @@ export default function AppShell({ children, menu = [], activeKey }) {
           </Button>
         </div>
       </nav>
-
       <main>{children}</main>
     </div>
   );

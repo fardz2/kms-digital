@@ -67,39 +67,16 @@ export default function LoginPortal() {
   return (
     <>
       {toast.contextHolder}
-      <div
-        style={{
-          minHeight: '100vh',
-          background: 'var(--color-surface)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 'var(--space-lg)',
-        }}
-      >
-        <div style={{ width: '100%', maxWidth: 480 }}>
-          <h1
-            style={{
-              fontSize: 'var(--text-xl)',
-              fontWeight: 'var(--font-weight-bold)',
-              textAlign: 'center',
-              marginBottom: 'var(--space-lg)',
-            }}
-          >
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
+        <div className="w-full max-w-lg">
+          <h1 className="text-h1 font-display text-neutral-900 text-center mb-6">
             KMS Digital Lebakwangi
           </h1>
 
           {expired && (
             <div
               role="alert"
-              style={{
-                background: 'var(--color-warning)',
-                color: 'var(--color-text)',
-                padding: 'var(--space-md)',
-                borderRadius: 'var(--radius-button)',
-                marginBottom: 'var(--space-md)',
-                textAlign: 'center',
-              }}
+              className="bg-warning-bg text-amber-900 px-4 py-3 rounded-button mb-4 text-center"
             >
               Sesi Anda berakhir, silakan masuk kembali.
             </div>
@@ -107,17 +84,17 @@ export default function LoginPortal() {
 
           {!selectedRole ? (
             <Card>
-              <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-md)' }}>Masuk sebagai:</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+              <h2 className="text-h3 font-display text-neutral-900 mb-4">Masuk sebagai:</h2>
+              <div className="flex flex-col gap-2">
                 {ROLES.map((r) => (
                   <Button
                     key={r.key}
                     variant="secondary"
                     size="lg"
                     onClick={() => setSelectedRole(r.key)}
-                    style={{ justifyContent: 'flex-start', width: '100%' }}
+                    className="justify-start w-full"
                   >
-                    <span style={{ marginRight: 'var(--space-sm)' }}>{r.icon}</span>
+                    <span className="mr-2">{r.icon}</span>
                     {r.label}
                   </Button>
                 ))}
@@ -125,7 +102,12 @@ export default function LoginPortal() {
             </Card>
           ) : (
             <Card>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedRole(null)} style={{ marginBottom: 'var(--space-md)' }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRole(null)}
+                className="mb-4"
+              >
                 ← Kembali
               </Button>
               <LoginForm
