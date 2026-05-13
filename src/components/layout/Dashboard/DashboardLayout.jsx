@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(
-    !window.matchMedia("(max-width: 768px)").matches
+    () => !window.matchMedia("(max-width: 768px)").matches
   );
+  const { collapsed } = useSidebarCollapsed();
 
   useEffect(() => {
     const handleResize = () => {
@@ -14,6 +16,12 @@ export default function DashboardLayout() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const marginClass = sidebarOpen
+    ? collapsed
+      ? "md:ml-[64px]"
+      : "md:ml-60"
+    : "";
 
   return (
     <div className="min-h-screen bg-faint-fog flex">
@@ -35,11 +43,9 @@ export default function DashboardLayout() {
       )}
 
       <main
-        className={`flex-1 min-w-0 transition-all duration-250 ease-out-quart ${
-          sidebarOpen ? "md:ml-60" : ""
-        }`}
+        className={`flex-1 min-w-0 transition-all duration-250 ease-out-quart ` + marginClass}
       >
-        <div className="p-4 md:p-[25px] max-w-page mx-auto">
+        <div className="max-w-page mx-auto">
           <Outlet />
         </div>
       </main>
