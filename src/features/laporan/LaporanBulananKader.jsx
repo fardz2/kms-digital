@@ -2,6 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { useQueries } from '@tanstack/react-query';
+import {
+  ArrowLeft,
+  Baby,
+  CheckCircle2,
+  AlertTriangle,
+  Check,
+} from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -51,52 +58,64 @@ export default function LaporanBulananKader() {
   const isLoading = anakLoading || isFetchingPengukuran;
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <PageHeader title="Laporan Bulanan" subtitle="Rekap posyandu Anda" />
+    <div className="min-h-screen bg-faint-fog">
+      <PageHeader
+        title="Laporan Bulanan"
+        eyebrow="Rekap Posyandu"
+        subtitle="Rekap pengukuran balita di posyandu Anda."
+      />
 
-      <div className="px-4 py-6 max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
         <Button
           variant="ghost"
           size="sm"
+          leadingIcon={<ArrowLeft size={16} strokeWidth={1.75} />}
           onClick={() => navigate(-1)}
-          className="mb-4"
+          className="mb-[17px]"
         >
-          ← Kembali
+          Kembali
         </Button>
 
-        <div className="mb-6">
-          <div className="text-caption text-neutral-500 mb-1">Bulan:</div>
+        <div className="mb-[25px]">
+          <div className="text-caption font-bold uppercase tracking-[0.12em] text-graphite mb-[8px]">
+            Pilih Bulan
+          </div>
           <MonthPicker value={bulan} onChange={setBulan} />
         </div>
 
         {isLoading ? (
-          <div className="text-neutral-500">Memuat data laporan...</div>
+          <div className="text-body-sm text-graphite">Memuat data laporan...</div>
         ) : (
           <>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4 mb-6">
-              <StatCard label="Total Balita" value={laporan.totalBalita} icon="👶" />
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px] mb-[25px]">
+              <StatCard
+                label="Total Balita"
+                value={laporan.totalBalita}
+                icon={<Baby size={22} strokeWidth={1.75} />}
+                accent="neutral"
+              />
               <StatCard
                 label="Sudah Diukur"
                 value={laporan.sudahDiukur}
-                icon="✅"
+                icon={<CheckCircle2 size={22} strokeWidth={1.75} />}
                 accent="success"
               />
               <StatCard
                 label="Belum Diukur"
                 value={laporan.belumDiukur}
-                icon="⚠️"
+                icon={<AlertTriangle size={22} strokeWidth={1.75} />}
                 accent="warning"
               />
             </div>
 
-            <Card title="Partisipasi Bulan Ini" className="mb-6">
+            <Card title="Partisipasi Bulan Ini" className="mb-[17px]">
               <ProgressBar
                 value={laporan.sudahDiukur}
                 max={laporan.totalBalita || 1}
               />
             </Card>
 
-            <Card title="Sebaran Status Gizi" className="mb-6">
+            <Card title="Sebaran Status Gizi" className="mb-[17px]">
               <StatusDistribution
                 distribusi={laporan.distribusi}
                 total={Object.values(laporan.distribusi).reduce((a, b) => a + b, 0)}
@@ -105,14 +124,15 @@ export default function LaporanBulananKader() {
 
             <Card
               title={`Belum Diukur Bulan Ini (${laporan.belumDiukurList.length})`}
-              className="mb-6"
+              className="mb-[17px]"
             >
               {laporan.belumDiukurList.length === 0 ? (
-                <div className="text-neutral-500">
-                  Semua balita sudah diukur 🎉
+                <div className="flex items-center gap-[13px] text-body-sm text-success">
+                  <Check size={20} strokeWidth={2} />
+                  Semua balita sudah diukur.
                 </div>
               ) : (
-                <ul className="pl-5 m-0 space-y-1">
+                <ul className="pl-[21px] m-0 space-y-[6px]">
                   {laporan.belumDiukurList.map((item) => (
                     <li key={item.id} className="text-body-sm text-deep-slate">
                       {item.nama}
@@ -125,14 +145,25 @@ export default function LaporanBulananKader() {
 
             <Card title={`Perlu Perhatian (${laporan.perluPerhatian.length})`}>
               {laporan.perluPerhatian.length === 0 ? (
-                <div className="text-neutral-500">
-                  Tidak ada balita yang perlu perhatian khusus 🎉
+                <div className="flex items-center gap-[13px] text-body-sm text-success">
+                  <Check size={20} strokeWidth={2} />
+                  Tidak ada balita yang perlu perhatian khusus.
                 </div>
               ) : (
-                <ul className="pl-5 m-0 space-y-1">
+                <ul className="m-0 space-y-[8px]">
                   {laporan.perluPerhatian.map((item) => (
-                    <li key={item.id} className="text-body-sm text-deep-slate">
-                      ⚠️ {item.nama} — {item.status}
+                    <li
+                      key={item.id}
+                      className="flex items-start gap-[8px] text-body-sm text-deep-slate"
+                    >
+                      <AlertTriangle
+                        size={16}
+                        strokeWidth={2}
+                        className="text-danger shrink-0 mt-[3px]"
+                      />
+                      <span>
+                        <span className="font-semibold">{item.nama}</span> — {item.status}
+                      </span>
                     </li>
                   ))}
                 </ul>
