@@ -6,10 +6,10 @@ import {
   message,
   Row,
   Select,
-  Table,
   Modal,
 } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import DataTable from "../../components/ui/DataTable";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Container from "react-bootstrap/Container";
 import useAuth from "../../hook/useAuth";
@@ -17,7 +17,6 @@ import useAuth from "../../hook/useAuth";
 export default function RegisterKaderPosyandu() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [searchText, setSearchedText] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
@@ -244,7 +243,6 @@ export default function RegisterKaderPosyandu() {
 
   // Function to reset filters
   const resetFilters = () => {
-    setSearchedText("");
     setStatusFilter(null);
   };
 
@@ -259,61 +257,47 @@ export default function RegisterKaderPosyandu() {
     return !!status; // Convert to boolean for null/undefined/false
   };
 
-  // Table columns configuration
   const columns = [
     {
-      title: "Nama",
-      dataIndex: "nama",
-      key: "nama",
-      filteredValue: searchText ? [searchText] : null,
-      onFilter: (value, record) =>
-        String(record.nama).toLowerCase().includes(value.toLowerCase()),
+      accessorKey: "nama",
+      header: "Nama",
+      enableSorting: true,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      accessorKey: "email",
+      header: "Email",
+      enableSorting: true,
     },
     {
-      title: "Desa",
-      dataIndex: ["desa", "name"],
-      key: "desa",
-      render: (text) => text || "N/A",
+      id: "desa",
+      header: "Desa",
+      accessorFn: (row) => row.desa?.name ?? "N/A",
+      enableSorting: true,
     },
     {
-      title: "Posyandu",
-      dataIndex: ["posyandu", "nama"],
-      key: "posyandu",
-      render: (text) => text || "N/A",
+      id: "posyandu",
+      header: "Posyandu",
+      accessorFn: (row) => row.posyandu?.nama ?? "N/A",
+      enableSorting: true,
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) =>
-        normalizeStatus(status) ? "Approve" : "Belum di Approve",
-      filters: [
-        {
-          text: "Approve",
-          value: true,
-        },
-        {
-          text: "Belum di Approve",
-          value: false,
-        },
-      ],
-      filteredValue: statusFilter !== null ? [statusFilter] : null,
-      onFilter: (value, record) => normalizeStatus(record.status) === value,
+      accessorKey: "status",
+      header: "Status",
+      enableSorting: true,
+      cell: ({ getValue }) =>
+        normalizeStatus(getValue()) ? "Approve" : "Belum di Approve",
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
+      id: "action",
+      header: "Aksi",
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
         <div>
           <Button
             type="default"
             size="small"
-            onClick={() => handleEdit(record)}
+            onClick={() => handleEdit(row.original)}
             style={{ marginRight: 8 }}
             disabled={
               createKaderMutation.isPending ||
@@ -327,7 +311,7 @@ export default function RegisterKaderPosyandu() {
             type="dashed"
             danger
             size="small"
-            onClick={() => showDeleteConfirm(record.id)}
+            onClick={() => showDeleteConfirm(row.original.id)}
             disabled={
               createKaderMutation.isPending ||
               updateKaderMutation.isPending ||
@@ -380,12 +364,13 @@ export default function RegisterKaderPosyandu() {
     form.resetFields();
   };
 
-  const handleTableChange = (pagination, filters) => {
-    setSearchedText(filters.nama ? filters.nama[0] : "");
-    setStatusFilter(
-      filters.status && filters.status.length > 0 ? filters.status[0] : null
-    );
-  };
+  const filteredKaderData = useMemo(() => {
+    let rows = kaderData || [];
+    if (statusFilter !== null) {
+      rows = rows.filter((r) => normalizeStatus(r.status) === statusFilter);
+    }
+    return rows;
+  }, [kaderData, statusFilter]);
 
   return (
     <>
@@ -568,46 +553,51 @@ export default function RegisterKaderPosyandu() {
             <p className="text-base">Apakah Anda yakin ingin menghapus Kader Posyandu ini?</p>
           </Modal>
 
-          <Table
-            title={() => (
-              <div className="flex justify-between items-center gap-4 flex-wrap">
-                <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Input.Search
-                    placeholder="Cari kader..."
-                    value={searchText}
-                    onChange={(e) => setSearchedText(e.target.value)}
-                    onSearch={(value) => setSearchedText(value)}
-                    className="w-full md:w-64"
-                    allowClear
-                  />
-                  <button
-                    onClick={resetFilters}
-                    disabled={
-                      createKaderMutation.isPending ||
-                      updateKaderMutation.isPending ||
-                      deleteKaderMutation.isPending
-                    }
-                    className="px-4 py-2 rounded-button bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium disabled:opacity-60 transition-colors"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-            )}
-            dataSource={kaderData || []}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h2 className="text-h3 font-display text-neutral-900">Daftar Kader Posyandu</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                value={statusFilter === null ? "" : String(statusFilter)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setStatusFilter(v === "" ? null : v === "true");
+                }}
+                className="rounded-button border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
+                disabled={
+                  createKaderMutation.isPending ||
+                  updateKaderMutation.isPending ||
+                  deleteKaderMutation.isPending
+                }
+              >
+                <option value="">Semua Status</option>
+                <option value="true">Approve</option>
+                <option value="false">Belum di Approve</option>
+              </select>
+              <button
+                onClick={resetFilters}
+                disabled={
+                  createKaderMutation.isPending ||
+                  updateKaderMutation.isPending ||
+                  deleteKaderMutation.isPending
+                }
+                className="px-4 py-2 rounded-button bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium disabled:opacity-60 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+          <DataTable
             columns={columns}
+            data={filteredKaderData}
             loading={
               kaderLoading ||
               createKaderMutation.isPending ||
               updateKaderMutation.isPending ||
               deleteKaderMutation.isPending
             }
-            pagination={{ pageSize: 5 }}
             rowKey="id"
-            onChange={handleTableChange}
-            locale={{ emptyText: "Tidak ada data Kader Posyandu" }}
-            scroll={{ x: "max-content" }}
+            searchPlaceholder="Cari kader..."
+            emptyText="Tidak ada data Kader Posyandu"
           />
         </div>
       </div>
