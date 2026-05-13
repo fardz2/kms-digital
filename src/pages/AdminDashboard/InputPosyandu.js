@@ -11,7 +11,6 @@ import {
 } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Container from "react-bootstrap/Container";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
@@ -267,153 +266,130 @@ export default function InputPosyandu() {
 
   return (
     <>
-      <Container
-        fluid
-        style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "20px",
-        }}
-      >
+      <div className="bg-white rounded-card shadow-card p-6">
         {contextHolder}
-        <Row justify="space-between">
-          <Col span={24}>
-            <Button
-              type="primary"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-h2 font-display text-neutral-900">Kelola Posyandu</h1>
+            <button
               onClick={showModal}
-              style={{ marginBottom: 16 }}
               disabled={
                 createPosyanduMutation.isPending ||
                 updatePosyanduMutation.isPending ||
                 deletePosyanduMutation.isPending
               }
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60 transition-colors"
             >
-              Tambah Posyandu
-            </Button>
-            <Modal
-              title={modalMode === "add" ? "Tambah Posyandu" : "Edit Posyandu"}
-              open={isModalVisible}
-              onCancel={handleCancel}
-              footer={null}
+              + Tambah Posyandu
+            </button>
+          </div>
+          <Modal
+            title={
+              <span className="text-h3 font-display text-neutral-900">
+                {modalMode === "add" ? "Tambah Posyandu" : "Edit Posyandu"}
+              </span>
+            }
+            open={isModalVisible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form
+              form={form}
+              name="basic"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              layout="vertical"
             >
-              <Form
-                form={form}
-                name="basic"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                autoComplete="off"
-                layout="vertical"
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Pilih Desa</span>}
+                name="desa"
+                rules={[{ required: true, message: "Desa masih kosong" }]}
               >
-                <Form.Item
-                  label="Pilih Desa"
-                  name="desa"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Desa masih kosong!",
-                    },
-                  ]}
+                <Select
+                  listHeight={100}
+                  optionFilterProp="children"
+                  showSearch
+                  placeholder="Pilih Desa"
+                  disabled={desaLoading}
+                  className="h-11"
                 >
-                  <Select
-                    listHeight={100}
-                    optionFilterProp="children"
-                    showSearch
-                    placeholder="Pilih Desa"
-                    disabled={desaLoading}
-                  >
-                    {dataDesa &&
-                      dataDesa.map((item) => (
-                        <Select.Option key={item.id} value={item.id}>
-                          {item.name}
-                        </Select.Option>
-                      ))}
-                  </Select>
-                </Form.Item>
+                  {dataDesa?.map((item) => (
+                    <Select.Option key={item.id} value={item.id}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-                <Form.Item
-                  label="Nama Posyandu"
-                  name="posyandu"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nama Posyandu masih kosong!",
-                    },
-                  ]}
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Nama Posyandu</span>}
+                name="posyandu"
+                rules={[{ required: true, message: "Nama Posyandu masih kosong" }]}
+              >
+                <Input className="h-11 text-base" />
+              </Form.Item>
+
+              <Form.Item
+                label={<span className="text-caption text-neutral-700">Alamat</span>}
+                name="alamat"
+                rules={[{ required: true, message: "Alamat masih kosong" }]}
+              >
+                <Input.TextArea rows={3} className="text-base" />
+              </Form.Item>
+
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={
+                    createPosyanduMutation.isPending ||
+                    updatePosyanduMutation.isPending
+                  }
+                  className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
                 >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Alamat"
-                  name="alamat"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Alamat masih kosong!",
-                    },
-                  ]}
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    createPosyanduMutation.isPending ||
+                    updatePosyanduMutation.isPending
+                  }
+                  className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
                 >
-                  <Input.TextArea rows={3} />
-                </Form.Item>
-
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={
-                      createPosyanduMutation.isPending ||
-                      updatePosyanduMutation.isPending
-                    }
-                  >
-                    Simpan
-                  </Button>
-                  <Button
-                    style={{ marginLeft: 8 }}
-                    onClick={handleCancel}
-                    disabled={
-                      createPosyanduMutation.isPending ||
-                      updatePosyanduMutation.isPending
-                    }
-                  >
-                    Batal
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-            <Table
-              title={() => (
-                <div className="flex justify-between items-center">
-                  <div className="flex justify-start items-center">
-                    <h2 className="text-sm font-semibold">Daftar Posyandu</h2>
-                  </div>
-                  <div className="flex justify-end items-center">
-                    <Input.Search
-                      placeholder="Search here ..."
-                      onSearch={(value) => {
-                        setSearchedText(value);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              dataSource={dataSource || []}
-              columns={columns}
-              loading={
-                posyanduLoading ||
-                createPosyanduMutation.isPending ||
-                updatePosyanduMutation.isPending ||
-                deletePosyanduMutation.isPending
-              }
-              pagination={{ pageSize: 5 }}
-              rowKey="id"
-              locale={{
-                emptyText: "Tidak ada data Posyandu",
-              }}
-              scroll={{ x: "max-content" }}
-            />
-          </Col>
-        </Row>
-      </Container>
+                  Simpan
+                </button>
+              </div>
+            </Form>
+          </Modal>
+          <Table
+            title={() => (
+              <div className="flex justify-between items-center gap-4 flex-wrap">
+                <h2 className="text-h3 font-display text-neutral-900">Daftar Posyandu</h2>
+                <Input.Search
+                  placeholder="Cari posyandu..."
+                  onSearch={(value) => setSearchedText(value)}
+                  className="w-full md:w-64"
+                  allowClear
+                />
+              </div>
+            )}
+            dataSource={dataSource || []}
+            columns={columns}
+            loading={
+              posyanduLoading ||
+              createPosyanduMutation.isPending ||
+              updatePosyanduMutation.isPending ||
+              deletePosyanduMutation.isPending
+            }
+            pagination={{ pageSize: 5 }}
+            rowKey="id"
+            locale={{ emptyText: "Tidak ada data Posyandu" }}
+            scroll={{ x: "max-content" }}
+          />
+        </div>
+      </div>
     </>
   );
 }
