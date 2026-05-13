@@ -201,7 +201,6 @@ export default function FormUpdateDataArtikel(props) {
     }
   ];
 
-  console.log(dataKategori)
   return (
     <>
       {contextHolder}
@@ -209,177 +208,181 @@ export default function FormUpdateDataArtikel(props) {
         <Modal
           open={isOpen}
           onCancel={onCancel}
-          title="Update Data Anak"
-          footer={[
-            <button
-              key="back"
-              type="button"
-              
-              onClick={onCancel}
-              className="batal_btn"
-            >
-              Batal
-            </button>,
-            <button
-              key="submit"
-              type="submit"
-              onClick={onOK}
-              className="simpan_btn"
-            >
-              Simpan
-            </button>,
-          ]}
+          title={
+            <span className="text-h3 font-display text-neutral-900">
+              Update Artikel
+            </span>
+          }
+          footer={
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={onCancel}
+                className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold"
+              >
+                Batal
+              </button>
+              <button
+                onClick={onOK}
+                className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm"
+              >
+                Simpan
+              </button>
+            </div>
+          }
+          bodyStyle={{ padding: "1.25rem", fontFamily: "Inter, sans-serif" }}
+          width={720}
         >
-          <Row>
-            <Col span={24}>
-              <Form form={form} name="form_update_data_anak" layout="vertical">
-                <Form.Item
-                  label="Pilih kategori"
-                  name="kategori"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Kategori masih kosong!",
-                    },
-                  ]}
-                >
-                  <Select size="4" listHeight={100} optionFilterProp="children" showSearch placeholder="Pilih Kategori">
-
-                    <Select.Option value="add">
-                      <Button onClick={() => {
-                        setStatePageKateogries(true)
-                        
-                      }}>Tambah Kategori</Button>
-                    </Select.Option>
-
-                    {
-                      statePageKateogries ?  
-                      <Select.Option>
-                      </Select.Option> :
-                    dataKategori.map((item) => (
-                     
-                      <Select.Option key={item.id} value={item.name} >
-                        {item.name}
-                      </Select.Option>
-                    ))
-                    }
-                  </Select>
-                </Form.Item>
-                
-                 {
-                  statePageKateogries &&
-                  <Form.Item
-                    style={{ Width: "100%" }}
-                    label="Tambah Kategori"
-                    name="name"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama Kategori masih kosong!",
-                      },
-                    ]}
+          <Form form={form} layout="vertical">
+            <Form.Item
+              label={
+                <span className="text-caption text-neutral-700">
+                  Pilih kategori
+                </span>
+              }
+              name="kategori"
+              rules={[{ required: true, message: "Kategori masih kosong" }]}
+            >
+              <Select
+                size="4"
+                listHeight={100}
+                optionFilterProp="children"
+                showSearch
+                placeholder="Pilih Kategori"
+                className="h-11"
+              >
+                <Select.Option value="add">
+                  <Button
+                    onClick={() => {
+                      setStatePageKateogries(true);
+                    }}
                   >
-                    <Input placeholder="Masukkan Nama Kategori"/>
-                  </Form.Item>
-                }
+                    Tambah Kategori
+                  </Button>
+                </Select.Option>
 
-                {
-                  !statePageKateogries &&
-                  <div>
-                    <Form.Item
-                  style={{ Width: "100%" }}
-                  label="Judul"
-                  name="judul"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Judul masih kosong!",
-                    },
-                  ]}
-                >
-                  <Input placeholder="Masukkan judul"/>
-                    </Form.Item>
-                    <Form.Item
-                      style={{ Width: "100%" }}
-                      label="Nama penulis"
-                      name="penulis"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Penulis masih kosong!",
-                        },
-                      ]}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      style={{ Width: "100%" }}
-                      label="Unggah cover artikel"
-                      name="image"
-                    >
-                    
-                    <div className="flex justify-center items-center w-full">
-                        <label
-                          htmlFor="import_pelanggan"
-                          className="flex flex-col justify-center items-center w-full h-64 bg-white rounded-lg border-2 border-dashed cursor-pointer dark:hover:bg-bray-800" style={{borderColor: "#FFB4B4"}}
-                        >
-                        
-                        {imageFile ? (
-                          <div className="flex flex-col justify-center items-center w-full h-full">
-                            {imageFile?.name}
-                          </div>
-                        ) : (
-                            <div className="flex flex-col justify-center items-center pt-5 pb-6">
-                              <svg
-                                aria-hidden="true"
-                                className="mb-3 w-10 h-10 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                ></path>
-                              </svg>
-                              <p className="mb-2 text-sm dark:text-gray-400" style={{color: "#b41318"}}>
-                                <span className="font-semibold">
-                                  Click to upload
-                                </span>{' '}
-                                  or drag and drop
-                                </p>
-                                <p className="text-xs" style={{color: "#b41318"}}>
-                                  Unggah Cover Digital
-                                </p>
-                            </div>
-                        )}
-                        <input
-                          id="import_pelanggan"
-                          type="file"
-                          accept=".jpg, .jpeg, .png"
-                          style={{color: "#b41318"}}
-                            onChange={(e) => {
-                              setImageFile(e.target.files[0]);
-                            }}
-                        />
-                      </label>
-                    </div>
-                    </Form.Item>
-                    <Form.Item
-                      style={{ Width: "100%" }}
-                      label="Paragraf"
-                      name="content"
-                    >
-                    </Form.Item>
-                    <ReactQuill theme="snow" value={valueContent} onChange={setValueContent} />;
-                  </div>
+                {statePageKateogries ? (
+                  <Select.Option></Select.Option>
+                ) : (
+                  dataKategori.map((item) => (
+                    <Select.Option key={item.id} value={item.name}>
+                      {item.name}
+                    </Select.Option>
+                  ))
+                )}
+              </Select>
+            </Form.Item>
+
+            {statePageKateogries && (
+              <Form.Item
+                label={
+                  <span className="text-caption text-neutral-700">
+                    Tambah Kategori
+                  </span>
                 }
-              </Form>
-            </Col>
-          </Row>
+                name="name"
+                rules={[
+                  { required: true, message: "Nama Kategori masih kosong" },
+                ]}
+              >
+                <Input
+                  placeholder="Masukkan Nama Kategori"
+                  className="h-11 text-base"
+                />
+              </Form.Item>
+            )}
+
+            {!statePageKateogries && (
+              <div>
+                <Form.Item
+                  label={
+                    <span className="text-caption text-neutral-700">Judul</span>
+                  }
+                  name="judul"
+                  rules={[{ required: true, message: "Judul masih kosong" }]}
+                >
+                  <Input placeholder="Masukkan judul" className="h-11 text-base" />
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span className="text-caption text-neutral-700">
+                      Nama penulis
+                    </span>
+                  }
+                  name="penulis"
+                  rules={[{ required: true, message: "Penulis masih kosong" }]}
+                >
+                  <Input className="h-11 text-base" />
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span className="text-caption text-neutral-700">
+                      Unggah cover artikel
+                    </span>
+                  }
+                  name="image"
+                >
+                  <label
+                    htmlFor="import_pelanggan"
+                    className="flex flex-col justify-center items-center w-full h-56 bg-primary-50 rounded-card border-2 border-dashed border-primary-200 cursor-pointer hover:bg-primary-100 transition-colors"
+                  >
+                    {imageFile ? (
+                      <div className="flex flex-col justify-center items-center text-primary-700 font-medium">
+                        {imageFile?.name}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col justify-center items-center">
+                        <svg
+                          aria-hidden="true"
+                          className="mb-3 w-10 h-10 text-primary-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                        </svg>
+                        <p className="text-sm text-primary-700 font-semibold">
+                          Klik untuk unggah
+                        </p>
+                        <p className="text-xs text-primary-600 mt-1">
+                          atau tarik & lepas
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      id="import_pelanggan"
+                      type="file"
+                      accept=".jpg, .jpeg, .png"
+                      className="hidden"
+                      onChange={(e) => {
+                        setImageFile(e.target.files[0]);
+                      }}
+                    />
+                  </label>
+                </Form.Item>
+                <Form.Item
+                  label={
+                    <span className="text-caption text-neutral-700">
+                      Konten Artikel
+                    </span>
+                  }
+                  name="content"
+                >
+                  <div className="border border-neutral-200 rounded-button overflow-hidden">
+                    <ReactQuill
+                      theme="snow"
+                      value={valueContent}
+                      onChange={setValueContent}
+                    />
+                  </div>
+                </Form.Item>
+              </div>
+            )}
+          </Form>
         </Modal>
       )}
     </>
