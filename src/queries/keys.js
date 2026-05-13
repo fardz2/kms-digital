@@ -23,4 +23,9 @@ export const qk = {
     list: ['artikel', 'list'],
     detail: (id) => ['artikel', 'detail', id],
   },
+  admin: {
+    list: (entity) => ['admin', 'list', entity],
+    stats: () => ['admin', 'stats'],
+    activity: () => ['admin', 'activity'],
+  },
 };
