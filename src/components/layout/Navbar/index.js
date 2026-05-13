@@ -1,39 +1,58 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Avatar, Col, Row, Modal, Form, Input, Button, message } from "antd";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Avatar, Modal, Form, Input, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../../../hook/useAuth";
-import { clearSession } from "../../../features/auth/session-storage";
-import "./index.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { clearSession, readSession, writeSession } from "../../../features/auth/session-storage";
+
+const LINKS_BY_ROLE = {
+  ORANG_TUA: [
+    { to: "/orangtua/balita", label: "Beranda" },
+    { to: "/artikel", label: "Artikel" },
+    { to: "/orangtua/forum", label: "Tanya Jawab" },
+  ],
+  TENAGA_KESEHATAN: [
+    { to: "/tenkes/beranda", label: "Beranda" },
+    { to: "/tenkes/forum", label: "Forum" },
+    { to: "/artikel", label: "Artikel" },
+  ],
+  DESA: [
+    { to: "/desa/beranda", label: "Beranda" },
+    { to: "/desa/acara", label: "Kelola Acara" },
+  ],
+  KADER_POSYANDU: [
+    { to: "/kader/balita", label: "Beranda" },
+    { to: "/kader/laporan", label: "Laporan" },
+  ],
+};
+
+function RoleLabel({ role }) {
+  if (!role) return "Tamu";
+  if (role === "ORANG_TUA") return "Orang Tua";
+  if (role === "KADER_POSYANDU") return "Kader Posyandu";
+  if (role === "TENAGA_KESEHATAN") return "Tenaga Kesehatan";
+  if (role === "DESA") return "Desa";
+  if (role === "ADMIN") return "Admin";
+  return role;
+}
 
 export default function NavbarComp(props) {
-  const { isLogin, admin, posyandu, desa, kader, tenkes } = props;
+  const { isLogin } = props;
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
-  const [activeLink, setActiveLink] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const user = useAuth();
 
   useEffect(() => {
-    const currentPath = window.location.pathname;
-    setActiveLink(currentPath);
+    if (user?.user?.name) form.setFieldsValue({ nama: user.user.name });
+  }, [user?.user?.name, form]);
 
-    form.setFieldsValue({ nama: user?.user?.name || "User" });
-  }, []);
-
-  // Fetch profile data
-  const {
-    data: profileData,
-    isLoading: isProfileLoading,
-    refetch,
-  } = useQuery({
+  const { data: profileData, isLoading: isProfileLoading, refetch } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       if (user?.user?.role === "ADMIN") return null;
@@ -47,30 +66,18 @@ export default function NavbarComp(props) {
         }
       );
       if (!response.ok) throw new Error("Gagal mengambil profil");
-      const data = await response.json();
-      // Debugging
-      return data;
+      return response.json();
     },
-    onSuccess: (data) => {
-      form.setFieldsValue({
-        nama: data?.data?.user?.name,
-      });
-    },
-    onError: (err) => {
-      console.error("Fetch profile error:", err);
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal mengambil profil",
-      });
-    },
+    enabled: !!user?.token?.value && user?.user?.role !== "ADMIN",
+    onError: (err) => messageApi.error(err.message || "Gagal mengambil profil"),
   });
+
   useEffect(() => {
     if (isProfileModalOpen) {
       refetch();
       form.setFieldsValue({ nama: user?.user?.name || "User" });
-      console.log("Refetching profile data..."); // Debugging
     }
-  }, [isProfileModalOpen, refetch]);
+  }, [isProfileModalOpen, refetch, form, user?.user?.name]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (values) => {
@@ -89,54 +96,20 @@ export default function NavbarComp(props) {
       return response.json();
     },
     onSuccess: (response) => {
-      messageApi.open({
-        type: "success",
-        content: "Profil berhasil diperbarui",
-      });
-      localStorage.setItem(
-        "login_data",
-        JSON.stringify({
-          ...user,
-          user: {
-            ...user.user,
-            name: response.data.user.name,
-          },
-        })
-      );
+      messageApi.success("Profil berhasil diperbarui");
+      const currentSession = readSession();
+      if (currentSession) {
+        writeSession({
+          ...currentSession,
+          user: { ...currentSession.user, name: response.data.user.name },
+        });
+      }
       queryClient.invalidateQueries(["profile"]);
       form.resetFields();
       setIsProfileModalOpen(false);
     },
-    onError: (err) => {
-      console.error("Update profile error:", err);
-      messageApi.open({
-        type: "error",
-        content: err.message || "Gagal memperbarui profil",
-      });
-    },
+    onError: (err) => messageApi.error(err.message || "Gagal memperbarui profil"),
   });
-
-  const handleProfileClick = () => {
-    if (user?.user?.role !== "ADMIN") {
-      setIsProfileModalOpen(true);
-    }
-  };
-
-  const handleUpdateProfile = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        updateProfileMutation.mutate(values);
-      })
-      .catch((info) => {
-        console.log("Validation Failed:", info);
-      });
-  };
-
-  const handleCancel = () => {
-    form.resetFields();
-    setIsProfileModalOpen(false);
-  };
 
   const handleLogout = () => {
     clearSession();
@@ -144,429 +117,226 @@ export default function NavbarComp(props) {
     navigate("/");
   };
 
-  const navbarStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFB4B4",
-    color: "#ffffff",
-    height: "80px",
-    paddingTop: "20px",
-    zIndex: 1000,
+  const handleProfileClick = () => {
+    if (user?.user?.role !== "ADMIN") setIsProfileModalOpen(true);
   };
 
-  const navLinkStyle = {
-    color: "white",
-    margin: "0 10px",
+  const handleUpdateProfile = () => {
+    form
+      .validateFields()
+      .then((values) => updateProfileMutation.mutate(values))
+      .catch(() => {});
   };
 
-  const activeNavLinkStyle = {
-    ...navLinkStyle,
-    fontWeight: "bold",
-    textDecoration: "underline",
-  };
+  const navLinks = isLogin && user?.user?.role ? LINKS_BY_ROLE[user.user.role] ?? [] : [];
+  const isActive = (to) => location.pathname.startsWith(to);
 
-  const BasicNavbar = () => (
-    <Navbar style={navbarStyle} expand="md">
-      <Container fluid="md">
-        <Navbar.Brand as={Link} to="/">
-          <h2 className="text-base md:text-xl text-white">KMS Digital</h2>
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse
-          id="basic-navbar-nav"
-          className="justify-content-end"
-          style={{ backgroundColor: "#FFB4B4" }}
-        >
-          <Nav className="ms-auto align-items-center">
-            <Link
-              to="/dashboard"
-              style={
-                activeLink === "/dashboard" ? activeNavLinkStyle : navLinkStyle
-              }
-            >
-              <h5>Home</h5>
-            </Link>
-            <Link
-              to="/"
-              style={
-                activeLink === "/about" ? activeNavLinkStyle : navLinkStyle
-              }
-            >
-              <h5>About</h5>
-            </Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-  );
+  const displayName = profileData?.data?.user?.name ?? user?.user?.name ?? "User";
 
-  if (isLogin) {
-    return (
-      <>
-        {contextHolder}
-        <Navbar style={navbarStyle} expand="lg">
-          <Container fluid="md">
-            <Navbar.Brand as={Link} to="/">
-              <h2 className="text-base md:text-xl text-white">
-                KMS Digital{" "}
-                <span className="text-[#b14444] font-bold">
-                  {user?.user?.desa_name || ""}
+  return (
+    <>
+      {contextHolder}
+      <nav className="sticky top-0 z-40 bg-primary-300 text-white shadow-card">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between gap-4 h-16">
+            <Link to="/" className="font-display font-bold text-body-lg md:text-h3">
+              KMS Digital
+              {user?.user?.desa_name && (
+                <span className="ml-2 text-primary-700 font-bold">
+                  {user.user.desa_name}
                 </span>
-              </h2>
-            </Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse
-              id="basic-navbar-nav"
-              className="justify-content-start"
-              style={{ backgroundColor: "#FFB4B4" }}
+              )}
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen((v) => !v)}
+              className="md:hidden p-2 rounded-button hover:bg-white/20 transition-colors"
+              aria-label="Buka menu"
+              aria-expanded={mobileOpen}
             >
-              <Nav className="mx-auto align-items-center">
-                {user?.user?.role === "ORANG_TUA" && (
-                  <>
-                    <Link
-                      to="/dashboard"
-                      style={
-                        activeLink === "/dashboard"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Home</h6>
-                    </Link>
-                    <Link
-                      to="/artikel"
-                      style={
-                        activeLink === "/artikel"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Artikel</h6>
-                    </Link>
-                    <Link
-                      to="/tanya-jawab"
-                      style={
-                        activeLink === "/tanya-jawab"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Tanya Jawab</h6>
-                    </Link>
-                  </>
-                )}
-                {user?.user?.role === "TENAGA_KESEHATAN" && (
-                  <>
-                    <Link
-                      to="/tenaga-kesehatan/dashboard"
-                      style={
-                        activeLink === "/tenaga-kesehatan/dashboard"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Home</h6>
-                    </Link>
-                  </>
-                )}
-                {user?.user?.role === "DESA" && (
-                  <>
-                    <Link
-                      to="/desa/dashboard"
-                      style={
-                        activeLink === "/desa/dashboard"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Home</h6>
-                    </Link>
-                    <Link
-                      to="/desa/reminder"
-                      style={
-                        activeLink === "/desa/reminder"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Event</h6>
-                    </Link>
-                  </>
-                )}
-                {user?.user?.role === "KADER_POSYANDU" && (
-                  <>
-                    <Link
-                      to="/dashboard"
-                      style={
-                        activeLink === "/dashboard"
-                          ? activeNavLinkStyle
-                          : navLinkStyle
-                      }
-                    >
-                      <h6 className="nav-link-text">Home</h6>
-                    </Link>
-                  </>
-                )}
-              </Nav>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </button>
 
-              <Row
-                justify="center"
-                align="middle"
-                onClick={handleProfileClick}
-                style={{ cursor: "pointer" }}
-              >
-                <Col>
-                  <Row justify="end" style={{ fontWeight: "bold" }}>
-                    {profileData?.data.user?.name || "User"}
-                  </Row>
-                  <Row justify="end">
-                    {user?.user?.role
-                      ? user.user.role.toLowerCase() === "orang_tua"
-                        ? "Orang Tua"
-                        : user.user.role
-                      : "Guest"}
-                  </Row>
-                </Col>
-                <Col>
-                  <Row justify="end" style={{ marginLeft: "10px" }}>
-                    <Avatar icon={<UserOutlined />} />
-                  </Row>
-                </Col>
-              </Row>
-              <Row justify="center" align="middle">
-                <Col style={{ display: "flex", alignItems: "center" }}>
+            <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+              {!isLogin && (
+                <>
+                  <Link to="/" className="px-3 py-2 rounded-button text-white/90 hover:bg-white/10 hover:text-white font-medium transition-colors">
+                    Beranda
+                  </Link>
+                </>
+              )}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`px-3 py-2 rounded-button font-medium transition-colors ${
+                    isActive(link.to)
+                      ? "bg-white/20 text-white"
+                      : "text-white/90 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="hidden md:flex items-center gap-3">
+              {isLogin ? (
+                <>
                   <button
-                    className="Btn"
-                    onClick={handleLogout}
-                    style={{ marginLeft: "20px" }}
-                    disabled={updateProfileMutation.isPending}
+                    type="button"
+                    onClick={handleProfileClick}
+                    className="flex items-center gap-2 p-1.5 rounded-button hover:bg-white/10 transition-colors"
                   >
-                    <div className="sign">
-                      <svg viewBox="0 0 512 512">
-                        <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
-                      </svg>
+                    <div className="text-right leading-tight">
+                      <div className="text-caption font-semibold">{displayName}</div>
+                      <div className="text-xs opacity-80">
+                        <RoleLabel role={user?.user?.role} />
+                      </div>
                     </div>
-                    <div className="text">Logout</div>
+                    <Avatar icon={<UserOutlined />} className="bg-primary-500" />
                   </button>
-                </Col>
-              </Row>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-button bg-primary-500 hover:bg-primary-600 text-white font-display font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  >
+                    Keluar
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/masuk"
+                  className="px-4 py-2 rounded-button bg-white hover:bg-neutral-50 text-primary-700 font-display font-semibold text-sm transition-colors"
+                >
+                  Masuk
+                </Link>
+              )}
+            </div>
+          </div>
 
-        <Modal
-          title="Profil Pengguna"
-          open={isProfileModalOpen}
-          onCancel={handleCancel}
-          footer={[
-            <Button
-              key="cancel"
-              onClick={handleCancel}
-              className="batal_btn"
+          {mobileOpen && (
+            <div className="md:hidden pb-4 space-y-1 border-t border-white/20 pt-2">
+              {!isLogin && (
+                <Link
+                  to="/"
+                  className="block px-3 py-2 rounded-button text-white/90 hover:bg-white/10 hover:text-white font-medium"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Beranda
+                </Link>
+              )}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block px-3 py-2 rounded-button font-medium ${
+                    isActive(link.to)
+                      ? "bg-white/20 text-white"
+                      : "text-white/90 hover:bg-white/10"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {isLogin ? (
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => {
+                      handleProfileClick();
+                      setMobileOpen(false);
+                    }}
+                    className="flex-1 px-4 py-2 rounded-button bg-white/20 hover:bg-white/30 text-white font-medium"
+                  >
+                    Profil
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMobileOpen(false);
+                    }}
+                    className="flex-1 px-4 py-2 rounded-button bg-primary-500 hover:bg-primary-600 text-white font-medium"
+                  >
+                    Keluar
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/masuk"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2 rounded-button bg-white text-primary-700 font-display font-semibold text-center"
+                >
+                  Masuk
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <Modal
+        title={<span className="text-h3 font-display text-neutral-900">Profil Pengguna</span>}
+        open={isProfileModalOpen}
+        onCancel={() => {
+          form.resetFields();
+          setIsProfileModalOpen(false);
+        }}
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={() => {
+                form.resetFields();
+                setIsProfileModalOpen(false);
+              }}
               disabled={updateProfileMutation.isPending}
+              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold disabled:opacity-60"
             >
               Batal
-            </Button>,
-            <Button
-              key="submit"
-              type="primary"
+            </button>
+            <button
               onClick={handleUpdateProfile}
-              className="update_btn"
               disabled={updateProfileMutation.isPending || isProfileLoading}
+              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm disabled:opacity-60"
             >
               {updateProfileMutation.isPending ? "Menyimpan..." : "Update"}
-            </Button>,
-          ]}
-        >
-          <Form form={form} layout="vertical" name="profile_form">
-            <Form.Item
-              label="Nama"
-              name="nama"
-              rules={[{ required: true, message: "Nama wajib diisi!" }]}
-            >
-              <Input disabled={isProfileLoading} />
-            </Form.Item>
-            <Form.Item
-              label="Password Baru"
-              name="password"
-              rules={[{ min: 8, message: "Password minimal 8 karakter!" }]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item
-              label="Konfirmasi Password"
-              name="password_confirmation"
-              rules={[
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Password tidak cocok!"));
-                  },
-                }),
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-          </Form>
-        </Modal>
-      </>
-    );
-  }
-
-  if (admin || posyandu || desa || kader || tenkes) {
-    return (
-      <Navbar style={navbarStyle} expand="lg">
-        <Container fluid="md">
-          <Navbar.Brand as={Link} to="/">
-            <h2 className="text-base md:text-xl text-white">
-              KMS Digital{" "}
-              <span className="text-[#b14444] font-bold">
-                {user?.user?.desa_name || ""}
-              </span>
-            </h2>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse
-            id="basic-navbar-nav"
-            className="justify-content-start"
-            style={{ backgroundColor: "#FFB4B4" }}
+            </button>
+          </div>
+        }
+      >
+        <Form form={form} layout="vertical" name="profile_form">
+          <Form.Item
+            label={<span className="text-caption text-neutral-700">Nama</span>}
+            name="nama"
+            rules={[{ required: true, message: "Nama wajib diisi" }]}
           >
-            {(desa || admin) && (
-              <Nav className="mx-auto align-items-center">
-                <Link
-                  to="/dashboard"
-                  style={
-                    activeLink === "/dashboard"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Home</h6>
-                </Link>
-                <Link
-                  to="/artikel"
-                  style={
-                    activeLink === "/artikel"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Input Data</h6>
-                </Link>
-                <Link
-                  to="/forum"
-                  style={
-                    activeLink === "/forum" ? activeNavLinkStyle : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Desa</h6>
-                </Link>
-              </Nav>
-            )}
-            {(posyandu || admin) && (
-              <Nav className="mx-auto align-items-center">
-                <Link
-                  to="/dashboard"
-                  style={
-                    activeLink === "/dashboard"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Home</h6>
-                </Link>
-                <Link
-                  to="/artikel"
-                  style={
-                    activeLink === "/artikel"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Input Data</h6>
-                </Link>
-                <Link
-                  to="/forum"
-                  style={
-                    activeLink === "/forum" ? activeNavLinkStyle : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Posyandu</h6>
-                </Link>
-              </Nav>
-            )}
-            {(kader || admin) && (
-              <Nav className="mx-auto align-items-center">
-                <Link
-                  to="/dashboard"
-                  style={
-                    activeLink === "/dashboard"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Home</h6>
-                </Link>
-                <Link
-                  to="/artikel"
-                  style={
-                    activeLink === "/artikel"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Register Akun</h6>
-                </Link>
-                <Link
-                  to="/forum"
-                  style={
-                    activeLink === "/forum" ? activeNavLinkStyle : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Kader Posyandu</h6>
-                </Link>
-              </Nav>
-            )}
-            {(tenkes || admin) && (
-              <Nav className="mx-auto align-items-center">
-                <Link
-                  to="/tenaga-kesehatan/dashboard"
-                  style={
-                    activeLink === "/tenaga-kesehatan/dashboard"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Home</h6>
-                </Link>
-                <Link
-                  to="/artikel"
-                  style={
-                    activeLink === "/artikel"
-                      ? activeNavLinkStyle
-                      : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Register Akun</h6>
-                </Link>
-                <Link
-                  to="/forum"
-                  style={
-                    activeLink === "/forum" ? activeNavLinkStyle : navLinkStyle
-                  }
-                >
-                  <h6 className="nav-link-text">Tenaga Kesehatan</h6>
-                </Link>
-              </Nav>
-            )}
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-    );
-  }
-
-  return <BasicNavbar />;
+            <Input disabled={isProfileLoading} className="h-11 text-base" />
+          </Form.Item>
+          <Form.Item
+            label={<span className="text-caption text-neutral-700">Kata Sandi Baru</span>}
+            name="password"
+            rules={[{ min: 8, message: "Minimal 8 karakter" }]}
+          >
+            <Input.Password className="h-11 text-base" />
+          </Form.Item>
+          <Form.Item
+            label={<span className="text-caption text-neutral-700">Konfirmasi Kata Sandi</span>}
+            name="password_confirmation"
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) return Promise.resolve();
+                  return Promise.reject(new Error("Kata sandi tidak cocok"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password className="h-11 text-base" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
 }
