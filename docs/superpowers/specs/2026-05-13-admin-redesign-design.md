@@ -64,9 +64,10 @@ product
 /admin/dashboard/tenaga-kesehatan      → RegisterTenagaKesehatan
 /admin/dashboard/artikel               → ArtikelList (BARU, split dari ArtikelAdmin)
 /admin/dashboard/artikel/baru          → ArtikelForm (BARU, split dari ArtikelAdmin)
-/admin/dashboard/artikel/:id/ubah      → ArtikelForm edit mode (via FormUpdateDataArtikel existing)
 /admin/dashboard/laporan               → LaporanAdmin (tetap placeholder, minor cleanup)
 ```
+
+**Catatan:** tidak ada route `/artikel/:id/ubah` terpisah. Edit artikel tetap pakai `FormUpdateDataArtikel` modal dari dalam `ArtikelList` (via row action "Ubah"). Alasan: form edit tidak sekompleks form create (tidak ada sub-flow "Tambah Kategori"), jadi modal cukup. Split page hanya untuk create — supaya form kategorinya tidak crowd dengan table.
 
 Role home ganti dari `/admin/dashboard/desa` → `/admin/dashboard`.
 
@@ -191,9 +192,9 @@ export function useAdminDashboardData() {
     queries: [
       { queryKey: qk.admin.list('desa'),     queryFn: () => desaApi.list(),     staleTime: 2 * 60 * 1000 },
       { queryKey: qk.admin.list('posyandu'), queryFn: () => posyanduApi.list(), staleTime: 2 * 60 * 1000 },
-      { queryKey: qk.admin.list('kader'),    queryFn: () => userApi.listByRole('KADER_POSYANDU'), staleTime: 2 * 60 * 1000 },
-      { queryKey: qk.admin.list('nakes'),    queryFn: () => userApi.listByRole('TENAGA_KESEHATAN'), staleTime: 2 * 60 * 1000 },
-      { queryKey: qk.admin.list('ortu'),     queryFn: () => userApi.listByRole('ORANG_TUA'), staleTime: 2 * 60 * 1000 },
+      { queryKey: qk.admin.list('kader'),    queryFn: () => kaderApi.list(),    staleTime: 2 * 60 * 1000 },
+      { queryKey: qk.admin.list('nakes'),    queryFn: () => nakesApi.list(),    staleTime: 2 * 60 * 1000 },
+      { queryKey: qk.admin.list('ortu'),     queryFn: () => ortuApi.list(),     staleTime: 2 * 60 * 1000 },
       { queryKey: qk.admin.list('artikel'),  queryFn: () => artikelApi.list(),  staleTime: 2 * 60 * 1000 },
     ],
     combine: (results) => {
@@ -219,10 +220,16 @@ export function useAdminDashboardData() {
 
 `mergeActivity` map tiap entity → unified shape `{id, type, title, timestamp, href, icon}`, filter 7 hari terakhir, sort desc, take top 10.
 
-Endpoint list user by role belum ada di API. Check: apakah `GET /api/auth/users?role=X` ada? Kalau tidak, gunakan:
-- Kader: `GET /api/posyandu/kader-posyandu` (sudah ada)
-- Nakes: `GET /api/posyandu/tenaga-kesehatan` (sudah ada)
-- Ortu: `GET /api/posyandu/orang-tua/list` (sudah ada)
+**Endpoint yang dipakai (semua sudah ada di backend):**
+
+- `desaApi.list()` → `GET /api/desa`
+- `posyanduApi.list()` → `GET /api/posyandu`
+- `kaderApi.list()` → `GET /api/posyandu/kader-posyandu` (existing, dipakai RegisterKaderPosyandu)
+- `nakesApi.list()` → `GET /api/posyandu/tenaga-kesehatan` (existing, dipakai RegisterTenagaKesehatan)
+- `ortuApi.list()` → `GET /api/posyandu/orang-tua/list` (existing, dipakai OrangTuaModal)
+- `artikelApi.list()` → `GET /api/artikel` (existing, dipakai ArtikelList)
+
+Tidak ada endpoint baru yang perlu backend add. Perlu extract ke api module terpisah (`kader.api.js`, `nakes.api.js`) karena saat ini inline di page-nya.
 
 ### 6. Sidebar Enhancement
 
