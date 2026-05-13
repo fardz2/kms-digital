@@ -91,6 +91,21 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] `npm test -- --watchAll=false` 63/63 pass
 - [ ] Legacy redirect semua masih jalan (`/sign-in`, `/dashboard`, `/kader-posyandu/dashboard`, dll)
 
+## Aesthetic Refresh (Plan 7)
+- [ ] Font Plus Jakarta Sans muncul di heading (Halo..., title halaman)
+- [ ] Font Inter muncul di body text
+- [ ] Brand pink tetap dominan, tidak berubah
+- [ ] Neutral gray tinted warm (bukan cool gray)
+- [ ] BalitaCard border color berbeda per status (merah perhatian / hijau sudah / netral belum)
+- [ ] Button hover lift + pink shadow glow (shadow-raised)
+- [ ] Slider BB/TB/LK track gradient pink, thumb bulat 28px bertactile
+- [ ] PosyanduHeader decorative blur circles visible
+- [ ] FilterChip rounded-full dengan count badge
+- [ ] StatusBadge soft pill (bg-bg + text-color pair)
+- [ ] Zero inline styles di file scope (kecuali dynamic value: width%, animationDelay, backgroundImage)
+- [ ] Tailwind arbitrary selector untuk slider thumb render correct di Chrome + Firefox
+- [ ] 64 tests pass, build success tanpa new warnings
+
 ## Mode Posyandu (Plan 6)
 - [ ] Login kader → langsung render `/kader/balita` sebagai ModePosyandu (bukan BerandaKader)
 - [ ] Header pink menampilkan "Halo [nama]", nama posyandu, bulan berjalan
