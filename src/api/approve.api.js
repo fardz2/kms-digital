@@ -16,3 +16,10 @@ export const approveApi = {
 
   rejectAnak: (id) => api.delete(`/api/posyandu/data-anak/${id}`),
 };
+
+export const orangTuaApi = {
+  list: () => api.get(`/api/posyandu/orang-tua/list?_=${Date.now()}`),
+  create: (payload) => api.post('/api/auth/orang-tua/register', payload),
+  update: (id, payload) => api.put(`/api/auth/users/${id}`, payload),
+  remove: (id) => api.delete(`/api/auth/users/${id}`),
+};

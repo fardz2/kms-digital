@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { CheckCheck, BarChart3, LogOut } from 'lucide-react';
+import { CheckCheck, BarChart3, LogOut, Users } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 export default function PosyanduHeader({
@@ -12,6 +12,7 @@ export default function PosyanduHeader({
   onApprove,
   onLaporan,
   onKeluar,
+  onKelolaOrangTua,
 }) {
   const bulanLabel = moment().format('MMMM YYYY');
   const persen = totalCount ? Math.round((sudahCount / totalCount) * 100) : 0;
@@ -47,6 +48,14 @@ export default function PosyanduHeader({
                 </span>
               </Button>
             )}
+            <Button
+              variant="default"
+              size="md"
+              leadingIcon={<Users size={18} strokeWidth={2} />}
+              onClick={onKelolaOrangTua}
+            >
+              Orang Tua
+            </Button>
             <Button
               variant="default"
               size="md"
