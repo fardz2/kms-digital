@@ -12,6 +12,7 @@ import {
   MapPin,
   Home,
   UserPlus,
+  Users,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import { readSession } from "../../features/auth/session-storage";
@@ -23,10 +24,26 @@ const BENEFITS = [
   'Konsultasi dengan tenaga kesehatan',
 ];
 
+const ROLES = [
+  {
+    value: 3,
+    label: 'Orang Tua',
+    desc: 'Pantau anak Anda',
+    Icon: Heart,
+  },
+  {
+    value: 4,
+    label: 'Kader Posyandu',
+    desc: 'Catat pengukuran rutin',
+    Icon: Users,
+  },
+];
+
 export default function SignUp() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [role, setRole] = useState(3);
+  const [form] = Form.useForm();
 
   const { isLoading: authLoading } = useQuery({
     queryKey: ["authCheck"],
@@ -187,29 +204,68 @@ export default function SignUp() {
               </div>
 
               <Form
+                form={form}
                 name="signup"
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
               >
-                <Form.Item
-                  label={
-                    <span className="text-body-sm font-semibold text-deep-slate">
-                      Peran
-                    </span>
-                  }
-                  name="role"
-                  initialValue={role}
-                  rules={[{ required: true, message: "Pilih peran" }]}
-                >
-                  <Select
-                    placeholder="Pilih peran"
-                    onChange={(value) => setRole(value)}
-                    className="h-[52px]"
+                <div className="mb-[21px]">
+                  <span className="block text-body-sm font-semibold text-deep-slate mb-[10px]">
+                    Saya mendaftar sebagai
+                  </span>
+                  <div
+                    role="tablist"
+                    aria-label="Pilih peran"
+                    className="grid grid-cols-2 gap-[8px] p-[6px] bg-polar-mist rounded-default"
                   >
-                    <Select.Option value={3}>Orang Tua</Select.Option>
-                    <Select.Option value={4}>Kader Posyandu</Select.Option>
-                  </Select>
+                    {ROLES.map(({ value, label, desc, Icon }) => {
+                      const active = role === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          onClick={() => {
+                            setRole(value);
+                            form.setFieldsValue({ role: value });
+                          }}
+                          className={`flex items-center gap-[13px] px-[17px] py-[13px] rounded-default text-left transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
+                            active
+                              ? 'bg-white text-deep-slate shadow-card'
+                              : 'bg-transparent text-graphite hover:text-deep-slate'
+                          }`}
+                        >
+                          <span
+                            className={`flex items-center justify-center w-[36px] h-[36px] rounded-full shrink-0 transition-colors ${
+                              active
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-white text-graphite'
+                            }`}
+                          >
+                            <Icon size={18} strokeWidth={2} />
+                          </span>
+                          <span className="flex flex-col leading-[1.2] min-w-0">
+                            <span
+                              className={`text-body-sm truncate ${
+                                active ? 'font-semibold' : 'font-medium'
+                              }`}
+                            >
+                              {label}
+                            </span>
+                            <span className="text-caption text-graphite mt-[2px] truncate">
+                              {desc}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Form.Item name="role" initialValue={role} hidden>
+                  <Input type="hidden" />
                 </Form.Item>
 
                 <Form.Item
