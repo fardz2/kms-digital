@@ -16,7 +16,7 @@ export default function DashboardLayout() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex">
+    <div className="min-h-screen bg-faint-fog flex">
       <Sidebar
         showSidebar={sidebarOpen}
         closeSidebar={() => setSidebarOpen(false)}
@@ -25,10 +25,10 @@ export default function DashboardLayout() {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed top-4 left-4 z-30 p-2.5 rounded-button bg-primary hover:bg-primary-600 text-white shadow-raised transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+          className="fixed top-4 left-4 z-30 p-[13px] rounded-default bg-white border border-light-ash text-deep-slate hover:bg-faint-fog transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
           aria-label="Buka sidebar"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
             <path d="M3 6h18M3 12h18M3 18h18" />
           </svg>
         </button>
@@ -36,10 +36,10 @@ export default function DashboardLayout() {
 
       <main
         className={`flex-1 min-w-0 transition-all duration-250 ease-out-quart ${
-          sidebarOpen ? "md:ml-72" : ""
+          sidebarOpen ? "md:ml-60" : ""
         }`}
       >
-        <div className="p-4 md:p-8">
+        <div className="p-4 md:p-[25px] max-w-page mx-auto">
           <Outlet />
         </div>
       </main>

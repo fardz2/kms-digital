@@ -1,5 +1,5 @@
 import React from "react";
-import { BiChevronRight } from "react-icons/bi";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function DropdownLink({
@@ -19,41 +19,43 @@ export default function DropdownLink({
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className={`flex items-center justify-between w-full px-3 py-2.5 rounded-button font-medium transition-colors ${
+        className={`flex items-center justify-between w-full h-[50px] px-[21px] rounded-default text-body-sm transition-colors duration-150 ease-out-quart ${
           isSectionActive
-            ? "bg-primary-50 text-primary-700"
-            : "text-neutral-700 hover:bg-neutral-100"
+            ? "bg-polar-mist text-deep-slate font-semibold"
+            : "text-deep-slate hover:bg-faint-fog"
         }`}
       >
         <span className="flex items-center gap-3">
-          {icon}
+          <span className={isSectionActive ? "text-primary-600" : "text-graphite"}>
+            {icon}
+          </span>
           {title}
         </span>
-        <BiChevronRight
+        <ChevronRight
           size={18}
-          className={`transition-transform duration-150 ${
+          className={`transition-transform duration-150 text-graphite ${
             isOpen ? "rotate-90" : ""
           }`}
         />
       </button>
 
       {isOpen && (
-        <ul className="ml-9 space-y-0.5">
+        <ul className="ml-[44px] space-y-0.5 border-l border-light-ash pl-[13px]">
           {dropdown.map((item) => {
             const isActive = pathname.includes(item.path);
             return (
               <li key={item.title}>
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-button text-sm transition-colors ${
+                  className={`flex items-center gap-3 px-[13px] py-2 rounded-default text-body-sm transition-colors ${
                     isActive
-                      ? "text-primary-700 font-semibold"
-                      : "text-neutral-600 hover:text-primary-700"
+                      ? "text-primary-600 font-semibold"
+                      : "text-graphite hover:text-deep-slate"
                   }`}
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      isActive ? "bg-primary" : "bg-neutral-300"
+                      isActive ? "bg-primary-500" : "bg-light-ash"
                     }`}
                   />
                   {item.title}

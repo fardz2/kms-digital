@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
-import { FiLogOut, FiLock, FiX } from "react-icons/fi";
+import { LogOut, Lock, X } from "lucide-react";
 import { Modal, Form, Input, message } from "antd";
 import {
   readSession,
@@ -77,32 +77,32 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
     <>
       {contextHolder}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-neutral-200 shadow-card transform transition-transform duration-250 ease-out-quart ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-light-ash transform transition-transform duration-250 ease-out-quart ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-          <div>
-            <div className="text-h3 font-display text-primary-700">
+        <div className="flex items-start justify-between px-[21px] py-[25px] border-b border-light-ash">
+          <div className="min-w-0">
+            <div className="text-heading font-semibold text-deep-slate truncate">
               KMS Digital
             </div>
-            <div className="text-caption text-neutral-500 mt-0.5">
+            <div className="text-caption text-graphite mt-1 truncate">
               {user?.user?.name ?? "Admin"}
             </div>
           </div>
           <button
             onClick={closeSidebar}
-            className="md:hidden p-2 rounded-button text-neutral-500 hover:bg-neutral-100"
+            className="md:hidden p-2 rounded-default text-graphite hover:bg-faint-fog transition-colors"
             aria-label="Tutup sidebar"
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
-        <nav className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-8rem)]">
+        <nav className="px-[13px] py-[21px] space-y-[25px] overflow-y-auto max-h-[calc(100vh-180px)]">
           {sidebarlink.map((section) => (
             <div key={section.title}>
-              <p className="text-overline text-neutral-500 px-3 mb-2">
+              <p className="text-overline text-graphite px-[13px] mb-[8px] uppercase">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -113,7 +113,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                         key={link.title}
                         pathname={pathname}
                         basepath={link.basepath}
-                        icon={<link.icon size={18} />}
+                        icon={<link.icon size={20} strokeWidth={1.75} />}
                         title={link.title}
                         dropdown={link.dropdown}
                       />
@@ -124,13 +124,17 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-button font-medium transition-colors ${
+                      className={`flex items-center gap-3 h-[50px] px-[13px] rounded-default text-body-sm transition-colors duration-150 ease-out-quart ${
                         isActive
-                          ? "bg-primary-50 text-primary-700"
-                          : "text-neutral-700 hover:bg-neutral-100"
+                          ? "bg-polar-mist text-deep-slate font-semibold"
+                          : "text-deep-slate hover:bg-faint-fog"
                       }`}
                     >
-                      <link.icon size={18} />
+                      <link.icon
+                        size={20}
+                        strokeWidth={1.75}
+                        className={isActive ? "text-primary-600" : "text-graphite"}
+                      />
                       {link.title}
                     </Link>
                   );
@@ -140,19 +144,19 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 inset-x-0 p-4 border-t border-neutral-200 bg-white space-y-1">
+        <div className="absolute bottom-0 inset-x-0 px-[13px] py-[17px] border-t border-light-ash bg-white space-y-1">
           <button
             onClick={() => setIsProfileModalOpen(true)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-button text-neutral-700 hover:bg-neutral-100 transition-colors w-full font-medium"
+            className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-deep-slate hover:bg-faint-fog transition-colors duration-150 ease-out-quart"
           >
-            <FiLock size={18} />
+            <Lock size={20} strokeWidth={1.75} className="text-graphite" />
             Ubah Kata Sandi
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-button text-danger hover:bg-danger-bg transition-colors w-full font-medium"
+            className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-danger hover:bg-danger/10 transition-colors duration-150 ease-out-quart"
           >
-            <FiLogOut size={18} />
+            <LogOut size={20} strokeWidth={1.75} />
             Keluar
           </button>
         </div>
@@ -160,7 +164,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
 
       <Modal
         title={
-          <span className="text-h3 font-display text-neutral-900">
+          <span className="text-heading font-semibold text-deep-slate">
             Profil Pengguna
           </span>
         }
@@ -170,19 +174,19 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
           setIsProfileModalOpen(false);
         }}
         footer={
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-[13px] justify-end">
             <button
               onClick={() => {
                 form.resetFields();
                 setIsProfileModalOpen(false);
               }}
-              className="px-5 py-2.5 rounded-button bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 font-display font-semibold"
+              className="px-[25px] py-[13px] rounded-button bg-white border border-light-ash text-deep-slate text-body-sm font-medium hover:bg-faint-fog transition-colors duration-150"
             >
               Batal
             </button>
             <button
               onClick={handleUpdateProfile}
-              className="px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm"
+              className="px-[25px] py-[13px] rounded-full bg-primary-500 hover:bg-primary-600 text-white text-body-sm font-medium transition-colors duration-150"
             >
               Simpan
             </button>
@@ -191,22 +195,22 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Nama</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Nama</span>}
             name="nama"
             rules={[{ required: true, message: "Nama wajib diisi" }]}
           >
-            <Input disabled className="h-11 text-base" />
+            <Input disabled className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-caption text-neutral-700">Kata Sandi Baru</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Kata Sandi Baru</span>}
             name="password"
             rules={[{ min: 8, message: "Minimal 8 karakter" }]}
           >
-            <Input.Password className="h-11 text-base" />
+            <Input.Password className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
             label={
-              <span className="text-caption text-neutral-700">
+              <span className="text-body-sm font-medium text-deep-slate">
                 Konfirmasi Kata Sandi
               </span>
             }
@@ -221,7 +225,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
               }),
             ]}
           >
-            <Input.Password className="h-11 text-base" />
+            <Input.Password className="h-[52px] text-base" />
           </Form.Item>
         </Form>
       </Modal>
