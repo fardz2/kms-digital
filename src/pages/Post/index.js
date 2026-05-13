@@ -3,7 +3,9 @@ import moment from "moment";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { MessageCircle, Plus, ArrowRight } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
+import Button from "../../components/ui/Button";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
 import useAuth from "../../hook/useAuth";
@@ -52,41 +54,43 @@ export default function Post() {
   }));
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-faint-fog">
       {contextHolder}
       <Navbar isLogin />
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-        <header className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
+        <header className="flex items-center justify-between gap-[17px] flex-wrap">
           <div>
-            <h1 className="text-h1 font-display text-neutral-900">
+            <h1 className="text-heading-lg font-bold text-deep-slate">
               Forum Tanya Jawab
             </h1>
-            <p className="text-caption text-neutral-500 mt-1">
-              Tanya tenaga kesehatan tentang perkembangan anak Anda
+            <p className="text-body-sm text-graphite mt-1">
+              Tanyakan kepada tenaga kesehatan tentang perkembangan anak Anda.
             </p>
           </div>
           {user?.user?.role === "ORANG_TUA" && (
-            <button
+            <Button
+              variant="primary"
+              size="md"
+              leadingIcon={<Plus size={20} strokeWidth={1.75} />}
               onClick={() => setIsOpenModalInputPost(true)}
-              className="inline-flex items-center gap-2 px-5 py-3 min-h-tap rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-raised active:scale-[0.98] transition-all duration-150 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
             >
-              + Tulis Pertanyaan
-            </button>
+              Tulis Pertanyaan
+            </Button>
           )}
         </header>
 
         {postsLoading && (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-[50px]">
             <Spin size="large" />
           </div>
         )}
 
         {!postsLoading && (!posts || posts.length === 0) && (
-          <div className="bg-white border border-neutral-200 rounded-card py-12 text-center">
+          <div className="bg-white border border-light-ash rounded-default py-[50px] text-center">
             <Empty
               description={
-                <span className="text-base text-neutral-600">
+                <span className="text-body-sm text-graphite">
                   Belum ada pertanyaan
                 </span>
               }
@@ -94,28 +98,28 @@ export default function Post() {
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-[17px]">
           {(posts ?? []).map((item) => (
             <article
               key={item.id}
-              className="bg-white border border-neutral-200 rounded-card p-5 transition-all duration-200 ease-out-quart hover:border-primary-200 hover:shadow-card"
+              className="bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart hover:border-graphite/30"
             >
-              <div className="flex items-start gap-3 mb-3">
+              <div className="flex items-start gap-[13px] mb-[17px]">
                 <img
                   src={avatar}
                   alt=""
-                  className="w-10 h-10 rounded-full bg-neutral-100"
+                  className="w-10 h-10 rounded-full bg-polar-mist"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-caption font-semibold text-neutral-900">
+                  <p className="text-body-sm font-semibold text-deep-slate">
                     {item.description}
                   </p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-caption text-graphite">
                     <span
                       className={`font-medium ${
                         item.role === "ORANG_TUA"
-                          ? "text-primary-700"
-                          : "text-accent"
+                          ? "text-primary-600"
+                          : "text-deep-slate"
                       }`}
                     >
                       {item.role === "ORANG_TUA"
@@ -128,34 +132,39 @@ export default function Post() {
                 </div>
               </div>
 
-              <h3 className="text-h3 font-display text-neutral-900 mb-3">
-                <Link to={item.href} className="hover:text-primary-700 transition-colors">
+              <h3 className="text-heading font-semibold text-deep-slate mb-[13px]">
+                <Link
+                  to={item.href}
+                  className="hover:text-primary-600 transition-colors"
+                >
                   {item.title}
                 </Link>
               </h3>
 
               <Link
                 to={item.href}
-                className="inline-flex items-center gap-1.5 text-caption font-semibold text-primary-700 hover:text-primary-800 transition-colors"
+                className="inline-flex items-center gap-[6px] text-body-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
               >
-                💬 Jawab pertanyaan →
+                <MessageCircle size={16} strokeWidth={1.75} />
+                Jawab pertanyaan
+                <ArrowRight size={16} strokeWidth={1.75} />
               </Link>
 
               {item.jawaban.length > 0 && (
-                <div className="mt-4 p-4 bg-primary-50 rounded-button space-y-2">
-                  <p className="text-caption font-semibold text-neutral-900">
-                    Jawaban:
+                <div className="mt-[17px] p-[17px] bg-polar-mist rounded-default space-y-[13px]">
+                  <p className="text-caption font-semibold uppercase tracking-wider text-deep-slate">
+                    Jawaban
                   </p>
                   {item.jawaban.map((j, idx) => (
                     <div
                       key={idx}
-                      className="pb-2 border-b border-primary-100 last:border-0 last:pb-0"
+                      className="pb-[13px] border-b border-light-ash last:border-0 last:pb-0"
                     >
-                      <p className="text-base text-neutral-700">
+                      <p className="text-body-sm text-deep-slate">
                         <strong className="font-semibold">{j.nama}</strong>:{" "}
                         {j.content}
                       </p>
-                      <p className="text-xs text-neutral-500 mt-0.5 tabular-nums">
+                      <p className="text-caption text-graphite mt-1 tabular-nums">
                         {moment(j.waktu).format("DD MMM YYYY HH:mm")}
                       </p>
                     </div>

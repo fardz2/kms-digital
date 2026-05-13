@@ -3,7 +3,9 @@ import axios from "axios";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Send } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
+import Button from "../../components/ui/Button";
 import avatar from "../../assets/icon/user.png";
 import { readSession } from "../../features/auth/session-storage";
 
@@ -59,42 +61,43 @@ export default function DetailForum() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-faint-fog">
       {contextHolder}
       <Navbar isLogin />
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1 text-caption text-neutral-600 hover:text-primary-700 font-medium transition-colors"
+          className="inline-flex items-center gap-2 text-body-sm font-medium text-graphite hover:text-deep-slate transition-colors"
         >
-          ← Kembali ke forum
+          <ArrowLeft size={16} strokeWidth={1.75} />
+          Kembali ke forum
         </button>
 
         {isLoading && (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-[50px]">
             <Spin size="large" />
           </div>
         )}
 
         {!isLoading && detailPost?.title && (
-          <article className="bg-white border border-neutral-200 rounded-card p-6 shadow-card">
-            <div className="flex items-start gap-3 mb-4">
+          <article className="bg-white border border-light-ash rounded-default p-[25px]">
+            <div className="flex items-start gap-[13px] mb-[17px]">
               <img
                 src={avatar}
                 alt=""
-                className="w-10 h-10 rounded-full bg-neutral-100"
+                className="w-10 h-10 rounded-full bg-polar-mist"
               />
               <div className="flex-1">
-                <p className="text-caption font-semibold text-neutral-900">
+                <p className="text-body-sm font-semibold text-deep-slate">
                   {detailPost.nama}
                 </p>
-                <p className="text-xs text-neutral-500">
+                <p className="text-caption text-graphite">
                   <span
                     className={`font-medium ${
                       detailPost.role === "ORANG_TUA"
-                        ? "text-primary-700"
-                        : "text-accent"
+                        ? "text-primary-600"
+                        : "text-deep-slate"
                     }`}
                   >
                     {detailPost.role === "ORANG_TUA"
@@ -108,75 +111,77 @@ export default function DetailForum() {
                 </p>
               </div>
             </div>
-            <h1 className="text-h2 font-display text-neutral-900 mb-3">
+            <h1 className="text-heading font-semibold text-deep-slate mb-[13px]">
               {detailPost.title}
             </h1>
-            <p className="text-base text-neutral-700 whitespace-pre-wrap">
+            <p className="text-base text-deep-slate whitespace-pre-wrap">
               {detailPost.content}
             </p>
           </article>
         )}
 
-        <section className="bg-white border border-neutral-200 rounded-card p-5">
-          <h2 className="text-h3 font-display text-neutral-900 mb-3">
+        <section className="bg-white border border-light-ash rounded-default p-[25px]">
+          <h2 className="text-heading-sm font-semibold text-deep-slate mb-[13px]">
             Tulis komentar
           </h2>
           <Form form={form} onFinish={onFinish} layout="vertical">
             <Form.Item
               name="comment"
               rules={[{ required: true, message: "Komentar masih kosong" }]}
-              className="!mb-3"
+              className="!mb-[13px]"
             >
               <Input.TextArea
-                rows={3}
+                rows={4}
                 placeholder="Bagikan jawaban atau tanggapan..."
                 className="text-base"
               />
             </Form.Item>
-            <button
+            <Button
+              variant="primary"
+              size="md"
               type="submit"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-button bg-primary hover:bg-primary-600 text-white font-display font-semibold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+              leadingIcon={<Send size={16} strokeWidth={1.75} />}
             >
               Kirim
-            </button>
+            </Button>
           </Form>
         </section>
 
-        <section className="space-y-3">
-          <h2 className="text-overline text-neutral-600">
+        <section className="space-y-[17px]">
+          <h2 className="text-overline text-graphite">
             Komentar ({comment.length})
           </h2>
           {comment.length === 0 ? (
-            <div className="text-center py-6 text-neutral-500 bg-white border border-neutral-200 rounded-card">
+            <div className="text-center py-[25px] text-body-sm text-graphite bg-white border border-light-ash rounded-default">
               Belum ada komentar
             </div>
           ) : (
             comment.map((item) => (
               <article
                 key={item.comment_id || item.time}
-                className="bg-white border border-neutral-200 rounded-card p-4"
+                className="bg-white border border-light-ash rounded-default p-[17px]"
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-[13px]">
                   <img
                     src={avatar}
                     alt=""
-                    className="w-9 h-9 rounded-full bg-neutral-100"
+                    className="w-9 h-9 rounded-full bg-polar-mist"
                   />
                   <div className="flex-1">
                     <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                      <p className="text-caption font-semibold text-neutral-900">
+                      <p className="text-body-sm font-semibold text-deep-slate">
                         {item.nama}
                       </p>
-                      <p className="text-xs text-neutral-500 tabular-nums">
+                      <p className="text-caption text-graphite tabular-nums">
                         {moment(item.time).format("DD MMM YYYY HH:mm")}
                       </p>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-0.5">
+                    <p className="text-caption text-graphite mt-1">
                       <span
                         className={`font-medium ${
                           item.role === "ORANG_TUA"
-                            ? "text-primary-700"
-                            : "text-accent"
+                            ? "text-primary-600"
+                            : "text-deep-slate"
                         }`}
                       >
                         {item.role === "ORANG_TUA"
@@ -184,7 +189,7 @@ export default function DetailForum() {
                           : "Tenaga Kesehatan"}
                       </span>
                     </p>
-                    <p className="mt-2 text-base text-neutral-700 whitespace-pre-wrap">
+                    <p className="mt-[13px] text-base text-deep-slate whitespace-pre-wrap">
                       {item.content}
                     </p>
                   </div>
