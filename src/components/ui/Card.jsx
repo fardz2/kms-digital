@@ -9,9 +9,9 @@ export default function Card({
 }) {
   const interactive = !!onClick;
   const base =
-    'bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart';
+    'bg-white border border-light-ash rounded-default p-[25px] shadow-card transition-all duration-150 ease-out-quart';
   const interactiveClasses = interactive
-    ? 'cursor-pointer hover:border-graphite/30 focus-within:ring-1 focus-within:ring-primary-500'
+    ? 'cursor-pointer hover:border-primary-300 hover:shadow-raised hover:-translate-y-[1px] focus-within:ring-1 focus-within:ring-primary-500'
     : '';
 
   return (

@@ -83,7 +83,10 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       >
         <div className="flex items-start justify-between px-[21px] py-[25px] border-b border-light-ash">
           <div className="min-w-0">
-            <div className="text-heading font-semibold text-deep-slate truncate">
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-1">
+              Posyandu
+            </p>
+            <div className="text-heading-lg font-bold text-deep-slate truncate leading-[1.1]">
               KMS Digital
             </div>
             <div className="text-caption text-graphite mt-1 truncate">
@@ -102,7 +105,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
         <nav className="px-[13px] py-[21px] space-y-[25px] overflow-y-auto max-h-[calc(100vh-180px)]">
           {sidebarlink.map((section) => (
             <div key={section.title}>
-              <p className="text-overline text-graphite px-[13px] mb-[8px] uppercase">
+              <p className="text-caption font-bold text-graphite px-[13px] mb-[8px] uppercase tracking-[0.12em]">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -126,13 +129,13 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                       to={link.path}
                       className={`flex items-center gap-3 h-[50px] px-[13px] rounded-default text-body-sm transition-colors duration-150 ease-out-quart ${
                         isActive
-                          ? "bg-polar-mist text-deep-slate font-semibold"
-                          : "text-deep-slate hover:bg-faint-fog"
+                          ? "bg-primary-50 text-primary-700 font-bold"
+                          : "text-deep-slate font-medium hover:bg-faint-fog"
                       }`}
                     >
                       <link.icon
                         size={20}
-                        strokeWidth={1.75}
+                        strokeWidth={isActive ? 2.25 : 1.75}
                         className={isActive ? "text-primary-600" : "text-graphite"}
                       />
                       {link.title}

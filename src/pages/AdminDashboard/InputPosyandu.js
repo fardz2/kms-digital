@@ -216,19 +216,22 @@ export default function InputPosyandu() {
   return (
     <div className="space-y-[25px]">
       {contextHolder}
-      <div className="flex items-center justify-between gap-[17px] flex-wrap">
-        <div>
-          <h1 className="text-heading-lg font-bold text-deep-slate">
+      <div className="flex items-start justify-between gap-[25px] flex-wrap">
+        <div className="min-w-0 flex-1">
+          <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
+            Data Master
+          </p>
+          <h1 className="text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
             Kelola Posyandu
           </h1>
-          <p className="text-body-sm text-graphite mt-1">
+          <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
             Daftar posyandu yang terdaftar di setiap desa.
           </p>
         </div>
         <Button
           variant="primary"
-          size="md"
-          leadingIcon={<Plus size={20} strokeWidth={1.75} />}
+          size="lg"
+          leadingIcon={<Plus size={20} strokeWidth={2} />}
           onClick={showModal}
           disabled={isBusy}
         >
@@ -236,7 +239,7 @@ export default function InputPosyandu() {
         </Button>
       </div>
 
-      <div className="bg-white border border-light-ash rounded-default p-[25px]">
+      <div className="bg-white border border-light-ash rounded-default p-[25px] shadow-card">
         <DataTable
           columns={columns}
           data={dataSource || []}

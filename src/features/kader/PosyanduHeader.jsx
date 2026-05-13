@@ -18,18 +18,18 @@ export default function PosyanduHeader({
 
   return (
     <header className="bg-white border-b border-light-ash">
-      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[25px] md:py-[33px]">
-        <div className="flex items-start justify-between gap-[17px] flex-wrap mb-[25px]">
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] md:py-[50px]">
+        <div className="flex items-start justify-between gap-[17px] flex-wrap mb-[33px]">
           <div className="min-w-0 flex-1">
-            <p className="text-overline text-graphite uppercase mb-1">
-              {bulanLabel}
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
+              Posyandu · {bulanLabel}
             </p>
-            <h1 className="text-heading-lg font-bold text-deep-slate truncate">
+            <h1 className="text-display font-bold text-deep-slate truncate leading-[1.05] tracking-tight">
               Halo, {userName ?? 'Kader'}
             </h1>
             {posyanduName && (
-              <p className="text-body-sm text-graphite mt-1">
-                Posyandu {posyanduName}
+              <p className="text-body-lg text-graphite mt-[13px]">
+                {posyanduName}
               </p>
             )}
           </div>
@@ -37,28 +37,28 @@ export default function PosyanduHeader({
             {pendingCount > 0 && (
               <Button
                 variant="default"
-                size="sm"
-                leadingIcon={<CheckCheck size={16} strokeWidth={1.75} />}
+                size="md"
+                leadingIcon={<CheckCheck size={18} strokeWidth={2} />}
                 onClick={onApprove}
               >
                 Setujui
-                <span className="ml-[6px] px-[8px] py-[1px] bg-primary-100 text-primary-700 rounded-full text-caption font-semibold tabular-nums">
+                <span className="ml-[6px] px-[8px] py-[1px] bg-primary-500 text-white rounded-full text-caption font-bold tabular-nums">
                   {pendingCount}
                 </span>
               </Button>
             )}
             <Button
               variant="default"
-              size="sm"
-              leadingIcon={<BarChart3 size={16} strokeWidth={1.75} />}
+              size="md"
+              leadingIcon={<BarChart3 size={18} strokeWidth={2} />}
               onClick={onLaporan}
             >
               Laporan
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              leadingIcon={<LogOut size={16} strokeWidth={1.75} />}
+              size="md"
+              leadingIcon={<LogOut size={18} strokeWidth={2} />}
               onClick={onKeluar}
             >
               Keluar
@@ -66,31 +66,37 @@ export default function PosyanduHeader({
           </div>
         </div>
 
-        <div className="flex items-baseline gap-[17px] flex-wrap mb-[13px]">
-          <div className="flex items-baseline gap-[13px]">
-            <span className="text-display font-bold text-deep-slate tabular-nums leading-none">
-              {sudahCount}
-            </span>
-            <span className="text-body-sm text-graphite">
-              dari <span className="font-semibold text-deep-slate">{totalCount}</span> balita sudah diukur bulan ini
-            </span>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-[25px] items-end">
+          <div className="space-y-[8px]">
+            <div className="flex items-baseline gap-[13px]">
+              <span className="text-display-lg font-bold text-deep-slate tabular-nums leading-none">
+                {sudahCount}
+              </span>
+              <span className="text-body-lg text-graphite">
+                dari <span className="font-bold text-deep-slate">{totalCount}</span> balita sudah diukur
+              </span>
+            </div>
+            <div
+              className="h-[8px] bg-polar-mist rounded-full overflow-hidden"
+              role="progressbar"
+              aria-valuenow={persen}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="h-full bg-primary-500 rounded-full transition-[width] duration-400 ease-out-quart"
+                style={{ width: `${persen}%` }}
+              />
+            </div>
           </div>
-          <span className="ml-auto text-heading font-bold text-primary-600 tabular-nums">
-            {persen}%
-          </span>
-        </div>
-
-        <div
-          className="h-[6px] bg-polar-mist rounded-full overflow-hidden"
-          role="progressbar"
-          aria-valuenow={persen}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <div
-            className="h-full bg-primary-500 rounded-full transition-[width] duration-400 ease-out-quart"
-            style={{ width: `${persen}%` }}
-          />
+          <div className="text-right">
+            <div className="text-display font-bold text-primary-600 tabular-nums leading-none">
+              {persen}%
+            </div>
+            <div className="text-caption font-bold uppercase tracking-[0.12em] text-graphite mt-[8px]">
+              Cakupan bulan ini
+            </div>
+          </div>
         </div>
       </div>
     </header>

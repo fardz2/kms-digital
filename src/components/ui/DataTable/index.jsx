@@ -74,11 +74,11 @@ export default function DataTable({
       )}
 
       <div className="overflow-x-auto">
-        <div className="rounded-default border border-light-ash bg-white overflow-hidden">
+        <div className="rounded-default border border-light-ash bg-white shadow-card overflow-hidden">
           <table className="w-full">
-            <thead className="bg-polar-mist">
+            <thead className="bg-gradient-to-b from-polar-mist to-polar-mist/60 border-b-2 border-primary-500">
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-light-ash">
+                <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <DataTableColumnHeader key={header.id} header={header} />
                   ))}
@@ -90,7 +90,7 @@ export default function DataTable({
                 Array.from({ length: 3 }).map((_, i) => (
                   <tr key={`skeleton-${i}`} className="border-b border-light-ash animate-pulse">
                     {visibleColumns.map((col) => (
-                      <td key={col.id} className="px-[17px] py-[13px]">
+                      <td key={col.id} className="px-[17px] py-[17px]">
                         <div className="h-4 bg-polar-mist rounded-default w-3/4" />
                       </td>
                     ))}
@@ -99,7 +99,7 @@ export default function DataTable({
               ) : rows.length === 0 ? (
                 <tr>
                   <td
-                    className="text-center py-[50px] text-body-sm text-graphite"
+                    className="text-center py-[67px] text-body-sm text-graphite"
                     colSpan={visibleColumns.length}
                   >
                     {emptyText}
@@ -109,12 +109,12 @@ export default function DataTable({
                 rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b border-light-ash last:border-b-0 hover:bg-faint-fog transition-colors duration-150"
+                    className="border-b border-light-ash last:border-b-0 hover:bg-primary-50/40 transition-colors duration-150"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-[17px] py-[13px] whitespace-nowrap text-body-sm text-deep-slate"
+                        className="px-[17px] py-[17px] whitespace-nowrap text-body-sm text-deep-slate"
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
