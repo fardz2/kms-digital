@@ -69,8 +69,8 @@ Tidak ada file `.test.jsx` untuk komponen ini di iterasi ini (project belum puny
   pageSizeOptions={[5,10,20,50]}
   rowKey="id"                   // string key accessor for row id (default: row index)
   searchPlaceholder="Cari data..."
-  toolbar={null}                // optional ReactNode, replaces default toolbar
-  title={null}                  // optional ReactNode rendered left of toolbar
+  toolbar={null}                // optional ReactNode, replaces entire default toolbar (including title slot)
+  title={null}                  // optional ReactNode rendered left of default toolbar; ignored if `toolbar` is provided
 />
 ```
 
