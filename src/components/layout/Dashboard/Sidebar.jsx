@@ -100,7 +100,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       {contextHolder}
       <aside
         className={
-          "fixed inset-y-0 left-0 z-40 bg-white border-r border-light-ash transform transition-all duration-250 ease-out-quart " +
+          "fixed inset-y-0 left-0 z-40 bg-white shadow-panel transform transition-all duration-250 ease-out-quart " +
           width +
           " " +
           (showSidebar ? "translate-x-0" : "-translate-x-full")

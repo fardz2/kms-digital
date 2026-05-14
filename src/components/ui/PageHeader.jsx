@@ -13,12 +13,16 @@ export default function PageHeader({
   const showSubtitleBelow = Boolean(eyebrow && subtitle);
 
   return (
-    <header className="bg-white border-b border-light-ash">
-      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] md:py-[50px]">
+    <header className="relative">
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] pt-[33px] md:pt-[50px] pb-[25px]">
         <div className="flex items-start justify-between gap-[17px] flex-wrap">
           <div className="min-w-0 flex-1">
             {topLine && (
-              <p className="text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[13px]">
+              <p className="inline-flex items-center gap-[10px] text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[13px]">
+                <span
+                  aria-hidden
+                  className="inline-block w-[6px] h-[6px] rounded-pill bg-primary-500 shadow-[0_0_0_4px_rgba(255,112,112,0.15)]"
+                />
                 {topLine}
               </p>
             )}
@@ -41,7 +45,7 @@ export default function PageHeader({
           )}
         </div>
         {stats && (
-          <div className="mt-[25px] pt-[21px] border-t border-light-ash">
+          <div className="mt-[25px] pt-[21px] border-t border-light-ash/60">
             {stats}
           </div>
         )}
