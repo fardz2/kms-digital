@@ -94,12 +94,12 @@ function mergeActivity(results, days = 7, limit = 10) {
 export function useAdminDashboardData() {
   return useQueries({
     queries: [
-      { queryKey: qk.admin.list('desa'),     queryFn: () => desaApi.list(),     staleTime: STALE },
-      { queryKey: qk.admin.list('posyandu'), queryFn: () => posyanduApi.list(), staleTime: STALE },
-      { queryKey: qk.admin.list('kader'),    queryFn: () => kaderApi.list(),    staleTime: STALE },
-      { queryKey: qk.admin.list('nakes'),    queryFn: () => nakesApi.list(),    staleTime: STALE },
-      { queryKey: qk.admin.list('ortu'),     queryFn: () => ortuApi.list(),     staleTime: STALE },
-      { queryKey: qk.admin.list('artikel'),  queryFn: () => artikelApi.list(),  staleTime: STALE },
+      { queryKey: qk.admin.list('desa'),     queryFn: async () => (await desaApi.list())?.data     ?? [], staleTime: STALE },
+      { queryKey: qk.admin.list('posyandu'), queryFn: async () => (await posyanduApi.list())?.data ?? [], staleTime: STALE },
+      { queryKey: qk.admin.list('kader'),    queryFn: async () => (await kaderApi.list())?.data    ?? [], staleTime: STALE },
+      { queryKey: qk.admin.list('nakes'),    queryFn: async () => (await nakesApi.list())?.data    ?? [], staleTime: STALE },
+      { queryKey: qk.admin.list('ortu'),     queryFn: async () => (await ortuApi.list())?.data     ?? [], staleTime: STALE },
+      { queryKey: qk.admin.list('artikel'),  queryFn: async () => (await artikelApi.list())?.data  ?? [], staleTime: STALE },
     ],
     combine: (results) => ({
       isLoading: results.every((r) => r.isLoading),
