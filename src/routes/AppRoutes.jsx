@@ -26,6 +26,7 @@ import DesaPage from '../pages/Admin/Desa/DesaPage';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
 import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu';
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
+import RegisterOrangTua from '../pages/AdminDashboard/RegisterOrangTua';
 import ArtikelList from '../pages/AdminDashboard/ArtikelList';
 import ArtikelForm from '../pages/AdminDashboard/ArtikelForm';
 import AdminDashboard from '../features/admin/AdminDashboard';
@@ -73,6 +74,7 @@ export default function AppRoutes() {
           <Route path="posyandu" element={<InputPosyandu />} />
           <Route path="kader-posyandu" element={<RegisterKaderPosyandu />} />
           <Route path="tenaga-kesehatan" element={<RegisterTenkes />} />
+          <Route path="orang-tua" element={<RegisterOrangTua />} />
           <Route path="artikel" element={<ArtikelList />} />
           <Route path="artikel/baru" element={<ArtikelForm />} />
           <Route path="laporan" element={<LaporanAdmin />} />
