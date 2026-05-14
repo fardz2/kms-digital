@@ -2,9 +2,12 @@ import { Form, Input, message, Select, Modal } from "antd";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import useAuth from "../../hook/useAuth";
+import { isThisMonth } from "../../utilities/isThisMonth";
 
 const normalizeStatus = (status) => {
   if (typeof status === "string") return status === "true" || status === "1";
@@ -212,6 +215,26 @@ export default function RegisterKaderPosyandu() {
     setIsModalVisible(true);
   };
 
+  const rows = kaderData ?? [];
+  const stats = [
+    { label: "Total Kader", value: rows.length },
+    {
+      label: "Disetujui",
+      value: rows.filter((r) => normalizeStatus(r.status)).length,
+      accent: "success",
+    },
+    {
+      label: "Menunggu",
+      value: rows.filter((r) => !normalizeStatus(r.status)).length,
+      accent: "warning",
+    },
+    {
+      label: "Baru Bulan Ini",
+      value: rows.filter((r) => isThisMonth(r.created_at)).length,
+      accent: "primary",
+    },
+  ];
+
   const columns = [
     { accessorKey: "nama", header: "Nama", enableSorting: true },
     { accessorKey: "email", header: "Email", enableSorting: true },
@@ -241,7 +264,7 @@ export default function RegisterKaderPosyandu() {
                 : "bg-polar-mist text-graphite"
             }`}
           >
-            {approved ? "Approve" : "Belum di Approve"}
+            {approved ? "Disetujui" : "Menunggu"}
           </span>
         );
       },
@@ -299,72 +322,69 @@ export default function RegisterKaderPosyandu() {
   };
 
   const filteredKaderData = useMemo(() => {
-    let rows = kaderData || [];
+    let data = rows;
     if (statusFilter !== null) {
-      rows = rows.filter((r) => normalizeStatus(r.status) === statusFilter);
+      data = data.filter((r) => normalizeStatus(r.status) === statusFilter);
     }
-    return rows;
-  }, [kaderData, statusFilter]);
+    return data;
+  }, [rows, statusFilter]);
 
   return (
-    <div className="space-y-[25px]">
+    <div>
       {contextHolder}
-      <div className="flex items-start justify-between gap-[25px] flex-wrap">
-        <div className="min-w-0 flex-1">
-          <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
-            Akun Pengguna
-          </p>
-          <h1 className="text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
-            Kelola Kader Posyandu
-          </h1>
-          <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
-            Daftar kader yang membantu operasional posyandu di desa.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="lg"
-          leadingIcon={<Plus size={20} strokeWidth={2} />}
-          onClick={showModal}
-          disabled={isBusy}
-        >
-          Tambah Kader Posyandu
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Akun Pengguna"
+        title="Kelola Kader Posyandu"
+        subtitle="Daftar kader yang membantu operasional posyandu di desa."
+        action={
+          <Button
+            variant="primary"
+            size="lg"
+            leadingIcon={<Plus size={20} strokeWidth={2} />}
+            onClick={showModal}
+            disabled={isBusy}
+          >
+            Tambah Kader Posyandu
+          </Button>
+        }
+        stats={<InlineStatBar items={stats} loading={kaderLoading} />}
+      />
 
-      <div className="bg-white border border-light-ash rounded-default p-[25px] shadow-card space-y-[17px]">
-        <div className="flex items-center justify-between gap-[17px] flex-wrap">
-          <h2 className="text-heading font-semibold text-deep-slate">
-            Daftar Kader Posyandu
-          </h2>
-          <div className="flex items-center gap-[8px] flex-wrap">
-            <select
-              value={statusFilter === null ? "" : String(statusFilter)}
-              onChange={(e) => {
-                const v = e.target.value;
-                setStatusFilter(v === "" ? null : v === "true");
-              }}
-              disabled={isBusy}
-              className="h-[44px] rounded-default border border-light-ash bg-white px-[13px] text-body-sm text-deep-slate focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors"
-            >
-              <option value="">Semua Status</option>
-              <option value="true">Approve</option>
-              <option value="false">Belum di Approve</option>
-            </select>
-            <Button variant="ghost" size="sm" onClick={resetFilters} disabled={isBusy}>
-              Reset
-            </Button>
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
+        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
+          <div className="flex items-center justify-between gap-[17px] flex-wrap">
+            <h2 className="text-heading font-semibold text-deep-slate">
+              Daftar Kader Posyandu
+            </h2>
+            <div className="flex items-center gap-[8px] flex-wrap">
+              <select
+                value={statusFilter === null ? "" : String(statusFilter)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setStatusFilter(v === "" ? null : v === "true");
+                }}
+                disabled={isBusy}
+                className="h-[44px] rounded-default border border-light-ash bg-white px-[13px] text-body-sm text-deep-slate focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors"
+              >
+                <option value="">Semua Status</option>
+                <option value="true">Disetujui</option>
+                <option value="false">Menunggu</option>
+              </select>
+              <Button variant="ghost" size="sm" onClick={resetFilters} disabled={isBusy}>
+                Reset
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <DataTable
-          columns={columns}
-          data={filteredKaderData}
-          loading={kaderLoading || isBusy}
-          rowKey="id"
-          searchPlaceholder="Cari kader..."
-          emptyText="Tidak ada data Kader Posyandu"
-        />
+          <DataTable
+            columns={columns}
+            data={filteredKaderData}
+            loading={kaderLoading || isBusy}
+            rowKey="id"
+            searchPlaceholder="Cari kader..."
+            emptyText="Belum ada kader posyandu terdaftar"
+          />
+        </div>
       </div>
 
       <Modal
@@ -495,8 +515,8 @@ export default function RegisterKaderPosyandu() {
             rules={[{ required: true, message: "Status masih kosong" }]}
           >
             <Select placeholder="Pilih Status" className="h-[52px]">
-              <Select.Option value={true}>Approve</Select.Option>
-              <Select.Option value={false}>Belum di Approve</Select.Option>
+              <Select.Option value={true}>Disetujui</Select.Option>
+              <Select.Option value={false}>Menunggu</Select.Option>
             </Select>
           </Form.Item>
 
@@ -515,7 +535,9 @@ export default function RegisterKaderPosyandu() {
               type="submit"
               disabled={createKaderMutation.isPending || updateKaderMutation.isPending}
             >
-              Simpan
+              {createKaderMutation.isPending || updateKaderMutation.isPending
+                ? "Menyimpan..."
+                : "Simpan"}
             </Button>
           </div>
         </Form>

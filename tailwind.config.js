@@ -16,7 +16,7 @@ module.exports = {
           DEFAULT: '#FF7070',
         },
         'cloud-white': '#ffffff',
-        'faint-fog':   '#f9f9fb',
+        'faint-fog':   '#FBF7F7',
         'canvas-warm': '#FBF7F7',
         'canvas-veil': '#F5EFEF',
         'polar-mist':  '#eff0f6',
