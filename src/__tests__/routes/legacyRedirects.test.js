@@ -61,4 +61,21 @@ describe('legacy redirects', () => {
     expect(map['/desa/acara']).toEqual('/desa/beranda#acara');
     expect(map['/tenkes/beranda']).toEqual('/tenkes/forum');
   });
+
+  test('my-forum and desa reminder skip intermediate redirects', () => {
+    const map = Object.fromEntries(LEGACY_REDIRECTS.map((r) => [r.from, r.to]));
+    expect(map['/my-forum']).toEqual('/orangtua/forum?tab=saya');
+    expect(map['/desa/reminder']).toEqual('/desa/beranda#acara');
+  });
+
+  test('no redirect target points at another redirect source (no chains)', () => {
+    const sources = new Set(LEGACY_REDIRECTS.map((r) => r.from));
+    const violators = LEGACY_REDIRECTS
+      .filter((r) => {
+        const basePath = r.to.split('?')[0].split('#')[0];
+        return sources.has(basePath);
+      })
+      .map((r) => `${r.from} -> ${r.to}`);
+    expect(violators).toEqual([]);
+  });
 });
