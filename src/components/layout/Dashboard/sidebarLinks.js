@@ -6,7 +6,6 @@ import {
   Newspaper,
   UserCog,
   Stethoscope,
-  Heart,
   BarChart3,
 } from 'lucide-react';
 
@@ -30,7 +29,6 @@ export const sidebarlink = [
     links: [
       { title: 'Kader Posyandu', path: 'kader-posyandu', icon: UserCog },
       { title: 'Tenaga Kesehatan', path: 'tenaga-kesehatan', icon: Stethoscope },
-      { title: 'Orang Tua', path: 'orang-tua', icon: Heart },
     ],
   },
   {
