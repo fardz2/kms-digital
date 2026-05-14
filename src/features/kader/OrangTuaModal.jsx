@@ -18,7 +18,7 @@ const normalizeStatus = (status) => {
   return !!status;
 };
 
-function FormOrangTua({ isOpen, onCancel, mode, initialValues, idPosyandu, idDesa }) {
+export function FormOrangTua({ isOpen, onCancel, mode, initialValues, idPosyandu, idDesa }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
