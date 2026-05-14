@@ -26,6 +26,7 @@ export default function RegisterOrangTua() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [statusFilter, setStatusFilter] = useState(null);
+  const [posyanduFilter, setPosyanduFilter] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -71,27 +72,39 @@ export default function RegisterOrangTua() {
 
   const filteredOrangTua = useMemo(() => {
     let rows = orangTuaList;
+    if (posyanduFilter !== null) {
+      rows = rows.filter(
+        (r) => (r.posyandu?.id ?? r.id_posyandu) === posyanduFilter
+      );
+    }
     if (statusFilter !== null) {
       rows = rows.filter((r) => r.status === statusFilter);
     }
     return rows;
-  }, [orangTuaList, statusFilter]);
+  }, [orangTuaList, statusFilter, posyanduFilter]);
+
+  const scopedList = useMemo(() => {
+    if (posyanduFilter === null) return orangTuaList;
+    return orangTuaList.filter(
+      (r) => (r.posyandu?.id ?? r.id_posyandu) === posyanduFilter
+    );
+  }, [orangTuaList, posyanduFilter]);
 
   const stats = [
-    { label: "Total Orang Tua", value: orangTuaList.length },
+    { label: "Total Orang Tua", value: scopedList.length },
     {
       label: "Disetujui",
-      value: orangTuaList.filter((r) => r.status).length,
+      value: scopedList.filter((r) => r.status).length,
       accent: "success",
     },
     {
       label: "Menunggu",
-      value: orangTuaList.filter((r) => !r.status).length,
+      value: scopedList.filter((r) => !r.status).length,
       accent: "warning",
     },
     {
       label: "Baru Bulan Ini",
-      value: orangTuaList.filter((r) => isThisMonth(r.created_at)).length,
+      value: scopedList.filter((r) => isThisMonth(r.created_at)).length,
       accent: "primary",
     },
   ];
@@ -283,6 +296,22 @@ export default function RegisterOrangTua() {
             </h2>
             <div className="flex items-center gap-[8px] flex-wrap">
               <select
+                value={posyanduFilter === null ? "" : String(posyanduFilter)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPosyanduFilter(v === "" ? null : Number(v));
+                }}
+                disabled={isBusy || posyanduLoading}
+                className="h-[44px] rounded-default border border-light-ash bg-white px-[13px] text-body-sm text-deep-slate focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors max-w-[200px]"
+              >
+                <option value="">Semua Posyandu</option>
+                {dataPosyandu?.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nama}
+                  </option>
+                ))}
+              </select>
+              <select
                 value={statusFilter === null ? "" : String(statusFilter)}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -298,7 +327,10 @@ export default function RegisterOrangTua() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setStatusFilter(null)}
+                onClick={() => {
+                  setStatusFilter(null);
+                  setPosyanduFilter(null);
+                }}
                 disabled={isBusy}
               >
                 Reset
