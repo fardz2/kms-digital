@@ -7,10 +7,13 @@ export const LEGACY_REDIRECTS = [
   { from: '/dashboard', to: '/orangtua/balita' },
   { from: '/tanya-jawab', to: '/orangtua/forum' },
   { from: '/my-forum', to: '/orangtua/forum/saya' },
+  { from: '/orangtua/forum/saya', to: '/orangtua/forum?tab=saya' },
   { from: '/kader-posyandu/dashboard', to: '/kader/balita' },
   { from: '/kader/beranda', to: '/kader/balita' },
   { from: '/desa/dashboard', to: '/desa/beranda' },
   { from: '/desa/reminder', to: '/desa/acara' },
+  { from: '/desa/acara', to: '/desa/beranda#acara' },
   { from: '/tenaga-kesehatan/dashboard', to: '/tenkes/forum' },
   { from: '/tenaga-kesehatan/detail/:id', to: '/tenkes/balita/:id' },
+  { from: '/tenkes/beranda', to: '/tenkes/forum' },
 ];

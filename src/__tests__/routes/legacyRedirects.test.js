@@ -54,4 +54,11 @@ describe('legacy redirects', () => {
     expect(entry).toBeDefined();
     expect(entry.to).toEqual('/kader/balita');
   });
+
+  test('redirects forum saya, desa acara, tenkes beranda to new locations', () => {
+    const map = Object.fromEntries(LEGACY_REDIRECTS.map((r) => [r.from, r.to]));
+    expect(map['/orangtua/forum/saya']).toEqual('/orangtua/forum?tab=saya');
+    expect(map['/desa/acara']).toEqual('/desa/beranda#acara');
+    expect(map['/tenkes/beranda']).toEqual('/tenkes/forum');
+  });
 });
