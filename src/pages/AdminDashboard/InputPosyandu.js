@@ -1,9 +1,12 @@
 import { Form, Input, message, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { isThisMonth } from "../../utilities/isThisMonth";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
@@ -126,6 +129,21 @@ export default function InputPosyandu() {
     updatePosyanduMutation.isPending ||
     deletePosyanduMutation.isPending;
 
+  const rows = dataSource ?? [];
+  const stats = [
+    { label: "Total Posyandu", value: rows.length },
+    {
+      label: "Tersebar di",
+      value: new Set(rows.map((p) => p.id_desa).filter(Boolean)).size + " desa",
+      accent: "neutral",
+    },
+    {
+      label: "Baru Bulan Ini",
+      value: rows.filter((p) => isThisMonth(p.created_at)).length,
+      accent: "primary",
+    },
+  ];
+
   const showDeleteConfirm = (id, nama) => {
     Modal.confirm({
       title: "Konfirmasi Hapus",
@@ -214,45 +232,37 @@ export default function InputPosyandu() {
   };
 
   return (
-    <div className="space-y-[25px]">
+    <div>
       {contextHolder}
-      <div className="flex items-start justify-between gap-[25px] flex-wrap">
-        <div className="min-w-0 flex-1">
-          <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
-            Data Master
-          </p>
-          <h1 className="text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
-            Kelola Posyandu
-          </h1>
-          <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
-            Daftar posyandu yang terdaftar di setiap desa.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="lg"
-          leadingIcon={<Plus size={20} strokeWidth={2} />}
-          onClick={showModal}
-          disabled={isBusy}
-        >
-          Tambah Posyandu
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Data Master"
+        title="Kelola Posyandu"
+        subtitle="Daftar posyandu yang terdaftar di setiap desa."
+        action={
+          <Button
+            variant="primary"
+            size="lg"
+            leadingIcon={<Plus size={20} strokeWidth={2} />}
+            onClick={showModal}
+            disabled={isBusy}
+          >
+            Tambah Posyandu
+          </Button>
+        }
+        stats={<InlineStatBar items={stats} loading={posyanduLoading} />}
+      />
 
-      <div className="bg-white border border-light-ash rounded-default p-[25px] shadow-card">
-        <DataTable
-          columns={columns}
-          data={dataSource || []}
-          loading={posyanduLoading || isBusy}
-          rowKey="id"
-          title={
-            <h2 className="text-heading font-semibold text-deep-slate">
-              Daftar Posyandu
-            </h2>
-          }
-          searchPlaceholder="Cari posyandu..."
-          emptyText="Tidak ada data Posyandu"
-        />
+      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
+        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]">
+          <DataTable
+            columns={columns}
+            data={dataSource || []}
+            loading={posyanduLoading || isBusy}
+            rowKey="id"
+            searchPlaceholder="Cari posyandu..."
+            emptyText="Belum ada posyandu terdaftar"
+          />
+        </div>
       </div>
 
       <Modal
