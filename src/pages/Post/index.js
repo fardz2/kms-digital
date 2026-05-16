@@ -44,8 +44,11 @@ export default function Post() {
     enabled: !!user?.user?.id && !!user?.user?.role,
   });
 
+  const isOrangTua = user?.user?.role === "ORANG_TUA";
+  const detailBase = isOrangTua ? "/orangtua/forum" : "/tenkes/balita";
+
   const posts = dataPost?.map((item) => ({
-    href: `/tenkes/balita/${item.post_id}`,
+    href: `${detailBase}/${item.post_id}`,
     title: item.title,
     nama_posyandu: item.posyandu,
     description: item.nama,
@@ -56,7 +59,6 @@ export default function Post() {
     user_id: item.user_id ?? item.id_user,
   }));
 
-  const isOrangTua = user?.user?.role === "ORANG_TUA";
   const filteredPosts =
     isOrangTua && tab === 'saya' && user?.user?.id
       ? (posts ?? []).filter(

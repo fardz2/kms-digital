@@ -14,20 +14,19 @@ import {
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
     { to: "/orangtua/balita", label: "Beranda" },
-    { to: "/artikel", label: "Artikel" },
     { to: "/orangtua/forum", label: "Tanya Jawab" },
+    { to: "/artikel", label: "Artikel" },
   ],
   TENAGA_KESEHATAN: [
-    { to: "/tenkes/beranda", label: "Beranda" },
     { to: "/tenkes/forum", label: "Forum" },
     { to: "/artikel", label: "Artikel" },
   ],
   DESA: [
     { to: "/desa/beranda", label: "Beranda" },
-    { to: "/desa/acara", label: "Kelola Acara" },
   ],
   KADER_POSYANDU: [
     { to: "/kader/balita", label: "Beranda" },
+    { to: "/kader/orangtua", label: "Akun Orang Tua" },
     { to: "/kader/laporan", label: "Laporan" },
   ],
 };

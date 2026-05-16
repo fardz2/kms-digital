@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { Plus, ChevronRight, MessageCircle, Newspaper } from 'lucide-react';
-import AppShell from '../../components/layout/AppShell';
+import Navbar from '../../components/layout/Navbar';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useSession } from '../auth/useSession';
 import { useAnakList } from '../../queries/useAnakQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
-
-const MENU = [
-  { key: 'balita', label: 'Anak Saya', path: '/orangtua/balita' },
-  { key: 'forum', label: 'Forum Tanya Jawab', path: '/orangtua/forum' },
-  { key: 'artikel', label: 'Artikel', path: '/artikel' },
-];
 
 function QuickLink({ Icon, title, desc, onClick }) {
   return (
@@ -42,7 +36,8 @@ export default function BerandaOT() {
   const [formOpen, setFormOpen] = useState(false);
 
   return (
-    <AppShell menu={MENU} activeKey="balita">
+    <div className="min-h-screen bg-faint-fog">
+      <Navbar isLogin />
       <PageHeader
         title={`Halo, ${user?.name ?? 'Orang Tua'}`}
         eyebrow="Orang Tua"
@@ -138,6 +133,6 @@ export default function BerandaOT() {
           refetch();
         }}
       />
-    </AppShell>
+    </div>
   );
 }
