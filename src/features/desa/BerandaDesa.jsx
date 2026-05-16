@@ -1,14 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import AppShell from '../../components/layout/AppShell';
+import Navbar from '../../components/layout/Navbar';
 import PageHeader from '../../components/ui/PageHeader';
 import { useSession } from '../auth/useSession';
 import { useStatistikGiziDesa } from '../../queries/useLaporanQueries';
 import LaporanDesa from '../laporan/LaporanDesa';
 import ExportDesaForm from './ExportDesaForm';
 import AcaraSection from './AcaraSection';
-
-const MENU = [{ key: 'beranda', label: 'Beranda', path: '/desa/beranda' }];
 
 export default function BerandaDesa() {
   const { user } = useSession();
@@ -29,7 +27,8 @@ export default function BerandaDesa() {
   }, [hash]);
 
   return (
-    <AppShell menu={MENU} activeKey="beranda">
+    <div className="min-h-screen bg-faint-fog">
+      <Navbar isLogin />
       <PageHeader
         title={`Desa ${user?.nama_desa ?? user?.desa_name ?? ''}`}
         eyebrow="Pemerintah Desa"
@@ -41,6 +40,6 @@ export default function BerandaDesa() {
         <LaporanDesa ref={printableRef} />
         <AcaraSection />
       </div>
-    </AppShell>
+    </div>
   );
 }
