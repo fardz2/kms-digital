@@ -15,7 +15,7 @@ import {
 } from '../../queries/useApproveQueries';
 import { useSession } from '../auth/useSession';
 import PendingApprovalSection from './PendingApprovalSection';
-import { FormOrangTua } from './OrangTuaModal';
+import FormOrangTua from './FormOrangTua';
 
 const TABS = [
   { key: 'pending', label: 'Menunggu Persetujuan' },

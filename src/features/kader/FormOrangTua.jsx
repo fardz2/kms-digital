@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Modal as AntModal, Select, message } from 'antd';
-import { AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Form, Input, Select, message } from 'antd';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
-import DataTable from '../../components/ui/DataTable';
 import {
-  useOrangTuaList,
   useCreateOrangTua,
   useUpdateOrangTua,
-  useDeleteOrangTua,
 } from '../../queries/useOrangTuaQueries';
-import { useSession } from '../auth/useSession';
 
 const normalizeStatus = (status) => {
   if (typeof status === 'string') return status === 'true' || status === '1';
@@ -18,7 +13,14 @@ const normalizeStatus = (status) => {
   return !!status;
 };
 
-export function FormOrangTua({ isOpen, onCancel, mode, initialValues, idPosyandu, idDesa }) {
+export default function FormOrangTua({
+  isOpen,
+  onCancel,
+  mode,
+  initialValues,
+  idPosyandu,
+  idDesa,
+}) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -201,156 +203,6 @@ export function FormOrangTua({ isOpen, onCancel, mode, initialValues, idPosyandu
           </Form.Item>
         </Form>
       </Modal>
-    </>
-  );
-}
-
-export default function OrangTuaModal({ open, onClose }) {
-  const { user } = useSession();
-  const [messageApi, contextHolder] = message.useMessage();
-
-  const [formMode, setFormMode] = useState('add');
-  const [formOpen, setFormOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  const { data: rawList, isLoading } = useOrangTuaList(open);
-  const deleteMutation = useDeleteOrangTua();
-
-  const orangTuaList = (rawList ?? []).map((item) => ({
-    ...item,
-    status: normalizeStatus(item.status),
-  }));
-
-  const openTambah = () => {
-    setFormMode('add');
-    setSelectedUser(null);
-    setFormOpen(true);
-  };
-
-  const openEdit = (record) => {
-    setFormMode('edit');
-    setSelectedUser(record);
-    setFormOpen(true);
-  };
-
-  const showDeleteConfirm = (record) => {
-    AntModal.confirm({
-      title: 'Hapus orang tua?',
-      icon: <AlertTriangle size={20} className="text-danger" />,
-      content: `${record.nama} akan dihapus dari daftar.`,
-      okText: 'Ya, Hapus',
-      cancelText: 'Batal',
-      okButtonProps: { danger: true },
-      onOk: () =>
-        deleteMutation.mutate(record.id, {
-          onSuccess: () => messageApi.success('Orang tua berhasil dihapus'),
-          onError: (err) =>
-            messageApi.error(err?.message ?? 'Gagal menghapus orang tua'),
-        }),
-    });
-  };
-
-  const columns = [
-    { accessorKey: 'nama', header: 'Nama', enableSorting: true },
-    { accessorKey: 'alamat', header: 'Alamat', enableSorting: true },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      enableSorting: true,
-      cell: ({ getValue }) => {
-        const approved = !!getValue();
-        return (
-          <span
-            className={`inline-flex items-center px-[13px] py-1 rounded-full text-caption font-medium ${
-              approved
-                ? 'bg-success/10 text-success'
-                : 'bg-polar-mist text-graphite'
-            }`}
-          >
-            {approved ? 'Disetujui' : 'Belum Disetujui'}
-          </span>
-        );
-      },
-    },
-    {
-      id: 'action',
-      header: 'Aksi',
-      enableSorting: false,
-      enableHiding: false,
-      cell: ({ row }) => (
-        <div className="flex gap-[8px]">
-          <Button
-            variant="default"
-            size="sm"
-            leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
-            onClick={() => openEdit(row.original)}
-          >
-            Ubah
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
-            onClick={() => showDeleteConfirm(row.original)}
-          >
-            Hapus
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  return (
-    <>
-      {contextHolder}
-      <Modal
-        title="Daftar Orang Tua"
-        open={open}
-        onCancel={onClose}
-        footer={null}
-        width={900}
-      >
-        <div className="flex items-start justify-between gap-[17px] flex-wrap mb-[17px]">
-          <div className="min-w-0 flex-1">
-            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[6px]">
-              Posyandu
-            </p>
-            <p className="text-body-sm text-graphite">
-              Kelola akun orang tua yang terdaftar di posyandu Anda.
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            size="md"
-            leadingIcon={<Plus size={20} strokeWidth={2} />}
-            onClick={openTambah}
-          >
-            Tambah Orang Tua
-          </Button>
-        </div>
-
-        <DataTable
-          columns={columns}
-          data={orangTuaList}
-          loading={isLoading || deleteMutation.isPending}
-          rowKey="id"
-          searchPlaceholder="Cari orang tua..."
-          emptyText="Belum ada orang tua terdaftar"
-          pageSize={5}
-        />
-      </Modal>
-
-      <FormOrangTua
-        isOpen={formOpen}
-        onCancel={() => {
-          setFormOpen(false);
-          setSelectedUser(null);
-        }}
-        mode={formMode}
-        initialValues={selectedUser}
-        idPosyandu={user?.id_posyandu}
-        idDesa={user?.id_desa}
-      />
     </>
   );
 }

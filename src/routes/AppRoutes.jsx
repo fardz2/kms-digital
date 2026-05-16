@@ -18,7 +18,6 @@ import LandingPage from '../pages/LandingPage';
 import DetailForum from '../pages/DetailForum';
 import SignUp from '../pages/SignUp';
 import Post from '../pages/Post';
-import MyPost from '../pages/MyPost';
 import NotFound from '../pages/NotFound';
 import DashboardLayout from '../components/layout/Dashboard/DashboardLayout';
 import DesaPage from '../pages/Admin/Desa/DesaPage';
@@ -54,7 +53,6 @@ export default function AppRoutes() {
       <Route element={<RequireRole allow={['ORANG_TUA']} />}>
         <Route path="/orangtua/balita" element={<BerandaOT />} />
         <Route path="/orangtua/forum" element={<Post />} />
-        <Route path="/orangtua/forum/saya" element={<MyPost />} />
         <Route path="/orangtua/forum/:id" element={<DetailForum />} />
         <Route path="/orangtua/balita/:id" element={<DetailAnak />} />
       </Route>
