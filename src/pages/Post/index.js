@@ -2,7 +2,7 @@ import { Spin, Empty, message } from "antd";
 import moment from "moment";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, Plus, ArrowRight } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
@@ -14,6 +14,8 @@ export default function Post() {
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const user = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') === 'saya' ? 'saya' : 'semua';
 
   const { data: dataPost, isLoading: postsLoading } = useQuery({
     queryKey: ["posts"],
@@ -51,7 +53,16 @@ export default function Post() {
     content: moment(item.time).format("DD MMMM YYYY"),
     jawaban: item.jawaban_tenaga_kesehatan || [],
     id: item.post_id,
+    user_id: item.user_id ?? item.id_user,
   }));
+
+  const isOrangTua = user?.user?.role === "ORANG_TUA";
+  const filteredPosts =
+    isOrangTua && tab === 'saya' && user?.user?.id
+      ? (posts ?? []).filter(
+          (p) => String(p.user_id ?? '') === String(user.user.id)
+        )
+      : posts;
 
   return (
     <div className="min-h-screen bg-faint-fog">
@@ -71,7 +82,7 @@ export default function Post() {
               Tanyakan kepada tenaga kesehatan tentang perkembangan anak Anda.
             </p>
           </div>
-          {user?.user?.role === "ORANG_TUA" && (
+          {isOrangTua && (
             <Button
               variant="primary"
               size="lg"
@@ -83,18 +94,47 @@ export default function Post() {
           )}
         </header>
 
+        {isOrangTua && (
+          <div className="flex gap-[8px] border-b border-light-ash">
+            {[
+              { key: 'semua', label: 'Semua' },
+              { key: 'saya', label: 'Punya Saya' },
+            ].map((t) => {
+              const active = t.key === tab;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() =>
+                    setSearchParams(t.key === 'semua' ? {} : { tab: t.key })
+                  }
+                  className={`px-[17px] py-[13px] text-body-sm font-semibold transition-colors border-b-2 -mb-px ${
+                    active
+                      ? 'text-primary-600 border-primary-500'
+                      : 'text-graphite border-transparent hover:text-deep-slate'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {postsLoading && (
           <div className="flex justify-center py-[50px]">
             <Spin size="large" />
           </div>
         )}
 
-        {!postsLoading && (!posts || posts.length === 0) && (
+        {!postsLoading && (!filteredPosts || filteredPosts.length === 0) && (
           <div className="bg-white border border-light-ash rounded-default py-[50px] text-center">
             <Empty
               description={
                 <span className="text-body-sm text-graphite">
-                  Belum ada pertanyaan
+                  {tab === 'saya'
+                    ? 'Belum ada pertanyaan dari Anda'
+                    : 'Belum ada pertanyaan'}
                 </span>
               }
             />
@@ -102,7 +142,7 @@ export default function Post() {
         )}
 
         <div className="space-y-[17px]">
-          {(posts ?? []).map((item) => (
+          {(filteredPosts ?? []).map((item) => (
             <article
               key={item.id}
               className="bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart hover:border-graphite/30"
