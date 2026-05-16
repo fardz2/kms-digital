@@ -204,7 +204,7 @@ export default function AkunOrangTuaPage() {
               loading={isLoading || deleteMutation.isPending}
               rowKey="id"
               searchPlaceholder="Cari orang tua..."
-              emptyText="Belum ada orang tua aktif"
+              emptyText="Belum ada orang tua aktif. Klik 'Tambah Orang Tua' untuk mendaftar pertama."
             />
           </div>
         )}

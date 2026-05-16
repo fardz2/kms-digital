@@ -71,8 +71,18 @@ export default function BerandaOT() {
 
           {!isLoading && (!anakList || anakList.length === 0) && (
             <Card>
-              <div className="text-center py-[25px] text-body-sm text-graphite">
-                Belum ada data anak.
+              <div className="text-center py-[33px] space-y-[13px]">
+                <p className="text-body-sm text-graphite">
+                  Belum ada data anak. Tambah anak pertama Anda untuk mulai mencatat pertumbuhan.
+                </p>
+                <Button
+                  variant="primary"
+                  size="md"
+                  leadingIcon={<Plus size={18} strokeWidth={2} />}
+                  onClick={() => setFormOpen(true)}
+                >
+                  Tambah Anak Pertama
+                </Button>
               </div>
             </Card>
           )}

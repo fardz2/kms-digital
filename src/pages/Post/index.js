@@ -101,16 +101,27 @@ export default function Post() {
         )}
 
         {!postsLoading && filteredPosts.length === 0 && (
-          <div className="bg-white border border-light-ash rounded-default py-[50px] text-center">
+          <div className="bg-white border border-light-ash rounded-default py-[50px] px-[25px] text-center space-y-[17px]">
             <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
               description={
                 <span className="text-body-sm text-graphite">
                   {tab === 'saya'
-                    ? 'Belum ada pertanyaan dari Anda'
-                    : 'Belum ada pertanyaan'}
+                    ? 'Anda belum pernah menulis pertanyaan'
+                    : 'Belum ada pertanyaan di forum'}
                 </span>
               }
             />
+            {isOrangTua && (
+              <Button
+                variant="primary"
+                size="md"
+                leadingIcon={<Plus size={18} strokeWidth={2} />}
+                onClick={() => setIsOpenModalInputPost(true)}
+              >
+                Tulis Pertanyaan Pertama
+              </Button>
+            )}
           </div>
         )}
 
