@@ -171,20 +171,26 @@ export default function Post() {
                   <p className="text-caption font-semibold uppercase tracking-wider text-deep-slate">
                     Jawaban
                   </p>
-                  {item.jawaban.map((j, idx) => (
-                    <div
-                      key={idx}
-                      className="pb-[13px] border-b border-light-ash last:border-0 last:pb-0"
-                    >
-                      <p className="text-body-sm text-deep-slate">
-                        <strong className="font-semibold">{j.nama}</strong>:{" "}
-                        {j.content}
-                      </p>
-                      <p className="text-caption text-graphite mt-1 tabular-nums">
-                        {moment(j.waktu).format("DD MMM YYYY HH:mm")}
-                      </p>
-                    </div>
-                  ))}
+                  {item.jawaban.map((j, idx) => {
+                    const ts = j.waktu ?? j.time ?? j.created_at ?? j.tanggal;
+                    const valid = ts && moment(ts).isValid();
+                    return (
+                      <div
+                        key={idx}
+                        className="pb-[13px] border-b border-light-ash last:border-0 last:pb-0"
+                      >
+                        <p className="text-body-sm text-deep-slate">
+                          <strong className="font-semibold">{j.nama}</strong>:{" "}
+                          {j.content}
+                        </p>
+                        {valid && (
+                          <p className="text-caption text-graphite mt-1 tabular-nums">
+                            {moment(ts).format("DD MMM YYYY HH:mm")}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </article>
