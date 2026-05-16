@@ -9,7 +9,6 @@ import BerandaOT from '../features/orangtua/BerandaOT';
 import ArtikelPublic from '../features/artikel/ArtikelList';
 import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
-import LaporanAdmin from '../features/laporan/LaporanAdmin';
 import BerandaDesa from '../features/desa/BerandaDesa';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
@@ -72,7 +71,6 @@ export default function AppRoutes() {
           <Route path="tenaga-kesehatan" element={<RegisterTenkes />} />
           <Route path="artikel" element={<ArtikelList />} />
           <Route path="artikel/baru" element={<ArtikelForm />} />
-          <Route path="laporan" element={<LaporanAdmin />} />
         </Route>
       </Route>
 
