@@ -1,4 +1,4 @@
-import { Form, Input, message, Modal } from "antd";
+import { Form, Input, Modal } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, AlertTriangle } from "lucide-react";
@@ -6,12 +6,13 @@ import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
+import { useToast } from "../../components/ui/Toast";
 import { desaApi } from "../../api/desa.api";
 import { isThisMonth } from "../../utilities/isThisMonth";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const queryClient = useQueryClient();
 
@@ -21,31 +22,31 @@ export default function InputDesa() {
       const res = await desaApi.list();
       return res.data ?? [];
     },
-    onError: (err) => messageApi.error(err?.message ?? "Gagal mengambil data desa"),
   });
 
   const deleteDesaMutation = useMutation({
     mutationFn: (id) => desaApi.remove(id),
     onSuccess: () => {
-      messageApi.success("Desa berhasil dihapus");
+      toast.success("Desa berhasil dihapus");
       queryClient.invalidateQueries(["desa"]);
     },
-    onError: (err) => messageApi.error(err?.message ?? "Gagal menghapus desa"),
+    onError: (err) => toast.error(err?.message ?? "Gagal menghapus desa"),
   });
 
   const createDesaMutation = useMutation({
-    mutationFn: (values) => desaApi.create({
-      name: values.name,
-      password: values.password,
-      password_confirmation: values.password_confirmation,
-    }),
+    mutationFn: (values) =>
+      desaApi.create({
+        name: values.name,
+        password: values.password,
+        password_confirmation: values.password_confirmation,
+      }),
     onSuccess: () => {
-      messageApi.success("Desa dan akun berhasil disimpan");
+      toast.success("Desa dan akun berhasil disimpan");
       queryClient.invalidateQueries(["desa"]);
       form.resetFields();
       setIsModalVisible(false);
     },
-    onError: (err) => messageApi.error(err?.message ?? "Data gagal tersimpan"),
+    onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),
   });
 
   const rows = dataSource ?? [];
@@ -98,7 +99,7 @@ export default function InputDesa() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Data Master"
         title="Kelola Desa"

@@ -1,4 +1,4 @@
-import { message, Modal } from "antd";
+import { Modal } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,17 +14,18 @@ import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
 import FormUpdateDataArtikel from "../../components/form/FormUpdateDataArtikel";
+import { useToast } from "../../components/ui/Toast";
 import { formatDate2 } from "../../utilities/Format";
 import { isThisMonth, isWithinDays } from "../../utilities/isThisMonth";
 import { artikelApi } from "../../api/artikel.api";
-import useAuth from "../../hook/useAuth";
+import { useSession } from "../../features/auth/useSession";
 
 export default function ArtikelList() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [isOpenModalUpdateDataArtikel, setIsOpenModalUpdateDataArtikel] = useState(false);
   const [dataArtikel, setDataArtikel] = useState(null);
   const queryClient = useQueryClient();
-  const user = useAuth();
+  const { isAuthenticated } = useSession();
 
   const { data: dataSource, isLoading: artikelLoading } = useQuery({
     queryKey: ["artikel"],
@@ -32,21 +33,16 @@ export default function ArtikelList() {
       const res = await artikelApi.list();
       return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.error(err?.message ?? "Gagal mengambil data artikel");
-    },
-    enabled: !!user?.token?.value,
+    enabled: isAuthenticated,
   });
 
   const deleteArtikelMutation = useMutation({
     mutationFn: (id) => artikelApi.remove(id),
     onSuccess: () => {
-      messageApi.success("Artikel berhasil dihapus");
+      toast.success("Artikel berhasil dihapus");
       queryClient.invalidateQueries(["artikel"]);
     },
-    onError: (err) => {
-      messageApi.error(err?.message ?? "Data gagal dihapus");
-    },
+    onError: (err) => toast.error(err?.message ?? "Data gagal dihapus"),
   });
 
   const isBusy = deleteArtikelMutation.isPending;
@@ -122,7 +118,7 @@ export default function ArtikelList() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Konten Edukasi"
         title="Kelola Artikel"
