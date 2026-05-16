@@ -34,6 +34,7 @@ export default function StatCard({
   trend,
   href,
   loading = false,
+  children,
 }) {
   const color = ACCENT[accent] ?? ACCENT.primary;
   const iconBg = ICON_BG[accent] ?? ICON_BG.primary;
@@ -72,6 +73,7 @@ export default function StatCard({
             <span>{trend.label}</span>
           </div>
         )}
+        {children && !loading && <div>{children}</div>}
       </div>
     </>
   );
