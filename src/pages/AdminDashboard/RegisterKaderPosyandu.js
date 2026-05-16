@@ -295,19 +295,17 @@ export default function RegisterKaderPosyandu() {
               Daftar Kader Posyandu
             </h2>
             <div className="flex items-center gap-[8px] flex-wrap">
-              <select
-                value={statusFilter === null ? "" : String(statusFilter)}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setStatusFilter(v === "" ? null : v === "true");
-                }}
+              <Select
+                value={statusFilter === null ? "ALL" : String(statusFilter)}
+                onChange={(v) => setStatusFilter(v === "ALL" ? null : v === "true")}
                 disabled={isBusy}
-                className="h-[44px] rounded-default border border-light-ash bg-white px-[13px] text-body-sm text-deep-slate focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 transition-colors"
+                className="h-[44px] min-w-[160px]"
+                placeholder="Semua Status"
               >
-                <option value="">Semua Status</option>
-                <option value="true">Disetujui</option>
-                <option value="false">Menunggu</option>
-              </select>
+                <Select.Option value="ALL">Semua Status</Select.Option>
+                <Select.Option value="true">Disetujui</Select.Option>
+                <Select.Option value="false">Menunggu</Select.Option>
+              </Select>
               <Button variant="ghost" size="sm" onClick={resetFilters} disabled={isBusy}>
                 Reset
               </Button>

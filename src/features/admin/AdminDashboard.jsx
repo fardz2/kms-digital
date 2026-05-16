@@ -3,7 +3,7 @@ import PageHeader from '../../components/ui/PageHeader';
 import AdminStatsGrid from './AdminStatsGrid';
 import AdminActivityFeed from './AdminActivityFeed';
 import { useAdminDashboardData } from './useAdminDashboardData';
-import useAuth from '../../hook/useAuth';
+import { useSession } from '../auth/useSession';
 
 function greetingPart() {
   const h = new Date().getHours();
@@ -14,8 +14,8 @@ function greetingPart() {
 }
 
 export default function AdminDashboard() {
-  const auth = useAuth();
-  const adminName = auth?.user?.name ?? 'Admin';
+  const { user } = useSession();
+  const adminName = user?.name ?? 'Admin';
   const { stats, activity, isLoading, hasPartialError } = useAdminDashboardData();
 
   return (

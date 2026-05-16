@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { readSession } from "../features/auth/session-storage";
+import { ROLE_HOME } from "../features/auth/roleHome";
 
 // Legacy useAuth — retained for pages that haven't migrated to useSession.
 // Reads from the same storage as useSession (kms_session_v1) via readSession(),
@@ -14,9 +15,7 @@ const useAuth = (expectedRole) => {
   const user = useMemo(() => readSession(), []);
 
   useEffect(() => {
-    if (publicRoutes.includes(location.pathname)) {
-      return;
-    }
+    if (publicRoutes.includes(location.pathname)) return;
 
     const isDetailRoute = location.pathname.startsWith(
       "/tenaga-kesehatan/detail/"
@@ -32,14 +31,6 @@ const useAuth = (expectedRole) => {
 
     const userRole = user.user.role;
 
-    const roleDashboards = {
-      ORANG_TUA: "/orangtua/balita",
-      KADER_POSYANDU: "/kader/balita",
-      TENAGA_KESEHATAN: "/tenkes/beranda",
-      DESA: "/desa/beranda",
-      ADMIN: "/admin/dashboard",
-    };
-
     if (expectedRole && userRole !== expectedRole) {
       if (
         isDetailRoute &&
@@ -48,7 +39,7 @@ const useAuth = (expectedRole) => {
         return;
       }
 
-      const redirectPath = roleDashboards[userRole] || "/masuk";
+      const redirectPath = ROLE_HOME[userRole] ?? "/masuk";
       navigate(redirectPath, {
         replace: true,
         state: {
