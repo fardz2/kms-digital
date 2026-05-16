@@ -1,53 +1,27 @@
-import { Spin, Empty, message } from "antd";
+import { Spin, Empty } from "antd";
 import moment from "moment";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, Plus, ArrowRight } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
-import useAuth from "../../hook/useAuth";
+import { useSession } from "../../features/auth/useSession";
+import { usePostList } from "../../queries/usePostQueries";
 
 export default function Post() {
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
-  const user = useAuth();
+  const { user, role } = useSession();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get('tab') === 'saya' ? 'saya' : 'semua';
 
-  const { data: dataPost, isLoading: postsLoading } = useQuery({
-    queryKey: ["posts"],
-    queryFn: async () => {
-      if (!user?.user?.id || !user?.user?.role) {
-        throw new Error("User ID or role not found");
-      }
+  const { data: dataPost, isLoading: postsLoading } = usePostList();
 
-      const endpoint =
-        user.user.role === "ORANG_TUA"
-          ? `${process.env.REACT_APP_BASE_URL}/api/post/orang-tua/${user.user.id}`
-          : user.user.role === "TENAGA_KESEHATAN"
-          ? `${process.env.REACT_APP_BASE_URL}/api/post/tenaga-kesehatan/${user.user.id}`
-          : null;
-
-      if (!endpoint) throw new Error("Invalid user role");
-
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const jsonData = await response.json();
-      return jsonData.data.sort((a, b) => b.time.localeCompare(a.time));
-    },
-    onError: (err) =>
-      messageApi.error(err.message || "Gagal mengambil data postingan"),
-    enabled: !!user?.user?.id && !!user?.user?.role,
-  });
-
-  const isOrangTua = user?.user?.role === "ORANG_TUA";
+  const isOrangTua = role === "ORANG_TUA";
   const detailBase = isOrangTua ? "/orangtua/forum" : "/tenkes/balita";
 
-  const posts = dataPost?.map((item) => ({
+  const posts = (dataPost ?? []).map((item) => ({
     href: `${detailBase}/${item.post_id}`,
     title: item.title,
     nama_posyandu: item.posyandu,
@@ -60,15 +34,12 @@ export default function Post() {
   }));
 
   const filteredPosts =
-    isOrangTua && tab === 'saya' && user?.user?.id
-      ? (posts ?? []).filter(
-          (p) => String(p.user_id ?? '') === String(user.user.id)
-        )
+    isOrangTua && tab === 'saya' && user?.id
+      ? posts.filter((p) => String(p.user_id ?? '') === String(user.id))
       : posts;
 
   return (
     <div className="min-h-screen bg-faint-fog">
-      {contextHolder}
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
@@ -129,7 +100,7 @@ export default function Post() {
           </div>
         )}
 
-        {!postsLoading && (!filteredPosts || filteredPosts.length === 0) && (
+        {!postsLoading && filteredPosts.length === 0 && (
           <div className="bg-white border border-light-ash rounded-default py-[50px] text-center">
             <Empty
               description={
@@ -144,7 +115,7 @@ export default function Post() {
         )}
 
         <div className="space-y-[17px]">
-          {(filteredPosts ?? []).map((item) => (
+          {filteredPosts.map((item) => (
             <article
               key={item.id}
               className="bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart hover:border-graphite/30"

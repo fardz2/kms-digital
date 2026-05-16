@@ -1,68 +1,49 @@
-import { Form, Input, Spin, message } from "antd";
-import axios from "axios";
+import { Form, Input, Spin } from "antd";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
 import avatar from "../../assets/icon/user.png";
-import { readSession } from "../../features/auth/session-storage";
+import { useToast } from "../../components/ui/Toast";
+import { useSession } from "../../features/auth/useSession";
+import { usePostDetail } from "../../queries/usePostQueries";
+import {
+  useCommentList,
+  useCreateComment,
+} from "../../queries/useCommentQueries";
 
 export default function DetailForum() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [user] = useState(() => readSession());
+  const { user } = useSession();
   const [form] = Form.useForm();
-  const [isLoading, setIsLoading] = useState(true);
-  const [detailPost, setDetailPost] = useState({});
-  const [comment, setComment] = useState([]);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/post/${id}`)
-      .then((response) => {
-        setIsLoading(false);
-        setDetailPost(response.data.data);
-      })
-      .catch(() => setIsLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data: detailPost, isLoading: postLoading } = usePostDetail(id);
+  const { data: comment = [], isLoading: commentLoading } = useCommentList(id);
+  const createComment = useCreateComment();
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/comment/${id}`)
-      .then((response) => {
-        setIsLoading(false);
-        const sortedData = response.data.data.sort((a, b) =>
-          b.time.localeCompare(a.time)
-        );
-        setComment(sortedData);
-      })
-      .catch(() => setIsLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey]);
+  const isLoading = postLoading || commentLoading;
 
   const onFinish = (values) => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/comment`, {
-        user_id: user.user.id,
-        post_id: id,
-        content: values.comment,
-      })
-      .then(() => {
-        setRefreshKey((k) => k + 1);
-        form.resetFields();
-        messageApi.success("Komentar berhasil dikirim");
-      })
-      .catch(() => messageApi.error("Gagal mengirim komentar"));
+    createComment.mutate(
+      { user_id: user?.id, post_id: id, content: values.comment },
+      {
+        onSuccess: () => {
+          form.resetFields();
+          toast.success("Komentar berhasil dikirim");
+        },
+        onError: (err) =>
+          toast.error(err?.message ?? "Gagal mengirim komentar"),
+      }
+    );
   };
 
   return (
     <div className="min-h-screen bg-faint-fog">
-      {contextHolder}
+      {toast.contextHolder}
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
@@ -80,7 +61,7 @@ export default function DetailForum() {
           </div>
         )}
 
-        {!isLoading && detailPost?.title && (
+        {!postLoading && detailPost?.title && (
           <article className="bg-white border border-light-ash rounded-default p-[25px]">
             <div className="flex items-start gap-[13px] mb-[17px]">
               <img
@@ -141,6 +122,7 @@ export default function DetailForum() {
               size="md"
               type="submit"
               leadingIcon={<Send size={16} strokeWidth={1.75} />}
+              loading={createComment.isPending}
             >
               Kirim
             </Button>
@@ -151,7 +133,7 @@ export default function DetailForum() {
           <h2 className="text-overline text-graphite">
             Komentar ({comment.length})
           </h2>
-          {comment.length === 0 ? (
+          {!commentLoading && comment.length === 0 ? (
             <div className="text-center py-[25px] text-body-sm text-graphite bg-white border border-light-ash rounded-default">
               Belum ada komentar
             </div>
