@@ -66,7 +66,50 @@ describe('query key factory (qk)', () => {
       qk.pengukuran.all[0],
       qk.laporan.all[0],
       qk.artikel.all[0],
+      qk.post.all[0],
+      qk.comment.all[0],
+      qk.profile.all[0],
+      qk.kategori.all[0],
     ];
-    expect(namespaces).toEqual(['auth', 'anak', 'pengukuran', 'laporan', 'artikel']);
+    expect(namespaces).toEqual([
+      'auth',
+      'anak',
+      'pengukuran',
+      'laporan',
+      'artikel',
+      'post',
+      'comment',
+      'profile',
+      'kategori',
+    ]);
+  });
+
+  test('post.list scopes by role and userId', () => {
+    expect(qk.post.list('ORANG_TUA', 7)).toEqual([
+      'post',
+      'list',
+      'ORANG_TUA',
+      7,
+    ]);
+    expect(qk.post.list('TENAGA_KESEHATAN', 7)).not.toEqual(
+      qk.post.list('ORANG_TUA', 7)
+    );
+  });
+
+  test('post.detail includes id', () => {
+    expect(qk.post.detail(99)).toEqual(['post', 'detail', 99]);
+  });
+
+  test('comment.byPost includes postId', () => {
+    expect(qk.comment.byPost(7)).toEqual(['comment', 'by-post', 7]);
+    expect(qk.comment.byPost(7)).not.toEqual(qk.comment.byPost(8));
+  });
+
+  test('profile.me is static', () => {
+    expect(qk.profile.me).toEqual(['profile', 'me']);
+  });
+
+  test('kategori.list is static', () => {
+    expect(qk.kategori.list).toEqual(['kategori', 'list']);
   });
 });
