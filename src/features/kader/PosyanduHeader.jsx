@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { CheckCheck, BarChart3, LogOut, Users } from 'lucide-react';
+import { BarChart3, LogOut, Users } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 export default function PosyanduHeader({
@@ -9,10 +9,9 @@ export default function PosyanduHeader({
   sudahCount,
   totalCount,
   pendingCount = 0,
-  onApprove,
+  onAkunOrangTua,
   onLaporan,
   onKeluar,
-  onKelolaOrangTua,
 }) {
   const bulanLabel = moment().format('MMMM YYYY');
   const persen = totalCount ? Math.round((sudahCount / totalCount) * 100) : 0;
@@ -35,26 +34,18 @@ export default function PosyanduHeader({
             )}
           </div>
           <div className="flex gap-[8px] flex-wrap">
-            {pendingCount > 0 && (
-              <Button
-                variant="default"
-                size="md"
-                leadingIcon={<CheckCheck size={18} strokeWidth={2} />}
-                onClick={onApprove}
-              >
-                Setujui
-                <span className="ml-[6px] px-[8px] py-[1px] bg-primary-500 text-white rounded-full text-caption font-bold tabular-nums">
-                  {pendingCount}
-                </span>
-              </Button>
-            )}
             <Button
               variant="default"
               size="md"
               leadingIcon={<Users size={18} strokeWidth={2} />}
-              onClick={onKelolaOrangTua}
+              onClick={onAkunOrangTua}
             >
-              Orang Tua
+              Akun Orang Tua
+              {pendingCount > 0 && (
+                <span className="ml-[6px] px-[8px] py-[1px] bg-primary-500 text-white rounded-full text-caption font-bold tabular-nums">
+                  {pendingCount}
+                </span>
+              )}
             </Button>
             <Button
               variant="default"

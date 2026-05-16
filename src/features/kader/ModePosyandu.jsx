@@ -6,8 +6,6 @@ import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
-import ApproveModal from './ApproveModal';
-import OrangTuaModal from './OrangTuaModal';
 import { classifyBalita, priority } from './classifyBalita';
 import Button from '../../components/ui/Button';
 import PengukuranForm from '../pengukuran/PengukuranForm';
@@ -30,8 +28,6 @@ export default function ModePosyandu() {
   const [existingPengukuran, setExistingPengukuran] = useState(null);
   const [prefillFrom, setPrefillFrom] = useState(null);
   const [tambahOpen, setTambahOpen] = useState(false);
-  const [approveOpen, setApproveOpen] = useState(false);
-  const [orangTuaOpen, setOrangTuaOpen] = useState(false);
 
   const { data: pendingOT } = usePendingOrangTua(true);
   const { data: pendingAnak } = usePendingAnak(true);
@@ -129,10 +125,9 @@ export default function ModePosyandu() {
         sudahCount={counts.semua - counts.belum}
         totalCount={counts.semua}
         pendingCount={pendingCount}
-        onApprove={() => setApproveOpen(true)}
+        onAkunOrangTua={() => navigate('/kader/orangtua')}
         onLaporan={() => navigate('/kader/laporan')}
         onKeluar={handleKeluar}
-        onKelolaOrangTua={() => setOrangTuaOpen(true)}
       />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
@@ -213,9 +208,6 @@ export default function ModePosyandu() {
         isOpen={tambahOpen}
         onCancel={() => setTambahOpen(false)}
       />
-
-      <ApproveModal open={approveOpen} onClose={() => setApproveOpen(false)} />
-      <OrangTuaModal open={orangTuaOpen} onClose={() => setOrangTuaOpen(false)} />
     </div>
   );
 }
