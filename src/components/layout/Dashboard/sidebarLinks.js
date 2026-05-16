@@ -11,13 +11,13 @@ import {
 
 export const sidebarlink = [
   {
-    title: 'Utama',
+    title: 'Beranda',
     links: [
       { title: 'Dashboard', path: '', icon: LayoutDashboard, exact: true },
     ],
   },
   {
-    title: 'Input Data',
+    title: 'Data Master',
     links: [
       { title: 'Desa', path: 'desa', icon: Home },
       { title: 'Posyandu', path: 'posyandu', icon: Building2 },
@@ -25,7 +25,7 @@ export const sidebarlink = [
     ],
   },
   {
-    title: 'Register Akun',
+    title: 'Akun Pengguna',
     links: [
       { title: 'Kader Posyandu', path: 'kader-posyandu', icon: UserCog },
       { title: 'Tenaga Kesehatan', path: 'tenaga-kesehatan', icon: Stethoscope },
