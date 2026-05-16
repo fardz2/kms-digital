@@ -4,9 +4,13 @@ describe('ROLE_HOME', () => {
   test('maps all 5 roles to a route', () => {
     expect(ROLE_HOME.ORANG_TUA).toEqual('/orangtua/balita');
     expect(ROLE_HOME.KADER_POSYANDU).toEqual('/kader/balita');
-    expect(ROLE_HOME.TENAGA_KESEHATAN).toEqual('/tenkes/beranda');
+    expect(ROLE_HOME.TENAGA_KESEHATAN).toEqual('/tenkes/forum');
     expect(ROLE_HOME.DESA).toEqual('/desa/beranda');
-    expect(ROLE_HOME.ADMIN).toEqual('/admin/dashboard/desa');
+    expect(ROLE_HOME.ADMIN).toEqual('/admin/dashboard');
+  });
+
+  test('TENAGA_KESEHATAN home is /tenkes/forum', () => {
+    expect(ROLE_HOME.TENAGA_KESEHATAN).toEqual('/tenkes/forum');
   });
 
   test('all paths start with slash', () => {

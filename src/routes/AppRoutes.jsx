@@ -6,7 +6,6 @@ import ModePosyandu from '../features/kader/ModePosyandu';
 import AkunOrangTuaPage from '../features/kader/AkunOrangTuaPage';
 import DetailAnak from '../features/anak/DetailAnak';
 import BerandaOT from '../features/orangtua/BerandaOT';
-import BerandaTenkes from '../features/tenkes/BerandaTenkes';
 import ArtikelPublic from '../features/artikel/ArtikelList';
 import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
@@ -81,7 +80,6 @@ export default function AppRoutes() {
 
       {/* Role: Tenaga Kesehatan (legacy) */}
       <Route element={<RequireRole allow={['TENAGA_KESEHATAN']} />}>
-        <Route path="/tenkes/beranda" element={<BerandaTenkes />} />
         <Route path="/tenkes/forum" element={<Post />} />
         <Route path="/tenkes/balita/:id" element={<DetailForum />} />
       </Route>
