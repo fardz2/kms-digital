@@ -153,3 +153,23 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] `npm run build` sukses tanpa error baru
 - [ ] Tidak ada console error saat navigate semua role
 - [ ] Browser back/forward jalan normal
+
+## Cross-Role Flow Simplification (Plan 2026-05-14)
+
+- [ ] Login kader → header `/kader/balita` cuma punya 3 tombol (Akun OT, Laporan, Keluar)
+- [ ] Klik "Akun Orang Tua" → navigate ke `/kader/orangtua`
+- [ ] `/kader/orangtua` punya tab "Menunggu Persetujuan" + "Daftar Aktif" dengan badge count
+- [ ] Tab pending bekerja: approve/tolak orang tua + anak
+- [ ] Tab aktif bekerja: tambah/edit/hapus orang tua
+- [ ] Login OT → `/orangtua/forum` punya tab Semua + Punya Saya
+- [ ] Tab "Punya Saya" filter post milik user, URL berubah ke `?tab=saya`
+- [ ] `/orangtua/forum/saya` di-redirect ke `/orangtua/forum?tab=saya`
+- [ ] Login desa → `/desa/beranda` punya 3 section (Export, Laporan, Acara)
+- [ ] Akses `/desa/acara` di-redirect dengan scroll ke section #acara
+- [ ] Login tenkes → langsung di `/tenkes/forum`
+- [ ] `/tenkes/beranda` di-redirect ke `/tenkes/forum`
+- [ ] `/admin/dashboard` single column: PageHeader + 4 stats + activity feed
+- [ ] Stats card "Pengguna" tampilkan total + breakdown 3 role
+- [ ] Sidebar admin pakai label "Beranda / Data Master / Akun Pengguna / Laporan"
+- [ ] 68 tests pass, build sukses
+
