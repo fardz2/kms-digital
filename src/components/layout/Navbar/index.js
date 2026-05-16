@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Avatar, Modal, Form, Input } from "antd";
-import { User, Menu, X, LogOut, Heart, ChevronDown } from "lucide-react";
+import { Avatar } from "antd";
+import { Menu, X, LogOut, Heart, ChevronDown } from "lucide-react";
 import useAuth from "../../../hook/useAuth";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
-import {
-  clearSession,
-  readSession,
-  writeSession,
-} from "../../../features/auth/session-storage";
-import {
-  useProfile,
-  useUpdateProfile,
-} from "../../../queries/useProfileQueries";
+import ProfileModal from "../../ui/ProfileModal";
+import { clearSession } from "../../../features/auth/session-storage";
 
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
@@ -89,7 +82,6 @@ export default function NavbarComp({ isLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [form] = Form.useForm();
   const toast = useToast();
   const user = useAuth();
 
@@ -99,23 +91,6 @@ export default function NavbarComp({ isLogin }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if (user?.user?.name) form.setFieldsValue({ nama: user.user.name });
-  }, [user?.user?.name, form]);
-
-  const { data: profileData, isLoading: isProfileLoading, refetch } = useProfile(
-    isProfileModalOpen
-  );
-
-  useEffect(() => {
-    if (isProfileModalOpen) {
-      refetch();
-      form.setFieldsValue({ nama: user?.user?.name || "User" });
-    }
-  }, [isProfileModalOpen, refetch, form, user?.user?.name]);
-
-  const updateProfile = useUpdateProfile();
 
   const handleLogout = () => {
     clearSession();
@@ -127,36 +102,11 @@ export default function NavbarComp({ isLogin }) {
     if (user?.user?.role !== "ADMIN") setIsProfileModalOpen(true);
   };
 
-  const handleUpdateProfile = () => {
-    form
-      .validateFields()
-      .then((values) =>
-        updateProfile.mutate(values, {
-          onSuccess: (response) => {
-            toast.success("Profil berhasil diperbarui");
-            const currentSession = readSession();
-            if (currentSession) {
-              writeSession({
-                ...currentSession,
-                user: { ...currentSession.user, name: response.data.user.name },
-              });
-            }
-            form.resetFields();
-            setIsProfileModalOpen(false);
-          },
-          onError: (err) =>
-            toast.error(err?.message ?? "Gagal memperbarui profil"),
-        })
-      )
-      .catch(() => {});
-  };
-
   const navLinks =
     isLogin && user?.user?.role ? LINKS_BY_ROLE[user.user.role] ?? [] : [];
   const isActive = (to) => location.pathname.startsWith(to);
 
-  const displayName =
-    profileData?.user?.name ?? user?.user?.name ?? "User";
+  const displayName = user?.user?.name ?? "User";
 
   const initials =
     displayName
@@ -349,91 +299,11 @@ export default function NavbarComp({ isLogin }) {
         </div>
       </nav>
 
-      <Modal
-        title={
-          <span className="text-heading font-semibold text-deep-slate">
-            Profil Pengguna
-          </span>
-        }
+      <ProfileModal
         open={isProfileModalOpen}
-        onCancel={() => {
-          form.resetFields();
-          setIsProfileModalOpen(false);
-        }}
-        footer={
-          <div className="flex gap-[13px] justify-end">
-            <Button
-              variant="default"
-              size="md"
-              onClick={() => {
-                form.resetFields();
-                setIsProfileModalOpen(false);
-              }}
-              disabled={updateProfile.isPending}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleUpdateProfile}
-              disabled={updateProfile.isPending || isProfileLoading}
-            >
-              {updateProfile.isPending ? "Menyimpan..." : "Simpan"}
-            </Button>
-          </div>
-        }
-      >
-        <Form form={form} layout="vertical" name="profile_form">
-          <Form.Item
-            label={
-              <span className="text-body-sm font-medium text-deep-slate">
-                Nama
-              </span>
-            }
-            name="nama"
-            rules={[{ required: true, message: "Nama wajib diisi" }]}
-          >
-            <Input disabled={isProfileLoading} className="h-[52px] text-base" />
-          </Form.Item>
-          <Form.Item
-            label={
-              <span className="text-body-sm font-medium text-deep-slate">
-                Kata Sandi Baru
-              </span>
-            }
-            name="password"
-            rules={[{ min: 8, message: "Minimal 8 karakter" }]}
-          >
-            <Input.Password
-              placeholder="Kosongkan jika tidak diubah"
-              className="h-[52px] text-base"
-            />
-          </Form.Item>
-          <Form.Item
-            label={
-              <span className="text-body-sm font-medium text-deep-slate">
-                Konfirmasi Kata Sandi
-              </span>
-            }
-            name="password_confirmation"
-            rules={[
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value)
-                    return Promise.resolve();
-                  return Promise.reject(new Error("Kata sandi tidak cocok"));
-                },
-              }),
-            ]}
-          >
-            <Input.Password
-              placeholder="Ulangi kata sandi"
-              className="h-[52px] text-base"
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onClose={() => setIsProfileModalOpen(false)}
+        fallbackName={user?.user?.name}
+      />
     </>
   );
 }

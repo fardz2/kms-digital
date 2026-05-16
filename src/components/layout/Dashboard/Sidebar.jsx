@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Tooltip } from "antd";
+import { Tooltip, Modal } from "antd";
 import { LogOut, Lock, X, Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { Modal, Form, Input } from "antd";
 import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
-import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
-import {
-  readSession,
-  clearSession,
-  writeSession,
-} from "../../../features/auth/session-storage";
+import ProfileModal from "../../ui/ProfileModal";
+import { readSession, clearSession } from "../../../features/auth/session-storage";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
-import {
-  useProfile,
-  useUpdateProfile,
-} from "../../../queries/useProfileQueries";
 
 function isLinkActive(pathname, link) {
   const basePath = "/admin/dashboard";
@@ -28,43 +19,10 @@ function isLinkActive(pathname, link) {
 export default function Sidebar({ showSidebar, closeSidebar }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [form] = Form.useForm();
   const toast = useToast();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [user, setUser] = useState(() => readSession() ?? {});
+  const session = readSession() ?? {};
   const { collapsed, toggle } = useSidebarCollapsed();
-
-  const { data: profileData } = useProfile(isProfileModalOpen);
-  const updateProfile = useUpdateProfile();
-
-  useEffect(() => {
-    if (isProfileModalOpen && profileData?.user?.name) {
-      form.setFieldsValue({ nama: profileData.user.name });
-    }
-  }, [isProfileModalOpen, profileData, form]);
-
-  const handleUpdateProfile = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        updateProfile.mutate(values, {
-          onSuccess: (response) => {
-            toast.success("Profil berhasil diperbarui");
-            const updatedUser = {
-              ...user,
-              user: { ...user.user, name: response.data.user.name },
-            };
-            writeSession(updatedUser);
-            setUser(updatedUser);
-            form.resetFields();
-            setIsProfileModalOpen(false);
-          },
-          onError: (err) =>
-            toast.error(err?.message ?? "Gagal memperbarui profil"),
-        });
-      })
-      .catch(() => {});
-  };
 
   const handleLogout = () => {
     Modal.confirm({
@@ -115,7 +73,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                   KMS Digital
                 </span>
                 <span className="text-caption text-graphite truncate">
-                  {user?.user?.name ?? "Admin"}
+                  {session?.user?.name ?? "Admin"}
                 </span>
               </span>
             </Link>
@@ -266,67 +224,12 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
         </div>
       </aside>
 
-      <Modal
-        title={
-          <span className="text-heading font-semibold text-deep-slate">
-            Profil Pengguna
-          </span>
-        }
+      <ProfileModal
         open={isProfileModalOpen}
-        onCancel={() => {
-          form.resetFields();
-          setIsProfileModalOpen(false);
-        }}
-        footer={
-          <div className="flex gap-[13px] justify-end">
-            <Button
-              variant="default"
-              size="md"
-              onClick={() => {
-                form.resetFields();
-                setIsProfileModalOpen(false);
-              }}
-            >
-              Batal
-            </Button>
-            <Button variant="primary" size="md" onClick={handleUpdateProfile}>
-              Simpan
-            </Button>
-          </div>
-        }
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Nama</span>}
-            name="nama"
-            rules={[{ required: true, message: "Nama wajib diisi" }]}
-          >
-            <Input disabled className="h-[52px] text-base" />
-          </Form.Item>
-          <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Kata Sandi Baru</span>}
-            name="password"
-            rules={[{ min: 8, message: "Minimal 8 karakter" }]}
-          >
-            <Input.Password className="h-[52px] text-base" />
-          </Form.Item>
-          <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Konfirmasi Kata Sandi</span>}
-            name="password_confirmation"
-            rules={[
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value)
-                    return Promise.resolve();
-                  return Promise.reject(new Error("Kata sandi tidak cocok"));
-                },
-              }),
-            ]}
-          >
-            <Input.Password className="h-[52px] text-base" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onClose={() => setIsProfileModalOpen(false)}
+        fallbackName={session?.user?.name}
+        variant="password-only"
+      />
     </>
   );
 }
