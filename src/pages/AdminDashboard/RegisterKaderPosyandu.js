@@ -1,4 +1,4 @@
-import { Form, Input, message, Select, Modal } from "antd";
+import { Form, Input, Select, Modal } from "antd";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
@@ -6,8 +6,12 @@ import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import useAuth from "../../hook/useAuth";
+import { useToast } from "../../components/ui/Toast";
+import { useSession } from "../../features/auth/useSession";
 import { isThisMonth } from "../../utilities/isThisMonth";
+import { desaApi } from "../../api/desa.api";
+import { posyanduApi } from "../../api/posyandu.api";
+import { kaderApi } from "../../api/kader.api";
 
 const normalizeStatus = (status) => {
   if (typeof status === "string") return status === "true" || status === "1";
@@ -17,7 +21,7 @@ const normalizeStatus = (status) => {
 
 export default function RegisterKaderPosyandu() {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [statusFilter, setStatusFilter] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
@@ -26,154 +30,88 @@ export default function RegisterKaderPosyandu() {
   const [userToDelete, setUserToDelete] = useState(null);
   const queryClient = useQueryClient();
 
-  const user = useAuth();
+  const { isAuthenticated } = useSession();
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/desa`);
-      if (!response.ok) throw new Error("Gagal mengambil data desa");
-      const data = await response.json();
-      return data.data;
+      const res = await desaApi.list();
+      return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data desa");
-    },
-    enabled: !!user?.token?.value,
+    enabled: isAuthenticated,
   });
 
   const { data: dataSource, isLoading: posyanduLoading } = useQuery({
     queryKey: ["posyandu"],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/posyandu`);
-      if (!response.ok) throw new Error("Gagal mengambil data posyandu");
-      const data = await response.json();
-      return data.data;
+      const res = await posyanduApi.list();
+      return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data posyandu");
-    },
-    enabled: !!user?.token?.value,
+    enabled: isAuthenticated,
   });
 
   const { data: kaderData, isLoading: kaderLoading } = useQuery({
     queryKey: ["kader-posyandu"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/kader-posyandu`,
-        { headers: { Authorization: `Bearer ${user?.token?.value}` } }
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data Kader Posyandu");
-      const data = await response.json();
-      return data.data;
+      const res = await kaderApi.list();
+      return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data Kader Posyandu");
-    },
-    enabled: !!user?.token?.value,
+    enabled: isAuthenticated,
   });
 
   const createKaderMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token?.value}`,
-          },
-          body: JSON.stringify({
-            nama: values.nama,
-            email: values.email,
-            password: values.password,
-            id_desa: values.desa,
-            id_posyandu: values.posyandu,
-            status: values.status || false,
-            role: "KADER_POSYANDU",
-          }),
-        }
-      );
-      if (!response.ok) {
-        let detail = "";
-        try {
-          const body = await response.json();
-          detail = body?.message ?? body?.error ?? JSON.stringify(body);
-        } catch (e) {
-          detail = response.statusText;
-        }
-        throw new Error(`Gagal Registrasi (${response.status}): ${detail}`);
-      }
-      return response.json();
-    },
+    mutationFn: (values) =>
+      kaderApi.register({
+        nama: values.nama,
+        email: values.email,
+        password: values.password,
+        id_desa: values.desa,
+        id_posyandu: values.posyandu,
+        status: values.status || false,
+        role: "KADER_POSYANDU",
+      }),
     onSuccess: () => {
-      messageApi.success("Register Berhasil");
+      toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
       queryClient.invalidateQueries(["kader-posyandu"]);
     },
-    onError: (error) => {
-      messageApi.error(error.message || "Gagal Registrasi");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const updateKaderMutation = useMutation({
-    mutationFn: async ({ id, values }) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${user?.token?.value}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nama: values.nama,
-            email: values.email,
-            password: values.password || undefined,
-            id_desa: values.desa,
-            id_posyandu: values.posyandu,
-            status: values.status,
-            role: "KADER_POSYANDU",
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal memperbarui Kader Posyandu");
-      return response.json();
-    },
+    mutationFn: ({ id, values }) =>
+      kaderApi.update(id, {
+        nama: values.nama,
+        email: values.email,
+        password: values.password || undefined,
+        id_desa: values.desa,
+        id_posyandu: values.posyandu,
+        status: values.status,
+        role: "KADER_POSYANDU",
+      }),
     onSuccess: () => {
-      messageApi.success("Kader Posyandu berhasil diperbarui");
+      toast.success("Kader Posyandu berhasil diperbarui");
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedUser(null);
       queryClient.invalidateQueries(["kader-posyandu"]);
     },
-    onError: (error) => {
-      messageApi.error(error.message || "Gagal memperbarui Kader Posyandu");
-    },
+    onError: (err) =>
+      toast.error(err?.message ?? "Gagal memperbarui Kader Posyandu"),
   });
 
   const deleteKaderMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${user?.token?.value}` },
-        }
-      );
-      if (!response.ok) throw new Error("Gagal menghapus Kader Posyandu");
-      return response.json();
-    },
+    mutationFn: (id) => kaderApi.remove(id),
     onSuccess: () => {
-      messageApi.success("Kader Posyandu berhasil dihapus");
+      toast.success("Kader Posyandu berhasil dihapus");
       queryClient.invalidateQueries(["kader-posyandu"]);
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
     onError: (err) => {
-      messageApi.error(err.message || "Gagal menghapus Kader Posyandu");
+      toast.error(err?.message ?? "Gagal menghapus Kader Posyandu");
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
@@ -331,7 +269,7 @@ export default function RegisterKaderPosyandu() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Akun Pengguna"
         title="Kelola Kader Posyandu"

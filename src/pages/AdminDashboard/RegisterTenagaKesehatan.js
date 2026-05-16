@@ -1,4 +1,4 @@
-import { Form, Input, message, Select, Modal } from "antd";
+import { Form, Input, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
@@ -6,101 +6,69 @@ import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import useAuth from "../../hook/useAuth";
+import { useToast } from "../../components/ui/Toast";
+import { useSession } from "../../features/auth/useSession";
 import { isThisMonth } from "../../utilities/isThisMonth";
+import { desaApi } from "../../api/desa.api";
+import { nakesApi } from "../../api/nakes.api";
 
 export default function RegisterTenagaKesehatan() {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const queryClient = useQueryClient();
 
-  const user = useAuth();
+  const { isAuthenticated } = useSession();
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/desa`);
-      if (!response.ok) throw new Error("Gagal mengambil data desa");
-      const data = await response.json();
-      return data.data;
+      const res = await desaApi.list();
+      return res.data ?? [];
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data desa");
-    },
-    enabled: !!user?.token?.value,
+    enabled: isAuthenticated,
   });
 
   const { data: tenagaKesehatanData, isLoading: tenagaKesehatanLoading } =
     useQuery({
       queryKey: ["tenaga-kesehatan"],
       queryFn: async () => {
-        const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/api/posyandu/tenaga-kesehatan`,
-          { headers: { Authorization: `Bearer ${user?.token?.value}` } }
-        );
-        if (!response.ok) throw new Error("Gagal mengambil data Tenaga Kesehatan");
-        const data = await response.json();
-        return data.data;
+        const res = await nakesApi.list();
+        return res.data ?? [];
       },
-      onError: (err) => {
-        messageApi.error(err.message || "Gagal mengambil data Tenaga Kesehatan");
-      },
-      enabled: !!user?.token?.value,
+      enabled: isAuthenticated,
     });
 
   const createTenagaKesehatanMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/tenaga-kesehatan/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nama: values.nama,
-            email: values.email,
-            password: values.password,
-            id_desa: values.desa,
-            status: true,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal Registrasi");
-      return response.json();
-    },
+    mutationFn: (values) =>
+      nakesApi.register({
+        nama: values.nama,
+        email: values.email,
+        password: values.password,
+        id_desa: values.desa,
+        status: true,
+      }),
     onSuccess: () => {
-      messageApi.success("Register Berhasil");
+      toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
       queryClient.invalidateQueries(["tenaga-kesehatan"]);
     },
-    onError: (error) => {
-      messageApi.error(error.message || "Gagal Registrasi");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const deleteTenagaKesehatanMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/users/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${user?.token?.value}` },
-        }
-      );
-      if (!response.ok) throw new Error("Gagal menghapus Tenaga Kesehatan");
-      return response.json();
-    },
+    mutationFn: (id) => nakesApi.remove(id),
     onSuccess: () => {
-      messageApi.success("Tenaga Kesehatan berhasil dihapus");
+      toast.success("Tenaga Kesehatan berhasil dihapus");
       queryClient.invalidateQueries(["tenaga-kesehatan"]);
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
     onError: (err) => {
-      messageApi.error(err.message || "Gagal menghapus Tenaga Kesehatan");
+      toast.error(err?.message ?? "Gagal menghapus Tenaga Kesehatan");
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
@@ -184,7 +152,7 @@ export default function RegisterTenagaKesehatan() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Akun Pengguna"
         title="Kelola Tenaga Kesehatan"

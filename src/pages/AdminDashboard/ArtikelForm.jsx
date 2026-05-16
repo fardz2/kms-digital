@@ -1,38 +1,29 @@
-import { Form, Input, message, Select } from "antd";
+import { Form, Input, Select } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { ArrowLeft, UploadCloud } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
-import useAuth from "../../hook/useAuth";
+import { useToast } from "../../components/ui/Toast";
+import { artikelApi } from "../../api/artikel.api";
+import {
+  useKategoriList,
+  useCreateKategori,
+} from "../../queries/useKategoriQueries";
 
 export default function ArtikelForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [imageFile, setImageFile] = useState(null);
   const [valueContent, setValueContent] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
   const queryClient = useQueryClient();
-  const user = useAuth();
 
-  const { data: dataKategori, isLoading: kategoriLoading } = useQuery({
-    queryKey: ["kategori"],
-    queryFn: async () => {
-      const response = await fetch(
-        process.env.REACT_APP_BASE_URL + "/api/kategori",
-        { headers: { Authorization: "Bearer " + user?.token?.value } }
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data kategori");
-      const data = await response.json();
-      return data.data;
-    },
-    onError: (err) => messageApi.error(err?.message ?? "Gagal mengambil kategori"),
-    enabled: !!user?.token?.value,
-  });
+  const { data: dataKategori, isLoading: kategoriLoading } = useKategoriList();
 
   const createArtikelMutation = useMutation({
     mutationFn: async (values) => {
@@ -44,50 +35,28 @@ export default function ArtikelForm() {
       formData.append("penulis", values.penulis);
       formData.append("content", valueContent);
       formData.append("image", imageFile);
-
-      const response = await fetch(
-        process.env.REACT_APP_BASE_URL + "/api/artikel",
-        {
-          method: "POST",
-          headers: { Authorization: "Bearer " + user?.token?.value },
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("Data gagal tersimpan");
-      return response.json();
+      return artikelApi.create(formData);
     },
     onSuccess: () => {
-      messageApi.success("Artikel berhasil diterbitkan");
+      toast.success("Artikel berhasil diterbitkan");
       queryClient.invalidateQueries(["artikel"]);
       setTimeout(() => navigate("/admin/dashboard/artikel"), 700);
     },
-    onError: (err) => messageApi.error(err?.message ?? "Data gagal tersimpan"),
+    onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),
   });
 
-  const createKategoriMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        process.env.REACT_APP_BASE_URL + "/api/kategori",
-        {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + user?.token?.value,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal menambah kategori");
-      return response.json();
-    },
-    onSuccess: () => {
-      messageApi.success("Kategori berhasil ditambahkan");
-      form.resetFields(["name"]);
-      setAddingCategory(false);
-      queryClient.invalidateQueries(["kategori"]);
-    },
-    onError: (err) => messageApi.error(err?.message ?? "Data gagal tersimpan"),
-  });
+  const createKategoriMutation = useCreateKategori();
+
+  const handleCreateKategori = (values) => {
+    createKategoriMutation.mutate(values, {
+      onSuccess: () => {
+        toast.success("Kategori berhasil ditambahkan");
+        form.resetFields(["name"]);
+        setAddingCategory(false);
+      },
+      onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),
+    });
+  };
 
   const isBusy =
     createArtikelMutation.isPending || createKategoriMutation.isPending;
@@ -110,13 +79,13 @@ export default function ArtikelForm() {
   };
 
   const onFinish = (values) => {
-    if (addingCategory) createKategoriMutation.mutate(values);
+    if (addingCategory) handleCreateKategori(values);
     else createArtikelMutation.mutate(values);
   };
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Tulis Baru"
         title="Artikel Baru"
@@ -246,7 +215,7 @@ export default function ArtikelForm() {
                               form.validateFields(["image"]);
                             })
                             .catch((error) => {
-                              messageApi.error(error.message);
+                              toast.error(error.message);
                               setImageFile(null);
                               form.validateFields(["image"]);
                             });

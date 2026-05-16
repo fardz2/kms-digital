@@ -1,4 +1,4 @@
-import { Form, Input, message, Select, Modal } from "antd";
+import { Form, Input, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
@@ -7,10 +7,13 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { isThisMonth } from "../../utilities/isThisMonth";
+import { useToast } from "../../components/ui/Toast";
+import { desaApi } from "../../api/desa.api";
+import { posyanduApi } from "../../api/posyandu.api";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [selectedPosyandu, setSelectedPosyandu] = useState(null);
@@ -19,109 +22,62 @@ export default function InputPosyandu() {
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa`
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data desa");
-      const data = await response.json();
-      return data.data;
-    },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data desa");
+      const res = await desaApi.list();
+      return res.data ?? [];
     },
   });
 
   const { data: dataSource, isLoading: posyanduLoading } = useQuery({
     queryKey: ["posyandu"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data posyandu");
-      const data = await response.json();
-      return data.data;
-    },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal mengambil data posyandu");
+      const res = await posyanduApi.list();
+      return res.data ?? [];
     },
   });
 
   const createPosyanduMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id_desa: values.desa,
-            nama: values.posyandu,
-            alamat: values.alamat,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Data gagal tersimpan");
-      return response.json();
-    },
+    mutationFn: (values) =>
+      posyanduApi.create({
+        id_desa: values.desa,
+        nama: values.posyandu,
+        alamat: values.alamat,
+      }),
     onSuccess: () => {
-      messageApi.success("Posyandu berhasil disimpan");
+      toast.success("Posyandu berhasil disimpan");
       queryClient.invalidateQueries(["posyandu"]);
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedPosyandu(null);
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Data gagal tersimpan");
-    },
+    onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),
   });
 
   const updatePosyanduMutation = useMutation({
-    mutationFn: async ({ id, values }) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/${id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id_desa: values.desa,
-            nama: values.posyandu,
-            alamat: values.alamat,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal memperbarui posyandu");
-      return response.json();
-    },
+    mutationFn: ({ id, values }) =>
+      posyanduApi.update(id, {
+        id_desa: values.desa,
+        nama: values.posyandu,
+        alamat: values.alamat,
+      }),
     onSuccess: () => {
-      messageApi.success("Posyandu berhasil diperbarui");
+      toast.success("Posyandu berhasil diperbarui");
       queryClient.invalidateQueries(["posyandu"]);
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedPosyandu(null);
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal memperbarui posyandu");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal memperbarui posyandu"),
   });
 
   const deletePosyanduMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/${id}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error("Gagal menghapus posyandu");
-      return response.json();
-    },
+    mutationFn: (id) => posyanduApi.remove(id),
     onSuccess: () => {
-      messageApi.success("Posyandu berhasil dihapus");
+      toast.success("Posyandu berhasil dihapus");
       queryClient.invalidateQueries(["posyandu"]);
     },
-    onError: (err) => {
-      messageApi.error(err.message || "Gagal menghapus posyandu");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal menghapus posyandu"),
   });
 
   const isBusy =
@@ -233,7 +189,7 @@ export default function InputPosyandu() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Data Master"
         title="Kelola Posyandu"
