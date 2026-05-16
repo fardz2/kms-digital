@@ -20,7 +20,7 @@ import SignUp from '../pages/SignUp';
 import Post from '../pages/Post';
 import NotFound from '../pages/NotFound';
 import DashboardLayout from '../components/layout/Dashboard/DashboardLayout';
-import DesaPage from '../pages/Admin/Desa/DesaPage';
+import DesaPage from '../pages/AdminDashboard/InputDesa';
 import InputPosyandu from '../pages/AdminDashboard/InputPosyandu';
 import RegisterKaderPosyandu from '../pages/AdminDashboard/RegisterKaderPosyandu';
 import RegisterTenkes from '../pages/AdminDashboard/RegisterTenagaKesehatan';
