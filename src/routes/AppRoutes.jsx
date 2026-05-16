@@ -12,7 +12,6 @@ import ArtikelDetailPage from '../features/artikel/ArtikelDetailPage';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
 import LaporanAdmin from '../features/laporan/LaporanAdmin';
 import BerandaDesa from '../features/desa/BerandaDesa';
-import KelolaAcara from '../features/desa/KelolaAcara';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
 // Legacy pages (masih dipakai sampai migrasi selesai)
@@ -64,7 +63,6 @@ export default function AppRoutes() {
       {/* Role: Desa (legacy) */}
       <Route element={<RequireRole allow={['DESA']} />}>
         <Route path="/desa/beranda" element={<BerandaDesa />} />
-        <Route path="/desa/acara" element={<KelolaAcara />} />
       </Route>
 
       {/* Role: Admin (legacy) */}
