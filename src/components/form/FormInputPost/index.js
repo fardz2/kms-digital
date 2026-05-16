@@ -1,58 +1,43 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Form, Modal, Input, message } from "antd";
+import { Form, Modal, Input } from "antd";
 import Button from "../../ui/Button";
-import useAuth from "../../../hook/useAuth";
+import { useToast } from "../../ui/Toast";
+import { useSession } from "../../../features/auth/useSession";
+import { useCreatePost } from "../../../queries/usePostQueries";
 
 export default function FormInputPost({ isOpen, onCancel }) {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
-  const queryClient = useQueryClient();
-  const user = useAuth();
-
-  const createPostMutation = useMutation({
-    mutationFn: async (values) => {
-      if (!user?.token?.value || !user?.user?.id) {
-        throw new Error("User authentication data missing");
-      }
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/post`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token.value}`,
-          },
-          body: JSON.stringify({
-            user_id: user.user.id,
-            title: values.judul,
-            content: values.pertanyaan,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal menyimpan data postingan");
-      return response.json();
-    },
-    onSuccess: () => {
-      messageApi.success("Data berhasil tersimpan");
-      form.resetFields();
-      onCancel();
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-    onError: (err) => messageApi.error(err.message || "Gagal menyimpan"),
-  });
+  const toast = useToast();
+  const { user } = useSession();
+  const createPost = useCreatePost();
 
   const onOK = () => {
     form
       .validateFields()
-      .then((values) => createPostMutation.mutate(values))
+      .then((values) => {
+        createPost.mutate(
+          {
+            user_id: user?.id,
+            title: values.judul,
+            content: values.pertanyaan,
+          },
+          {
+            onSuccess: () => {
+              toast.success("Data berhasil tersimpan");
+              form.resetFields();
+              onCancel();
+            },
+            onError: (err) => toast.error(err?.message ?? "Gagal menyimpan"),
+          }
+        );
+      })
       .catch(() => {});
   };
 
-  const saving = createPostMutation.isPending;
+  const saving = createPost.isPending;
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <Modal
         open={isOpen}
         onCancel={onCancel}
