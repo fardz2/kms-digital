@@ -1,23 +1,29 @@
-import { Form, Input, message, Modal, Select } from "antd";
-import axios from "axios";
+import { Form, Input, Modal, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import "./style.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { UploadCloud } from "lucide-react";
 import Button from "../../ui/Button";
-import { readSession } from "../../../features/auth/session-storage";
+import { useToast } from "../../ui/Toast";
+import { useSession } from "../../../features/auth/useSession";
+import { artikelApi } from "../../../api/artikel.api";
+import {
+  useKategoriList,
+  useCreateKategori,
+} from "../../../queries/useKategoriQueries";
 
-export default function FormUpdateDataArtikel(props) {
-  const [user] = useState(() => readSession());
-  const { isOpen, onCancel, fetch, data } = props;
-  const [dataKategori, setDataKategori] = useState([]);
+export default function FormUpdateDataArtikel({ isOpen, onCancel, fetch, data }) {
+  const { role } = useSession();
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [imageFile, setImageFile] = useState(null);
   const [valueContent, setValueContent] = useState("");
   const [statePageKateogries, setStatePageKateogries] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
+  const { data: dataKategori = [] } = useKategoriList(isOpen);
+  const createKategori = useCreateKategori();
 
   useEffect(() => {
     if (data) {
@@ -28,19 +34,10 @@ export default function FormUpdateDataArtikel(props) {
       });
       setValueContent(data.content);
     }
-
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/api/kategori`, {
-        headers: { Authorization: `Bearer ${user?.token?.value}` },
-      })
-      .then((response) => {
-        setDataKategori(response.data.data);
-        setStatePageKateogries(false);
-      })
-      .catch(() => {});
-  }, [form, data, user?.token?.value]);
+  }, [form, data]);
 
   function submitArtikel(values) {
+    if (!data) return;
     setIsPending(true);
     const formData = new FormData();
     formData.append("judul", values.judul);
@@ -49,14 +46,10 @@ export default function FormUpdateDataArtikel(props) {
     formData.append("content", valueContent);
     if (imageFile) formData.append("image", imageFile);
 
-    axios
-      .post(
-        `${process.env.REACT_APP_BASE_URL}/api/artikel/${data.id}`,
-        formData,
-        { headers: { Authorization: `Bearer ${user.token.value}` } }
-      )
+    artikelApi
+      .update(data.id, formData)
       .then(() => {
-        messageApi.success("Data berhasil tersimpan");
+        toast.success("Data berhasil tersimpan");
         setTimeout(() => {
           onCancel();
           setValueContent("");
@@ -66,9 +59,9 @@ export default function FormUpdateDataArtikel(props) {
         }, 1000);
         form.resetFields();
       })
-      .catch(() => {
+      .catch((err) => {
         setIsPending(false);
-        messageApi.error("Data gagal tersimpan");
+        toast.error(err?.message ?? "Data gagal tersimpan");
         setTimeout(() => {
           setImageFile(null);
           onCancel();
@@ -78,12 +71,9 @@ export default function FormUpdateDataArtikel(props) {
 
   function submitKategori(values) {
     setIsPending(true);
-    axios
-      .post(`${process.env.REACT_APP_BASE_URL}/api/kategori`, values, {
-        headers: { Authorization: `Bearer ${user.token.value}` },
-      })
-      .then(() => {
-        messageApi.success("Data berhasil tersimpan");
+    createKategori.mutate(values, {
+      onSuccess: () => {
+        toast.success("Data berhasil tersimpan");
         setTimeout(() => {
           onCancel();
           setValueContent("");
@@ -92,22 +82,23 @@ export default function FormUpdateDataArtikel(props) {
           fetch?.();
         }, 1000);
         form.resetFields();
-      })
-      .catch(() => {
+      },
+      onError: (err) => {
         setIsPending(false);
-        messageApi.error("Data gagal tersimpan");
+        toast.error(err?.message ?? "Data gagal tersimpan");
         setTimeout(() => {
           setImageFile(null);
           onCancel();
         }, 1000);
-      });
+      },
+    });
   }
 
   function onOK() {
     form
       .validateFields()
       .then((values) => {
-        if (!user || user.user.role !== "ADMIN") return;
+        if (role !== "ADMIN") return;
         if (statePageKateogries) submitKategori(values);
         else submitArtikel(values);
       })
@@ -116,7 +107,7 @@ export default function FormUpdateDataArtikel(props) {
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       {data && (
         <Modal
           open={isOpen}

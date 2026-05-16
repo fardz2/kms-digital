@@ -19,6 +19,27 @@ export function useAnakList() {
   });
 }
 
+export function useCreateAnak() {
+  const qc = useQueryClient();
+  const { role } = useSession();
+  return useMutation({
+    mutationFn: (payload) => anakApi.create(role, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.anak.all });
+    },
+  });
+}
+
+export function useImportAnakExcel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (formData) => anakApi.importExcel(formData),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.anak.all });
+    },
+  });
+}
+
 export function useAnakDetail(id) {
   const { role, isAuthenticated } = useSession();
 

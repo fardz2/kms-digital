@@ -1,91 +1,62 @@
-import { DatePicker, Form, Input, message, Modal, Select } from "antd";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { DatePicker, Form, Input, Modal, Select } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import Button from "../../ui/Button";
-import useAuth from "../../../hook/useAuth";
+import { useToast } from "../../ui/Toast";
+import { useSession } from "../../../features/auth/useSession";
+import { ortuApi } from "../../../api/ortu.api";
+import { useCreateAnak } from "../../../queries/useAnakQueries";
 
 export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
-  const queryClient = useQueryClient();
-  const user = useAuth();
+  const toast = useToast();
+  const { isAuthenticated, role } = useSession();
+  const isOrangTua = role === "ORANG_TUA";
 
   const { data: dataOrangTua, isLoading: orangTuaLoading } = useQuery({
-    queryKey: ["orang-tua"],
+    queryKey: ["orang-tua-kader-form"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu/orang-tua`,
-        {
-          headers: { Authorization: `Bearer ${user?.token?.value}` },
-        }
-      );
-      if (!response.ok) throw new Error("Gagal mengambil data orang tua");
-      const data = await response.json();
-      return data.data;
+      const res = await ortuApi.forKader();
+      return res.data ?? [];
     },
-    onError: (err) =>
-      messageApi.error(err.message || "Gagal mengambil data orang tua"),
-    enabled: !!user?.token?.value && user?.user?.role !== "ORANG_TUA",
+    enabled: isAuthenticated && !isOrangTua,
+    staleTime: 60 * 1000,
   });
 
-  const createAnakMutation = useMutation({
-    mutationFn: async (values) => {
-      const url =
-        user?.user?.role === "KADER_POSYANDU"
-          ? `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak`
-          : `${process.env.REACT_APP_BASE_URL}/api/orang-tua/data-anak`;
-      const body =
-        user?.user?.role === "KADER_POSYANDU"
-          ? {
-              nama: values.nama,
-              panggilan: values.panggilan,
-              tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
-              gender: values.jenisKelamin,
-              alamat: values.alamat,
-              id_orang_tua: values.orangTua,
-              status: kader,
-            }
-          : {
-              nama: values.nama,
-              panggilan: values.panggilan,
-              tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
-              gender: values.jenisKelamin,
-              alamat: values.alamat,
-              status: kader,
-            };
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user?.token?.value}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) throw new Error("Data gagal tersimpan");
-      return response.json();
-    },
-    onSuccess: () => {
-      messageApi.success("Data berhasil tersimpan");
-      form.resetFields();
-      setTimeout(() => {
-        onCancel();
-        queryClient.invalidateQueries(["data-anak"]);
-      }, 800);
-    },
-    onError: (err) =>
-      messageApi.error(err.message || "Data gagal tersimpan"),
-  });
+  const createAnak = useCreateAnak();
 
   const onOK = () => {
     form
       .validateFields()
-      .then((values) => createAnakMutation.mutate(values))
+      .then((values) => {
+        const base = {
+          nama: values.nama,
+          panggilan: values.panggilan,
+          tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
+          gender: values.jenisKelamin,
+          alamat: values.alamat,
+          status: kader,
+        };
+        const payload = isOrangTua
+          ? base
+          : { ...base, id_orang_tua: values.orangTua };
+
+        createAnak.mutate(payload, {
+          onSuccess: () => {
+            toast.success("Data berhasil tersimpan");
+            form.resetFields();
+            setTimeout(() => onCancel(), 800);
+          },
+          onError: (err) =>
+            toast.error(err?.message ?? "Data gagal tersimpan"),
+        });
+      })
       .catch(() => {});
   };
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <Modal
         open={isOpen}
         onCancel={onCancel}
@@ -100,7 +71,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
               variant="default"
               size="md"
               onClick={onCancel}
-              disabled={createAnakMutation.isPending}
+              disabled={createAnak.isPending}
             >
               Batal
             </Button>
@@ -108,9 +79,9 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
               variant="primary"
               size="md"
               onClick={onOK}
-              disabled={createAnakMutation.isPending || orangTuaLoading}
+              disabled={createAnak.isPending || orangTuaLoading}
             >
-              {createAnakMutation.isPending ? "Menyimpan..." : "Simpan"}
+              {createAnak.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </div>
         }
@@ -154,7 +125,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
           >
             <Input.TextArea rows={3} className="text-base" placeholder="Alamat tempat tinggal" />
           </Form.Item>
-          {user?.user?.role !== "ORANG_TUA" && (
+          {!isOrangTua && (
             <Form.Item
               label={<span className="text-body-sm font-medium text-deep-slate">Orang Tua</span>}
               name="orangTua"
@@ -167,7 +138,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
                 optionFilterProp="children"
                 placeholder="Pilih orang tua"
               >
-                {dataOrangTua?.map((data) => (
+                {(dataOrangTua ?? []).map((data) => (
                   <Select.Option key={data.id} value={data.id}>
                     {data.nama}
                   </Select.Option>

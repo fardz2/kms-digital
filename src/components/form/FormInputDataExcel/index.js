@@ -1,60 +1,39 @@
-import { Form, Input, message, Modal } from "antd";
-import axios from "axios";
+import { Form, Input, Modal } from "antd";
 import React, { useState } from "react";
 import { FileSpreadsheet } from "lucide-react";
 import Button from "../../ui/Button";
-import { readSession } from "../../../features/auth/session-storage";
+import { useToast } from "../../ui/Toast";
+import { useImportAnakExcel } from "../../../queries/useAnakQueries";
 
-export default function FormInputDataExcel(props) {
-  const [user] = useState(() => readSession() ?? {});
-  const { isOpen, onCancel, fetch } = props;
+export default function FormInputDataExcel({ isOpen, onCancel, fetch }) {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [excelFile, setExcelFile] = useState(null);
-  const [isPending, setIsPending] = useState(false);
+  const importExcel = useImportAnakExcel();
 
   function onOK() {
     form
       .validateFields()
       .then(() => {
         if (!excelFile) {
-          messageApi.error("Pilih file terlebih dahulu");
+          toast.error("Pilih file terlebih dahulu");
           return;
         }
-
-        if (user && user.user.role === "KADER_POSYANDU") {
-          const formData = new FormData();
-          formData.append("file", excelFile);
-          setIsPending(true);
-
-          axios
-            .post(
-              `${process.env.REACT_APP_BASE_URL}/api/posyandu/data-anak-excel`,
-              formData,
-              {
-                headers: {
-                  Authorization: `Bearer ${user.token.value}`,
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            )
-            .then(() => {
-              messageApi.success("Data berhasil diunggah");
-              form.resetFields();
-              setExcelFile(null);
-              setTimeout(() => {
-                setIsPending(false);
-                onCancel();
-                fetch?.();
-              }, 1500);
-            })
-            .catch((err) => {
-              setIsPending(false);
-              messageApi.error(
-                err.response?.data?.message || "Data gagal diunggah"
-              );
-            });
-        }
+        const formData = new FormData();
+        formData.append("file", excelFile);
+        importExcel.mutate(formData, {
+          onSuccess: () => {
+            toast.success("Data berhasil diunggah");
+            form.resetFields();
+            setExcelFile(null);
+            setTimeout(() => {
+              onCancel();
+              fetch?.();
+            }, 1500);
+          },
+          onError: (err) =>
+            toast.error(err?.message ?? "Data gagal diunggah"),
+        });
       })
       .catch(() => {});
   }
@@ -65,9 +44,11 @@ export default function FormInputDataExcel(props) {
     onCancel();
   };
 
+  const isPending = importExcel.isPending;
+
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <Modal
         open={isOpen}
         onCancel={close}
