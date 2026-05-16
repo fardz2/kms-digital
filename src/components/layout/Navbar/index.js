@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Avatar, Modal, Form, Input, message } from "antd";
+import { Avatar, Modal, Form, Input } from "antd";
 import { User, Menu, X, LogOut, Heart, ChevronDown } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../../../hook/useAuth";
 import Button from "../../ui/Button";
+import { useToast } from "../../ui/Toast";
 import {
   clearSession,
   readSession,
   writeSession,
 } from "../../../features/auth/session-storage";
+import {
+  useProfile,
+  useUpdateProfile,
+} from "../../../queries/useProfileQueries";
 
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
@@ -82,12 +86,11 @@ function NavLink({ to, label, active, onClick }) {
 export default function NavbarComp({ isLogin }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const user = useAuth();
 
   useEffect(() => {
@@ -101,29 +104,9 @@ export default function NavbarComp({ isLogin }) {
     if (user?.user?.name) form.setFieldsValue({ nama: user.user.name });
   }, [user?.user?.name, form]);
 
-  const {
-    data: profileData,
-    isLoading: isProfileLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      if (user?.user?.role === "ADMIN") return null;
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token?.value}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Gagal mengambil profil");
-      return response.json();
-    },
-    enabled: !!user?.token?.value && user?.user?.role !== "ADMIN",
-    onError: (err) => messageApi.error(err.message || "Gagal mengambil profil"),
-  });
+  const { data: profileData, isLoading: isProfileLoading, refetch } = useProfile(
+    isProfileModalOpen
+  );
 
   useEffect(() => {
     if (isProfileModalOpen) {
@@ -132,42 +115,11 @@ export default function NavbarComp({ isLogin }) {
     }
   }, [isProfileModalOpen, refetch, form, user?.user?.name]);
 
-  const updateProfileMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/profile`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${user?.token?.value}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal memperbarui profil");
-      return response.json();
-    },
-    onSuccess: (response) => {
-      messageApi.success("Profil berhasil diperbarui");
-      const currentSession = readSession();
-      if (currentSession) {
-        writeSession({
-          ...currentSession,
-          user: { ...currentSession.user, name: response.data.user.name },
-        });
-      }
-      queryClient.invalidateQueries(["profile"]);
-      form.resetFields();
-      setIsProfileModalOpen(false);
-    },
-    onError: (err) =>
-      messageApi.error(err.message || "Gagal memperbarui profil"),
-  });
+  const updateProfile = useUpdateProfile();
 
   const handleLogout = () => {
     clearSession();
-    messageApi.success("Berhasil logout");
+    toast.success("Berhasil logout");
     navigate("/");
   };
 
@@ -178,7 +130,24 @@ export default function NavbarComp({ isLogin }) {
   const handleUpdateProfile = () => {
     form
       .validateFields()
-      .then((values) => updateProfileMutation.mutate(values))
+      .then((values) =>
+        updateProfile.mutate(values, {
+          onSuccess: (response) => {
+            toast.success("Profil berhasil diperbarui");
+            const currentSession = readSession();
+            if (currentSession) {
+              writeSession({
+                ...currentSession,
+                user: { ...currentSession.user, name: response.data.user.name },
+              });
+            }
+            form.resetFields();
+            setIsProfileModalOpen(false);
+          },
+          onError: (err) =>
+            toast.error(err?.message ?? "Gagal memperbarui profil"),
+        })
+      )
       .catch(() => {});
   };
 
@@ -187,7 +156,7 @@ export default function NavbarComp({ isLogin }) {
   const isActive = (to) => location.pathname.startsWith(to);
 
   const displayName =
-    profileData?.data?.user?.name ?? user?.user?.name ?? "User";
+    profileData?.user?.name ?? user?.user?.name ?? "User";
 
   const initials =
     displayName
@@ -199,7 +168,7 @@ export default function NavbarComp({ isLogin }) {
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <nav
         className={`sticky top-0 z-40 bg-white border-b transition-all duration-200 ${
           scrolled
@@ -400,7 +369,7 @@ export default function NavbarComp({ isLogin }) {
                 form.resetFields();
                 setIsProfileModalOpen(false);
               }}
-              disabled={updateProfileMutation.isPending}
+              disabled={updateProfile.isPending}
             >
               Batal
             </Button>
@@ -408,9 +377,9 @@ export default function NavbarComp({ isLogin }) {
               variant="primary"
               size="md"
               onClick={handleUpdateProfile}
-              disabled={updateProfileMutation.isPending || isProfileLoading}
+              disabled={updateProfile.isPending || isProfileLoading}
             >
-              {updateProfileMutation.isPending ? "Menyimpan..." : "Simpan"}
+              {updateProfile.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </div>
         }

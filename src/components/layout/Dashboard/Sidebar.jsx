@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Tooltip } from "antd";
 import { LogOut, Lock, X, Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { Modal, Form, Input, message } from "antd";
+import { Modal, Form, Input } from "antd";
 import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
 import Button from "../../ui/Button";
+import { useToast } from "../../ui/Toast";
 import {
   readSession,
   clearSession,
   writeSession,
 } from "../../../features/auth/session-storage";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
+import {
+  useProfile,
+  useUpdateProfile,
+} from "../../../queries/useProfileQueries";
 
 function isLinkActive(pathname, link) {
   const basePath = "/admin/dashboard";
@@ -25,55 +29,39 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [user, setUser] = useState(() => readSession() ?? {});
   const { collapsed, toggle } = useSidebarCollapsed();
 
+  const { data: profileData } = useProfile(isProfileModalOpen);
+  const updateProfile = useUpdateProfile();
+
   useEffect(() => {
-    if (isProfileModalOpen && user?.token?.value) {
-      axios
-        .get(process.env.REACT_APP_BASE_URL + "/api/profile", {
-          headers: { Authorization: "Bearer " + user.token.value },
-        })
-        .then((response) => {
-          form.setFieldsValue({ nama: response.data.data.user.name });
-        })
-        .catch((err) => {
-          messageApi.error(
-            err.response?.data?.message || "Gagal mengambil profil"
-          );
-        });
+    if (isProfileModalOpen && profileData?.user?.name) {
+      form.setFieldsValue({ nama: profileData.user.name });
     }
-  }, [isProfileModalOpen, user?.token?.value, form, messageApi]);
+  }, [isProfileModalOpen, profileData, form]);
 
   const handleUpdateProfile = () => {
     form
       .validateFields()
       .then((values) => {
-        axios
-          .put(process.env.REACT_APP_BASE_URL + "/api/profile", values, {
-            headers: {
-              Authorization: "Bearer " + user.token.value,
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            messageApi.success("Profil berhasil diperbarui");
+        updateProfile.mutate(values, {
+          onSuccess: (response) => {
+            toast.success("Profil berhasil diperbarui");
             const updatedUser = {
               ...user,
-              user: { ...user.user, name: response.data.data.user.name },
+              user: { ...user.user, name: response.data.user.name },
             };
             writeSession(updatedUser);
             setUser(updatedUser);
             form.resetFields();
             setIsProfileModalOpen(false);
-          })
-          .catch((err) => {
-            messageApi.error(
-              err.response?.data?.message || "Gagal memperbarui profil"
-            );
-          });
+          },
+          onError: (err) =>
+            toast.error(err?.message ?? "Gagal memperbarui profil"),
+        });
       })
       .catch(() => {});
   };
@@ -87,7 +75,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       okButtonProps: { danger: true },
       onOk: () => {
         clearSession();
-        messageApi.success("Berhasil logout");
+        toast.success("Berhasil logout");
         navigate("/masuk", { replace: true });
       },
     });
@@ -97,7 +85,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <aside
         className={
           "fixed inset-y-0 left-0 z-40 bg-white shadow-panel transform transition-all duration-250 ease-out-quart " +
