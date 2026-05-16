@@ -1,4 +1,4 @@
-import { Form, Input, message, Select, Spin } from "antd";
+import { Form, Input, Select, Spin } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,8 +15,13 @@ import {
   Users,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
+import { useToast } from "../../components/ui/Toast";
 import { readSession } from "../../features/auth/session-storage";
 import { ROLE_HOME } from "../../features/auth/roleHome";
+import { desaApi } from "../../api/desa.api";
+import { posyanduApi } from "../../api/posyandu.api";
+import { kaderApi } from "../../api/kader.api";
+import { ortuApi } from "../../api/ortu.api";
 
 const BENEFITS = [
   'Catat pertumbuhan anak bulanan',
@@ -41,7 +46,7 @@ const ROLES = [
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const [role, setRole] = useState(3);
   const [form] = Form.useForm();
 
@@ -54,7 +59,7 @@ export default function SignUp() {
 
       if (isAuthenticated) {
         const redirectPath = ROLE_HOME[userRole] ?? "/";
-        messageApi.info("Anda sudah login. Mengarahkan ke dashboard...");
+        toast.info("Anda sudah login. Mengarahkan ke dashboard...");
         navigate(redirectPath, { replace: true });
       }
 
@@ -66,84 +71,50 @@ export default function SignUp() {
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
     queryKey: ["desa"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/desa`
-      );
-      if (!response.ok) throw new Error("Gagal memuat data desa");
-      const data = await response.json();
-      return data.data;
+      const res = await desaApi.list();
+      return res.data ?? [];
     },
-    onError: () => messageApi.error("Gagal memuat data desa"),
   });
 
   const { data: dataPosyandu, isLoading: posyanduLoading } = useQuery({
     queryKey: ["posyandu"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/posyandu`
-      );
-      if (!response.ok) throw new Error("Gagal memuat data posyandu");
-      const data = await response.json();
-      return data.data;
+      const res = await posyanduApi.list();
+      return res.data ?? [];
     },
-    onError: () => messageApi.error("Gagal memuat data posyandu"),
   });
 
   const posyanduRegisterMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/posyandu/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nama: values.nama,
-            email: values.email,
-            password: values.password,
-            id_desa: values.desa,
-            id_posyandu: values.posyandu,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal Registrasi");
-      return response.json();
-    },
+    mutationFn: (values) =>
+      kaderApi.register({
+        nama: values.nama,
+        email: values.email,
+        password: values.password,
+        id_desa: values.desa,
+        id_posyandu: values.posyandu,
+      }),
     onSuccess: () => {
-      messageApi.success("Registrasi berhasil. Silakan masuk.");
+      toast.success("Registrasi berhasil. Silakan masuk.");
       setTimeout(() => navigate("/masuk"), 1000);
     },
-    onError: (error) => {
-      messageApi.error(error.message || "Gagal Registrasi");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const orangTuaRegisterMutation = useMutation({
-    mutationFn: async (values) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/auth/orang-tua/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nama: values.nama,
-            email: values.email,
-            password: values.password,
-            id_desa: values.desa,
-            id_posyandu: values.posyandu,
-            alamat: values.alamat,
-          }),
-        }
-      );
-      if (!response.ok) throw new Error("Gagal Registrasi");
-      return response.json();
-    },
+    mutationFn: (values) =>
+      ortuApi.register({
+        nama: values.nama,
+        email: values.email,
+        password: values.password,
+        id_desa: values.desa,
+        id_posyandu: values.posyandu,
+        alamat: values.alamat,
+      }),
     onSuccess: () => {
-      messageApi.success("Registrasi berhasil. Silakan masuk.");
+      toast.success("Registrasi berhasil. Silakan masuk.");
       setTimeout(() => navigate("/masuk"), 1000);
     },
-    onError: (error) => {
-      messageApi.error(error.message || "Gagal Registrasi");
-    },
+    onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const onFinish = (values) => {
@@ -160,7 +131,7 @@ export default function SignUp() {
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
 
       {(authLoading || desaLoading || posyanduLoading) && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/95 px-[25px] py-[21px] rounded-default border border-light-ash shadow-card">
