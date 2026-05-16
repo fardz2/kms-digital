@@ -2,7 +2,6 @@ import React from 'react';
 import PageHeader from '../../components/ui/PageHeader';
 import AdminStatsGrid from './AdminStatsGrid';
 import AdminActivityFeed from './AdminActivityFeed';
-import AdminQuickLinks from './AdminQuickLinks';
 import { useAdminDashboardData } from './useAdminDashboardData';
 import useAuth from '../../hook/useAuth';
 
@@ -29,15 +28,11 @@ export default function AdminDashboard() {
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[33px]">
         <AdminStatsGrid stats={stats} loading={isLoading} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-[25px]">
-          <AdminActivityFeed
-            items={activity}
-            loading={isLoading}
-            hasPartialError={hasPartialError}
-          />
-          <AdminQuickLinks />
-        </div>
+        <AdminActivityFeed
+          items={activity}
+          loading={isLoading}
+          hasPartialError={hasPartialError}
+        />
       </div>
     </div>
   );
