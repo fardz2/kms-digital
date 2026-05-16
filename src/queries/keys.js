@@ -28,4 +28,21 @@ export const qk = {
     stats: () => ['admin', 'stats'],
     activity: () => ['admin', 'activity'],
   },
+  post: {
+    all: ['post'],
+    list: (role, userId) => ['post', 'list', role, userId],
+    detail: (id) => ['post', 'detail', id],
+  },
+  comment: {
+    all: ['comment'],
+    byPost: (postId) => ['comment', 'by-post', postId],
+  },
+  profile: {
+    all: ['profile'],
+    me: ['profile', 'me'],
+  },
+  kategori: {
+    all: ['kategori'],
+    list: ['kategori', 'list'],
+  },
 };
