@@ -8,7 +8,7 @@ Jalankan sebelum manual testing:
 ```bash
 npm test -- --watchAll=false
 ```
-Expected: semua test PASS (saat ini: 30 tests di 4 suites).
+Expected: semua test PASS (saat ini: 73 tests di 7 suites).
 
 ## Login & Session
 - [ ] Login semua 5 role via `/masuk` portal sukses
@@ -45,13 +45,14 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Tombol Keluar di navbar berfungsi
 
 ## Tenaga Kesehatan (Plan 4)
-- [ ] Login tenkes redirect ke `/tenkes/beranda` (bukan `/tenkes/forum`)
-- [ ] `/tenkes/beranda` landing baru dengan 2 card (Forum + Artikel)
-- [ ] Klik Forum → `/tenkes/forum` legacy Post masih jalan
+- [ ] Login tenkes redirect langsung ke `/tenkes/forum` (BerandaTenkes dihapus)
+- [ ] `/tenkes/beranda` legacy → redirect ke `/tenkes/forum`
+- [ ] Klik link Forum/Artikel di Navbar bekerja
 
 ## Admin (Plan 4)
-- [ ] Sidebar admin punya menu baru "Laporan Keseluruhan"
-- [ ] Klik menu → render placeholder "Fitur laporan sedang disiapkan"
+- [ ] Sidebar admin pakai label "Beranda / Data Master / Akun Pengguna" (LaporanAdmin dihapus)
+- [ ] AdminDashboard single column: header + 4 stats + activity feed
+- [ ] Stats "Pengguna" tampilkan total agg + breakdown (Kader/Tenkes/Ortu)
 - [ ] Sub-page existing (Desa, Posyandu, Kader, Tenkes, Artikel) tidak regressions
 
 ## Laporan (Plan 3)
@@ -71,13 +72,14 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] 3 Card distribusi BB/TB/LK total desa
 
 ### Desa Acara
-- [ ] `/desa/acara` form tambah acara (judul + tanggal required, deskripsi optional)
+- [ ] `/desa/beranda` punya section "Acara" embedded di bawah Laporan
+- [ ] Form tambah acara (judul + tanggal required, deskripsi optional)
 - [ ] Submit → toast → list refresh
 - [ ] Hapus dengan konfirmasi
+- [ ] `/desa/acara` legacy → redirect ke `/desa/beranda#acara` dengan auto-scroll
 
 ### Admin Laporan
-- [ ] `/admin/dashboard/laporan` render LaporanAdmin informasional
-- [ ] Tidak ada error saat akses
+- [ ] Menu LaporanAdmin sudah dihapus (route `/admin/dashboard/laporan` tidak ada)
 
 ## Artikel Public
 - [ ] `/artikel` render ArtikelList baru (bukan legacy)
@@ -139,14 +141,17 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] Legacy redirect `/kader-posyandu/dashboard` → `/kader/balita`
 
 ## Orang Tua (legacy pages, new routes)
-- [ ] `/orangtua/balita` render dashboard lama
-- [ ] `/orangtua/forum`, `/orangtua/forum/saya`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan
+- [ ] `/orangtua/balita` render BerandaOT pakai Navbar (konsisten dengan flow lain)
+- [ ] `/orangtua/forum`, `/orangtua/forum/:id`, `/orangtua/balita/:id` jalan
+- [ ] `/orangtua/forum/saya` legacy → redirect ke `/orangtua/forum?tab=saya`
+- [ ] Klik "Jawab pertanyaan" di forum → navigate ke `/orangtua/forum/{id}` (bukan tenkes)
 
 ## Admin (legacy)
 - [ ] `/admin/dashboard/desa`, posyandu, kader-posyandu, tenaga-kesehatan, artikel jalan
+- [ ] Menu admin tidak punya entry "Laporan" lagi (sudah dihapus)
 
 ## Desa & Tenkes (legacy)
-- [ ] `/desa/beranda`, `/desa/acara` jalan
+- [ ] `/desa/beranda` jalan, pakai Navbar (bukan AppShell minimal)
 - [ ] `/tenkes/forum`, `/tenkes/balita/:id` jalan
 
 ## Build & Runtime
@@ -170,6 +175,41 @@ Expected: semua test PASS (saat ini: 30 tests di 4 suites).
 - [ ] `/tenkes/beranda` di-redirect ke `/tenkes/forum`
 - [ ] `/admin/dashboard` single column: PageHeader + 4 stats + activity feed
 - [ ] Stats card "Pengguna" tampilkan total + breakdown 3 role
-- [ ] Sidebar admin pakai label "Beranda / Data Master / Akun Pengguna / Laporan"
-- [ ] 68 tests pass, build sukses
+- [ ] Sidebar admin pakai label "Beranda / Data Master / Akun Pengguna"
+
+## Architecture Cleanup (Plan 2026-05-15)
+
+### API Migration
+- [ ] Semua page yang fetch data pakai `api/client.js` (tidak ada raw fetch lagi)
+- [ ] 401 expired auto-redirect ke `/masuk?expired=1` dari interceptor
+- [ ] Authorization header otomatis diinject di semua request
+- [ ] Search "REACT_APP_BASE_URL" di src/ → hanya 1 occurrence di `client.js`
+
+### React Query Coverage
+- [ ] Forum: `usePostList`, `usePostDetail`, `useCreatePost`, `useCommentList`, `useCreateComment`
+- [ ] Profile: `useProfile`, `useUpdateProfile`
+- [ ] Kategori: `useKategoriList`, `useCreateKategori`
+- [ ] Anak: `useCreateAnak`, `useImportAnakExcel`
+- [ ] Cache invalidation di all mutations
+
+### UI Consistency
+- [ ] Semua role pakai `<Navbar>` (BerandaDesa juga, AppShell minimal dihapus)
+- [ ] Profile modal di Navbar + Sidebar pakai `ProfileModal` shared component
+- [ ] Forum tab "Saya" pakai filter berdasarkan `user.id` (bukan endpoint terpisah)
+- [ ] Empty state CTA: BerandaOT (Tambah Anak Pertama), Forum (Tulis Pertanyaan Pertama)
+- [ ] Filter status di RegisterKaderPosyandu pakai antd Select (bukan native)
+
+### Tech Debt Resolved
+- [ ] `moment.locale('id')` set di `index.js` (bulan tampil "Mei", "Juni", dst)
+- [ ] DesaPage shim folder dihapus, import InputDesa langsung
+- [ ] LaporanAdmin placeholder dihapus dari sidebar + route + file
+- [ ] useAuth pakai ROLE_HOME (tidak duplicate role map)
+- [ ] AdminDashboard pakai useSession (RequireRole sudah handle role guard)
+- [ ] useSession reactive ke storage event (logout di tab lain auto-sync)
+- [ ] Toast pakai inline duration (tidak module-load `message.config()` yang trigger antd v4 bug)
+
+### Verification
+- [ ] 73 tests pass (post/comment/profile/kategori query keys covered)
+- [ ] `npm run build` Compiled successfully (zero ESLint warning)
+- [ ] Bundle size tidak naik signifikan
 
