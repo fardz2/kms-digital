@@ -153,7 +153,7 @@ export default function RegisterKaderPosyandu() {
     setIsModalVisible(true);
   };
 
-  const rows = kaderData ?? [];
+  const rows = useMemo(() => kaderData ?? [], [kaderData]);
   const stats = [
     { label: "Total Kader", value: rows.length },
     {

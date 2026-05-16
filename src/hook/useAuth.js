@@ -3,6 +3,8 @@ import { useEffect, useMemo } from "react";
 import { readSession } from "../features/auth/session-storage";
 import { ROLE_HOME } from "../features/auth/roleHome";
 
+const PUBLIC_ROUTES = ["/sign-in", "/"];
+
 // Legacy useAuth — retained for pages that haven't migrated to useSession.
 // Reads from the same storage as useSession (kms_session_v1) via readSession(),
 // which also handles one-time migration from the old login_data key.
@@ -10,12 +12,10 @@ const useAuth = (expectedRole) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const publicRoutes = ["/sign-in", "/"];
-
   const user = useMemo(() => readSession(), []);
 
   useEffect(() => {
-    if (publicRoutes.includes(location.pathname)) return;
+    if (PUBLIC_ROUTES.includes(location.pathname)) return;
 
     const isDetailRoute = location.pathname.startsWith(
       "/tenaga-kesehatan/detail/"
