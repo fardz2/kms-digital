@@ -85,7 +85,7 @@ export default function SignUp() {
   });
 
   const posyanduRegisterMutation = useMutation({
-    mutationFn: (values: any) =>
+    mutationFn: (values: Record<string, any>) =>
       kaderApi.register({
         nama: values.nama,
         email: values.email,
@@ -101,7 +101,7 @@ export default function SignUp() {
   });
 
   const orangTuaRegisterMutation = useMutation({
-    mutationFn: (values: any) =>
+    mutationFn: (values: Record<string, any>) =>
       ortuApi.register({
         nama: values.nama,
         email: values.email,
@@ -490,7 +490,7 @@ export default function SignUp() {
           </div>
 
           <div className="relative text-caption text-white/50">
-            · {new Date().getFullYear()} Posyandu Lebakwangi
+            Â· {new Date().getFullYear()} Posyandu Lebakwangi
           </div>
         </aside>
       </div>

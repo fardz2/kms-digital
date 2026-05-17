@@ -38,7 +38,7 @@ export default function InputPosyandu() {
   });
 
   const createPosyanduMutation = useMutation({
-    mutationFn: (values: any) =>
+    mutationFn: (values: Record<string, any>) =>
       posyanduApi.create({
         id_desa: values.desa,
         nama: values.posyandu,
@@ -56,7 +56,7 @@ export default function InputPosyandu() {
   });
 
   const updatePosyanduMutation = useMutation({
-    mutationFn: ({ id, values }: any) =>
+    mutationFn: ({ id, values }: { id: number; values: Record<string, any> }) =>
       posyanduApi.update(id, {
         id_desa: values.desa,
         nama: values.posyandu,

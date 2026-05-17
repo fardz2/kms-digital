@@ -60,7 +60,7 @@ export default function RegisterKaderPosyandu() {
   });
 
   const createKaderMutation = useMutation({
-    mutationFn: (values: any) =>
+    mutationFn: (values: Record<string, any>) =>
       kaderApi.register({
         nama: values.nama,
         email: values.email,
@@ -80,7 +80,7 @@ export default function RegisterKaderPosyandu() {
   });
 
   const updateKaderMutation = useMutation({
-    mutationFn: ({ id, values }: any) =>
+    mutationFn: ({ id, values }: { id: number; values: Record<string, any> }) =>
       kaderApi.update(id, {
         nama: values.nama,
         email: values.email,

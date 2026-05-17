@@ -42,7 +42,7 @@ export default function RegisterTenagaKesehatan() {
     });
 
   const createTenagaKesehatanMutation = useMutation({
-    mutationFn: (values: any) =>
+    mutationFn: (values: Record<string, any>) =>
       nakesApi.register({
         nama: values.nama,
         email: values.email,
