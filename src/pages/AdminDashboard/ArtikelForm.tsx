@@ -1,11 +1,12 @@
 ﻿// @ts-nocheck
 import { Form, Input, Select } from "antd";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { ArrowLeft, UploadCloud } from "lucide-react";
+
+const ReactQuill = lazy(() => import("react-quill-new"));
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import { useToast } from "../../components/ui/Toast";
@@ -238,11 +239,13 @@ export default function ArtikelForm() {
                     },
                   ]}
                 >
-                  <ReactQuill
-                    theme="snow"
-                    value={valueContent}
-                    onChange={setValueContent}
-                  />
+                  <Suspense fallback={<div className="h-[200px] bg-faint-fog rounded-default animate-pulse" />}>
+                    <ReactQuill
+                      theme="snow"
+                      value={valueContent}
+                      onChange={setValueContent}
+                    />
+                  </Suspense>
                 </Form.Item>
               </>
             )}

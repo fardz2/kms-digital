@@ -1,7 +1,6 @@
 import { Form, Input, Modal, Select } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import "./style.css";
-import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { UploadCloud } from "lucide-react";
 import Button from "../../ui/Button";
@@ -12,6 +11,8 @@ import {
   useKategoriList,
   useCreateKategori,
 } from "../../../queries/useKategoriQueries";
+
+const ReactQuill = lazy(() => import("react-quill-new"));
 
 export default function FormUpdateDataArtikel({ isOpen, onCancel, fetch, data }) {
   const { role } = useSession();
@@ -270,11 +271,13 @@ export default function FormUpdateDataArtikel({ isOpen, onCancel, fetch, data })
                   name="content"
                 >
                   <div className="border border-light-ash rounded-default overflow-hidden">
-                    <ReactQuill
-                      theme="snow"
-                      value={valueContent}
-                      onChange={setValueContent}
-                    />
+                    <Suspense fallback={<div className="h-[180px] bg-faint-fog animate-pulse" />}>
+                      <ReactQuill
+                        theme="snow"
+                        value={valueContent}
+                        onChange={setValueContent}
+                      />
+                    </Suspense>
                   </div>
                 </Form.Item>
               </>
