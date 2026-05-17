@@ -1,11 +1,11 @@
 ﻿// @ts-nocheck
 import React from 'react';
 import moment from 'moment';
-import { Modal as AntModal } from 'antd';
 import { AlertTriangle, Check } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   usePendingOrangTua,
   usePendingAnak,
@@ -14,17 +14,6 @@ import {
   useRejectOrangTua,
   useRejectAnak,
 } from '../../queries/useApproveQueries';
-
-function confirmAction({ title, content, okText, onOk }) {
-  AntModal.confirm({
-    title,
-    icon: <AlertTriangle size={20} className="text-danger" />,
-    content,
-    okText: okText ?? 'Ya',
-    cancelText: 'Batal',
-    onOk,
-  });
-}
 
 function EmptyState({ label }) {
   return (
@@ -35,7 +24,7 @@ function EmptyState({ label }) {
   );
 }
 
-function OrangTuaList({ data, isLoading, onApprove, onReject }) {
+function OrangTuaList({ data, isLoading, onApprove, onReject, askConfirm }) {
   if (isLoading) return <div className="text-body-sm text-graphite">Memuat daftar orang tua...</div>;
   if (!data || data.length === 0) return <EmptyState label="orang tua" />;
   return (
@@ -55,8 +44,9 @@ function OrangTuaList({ data, isLoading, onApprove, onReject }) {
               variant="destructive"
               size="sm"
               onClick={() =>
-                confirmAction({
+                askConfirm({
                   title: 'Tolak pendaftaran?',
+                  icon: <AlertTriangle size={20} className="text-danger" />,
                   content: `${ot.nama} akan dihapus.`,
                   okText: 'Ya, Tolak',
                   onOk: () => onReject(ot.id),
@@ -80,7 +70,7 @@ function OrangTuaList({ data, isLoading, onApprove, onReject }) {
   );
 }
 
-function AnakList({ data, isLoading, onApprove, onReject }) {
+function AnakList({ data, isLoading, onApprove, onReject, askConfirm }) {
   if (isLoading) return <div className="text-body-sm text-graphite">Memuat daftar anak...</div>;
   if (!data || data.length === 0) return <EmptyState label="anak" />;
   return (
@@ -109,8 +99,9 @@ function AnakList({ data, isLoading, onApprove, onReject }) {
                 variant="destructive"
                 size="sm"
                 onClick={() =>
-                  confirmAction({
+                  askConfirm({
                     title: 'Tolak pendaftaran?',
+                    icon: <AlertTriangle size={20} className="text-danger" />,
                     content: `${anak.nama} akan dihapus.`,
                     okText: 'Ya, Tolak',
                     onOk: () => onReject(anak.id),
@@ -137,6 +128,7 @@ function AnakList({ data, isLoading, onApprove, onReject }) {
 
 export default function PendingApprovalSection({ enabled = true }) {
   const toast = useToast();
+  const askConfirm = useConfirmDialog();
   const { data: otList, isLoading: otLoading } = usePendingOrangTua(enabled);
   const { data: anakList, isLoading: anakLoading } = usePendingAnak(enabled);
 
@@ -174,6 +166,7 @@ export default function PendingApprovalSection({ enabled = true }) {
               isLoading={otLoading}
               onApprove={(id) => approveOT.mutate(id, withToast('Setujui orang tua'))}
               onReject={(id) => rejectOT.mutate(id, withToast('Tolak orang tua'))}
+              askConfirm={askConfirm}
             />
           </section>
           <section className="space-y-[17px]">
@@ -185,6 +178,7 @@ export default function PendingApprovalSection({ enabled = true }) {
               isLoading={anakLoading}
               onApprove={(id) => approveAnak.mutate(id, withToast('Setujui anak'))}
               onReject={(id) => rejectAnak.mutate(id, withToast('Tolak anak'))}
+              askConfirm={askConfirm}
             />
           </section>
         </>
