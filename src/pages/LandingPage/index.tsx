@@ -15,6 +15,8 @@ import {
 import landingPageImage from "../../assets/img/baby-banner.svg";
 import NavbarComp from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
+import { useSession } from "../../features/auth/useSession";
+import { ROLE_HOME } from "../../features/auth/roleHome";
 
 const ROLES = [
   {
@@ -64,9 +66,12 @@ const STATS = [
 ];
 
 export default function LandingPage() {
+  const { isAuthenticated, role } = useSession();
+  const dashboardPath = role ? ROLE_HOME[role] ?? '/' : '/masuk';
+
   return (
     <>
-      <NavbarComp />
+      <NavbarComp isLogin={isAuthenticated} />
       <main className="bg-faint-fog">
         {/* Hero */}
         <section className="relative overflow-hidden">
@@ -105,21 +110,36 @@ export default function LandingPage() {
                   dalam satu aplikasi sederhana.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-[13px] max-w-[420px]">
-                  <Link to="/masuk" className="flex-1">
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      trailingIcon={<ArrowRight size={20} strokeWidth={2.25} />}
-                      className="w-full"
-                    >
-                      Masuk ke Akun
-                    </Button>
-                  </Link>
-                  <Link to="/sign-up" className="flex-1">
-                    <Button variant="default" size="lg" className="w-full">
-                      Daftar Baru
-                    </Button>
-                  </Link>
+                  {isAuthenticated ? (
+                    <Link to={dashboardPath} className="flex-1">
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        trailingIcon={<ArrowRight size={20} strokeWidth={2.25} />}
+                        className="w-full"
+                      >
+                        Buka Dashboard
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link to="/masuk" className="flex-1">
+                        <Button
+                          variant="primary"
+                          size="lg"
+                          trailingIcon={<ArrowRight size={20} strokeWidth={2.25} />}
+                          className="w-full"
+                        >
+                          Masuk ke Akun
+                        </Button>
+                      </Link>
+                      <Link to="/sign-up" className="flex-1">
+                        <Button variant="default" size="lg" className="w-full">
+                          Daftar Baru
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
                 <div className="mt-[33px] flex items-center gap-[17px] text-caption text-graphite">
                   <div className="flex items-center gap-[6px]">
