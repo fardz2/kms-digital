@@ -45,8 +45,9 @@ export default function AdminActivityFeed({ items = [], loading, hasPartialError
 
       {loading ? (
         <div className="flex flex-col gap-[8px]">
+          {/* Static skeleton placeholders, index key is safe (no reorder) */}
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-[17px] px-[17px] py-[13px]">
+            <div key={`skeleton-${i}`} className="flex items-center gap-[17px] px-[17px] py-[13px]">
               <div className="w-[40px] h-[40px] rounded-full bg-polar-mist animate-pulse shrink-0" />
               <div className="flex-1">
                 <div className="h-[14px] w-2/3 bg-polar-mist animate-pulse rounded mb-[6px]" />
