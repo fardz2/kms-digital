@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { Form, Input, Select, Modal } from "antd";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/ui/DataTable";

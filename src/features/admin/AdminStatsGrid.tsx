@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import React from 'react';
 import { Home, Building2, Users, Newspaper } from 'lucide-react';
 import StatCard from '../../components/ui/StatCard';

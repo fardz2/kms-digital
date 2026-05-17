@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import React, { useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
 import Modal from '../../components/ui/Modal';

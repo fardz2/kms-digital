@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { Form, Input, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";

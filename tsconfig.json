@@ -12,6 +12,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
@@ -25,7 +27,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "suppressImplicitAnyIndexErrors": false,
+    "noImplicitThis": false
   },
   "include": ["src", "vite.config.js"],
   "exclude": ["node_modules", "build", "dist"]

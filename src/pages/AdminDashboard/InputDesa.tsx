@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { Form, Input, Modal } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

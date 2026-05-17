@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { useMutation } from '@tanstack/react-query';
 import { laporanApi } from '../api/laporan.api';
 

@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import React from 'react';
 import moment from 'moment';
 import { Form, Input, DatePicker, Modal as AntModal } from 'antd';

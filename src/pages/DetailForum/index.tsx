@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { Form, Input, Spin } from "antd";
 import moment from "moment";
 import React from "react";

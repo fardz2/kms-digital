@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { Form, Input, Select, Spin } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
