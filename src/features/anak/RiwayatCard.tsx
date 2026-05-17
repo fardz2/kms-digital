@@ -38,24 +38,24 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3 mb-3 text-base">
         <div>
-          <strong>?? BB:</strong> {berat} kg
+          <strong>BB:</strong> {berat} kg
         </div>
         <div>
-          <strong>?? TB:</strong> {tinggi} cm
+          <strong>TB:</strong> {tinggi} cm
         </div>
         <div>
-          <strong>?? LK:</strong> {lingkarKepala} cm
+          <strong>LK:</strong> {lingkarKepala} cm
         </div>
         {lila != null && (
           <div>
-            <strong>?? LILA:</strong> {lila} cm
+            <strong>LILA:</strong> {lila} cm
           </div>
         )}
       </div>
 
       {catatan && (
         <div className="px-[17px] py-[13px] bg-polar-mist rounded-default text-body-sm text-deep-slate mb-[13px]">
-          ?? {catatan}
+          {catatan}
         </div>
       )}
 
