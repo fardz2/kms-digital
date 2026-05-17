@@ -16,7 +16,7 @@ describe('session-storage', () => {
 
   const validSession = {
     token: { value: 'abc123' },
-    user: { id: 1, role: 'KADER_POSYANDU', name: 'Bu Siti' },
+    user: { id: 1, role: 'KADER_POSYANDU' as const, name: 'Bu Siti' },
   };
 
   describe('readSession', () => {

@@ -23,7 +23,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const toast = useToast();
   const confirm = useConfirmDialog();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const session = readSession() ?? {};
+  const session = readSession();
   const { collapsed, toggle } = useSidebarCollapsed();
 
   const handleLogout = () => {
