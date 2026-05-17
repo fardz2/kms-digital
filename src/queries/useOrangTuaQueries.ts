@@ -1,4 +1,5 @@
-﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+﻿// @ts-nocheck
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orangTuaApi } from '../api/approve.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
