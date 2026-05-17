@@ -45,4 +45,17 @@ export const qk = {
     all: ['kategori'],
     list: ['kategori', 'list'],
   },
+  approve: {
+    all: ['approve'],
+    orangTua: ['approve', 'orangTua'],
+    anak: ['approve', 'anak'],
+  },
+  reminder: {
+    all: ['reminder'],
+    list: ['reminder', 'list'],
+  },
+  orangTua: {
+    all: ['orangTua'],
+    list: ['orangTua', 'list'],
+  },
 };
