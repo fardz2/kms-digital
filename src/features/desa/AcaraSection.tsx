@@ -1,11 +1,12 @@
 ﻿// @ts-nocheck
 import React from 'react';
 import moment from 'moment';
-import { Form, Input, DatePicker, Modal as AntModal } from 'antd';
+import { Form, Input, DatePicker } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   useReminderList,
   useCreateReminder,
@@ -14,6 +15,7 @@ import {
 
 export default function AcaraSection() {
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const [form] = Form.useForm();
   const { data: reminders, isLoading } = useReminderList();
   const createMutation = useCreateReminder();
@@ -40,7 +42,7 @@ export default function AcaraSection() {
   };
 
   const handleDelete = (id, judul) => {
-    AntModal.confirm({
+    confirm({
       title: 'Hapus acara?',
       icon: <ExclamationCircleOutlined />,
       content: `Acara "${judul}" akan dihapus.`,

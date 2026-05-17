@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import { Modal as AntModal } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { useAnakDetail } from '../../queries/useAnakQueries';
 import {
   usePengukuranAnak,
@@ -21,6 +21,7 @@ export default function DetailAnak() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const { role } = useSession();
 
   const { data: anak, isLoading: anakLoading } = useAnakDetail(id);
@@ -43,7 +44,7 @@ export default function DetailAnak() {
   };
 
   const handleDelete = (item) => {
-    AntModal.confirm({
+    confirm({
       title: 'Hapus pengukuran?',
       icon: <ExclamationCircleOutlined />,
       content: `Data tanggal ${moment(item.date).format('DD MMMM YYYY')} akan dihapus.`,
