@@ -2,7 +2,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import { Modal } from 'antd';
 import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
@@ -11,6 +10,7 @@ import { classifyBalita, priority } from './classifyBalita';
 import Button from '../../components/ui/Button';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import { useSession } from '../auth/useSession';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { usePengukuranBulananKader } from '../../queries/usePengukuranBulananKader';
 import {
   usePendingOrangTua,
@@ -21,6 +21,7 @@ import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 export default function ModePosyandu() {
   const navigate = useNavigate();
   const { user, logout } = useSession();
+  const confirm = useConfirmDialog();
   const { anakList, pengukuranByAnak, isLoading } = usePengukuranBulananKader();
   const [filter, setFilter] = useState('semua');
   const [search, setSearch] = useState('');
@@ -70,7 +71,7 @@ export default function ModePosyandu() {
   }, [balitaWithMeta, search, filter]);
 
   const handleKeluar = () => {
-    Modal.confirm({
+    confirm({
       title: 'Keluar dari akun?',
       icon: <AlertTriangle size={20} className="text-danger" />,
       content: 'Anda perlu masuk kembali untuk menggunakan aplikasi.',
