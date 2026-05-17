@@ -1,10 +1,11 @@
-import { Form, Input, Spin } from "antd";
+import { Form, Input } from "antd";
 import moment from "moment";
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
+import { SkeletonCard } from "../../components/ui/Skeleton";
 import avatar from "../../assets/icon/user.png";
 import { useToast } from "../../components/ui/Toast";
 import { useSession } from "../../features/auth/useSession";
@@ -56,8 +57,9 @@ export default function DetailForum() {
         </button>
 
         {isLoading && (
-          <div className="flex justify-center py-[50px]">
-            <Spin size="large" />
+          <div className="space-y-[17px]">
+            <SkeletonCard lines={3} />
+            <SkeletonCard lines={2} />
           </div>
         )}
 

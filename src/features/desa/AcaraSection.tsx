@@ -98,7 +98,12 @@ export default function AcaraSection() {
       </Card>
 
       <Card title={`Daftar Acara (${sorted.length})`}>
-        {isLoading && <div className="text-neutral-500">Memuat...</div>}
+        {isLoading && (
+          <div className="space-y-[8px]">
+            <div className="h-[60px] bg-polar-mist animate-pulse rounded-default" />
+            <div className="h-[60px] bg-polar-mist animate-pulse rounded-default" />
+          </div>
+        )}
         {!isLoading && sorted.length === 0 && (
           <div className="text-center py-4 text-neutral-500">Belum ada acara</div>
         )}

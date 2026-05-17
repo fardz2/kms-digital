@@ -1,10 +1,11 @@
-import { Spin, Empty } from "antd";
+import { Empty } from "antd";
 import moment from "moment";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, Plus, ArrowRight } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
+import { SkeletonCard } from "../../components/ui/Skeleton";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
 import { useSession } from "../../features/auth/useSession";
@@ -95,8 +96,10 @@ export default function Post() {
         )}
 
         {postsLoading && (
-          <div className="flex justify-center py-[50px]">
-            <Spin size="large" />
+          <div className="flex flex-col gap-[13px]">
+            <SkeletonCard lines={3} />
+            <SkeletonCard lines={3} />
+            <SkeletonCard lines={3} />
           </div>
         )}
 

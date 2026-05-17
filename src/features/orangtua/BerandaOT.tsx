@@ -9,6 +9,7 @@ import Button from '../../components/ui/Button';
 import { useSession } from '../auth/useSession';
 import { useAnakList } from '../../queries/useAnakQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
+import { SkeletonList } from '../../components/ui/Skeleton';
 
 function QuickLink({ Icon, title, desc, onClick }) {
   return (
@@ -65,9 +66,7 @@ export default function BerandaOT() {
             </Button>
           </div>
 
-          {isLoading && (
-            <div className="text-body-sm text-graphite">Memuat data anak...</div>
-          )}
+          {isLoading && <SkeletonList count={2} />}
 
           {!isLoading && (!anakList || anakList.length === 0) && (
             <Card>

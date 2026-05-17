@@ -16,6 +16,7 @@ import {
   usePendingAnak,
 } from '../../queries/useApproveQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
+import { SkeletonList } from '../../components/ui/Skeleton';
 
 export default function ModePosyandu() {
   const navigate = useNavigate();
@@ -152,9 +153,7 @@ export default function ModePosyandu() {
           <FilterChip value={filter} onChange={setFilter} counts={counts} />
         </div>
 
-        {isLoading && (
-          <div className="text-body-sm text-graphite">Memuat data balita...</div>
-        )}
+        {isLoading && <SkeletonList count={3} />}
 
         {!isLoading && filtered.length === 0 && (
           <div className="text-center py-[50px] text-body-sm text-graphite">

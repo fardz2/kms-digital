@@ -84,7 +84,14 @@ export default function LaporanBulananKader() {
         </div>
 
         {isLoading ? (
-          <div className="text-body-sm text-graphite">Memuat data laporan...</div>
+          <div className="space-y-[17px]">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px]">
+              <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
+              <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
+              <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
+            </div>
+            <div className="h-[200px] bg-polar-mist animate-pulse rounded-default" />
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px] mb-[25px]">

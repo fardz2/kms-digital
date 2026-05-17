@@ -4,6 +4,7 @@ import { AlertTriangle, Check } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { useToast } from '../../components/ui/Toast';
+import { SkeletonList } from '../../components/ui/Skeleton';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   usePendingOrangTua,
@@ -24,7 +25,7 @@ function EmptyState({ label }) {
 }
 
 function OrangTuaList({ data, isLoading, onApprove, onReject, askConfirm }) {
-  if (isLoading) return <div className="text-body-sm text-graphite">Memuat daftar orang tua...</div>;
+  if (isLoading) return <SkeletonList count={2} />;
   if (!data || data.length === 0) return <EmptyState label="orang tua" />;
   return (
     <div className="flex flex-col gap-[13px]">
@@ -70,7 +71,7 @@ function OrangTuaList({ data, isLoading, onApprove, onReject, askConfirm }) {
 }
 
 function AnakList({ data, isLoading, onApprove, onReject, askConfirm }) {
-  if (isLoading) return <div className="text-body-sm text-graphite">Memuat daftar anak...</div>;
+  if (isLoading) return <SkeletonList count={2} />;
   if (!data || data.length === 0) return <EmptyState label="anak" />;
   return (
     <div className="flex flex-col gap-[13px]">

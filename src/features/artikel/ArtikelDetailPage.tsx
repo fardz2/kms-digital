@@ -1,8 +1,10 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
+import { ArrowLeft } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { SkeletonText } from '../../components/ui/Skeleton';
 import { useArtikelDetail } from '../../queries/useArtikelQueries';
 import { sanitizeHtml } from '../../utilities/sanitize';
 
@@ -27,14 +29,17 @@ export default function ArtikelDetailPage() {
         <Button
           variant="ghost"
           size="sm"
+          leadingIcon={<ArrowLeft size={16} strokeWidth={1.75} />}
           onClick={() => navigate(-1)}
           className="mb-4"
         >
-          ? Kembali
+          Kembali
         </Button>
 
         {isLoading ? (
-          <div className="text-neutral-500">Memuat artikel...</div>
+          <div className="bg-white p-[25px] rounded-default border border-light-ash">
+            <SkeletonText lines={6} />
+          </div>
         ) : (
           <div
             className="bg-white p-[25px] rounded-default border border-light-ash text-base text-deep-slate leading-relaxed"

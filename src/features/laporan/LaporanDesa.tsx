@@ -133,7 +133,13 @@ const LaporanDesa = forwardRef<HTMLDivElement>(function LaporanDesa(_props, ref)
 
   if (isLoading) {
     return (
-      <div className="text-body-sm text-graphite">Memuat laporan desa...</div>
+      <div className="space-y-[17px]">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[17px]">
+          <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
+          <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
+        </div>
+        <div className="h-[160px] bg-polar-mist animate-pulse rounded-default" />
+      </div>
     );
   }
 

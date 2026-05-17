@@ -5,6 +5,7 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { SkeletonCard } from '../../components/ui/Skeleton';
 import { useArtikelList } from '../../queries/useArtikelQueries';
 
 export default function ArtikelList() {
@@ -30,7 +31,11 @@ export default function ArtikelList() {
         </Button>
 
         {isLoading && (
-          <div className="text-body-sm text-graphite">Memuat artikel...</div>
+          <div className="flex flex-col gap-[13px]">
+            <SkeletonCard lines={2} />
+            <SkeletonCard lines={2} />
+            <SkeletonCard lines={2} />
+          </div>
         )}
 
         {!isLoading && (!artikel || artikel.length === 0) && (
