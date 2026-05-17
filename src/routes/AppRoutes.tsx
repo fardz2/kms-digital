@@ -31,17 +31,37 @@ const ArtikelList = lazy(() => import('../pages/AdminDashboard/ArtikelList'));
 const ArtikelForm = lazy(() => import('../pages/AdminDashboard/ArtikelForm'));
 const AdminDashboard = lazy(() => import('../features/admin/AdminDashboard'));
 
-function PageFallback() {
+/**
+ * Top loading bar yang animasi shimmer dari kiri ke kanan.
+ * Tampil sebagai overlay tipis di top viewport, tidak unmount halaman saat ini.
+ */
+function TopLoadingBar() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-faint-fog">
-      <div className="text-body-sm text-graphite">Memuat halaman...</div>
+    <div
+      role="progressbar"
+      aria-label="Memuat halaman"
+      className="fixed top-0 left-0 right-0 h-[3px] z-[9999] bg-primary-50 overflow-hidden"
+    >
+      <div
+        className="h-full w-1/3 bg-primary-500 rounded-r-full animate-[loading-bar_1s_ease-in-out_infinite]"
+        style={{
+          animation: 'loading-bar 1s ease-in-out infinite',
+        }}
+      />
+      <style>{`
+        @keyframes loading-bar {
+          0%   { transform: translateX(-100%); }
+          50%  { transform: translateX(100%); }
+          100% { transform: translateX(300%); }
+        }
+      `}</style>
     </div>
   );
 }
 
 export default function AppRoutes() {
   return (
-    <Suspense fallback={<PageFallback />}>
+    <Suspense fallback={<TopLoadingBar />}>
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
