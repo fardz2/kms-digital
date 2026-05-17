@@ -1,16 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Modal } from 'antd';
 import { AlertTriangle, LogOut } from 'lucide-react';
 import Button from '../ui/Button';
 import { useSession } from '../../features/auth/useSession';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 export default function AppShell({ children, menu = [], activeKey }) {
   const navigate = useNavigate();
   const { user, logout } = useSession();
+  const confirm = useConfirmDialog();
 
   const handleLogout = () => {
-    Modal.confirm({
+    confirm({
       title: 'Keluar dari akun?',
       icon: <AlertTriangle size={20} className="text-danger" />,
       content: 'Anda perlu masuk kembali untuk menggunakan aplikasi.',

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Tooltip, Modal } from "antd";
+import { Tooltip } from "antd";
 import { LogOut, Lock, X, Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
@@ -8,6 +8,7 @@ import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
 import { readSession, clearSession } from "../../../features/auth/session-storage";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
+import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
 
 function isLinkActive(pathname, link) {
   const basePath = "/admin/dashboard";
@@ -20,12 +21,13 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const session = readSession() ?? {};
   const { collapsed, toggle } = useSidebarCollapsed();
 
   const handleLogout = () => {
-    Modal.confirm({
+    confirm({
       title: "Keluar dari akun?",
       content: "Anda perlu masuk kembali untuk menggunakan aplikasi.",
       okText: "Ya, Keluar",
