@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntApp, ConfigProvider } from 'antd';
 import idID from 'antd/locale/id_ID';
 import AppRoutes from './routes/AppRoutes';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,14 +28,16 @@ const theme = {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ConfigProvider theme={theme} locale={idID}>
-        <AntApp>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AntApp>
-      </ConfigProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ConfigProvider theme={theme} locale={idID}>
+          <AntApp>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </AntApp>
+        </ConfigProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
