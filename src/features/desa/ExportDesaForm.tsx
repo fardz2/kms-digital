@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { DatePicker, Form, Select, message } from 'antd';
+import { DatePicker, Form, Select } from 'antd';
 import dayjs from 'dayjs';
 import { Download, Printer } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { useToast } from '../../components/ui/Toast';
 import { useExportCsvDesa } from '../../queries/useExportQueries';
 import { useSession } from '../auth/useSession';
 
 export default function ExportDesaForm({ posyanduList = [], printableRef }) {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const { user } = useSession();
   const [isPrinting, setIsPrinting] = useState(false);
 
@@ -21,7 +22,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
       .then((values) => {
         const idDesa = user?.id_desa;
         if (!idDesa) {
-          messageApi.error('Data desa tidak tersedia');
+          toast.error('Data desa tidak tersedia');
           return;
         }
         exportCsv.mutate(
@@ -33,10 +34,10 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
           },
           {
             onSuccess: () => {
-              messageApi.success('Data berhasil diunduh');
+              toast.success('Data berhasil diunduh');
             },
             onError: (err) => {
-              messageApi.error(err?.message ?? 'Data gagal diunduh');
+              toast.error(err?.message ?? 'Data gagal diunduh');
             },
           }
         );
@@ -46,7 +47,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
 
   const handlePrintPdf = async () => {
     if (!printableRef?.current) {
-      messageApi.error('Konten laporan belum siap');
+      toast.error('Konten laporan belum siap');
       return;
     }
     try {
@@ -64,10 +65,10 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
       };
 
       await html2pdf(printableRef.current, opt).save();
-      messageApi.success('Laporan PDF berhasil dibuat');
+      toast.success('Laporan PDF berhasil dibuat');
     } catch (err) {
       console.error('PDF export error:', err);
-      messageApi.error('Gagal membuat laporan PDF');
+      toast.error('Gagal membuat laporan PDF');
     } finally {
       setIsPrinting(false);
     }
@@ -86,7 +87,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
         </div>
       }
     >
-      {contextHolder}
+      {toast.contextHolder}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[25px]">
         <div className="space-y-[13px]">

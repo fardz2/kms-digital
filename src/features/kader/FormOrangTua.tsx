@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Select, message } from 'antd';
+import { Form, Input, Select } from 'antd';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
+import { useToast } from '../../components/ui/Toast';
 import {
   useCreateOrangTua,
   useUpdateOrangTua,
@@ -22,7 +23,7 @@ export default function FormOrangTua({
   idDesa,
 }) {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
 
   const createMutation = useCreateOrangTua();
   const updateMutation = useUpdateOrangTua();
@@ -65,11 +66,11 @@ export default function FormOrangTua({
             },
             {
               onSuccess: () => {
-                messageApi.success('Berhasil menambahkan orang tua');
+                toast.success('Berhasil menambahkan orang tua');
                 close();
               },
               onError: (err) =>
-                messageApi.error(err?.message ?? 'Gagal menambahkan orang tua'),
+                toast.error(err?.message ?? 'Gagal menambahkan orang tua'),
             }
           );
         } else {
@@ -86,11 +87,11 @@ export default function FormOrangTua({
             },
             {
               onSuccess: () => {
-                messageApi.success('Berhasil memperbarui orang tua');
+                toast.success('Berhasil memperbarui orang tua');
                 close();
               },
               onError: (err) =>
-                messageApi.error(err?.message ?? 'Gagal memperbarui orang tua'),
+                toast.error(err?.message ?? 'Gagal memperbarui orang tua'),
             }
           );
         }
@@ -102,7 +103,7 @@ export default function FormOrangTua({
 
   return (
     <>
-      {contextHolder}
+      {toast.contextHolder}
       <Modal
         title={isEdit ? 'Ubah Orang Tua' : 'Tambah Orang Tua'}
         open={isOpen}

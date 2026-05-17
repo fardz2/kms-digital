@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../components/ui/Toast';
 import { message } from 'antd';
 import { ArrowLeft, AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
@@ -33,7 +34,7 @@ export default function AkunOrangTuaPage() {
   const navigate = useNavigate();
   const { user } = useSession();
   const [tab, setTab] = useState('pending');
-  const [messageApi, contextHolder] = message.useMessage();
+  const toast = useToast();
   const confirm = useConfirmDialog();
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState('add');
@@ -65,9 +66,9 @@ export default function AkunOrangTuaPage() {
       okButtonProps: { danger: true },
       onOk: () =>
         deleteMutation.mutate(record.id, {
-          onSuccess: () => messageApi.success('Orang tua berhasil dihapus'),
+          onSuccess: () => toast.success('Orang tua berhasil dihapus'),
           onError: (err) =>
-            messageApi.error(err?.message ?? 'Gagal menghapus orang tua'),
+            toast.error(err?.message ?? 'Gagal menghapus orang tua'),
         }),
     });
   };
@@ -134,7 +135,7 @@ export default function AkunOrangTuaPage() {
 
   return (
     <div>
-      {contextHolder}
+      {toast.contextHolder}
       <PageHeader
         eyebrow="Kader Posyandu"
         title="Akun Orang Tua"
