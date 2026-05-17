@@ -1,7 +1,7 @@
 ﻿// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Modal as AntModal, message } from 'antd';
+import { message } from 'antd';
 import { ArrowLeft, AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -15,6 +15,7 @@ import {
   usePendingAnak,
 } from '../../queries/useApproveQueries';
 import { useSession } from '../auth/useSession';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import PendingApprovalSection from './PendingApprovalSection';
 import FormOrangTua from './FormOrangTua';
 
@@ -34,6 +35,7 @@ export default function AkunOrangTuaPage() {
   const { user } = useSession();
   const [tab, setTab] = useState('pending');
   const [messageApi, contextHolder] = message.useMessage();
+  const confirm = useConfirmDialog();
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState('add');
   const [selected, setSelected] = useState(null);
@@ -55,7 +57,7 @@ export default function AkunOrangTuaPage() {
   );
 
   const showDeleteConfirm = (record) => {
-    AntModal.confirm({
+    confirm({
       title: 'Hapus orang tua?',
       icon: <AlertTriangle size={20} className="text-danger" />,
       content: `${record.nama} akan dihapus dari daftar.`,
