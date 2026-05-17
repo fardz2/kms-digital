@@ -2,25 +2,42 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, ChevronRight } from 'lucide-react';
 
-const ACCENT = {
+const ACCENT: Record<string, string> = {
   primary: 'text-primary-600',
   success: 'text-success',
   warning: 'text-warning',
-  danger:  'text-danger',
-  accent:  'text-accent',
+  danger: 'text-danger',
+  accent: 'text-accent',
   neutral: 'text-deep-slate',
 };
 
-const ICON_BG = {
+const ICON_BG: Record<string, string> = {
   primary: 'bg-primary-50 text-primary-600',
   success: 'bg-success/10 text-success',
   warning: 'bg-warning/15 text-deep-slate',
-  danger:  'bg-danger/10 text-danger',
-  accent:  'bg-accent-bg text-accent',
+  danger: 'bg-danger/10 text-danger',
+  accent: 'bg-accent-bg text-accent',
   neutral: 'bg-polar-mist text-graphite',
 };
 
-function TrendIcon({ type }) {
+interface Trend {
+  type: 'up' | 'down' | 'flat';
+  value: React.ReactNode;
+  label?: React.ReactNode;
+}
+
+interface StatCardProps {
+  label: React.ReactNode;
+  value?: React.ReactNode;
+  icon?: React.ReactNode;
+  accent?: keyof typeof ACCENT;
+  trend?: Trend;
+  href?: string;
+  loading?: boolean;
+  children?: React.ReactNode;
+}
+
+function TrendIcon({ type }: { type: Trend['type'] }) {
   if (type === 'up') return <TrendingUp size={14} strokeWidth={2.25} className="text-success" />;
   if (type === 'down') return <TrendingDown size={14} strokeWidth={2.25} className="text-danger" />;
   return <Minus size={14} strokeWidth={2.25} className="text-graphite" />;
@@ -35,7 +52,7 @@ export default function StatCard({
   href,
   loading = false,
   children,
-}) {
+}: StatCardProps) {
   const color = ACCENT[accent] ?? ACCENT.primary;
   const iconBg = ICON_BG[accent] ?? ICON_BG.primary;
 

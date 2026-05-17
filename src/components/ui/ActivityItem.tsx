@@ -1,18 +1,26 @@
-﻿// @ts-nocheck
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import moment from 'moment';
 
-const ACCENT_BG = {
+const ACCENT_BG: Record<string, string> = {
   primary: 'bg-primary-50 text-primary-600',
   success: 'bg-success/10 text-success',
   warning: 'bg-warning/15 text-deep-slate',
-  danger:  'bg-danger/10 text-danger',
+  danger: 'bg-danger/10 text-danger',
   neutral: 'bg-polar-mist text-graphite',
 };
 
-function formatRelative(timestamp) {
+interface ActivityItemProps {
+  icon?: React.ReactNode;
+  iconAccent?: keyof typeof ACCENT_BG;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  timestamp?: string;
+  href?: string;
+}
+
+function formatRelative(timestamp?: string): string {
   if (!timestamp) return '';
   const m = moment(timestamp);
   if (!m.isValid()) return '';
@@ -26,16 +34,12 @@ export default function ActivityItem({
   subtitle,
   timestamp,
   href,
-}) {
+}: ActivityItemProps) {
   const bg = ACCENT_BG[iconAccent] ?? ACCENT_BG.primary;
-  const Wrapper = href ? Link : 'div';
-  const wrapperProps = href ? { to: href } : {};
+  const className = `flex items-center gap-[17px] px-[17px] py-[13px] rounded-default transition-colors duration-150 ${href ? 'hover:bg-primary-50/40 cursor-pointer' : ''}`;
 
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className={`flex items-center gap-[17px] px-[17px] py-[13px] rounded-default transition-colors duration-150 ${href ? 'hover:bg-primary-50/40 cursor-pointer' : ''}`}
-    >
+  const inner = (
+    <>
       {icon && (
         <span className={`flex items-center justify-center w-[40px] h-[40px] rounded-full shrink-0 ${bg}`}>
           {icon}
@@ -59,6 +63,16 @@ export default function ActivityItem({
           className="text-graphite shrink-0 hidden sm:inline"
         />
       )}
-    </Wrapper>
+    </>
   );
+
+  if (href) {
+    return (
+      <Link to={href} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{inner}</div>;
 }

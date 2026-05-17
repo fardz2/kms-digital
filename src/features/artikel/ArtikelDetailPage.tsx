@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
@@ -31,7 +30,7 @@ export default function ArtikelDetailPage() {
           onClick={() => navigate(-1)}
           className="mb-4"
         >
-          ← Kembali
+          ? Kembali
         </Button>
 
         {isLoading ? (

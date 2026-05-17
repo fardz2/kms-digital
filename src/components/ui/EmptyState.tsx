@@ -1,12 +1,20 @@
 import React from 'react';
 
+interface EmptyStateProps {
+  icon?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  className?: string;
+}
+
 export default function EmptyState({
   icon,
   title,
   description,
   action,
   className = '',
-}) {
+}: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center text-center py-[50px] px-[25px] ${className}`}>
       {icon && (

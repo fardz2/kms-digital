@@ -1,18 +1,27 @@
-﻿// @ts-nocheck
 import React from 'react';
+
+interface FormFieldProps {
+  label?: React.ReactNode;
+  required?: boolean;
+  error?: string;
+  hint?: string;
+  htmlFor?: string;
+  children: React.ReactNode;
+  className?: string;
+}
 
 /**
  * FormField — label + control wrapper aligned with DESIGN.md (21n adapted).
- *
- * Props:
- *   label        — string, required
- *   required     — boolean, shows asterisk
- *   error        — string, inline error message
- *   hint         — string, helper text below input
- *   htmlFor      — links label to input id
- *   children     — the input element
  */
-export function FormField({ label, required, error, hint, htmlFor, children, className = '' }) {
+export function FormField({
+  label,
+  required,
+  error,
+  hint,
+  htmlFor,
+  children,
+  className = '',
+}: FormFieldProps) {
   return (
     <div className={`space-y-[6px] ${className}`}>
       {label && (
@@ -34,13 +43,14 @@ export function FormField({ label, required, error, hint, htmlFor, children, cla
 const INPUT_BASE =
   'block w-full h-[52px] bg-white border border-light-ash rounded-default px-[17px] text-base text-deep-slate placeholder:text-graphite focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:bg-faint-fog disabled:text-graphite disabled:cursor-not-allowed transition-colors duration-150';
 
-/**
- * TextInput — styled input for use inside FormField.
- */
-export const TextInput = React.forwardRef(function TextInput(
-  { className = '', invalid = false, ...rest },
-  ref
-) {
+interface InputBaseProps {
+  invalid?: boolean;
+}
+
+export const TextInput = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & InputBaseProps
+>(function TextInput({ className = '', invalid = false, ...rest }, ref) {
   const classes = [
     INPUT_BASE,
     invalid ? 'border-danger focus:ring-danger focus:border-danger' : '',
@@ -51,13 +61,10 @@ export const TextInput = React.forwardRef(function TextInput(
   return <input ref={ref} className={classes} {...rest} />;
 });
 
-/**
- * TextArea — styled multi-line input.
- */
-export const TextArea = React.forwardRef(function TextArea(
-  { className = '', invalid = false, rows = 4, ...rest },
-  ref
-) {
+export const TextArea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & InputBaseProps
+>(function TextArea({ className = '', invalid = false, rows = 4, ...rest }, ref) {
   const classes = [
     'block w-full bg-white border border-light-ash rounded-default px-[17px] py-[13px] text-base text-deep-slate placeholder:text-graphite focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:bg-faint-fog disabled:text-graphite disabled:cursor-not-allowed transition-colors duration-150',
     invalid ? 'border-danger focus:ring-danger focus:border-danger' : '',
@@ -68,13 +75,10 @@ export const TextArea = React.forwardRef(function TextArea(
   return <textarea ref={ref} rows={rows} className={classes} {...rest} />;
 });
 
-/**
- * NativeSelect — styled native <select>.
- */
-export const NativeSelect = React.forwardRef(function NativeSelect(
-  { className = '', invalid = false, children, ...rest },
-  ref
-) {
+export const NativeSelect = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement> & InputBaseProps
+>(function NativeSelect({ className = '', invalid = false, children, ...rest }, ref) {
   const classes = [
     INPUT_BASE,
     'pr-[42px] appearance-none bg-no-repeat bg-[right_13px_center]',
