@@ -1,5 +1,4 @@
-﻿// @ts-nocheck
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import PageHeader from '../../components/ui/PageHeader';
@@ -11,10 +10,10 @@ import AcaraSection from './AcaraSection';
 
 export default function BerandaDesa() {
   const { user } = useSession();
-  const printableRef = useRef(null);
+  const printableRef = useRef<HTMLDivElement>(null);
   const { hash } = useLocation();
 
-  const idDesa = user?.id_desa ?? user?.desa_id;
+  const idDesa = user?.id_desa;
   const { data: statistikData } = useStatistikGiziDesa(idDesa);
   const posyanduList = Array.isArray(statistikData) ? statistikData : [];
 
