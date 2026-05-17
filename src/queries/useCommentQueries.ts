@@ -1,16 +1,32 @@
-﻿// @ts-nocheck
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commentApi } from '../api/comment.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
 
-export function useCommentList(postId) {
+interface Comment {
+  comment_id?: number;
+  id?: number;
+  user_id: number;
+  post_id: number;
+  content: string;
+  nama?: string;
+  role?: string;
+  time?: string;
+}
+
+interface CreateCommentPayload {
+  user_id: number | undefined;
+  post_id: number | string;
+  content: string;
+}
+
+export function useCommentList(postId: number | string | undefined) {
   const { isAuthenticated } = useSession();
-  return useQuery({
+  return useQuery<Comment[]>({
     queryKey: qk.comment.byPost(postId),
     queryFn: async () => {
       const res = await commentApi.listByPost(postId);
-      const list = res.data ?? [];
+      const list: Comment[] = res.data ?? [];
       return [...list].sort((a, b) =>
         (b.time ?? '').localeCompare(a.time ?? '')
       );
@@ -23,7 +39,7 @@ export function useCommentList(postId) {
 export function useCreateComment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload) => commentApi.create(payload),
+    mutationFn: (payload: CreateCommentPayload) => commentApi.create(payload),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: qk.comment.byPost(variables.post_id) });
     },
