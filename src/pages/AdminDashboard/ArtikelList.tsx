@@ -1,5 +1,4 @@
 ﻿// @ts-nocheck
-import { Modal } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +15,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
 import FormUpdateDataArtikel from "../../components/form/FormUpdateDataArtikel";
 import { useToast } from "../../components/ui/Toast";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { formatDate2 } from "../../utilities/Format";
 import { isThisMonth, isWithinDays } from "../../utilities/isThisMonth";
 import { artikelApi } from "../../api/artikel.api";
@@ -23,6 +23,7 @@ import { useSession } from "../../features/auth/useSession";
 
 export default function ArtikelList() {
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const [isOpenModalUpdateDataArtikel, setIsOpenModalUpdateDataArtikel] = useState(false);
   const [dataArtikel, setDataArtikel] = useState(null);
   const queryClient = useQueryClient();
@@ -98,7 +99,7 @@ export default function ArtikelList() {
             size="sm"
             leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
             onClick={() => {
-              Modal.confirm({
+              confirm({
                 title: "Hapus artikel?",
                 icon: <AlertTriangle size={20} className="text-danger" />,
                 content: "Data yang dihapus tidak dapat dikembalikan.",

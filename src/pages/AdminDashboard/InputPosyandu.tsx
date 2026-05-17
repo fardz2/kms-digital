@@ -9,12 +9,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { isThisMonth } from "../../utilities/isThisMonth";
 import { useToast } from "../../components/ui/Toast";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";
 import { posyanduApi } from "../../api/posyandu.api";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [selectedPosyandu, setSelectedPosyandu] = useState(null);
@@ -102,13 +104,13 @@ export default function InputPosyandu() {
   ];
 
   const showDeleteConfirm = (id, nama) => {
-    Modal.confirm({
+    confirm({
       title: "Konfirmasi Hapus",
       content: `Apakah Anda yakin ingin menghapus posyandu "${nama}"?`,
       okText: "Hapus",
-      okType: "danger",
+      okButtonProps: { danger: true },
       cancelText: "Batal",
-      onOk() {
+      onOk: () => {
         deletePosyanduMutation.mutate(id);
       },
     });

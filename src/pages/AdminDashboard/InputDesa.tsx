@@ -8,12 +8,14 @@ import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useToast } from "../../components/ui/Toast";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";
 import { isThisMonth } from "../../utilities/isThisMonth";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
   const toast = useToast();
+  const confirm = useConfirmDialog();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const queryClient = useQueryClient();
 
@@ -61,7 +63,7 @@ export default function InputDesa() {
   ];
 
   const showDeleteConfirm = (id, name) => {
-    Modal.confirm({
+    confirm({
       title: "Hapus desa?",
       icon: <AlertTriangle size={20} className="text-danger" />,
       content: `Desa '` + name + `' akan dihapus.`,
