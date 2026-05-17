@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
@@ -39,7 +38,7 @@ export default function InputPosyandu() {
   });
 
   const createPosyanduMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: any) =>
       posyanduApi.create({
         id_desa: values.desa,
         nama: values.posyandu,
@@ -47,7 +46,7 @@ export default function InputPosyandu() {
       }),
     onSuccess: () => {
       toast.success("Posyandu berhasil disimpan");
-      queryClient.invalidateQueries(["posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
@@ -57,7 +56,7 @@ export default function InputPosyandu() {
   });
 
   const updatePosyanduMutation = useMutation({
-    mutationFn: ({ id, values }) =>
+    mutationFn: ({ id, values }: any) =>
       posyanduApi.update(id, {
         id_desa: values.desa,
         nama: values.posyandu,
@@ -65,7 +64,7 @@ export default function InputPosyandu() {
       }),
     onSuccess: () => {
       toast.success("Posyandu berhasil diperbarui");
-      queryClient.invalidateQueries(["posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
@@ -78,7 +77,7 @@ export default function InputPosyandu() {
     mutationFn: (id) => posyanduApi.remove(id),
     onSuccess: () => {
       toast.success("Posyandu berhasil dihapus");
-      queryClient.invalidateQueries(["posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal menghapus posyandu"),
   });

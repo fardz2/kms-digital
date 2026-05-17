@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar } from "antd";
@@ -57,7 +56,17 @@ function BrandMark({ desaName }) {
   );
 }
 
-function NavLink({ to, label, active, onClick }) {
+function NavLink({
+  to,
+  label,
+  active,
+  onClick,
+}: {
+  to: string;
+  label: React.ReactNode;
+  active: boolean;
+  onClick?: () => void;
+}) {
   return (
     <Link
       to={to}
@@ -77,7 +86,7 @@ function NavLink({ to, label, active, onClick }) {
   );
 }
 
-export default function NavbarComp({ isLogin }) {
+export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);

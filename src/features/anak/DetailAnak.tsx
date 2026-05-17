@@ -71,7 +71,7 @@ export default function DetailAnak() {
           title={anakLoading ? 'Memuat...' : (anak?.nama ?? '-')}
           subtitle={
             umur != null
-              ? `${umur} bulan · ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
+              ? `${umur} bulan ï¿½ ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
               : undefined
           }
         />

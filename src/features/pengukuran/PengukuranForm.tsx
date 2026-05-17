@@ -123,7 +123,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
     <>
       {toast.contextHolder}
       <Modal
-        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran — ${anak?.nama ?? ''}`}
+        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran ï¿½ ${anak?.nama ?? ''}`}
         open={open}
         onCancel={onClose}
         width={560}

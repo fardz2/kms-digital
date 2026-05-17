@@ -82,7 +82,7 @@ function AnakList({ data, isLoading, onApprove, onReject, askConfirm }) {
           <Card key={anak.id}>
             <div className="text-heading-sm font-semibold text-deep-slate">{anak.nama ?? '-'}</div>
             <div className="text-caption text-graphite mt-1">
-              {umurBulan != null ? `${umurBulan} bulan · ` : ''}
+              {umurBulan != null ? `${umurBulan} bulan ï¿½ ` : ''}
               {anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
             </div>
             {anak.nama_ortu && (

@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Select, Spin } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -86,7 +85,7 @@ export default function SignUp() {
   });
 
   const posyanduRegisterMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: any) =>
       kaderApi.register({
         nama: values.nama,
         email: values.email,
@@ -102,7 +101,7 @@ export default function SignUp() {
   });
 
   const orangTuaRegisterMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: any) =>
       ortuApi.register({
         nama: values.nama,
         email: values.email,
@@ -304,7 +303,7 @@ export default function SignUp() {
                   name="password"
                   rules={[
                     { required: true, message: "Kata sandi masih kosong" },
-                    { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+                    { pattern: /^.{8,}$/, message: "Minimal 8 karakter" },
                   ]}
                 >
                   <Input.Password
@@ -491,7 +490,7 @@ export default function SignUp() {
           </div>
 
           <div className="relative text-caption text-white/50">
-            © {new Date().getFullYear()} Posyandu Lebakwangi
+            � {new Date().getFullYear()} Posyandu Lebakwangi
           </div>
         </aside>
       </div>

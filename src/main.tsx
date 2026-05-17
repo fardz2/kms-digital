@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import moment from 'moment';
 // @ts-expect-error -- moment locale has no type declarations

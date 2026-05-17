@@ -85,7 +85,7 @@ export default function DetailForum() {
                       ? "Orang Tua"
                       : "Tenaga Kesehatan"}
                   </span>{" "}
-                  ·{" "}
+                  ï¿½{" "}
                   <span className="tabular-nums">
                     {moment(detailPost.time).format("DD MMMM YYYY")}
                   </span>

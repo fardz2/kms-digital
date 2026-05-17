@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Select, Modal } from "antd";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/ui/DataTable";
@@ -61,7 +60,7 @@ export default function RegisterKaderPosyandu() {
   });
 
   const createKaderMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: any) =>
       kaderApi.register({
         nama: values.nama,
         email: values.email,
@@ -75,13 +74,13 @@ export default function RegisterKaderPosyandu() {
       toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
-      queryClient.invalidateQueries(["kader-posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const updateKaderMutation = useMutation({
-    mutationFn: ({ id, values }) =>
+    mutationFn: ({ id, values }: any) =>
       kaderApi.update(id, {
         nama: values.nama,
         email: values.email,
@@ -97,7 +96,7 @@ export default function RegisterKaderPosyandu() {
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedUser(null);
-      queryClient.invalidateQueries(["kader-posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
     },
     onError: (err) =>
       toast.error(err?.message ?? "Gagal memperbarui Kader Posyandu"),
@@ -107,7 +106,7 @@ export default function RegisterKaderPosyandu() {
     mutationFn: (id) => kaderApi.remove(id),
     onSuccess: () => {
       toast.success("Kader Posyandu berhasil dihapus");
-      queryClient.invalidateQueries(["kader-posyandu"]);
+      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
@@ -367,9 +366,9 @@ export default function RegisterKaderPosyandu() {
               modalMode === "add"
                 ? [
                     { required: true, message: "Kata sandi masih kosong" },
-                    { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+                    { pattern: /^.{8,}$/, message: "Minimal 8 karakter" },
                   ]
-                : [{ pattern: "^.{8,}$", message: "Minimal 8 karakter" }]
+                : [{ pattern: /^.{8,}$/, message: "Minimal 8 karakter" }]
             }
           >
             <Input.Password

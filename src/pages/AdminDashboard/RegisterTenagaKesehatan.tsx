@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Select, Modal } from "antd";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
@@ -43,7 +42,7 @@ export default function RegisterTenagaKesehatan() {
     });
 
   const createTenagaKesehatanMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: any) =>
       nakesApi.register({
         nama: values.nama,
         email: values.email,
@@ -55,7 +54,7 @@ export default function RegisterTenagaKesehatan() {
       toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
-      queryClient.invalidateQueries(["tenaga-kesehatan"]);
+      queryClient.invalidateQueries({ queryKey: ["tenaga-kesehatan"] });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
@@ -64,7 +63,7 @@ export default function RegisterTenagaKesehatan() {
     mutationFn: (id) => nakesApi.remove(id),
     onSuccess: () => {
       toast.success("Tenaga Kesehatan berhasil dihapus");
-      queryClient.invalidateQueries(["tenaga-kesehatan"]);
+      queryClient.invalidateQueries({ queryKey: ["tenaga-kesehatan"] });
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
@@ -224,7 +223,7 @@ export default function RegisterTenagaKesehatan() {
             name="password"
             rules={[
               { required: true, message: "Kata sandi masih kosong" },
-              { pattern: "^.{8,}$", message: "Minimal 8 karakter" },
+              { pattern: /^.{8,}$/, message: "Minimal 8 karakter" },
             ]}
           >
             <Input.Password placeholder="Minimal 8 karakter" className="h-[52px] text-base" />

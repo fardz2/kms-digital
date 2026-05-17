@@ -1,4 +1,4 @@
-﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commentApi } from '../api/comment.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
