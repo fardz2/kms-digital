@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { forwardRef } from 'react';
 import {
   Baby,
@@ -12,12 +11,34 @@ import ProgressBar from '../../components/ui/ProgressBar';
 import { useStatistikGiziDesa } from '../../queries/useLaporanQueries';
 import { useSession } from '../auth/useSession';
 
-function sumCategory(cat) {
-  if (!cat || typeof cat !== 'object') return 0;
-  return Object.values(cat).reduce((acc, v) => acc + Number(v || 0), 0);
+interface PosyanduStat {
+  id_posyandu?: number;
+  nama_posyandu?: string;
+  berat_badan?: Record<string, number>;
+  tinggi_badan?: Record<string, number>;
+  lingkar_kepala?: Record<string, number>;
 }
 
-export function aggregateDesa(statistik) {
+interface PerPosyanduSummary {
+  id?: number;
+  nama?: string;
+  total: number;
+}
+
+interface AggregatedDesa {
+  totalBalita: number;
+  perPosyandu: PerPosyanduSummary[];
+  distribusiBB: Record<string, number>;
+  distribusiTB: Record<string, number>;
+  distribusiLK: Record<string, number>;
+}
+
+function sumCategory(cat: Record<string, number> | undefined): number {
+  if (!cat || typeof cat !== 'object') return 0;
+  return Object.values(cat).reduce((acc: number, v) => acc + Number(v || 0), 0);
+}
+
+export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDesa {
   if (!Array.isArray(statistik) || statistik.length === 0) {
     return {
       totalBalita: 0,
@@ -28,16 +49,16 @@ export function aggregateDesa(statistik) {
     };
   }
 
-  const perPosyandu = statistik.map((p) => ({
+  const perPosyandu: PerPosyanduSummary[] = statistik.map((p: PosyanduStat) => ({
     id: p.id_posyandu,
     nama: p.nama_posyandu,
     total: sumCategory(p.berat_badan),
   }));
   const totalBalita = perPosyandu.reduce((acc, x) => acc + x.total, 0);
 
-  const reduceCategory = (key) => {
-    const acc = {};
-    statistik.forEach((p) => {
+  const reduceCategory = (key: 'berat_badan' | 'tinggi_badan' | 'lingkar_kepala') => {
+    const acc: Record<string, number> = {};
+    statistik.forEach((p: PosyanduStat) => {
       const cat = p[key] ?? {};
       Object.entries(cat).forEach(([k, v]) => {
         acc[k] = (acc[k] ?? 0) + Number(v || 0);
@@ -55,7 +76,7 @@ export function aggregateDesa(statistik) {
   };
 }
 
-const LABEL_MAP = {
+const LABEL_MAP: Record<string, string> = {
   normal: 'Normal',
   kurus: 'Kurus',
   sangat_kurus: 'Sangat Kurus',
@@ -67,7 +88,13 @@ const LABEL_MAP = {
   mikrosefali: 'Mikrosefali',
 };
 
-function Distribusi({ distribusi, total }) {
+function Distribusi({
+  distribusi,
+  total,
+}: {
+  distribusi: Record<string, number>;
+  total: number;
+}) {
   const entries = Object.entries(distribusi);
   if (entries.length === 0 || total === 0) {
     return <div className="text-body-sm text-graphite">Belum ada data</div>;
@@ -86,9 +113,9 @@ function Distribusi({ distribusi, total }) {
   );
 }
 
-const LaporanDesa = forwardRef(function LaporanDesa(_props, ref) {
+const LaporanDesa = forwardRef<HTMLDivElement>(function LaporanDesa(_props, ref) {
   const { user } = useSession();
-  const idDesa = user?.id_desa ?? user?.desa_id;
+  const idDesa = user?.id_desa;
   const { data, isLoading } = useStatistikGiziDesa(idDesa);
 
   const agg = aggregateDesa(data);

@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +41,7 @@ export default function ArtikelList() {
     mutationFn: (id) => artikelApi.remove(id),
     onSuccess: () => {
       toast.success("Artikel berhasil dihapus");
-      queryClient.invalidateQueries(["artikel"]);
+      queryClient.invalidateQueries({ queryKey: ["artikel"] });
     },
     onError: (err) => toast.error(err?.message ?? "Data gagal dihapus"),
   });
@@ -154,7 +153,7 @@ export default function ArtikelList() {
               variant="ghost"
               size="sm"
               leadingIcon={<RotateCcw size={16} strokeWidth={1.75} />}
-              onClick={() => queryClient.invalidateQueries(["artikel"])}
+              onClick={() => queryClient.invalidateQueries({ queryKey: ["artikel"] })}
               disabled={isBusy}
             >
               Muat ulang
@@ -166,7 +165,7 @@ export default function ArtikelList() {
       <FormUpdateDataArtikel
         isOpen={isOpenModalUpdateDataArtikel}
         onCancel={() => setIsOpenModalUpdateDataArtikel(false)}
-        fetch={() => queryClient.invalidateQueries(["artikel"])}
+        fetch={() => queryClient.invalidateQueries({ queryKey: ["artikel"] })}
         data={dataArtikel}
       />
     </div>

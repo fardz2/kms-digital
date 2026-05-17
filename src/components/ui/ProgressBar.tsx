@@ -1,6 +1,18 @@
 import React from 'react';
 
-export default function ProgressBar({ value = 0, max = 100, label, color = 'bg-primary' }) {
+interface ProgressBarProps {
+  value?: number;
+  max?: number;
+  label?: React.ReactNode;
+  color?: string;
+}
+
+export default function ProgressBar({
+  value = 0,
+  max = 100,
+  label,
+  color = 'bg-primary',
+}: ProgressBarProps) {
   const pct = Math.min(100, Math.max(0, (value / Math.max(max, 1)) * 100));
   return (
     <div>

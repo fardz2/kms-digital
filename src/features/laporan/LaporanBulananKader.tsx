@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
@@ -163,7 +162,7 @@ export default function LaporanBulananKader() {
                         className="text-danger shrink-0 mt-[3px]"
                       />
                       <span>
-                        <span className="font-semibold">{item.nama}</span> — {item.status}
+                        <span className="font-semibold">{item.nama}</span> � {item.status}
                       </span>
                     </li>
                   ))}

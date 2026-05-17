@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -10,6 +10,23 @@ import {
 import DataTableColumnHeader from './DataTableColumnHeader';
 import DataTablePagination from './DataTablePagination';
 import DataTableToolbar from './DataTableToolbar';
+
+interface DataTableProps {
+  columns: any[];
+  data: any[];
+  loading?: boolean;
+  emptyText?: string;
+  enableSorting?: boolean;
+  enableGlobalFilter?: boolean;
+  enablePagination?: boolean;
+  enableColumnVisibility?: boolean;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  rowKey?: string;
+  searchPlaceholder?: string;
+  toolbar?: React.ReactNode;
+  title?: React.ReactNode;
+}
 
 export default function DataTable({
   columns,
@@ -26,7 +43,7 @@ export default function DataTable({
   searchPlaceholder = 'Cari data...',
   toolbar = null,
   title = null,
-}) {
+}: DataTableProps) {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnVisibility, setColumnVisibility] = useState({});

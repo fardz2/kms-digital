@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Spin } from "antd";
 import moment from "moment";
 import React from "react";
@@ -86,7 +85,7 @@ export default function DetailForum() {
                       ? "Orang Tua"
                       : "Tenaga Kesehatan"}
                   </span>{" "}
-                  ·{" "}
+                  �{" "}
                   <span className="tabular-nums">
                     {moment(detailPost.time).format("DD MMMM YYYY")}
                   </span>

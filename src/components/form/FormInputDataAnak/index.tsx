@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { DatePicker, Form, Input, Modal, Select } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";

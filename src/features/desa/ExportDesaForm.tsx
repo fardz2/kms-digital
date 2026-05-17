@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useState } from 'react';
 import { DatePicker, Form, Select, message } from 'antd';
 import moment from 'moment';
@@ -20,7 +19,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
     form
       .validateFields()
       .then((values) => {
-        const idDesa = user?.id_desa ?? user?.desa_id;
+        const idDesa = user?.id_desa;
         if (!idDesa) {
           messageApi.error('Data desa tidak tersedia');
           return;
