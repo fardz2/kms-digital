@@ -112,4 +112,20 @@ describe('query key factory (qk)', () => {
   test('kategori.list is static', () => {
     expect(qk.kategori.list).toEqual(['kategori', 'list']);
   });
+
+  test('approve namespace keys', () => {
+    expect(qk.approve.all).toEqual(['approve']);
+    expect(qk.approve.orangTua).toEqual(['approve', 'orangTua']);
+    expect(qk.approve.anak).toEqual(['approve', 'anak']);
+  });
+
+  test('reminder namespace keys', () => {
+    expect(qk.reminder.all).toEqual(['reminder']);
+    expect(qk.reminder.list).toEqual(['reminder', 'list']);
+  });
+
+  test('orangTua namespace keys', () => {
+    expect(qk.orangTua.all).toEqual(['orangTua']);
+    expect(qk.orangTua.list).toEqual(['orangTua', 'list']);
+  });
 });
