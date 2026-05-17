@@ -23,7 +23,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: false,
+    sourcemap: 'hidden',
   },
   resolve: {
     extensions: ['.mjs', '.js', '.jsx', '.ts', '.tsx', '.json'],
