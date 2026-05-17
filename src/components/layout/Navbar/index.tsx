@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar } from "antd";
 import { Menu, X, LogOut, Heart, ChevronDown } from "lucide-react";
-import useAuth from "../../../hook/useAuth";
+import { useSession } from "../../../features/auth/useSession";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
@@ -84,7 +84,7 @@ export default function NavbarComp({ isLogin }) {
   const [scrolled, setScrolled] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const toast = useToast();
-  const user = useAuth();
+  const { user, role } = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -100,14 +100,14 @@ export default function NavbarComp({ isLogin }) {
   };
 
   const handleProfileClick = () => {
-    if (user?.user?.role !== "ADMIN") setIsProfileModalOpen(true);
+    if (role !== "ADMIN") setIsProfileModalOpen(true);
   };
 
   const navLinks =
-    isLogin && user?.user?.role ? LINKS_BY_ROLE[user.user.role] ?? [] : [];
+    isLogin && role ? LINKS_BY_ROLE[role] ?? [] : [];
   const isActive = (to) => location.pathname.startsWith(to);
 
-  const displayName = user?.user?.name ?? "User";
+  const displayName = user?.name ?? "User";
 
   const initials =
     displayName
@@ -129,7 +129,7 @@ export default function NavbarComp({ isLogin }) {
       >
         <div className="max-w-page mx-auto px-[17px] md:px-[25px]">
           <div className="flex items-center justify-between gap-[17px] h-[72px]">
-            <BrandMark desaName={user?.user?.desa_name} />
+            <BrandMark desaName={user?.desa_name} />
 
             <button
               type="button"
@@ -175,7 +175,7 @@ export default function NavbarComp({ isLogin }) {
                         {displayName}
                       </span>
                       <span className="block text-caption text-graphite">
-                        {roleLabel(user?.user?.role)}
+                        {roleLabel(role)}
                       </span>
                     </span>
                     <ChevronDown size={14} strokeWidth={2} className="text-graphite" />
@@ -251,7 +251,7 @@ export default function NavbarComp({ isLogin }) {
                           {displayName}
                         </span>
                         <span className="block text-caption text-graphite">
-                          {roleLabel(user?.user?.role)}
+                          {roleLabel(role)}
                         </span>
                       </span>
                     </button>
@@ -303,7 +303,7 @@ export default function NavbarComp({ isLogin }) {
       <ProfileModal
         open={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        fallbackName={user?.user?.name}
+        fallbackName={user?.name}
       />
     </>
   );
