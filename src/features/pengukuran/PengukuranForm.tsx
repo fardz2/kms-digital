@@ -14,13 +14,21 @@ import {
   useCreatePengukuran,
   useUpdatePengukuran,
 } from '../../queries/usePengukuranQueries';
+import type { Anak, Pengukuran } from '../../types';
+
+interface PrefillFrom {
+  berat?: number | string;
+  tinggi?: number | string;
+  lingkar_kepala?: number | string;
+  lila?: number | string | null;
+}
 
 interface PengukuranFormProps {
   open: boolean;
   onClose: () => void;
-  anak?: any;
-  existing?: any;
-  prefillFrom?: any;
+  anak?: Anak | null;
+  existing?: Pengukuran | null;
+  prefillFrom?: PrefillFrom | null;
 }
 
 const DEFAULTS = {
@@ -89,7 +97,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
   const handleSubmit = () => {
     const payload = {
-      id_anak: parseInt(anak.id, 10),
+      id_anak: anak ? Number(anak.id) : 0,
       berat,
       tinggi,
       lingkar_kepala: lingkarKepala,

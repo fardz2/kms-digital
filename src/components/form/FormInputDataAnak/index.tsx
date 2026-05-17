@@ -9,7 +9,7 @@ import { useCreateAnak } from "../../../queries/useAnakQueries";
 interface FormInputDataAnakProps {
   isOpen: boolean;
   onCancel: () => void;
-  kader?: any;
+  kader?: boolean;
 }
 
 export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInputDataAnakProps) {
