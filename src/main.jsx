@@ -9,7 +9,6 @@ import '@fontsource/sen/500.css';
 import '@fontsource/sen/600.css';
 import '@fontsource/sen/700.css';
 
-import 'antd/dist/antd.min.css';
 import './global.css';
 
 moment.locale('id');
