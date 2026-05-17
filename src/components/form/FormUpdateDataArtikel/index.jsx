@@ -1,8 +1,8 @@
 import { Form, Input, Modal, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import "./style.css";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import { UploadCloud } from "lucide-react";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
