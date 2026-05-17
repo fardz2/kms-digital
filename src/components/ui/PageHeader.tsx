@@ -1,5 +1,15 @@
 import React from 'react';
 
+interface PageHeaderProps {
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
+  eyebrow?: React.ReactNode;
+  action?: React.ReactNode;
+  search?: React.ReactNode;
+  stats?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
 export default function PageHeader({
   title,
   subtitle,
@@ -8,7 +18,7 @@ export default function PageHeader({
   search,
   stats,
   children,
-}) {
+}: PageHeaderProps) {
   const topLine = eyebrow ?? subtitle;
   const showSubtitleBelow = Boolean(eyebrow && subtitle);
 
