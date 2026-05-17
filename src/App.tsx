@@ -5,6 +5,7 @@ import { App as AntApp, ConfigProvider } from 'antd';
 import idID from 'antd/locale/id_ID';
 import AppRoutes from './routes/AppRoutes';
 import ErrorBoundary from './components/ErrorBoundary';
+import TourProvider from './features/tour/TourProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +34,9 @@ export default function App() {
         <ConfigProvider theme={theme} locale={idID}>
           <AntApp>
             <BrowserRouter>
-              <AppRoutes />
+              <TourProvider>
+                <AppRoutes />
+              </TourProvider>
             </BrowserRouter>
           </AntApp>
         </ConfigProvider>

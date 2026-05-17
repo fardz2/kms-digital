@@ -39,6 +39,7 @@ export default function PosyanduHeader({
               size="md"
               leadingIcon={<Users size={18} strokeWidth={2} />}
               onClick={onAkunOrangTua}
+              data-tour-id="kader-akun-ortu"
             >
               Akun Orang Tua
               {pendingCount > 0 && (

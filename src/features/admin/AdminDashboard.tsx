@@ -27,7 +27,9 @@ export default function AdminDashboard() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[33px]">
-        <AdminStatsGrid stats={stats} loading={isLoading} />
+        <div data-tour-id="admin-stats">
+          <AdminStatsGrid stats={stats} loading={isLoading} />
+        </div>
         <AdminActivityFeed
           items={activity}
           loading={isLoading}

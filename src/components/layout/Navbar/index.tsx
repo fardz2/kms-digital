@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar } from "antd";
-import { Menu, X, LogOut, Heart, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, Heart, ChevronDown, HelpCircle } from "lucide-react";
 import { useSession } from "../../../features/auth/useSession";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
+import { useTourContext } from "../../../features/tour/TourProvider";
 import { clearSession } from "../../../features/auth/session-storage";
 
 const LINKS_BY_ROLE = {
@@ -94,6 +95,7 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const toast = useToast();
   const { user, role } = useSession();
+  const { replay } = useTourContext();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -188,6 +190,15 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
                       </span>
                     </span>
                     <ChevronDown size={14} strokeWidth={2} className="text-graphite" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={replay}
+                    aria-label="Bantuan"
+                    title="Lihat tutorial lagi"
+                    className="flex items-center justify-center w-[36px] h-[36px] rounded-full text-graphite hover:text-deep-slate hover:bg-faint-fog transition-colors"
+                  >
+                    <HelpCircle size={18} strokeWidth={1.75} />
                   </button>
                   <Button
                     variant="default"

@@ -47,6 +47,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
     <>
       {toast.contextHolder}
       <aside
+        data-tour-id="admin-sidebar"
         className={
           "fixed inset-y-0 left-0 z-40 bg-white shadow-panel transform transition-all duration-250 ease-out-quart " +
           width +

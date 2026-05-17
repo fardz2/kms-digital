@@ -61,6 +61,7 @@ export default function BerandaOT() {
               size="md"
               leadingIcon={<Plus size={20} strokeWidth={2} />}
               onClick={() => setFormOpen(true)}
+              data-tour-id="ot-tambah-anak"
             >
               Tambah Anak
             </Button>
@@ -119,18 +120,22 @@ export default function BerandaOT() {
             Lainnya
           </p>
           <div className="flex flex-col gap-[8px]">
-            <QuickLink
-              Icon={MessageCircle}
-              title="Forum Tanya Jawab"
-              desc="Tanya tenaga kesehatan tentang anak Anda"
-              onClick={() => navigate('/orangtua/forum')}
-            />
-            <QuickLink
-              Icon={Newspaper}
-              title="Artikel Kesehatan"
-              desc="Baca artikel edukasi gizi dan tumbuh kembang"
-              onClick={() => navigate('/artikel')}
-            />
+            <div data-tour-id="ot-forum">
+              <QuickLink
+                Icon={MessageCircle}
+                title="Forum Tanya Jawab"
+                desc="Tanya tenaga kesehatan tentang anak Anda"
+                onClick={() => navigate('/orangtua/forum')}
+              />
+            </div>
+            <div data-tour-id="ot-artikel">
+              <QuickLink
+                Icon={Newspaper}
+                title="Artikel Kesehatan"
+                desc="Baca artikel edukasi gizi dan tumbuh kembang"
+                onClick={() => navigate('/artikel')}
+              />
+            </div>
           </div>
         </section>
       </div>

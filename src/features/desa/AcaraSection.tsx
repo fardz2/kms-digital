@@ -62,7 +62,7 @@ export default function AcaraSection() {
   );
 
   return (
-    <section id="acara" className="space-y-[25px] scroll-mt-[80px]">
+    <section id="acara" data-tour-id="desa-acara" className="space-y-[25px] scroll-mt-[80px]">
       {toast.contextHolder}
       <Card title="Tambah Acara Baru">
         <Form form={form} layout="vertical" onFinish={onSubmit}>

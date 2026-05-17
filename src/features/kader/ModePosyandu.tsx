@@ -134,7 +134,7 @@ export default function ModePosyandu() {
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
         <div className="space-y-[13px]">
-          <div className="relative">
+          <div className="relative" data-tour-id="kader-search">
             <input
               type="search"
               value={search}
@@ -150,7 +150,9 @@ export default function ModePosyandu() {
               <Search size={18} strokeWidth={1.75} />
             </span>
           </div>
-          <FilterChip value={filter} onChange={setFilter} counts={counts} />
+          <div data-tour-id="kader-filter">
+            <FilterChip value={filter} onChange={setFilter} counts={counts} />
+          </div>
         </div>
 
         {isLoading && <SkeletonList count={3} />}
@@ -190,6 +192,7 @@ export default function ModePosyandu() {
             leadingIcon={<Plus size={20} strokeWidth={2} />}
             onClick={() => setTambahOpen(true)}
             className="w-full"
+            data-tour-id="kader-tambah"
           >
             Tambah Balita Baru
           </Button>
