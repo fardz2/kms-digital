@@ -3,25 +3,26 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import RequireRole from './RequireRole';
 import { LEGACY_REDIRECTS } from './legacyRedirects';
 
-// Eager: critical for initial render
+// Eager: critical for initial render + frequently navigated pages
+// (no flash when navigating within a role)
 import LoginPortal from '../features/auth/LoginPortal';
 import LandingPage from '../pages/LandingPage';
 import NotFound from '../pages/NotFound';
+import ModePosyandu from '../features/kader/ModePosyandu';
+import AkunOrangTuaPage from '../features/kader/AkunOrangTuaPage';
+import BerandaOT from '../features/orangtua/BerandaOT';
+import BerandaDesa from '../features/desa/BerandaDesa';
+import Post from '../pages/Post';
+import DetailForum from '../pages/DetailForum';
+import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
 
-// Lazy: per-role feature pages
-const ModePosyandu = lazy(() => import('../features/kader/ModePosyandu'));
-const AkunOrangTuaPage = lazy(() => import('../features/kader/AkunOrangTuaPage'));
+// Lazy: heavy pages (chart-heavy, admin-only, rare visits)
 const DetailAnak = lazy(() => import('../features/anak/DetailAnak'));
-const BerandaOT = lazy(() => import('../features/orangtua/BerandaOT'));
 const ArtikelPublic = lazy(() => import('../features/artikel/ArtikelList'));
 const ArtikelDetailPage = lazy(() => import('../features/artikel/ArtikelDetailPage'));
-const LaporanBulananKader = lazy(() => import('../features/laporan/LaporanBulananKader'));
-const BerandaDesa = lazy(() => import('../features/desa/BerandaDesa'));
 const SignUp = lazy(() => import('../pages/SignUp'));
-const Post = lazy(() => import('../pages/Post'));
-const DetailForum = lazy(() => import('../pages/DetailForum'));
 
-// Admin pages
+// Admin pages — lazy karena hanya admin yang akses
 const DashboardLayout = lazy(() => import('../components/layout/Dashboard/DashboardLayout'));
 const DesaPage = lazy(() => import('../pages/AdminDashboard/InputDesa'));
 const InputPosyandu = lazy(() => import('../pages/AdminDashboard/InputPosyandu'));
@@ -32,8 +33,7 @@ const ArtikelForm = lazy(() => import('../pages/AdminDashboard/ArtikelForm'));
 const AdminDashboard = lazy(() => import('../features/admin/AdminDashboard'));
 
 /**
- * Top loading bar yang animasi shimmer dari kiri ke kanan.
- * Tampil sebagai overlay tipis di top viewport, tidak unmount halaman saat ini.
+ * Top loading bar — minimal fallback yang tidak unmount halaman saat ini.
  */
 function TopLoadingBar() {
   return (
@@ -43,10 +43,8 @@ function TopLoadingBar() {
       className="fixed top-0 left-0 right-0 h-[3px] z-[9999] bg-primary-50 overflow-hidden"
     >
       <div
-        className="h-full w-1/3 bg-primary-500 rounded-r-full animate-[loading-bar_1s_ease-in-out_infinite]"
-        style={{
-          animation: 'loading-bar 1s ease-in-out infinite',
-        }}
+        className="h-full w-1/3 bg-primary-500 rounded-r-full"
+        style={{ animation: 'loading-bar 1s ease-in-out infinite' }}
       />
       <style>{`
         @keyframes loading-bar {
