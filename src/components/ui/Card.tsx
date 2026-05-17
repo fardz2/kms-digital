@@ -1,36 +1,31 @@
 import React from 'react';
 
+interface CardProps {
+  title?: React.ReactNode;
+  footer?: React.ReactNode;
+  onClick?: (e: React.MouseEvent) => void;
+  className?: string;
+  children: React.ReactNode;
+  interactive?: boolean;
+}
+
 export default function Card({
   title,
   footer,
   onClick,
   className = '',
   children,
-}) {
-  const interactive = !!onClick;
+  interactive,
+}: CardProps) {
+  const isInteractive = interactive ?? !!onClick;
   const base =
     'bg-white border border-light-ash rounded-default p-[25px] shadow-card transition-all duration-150 ease-out-quart';
-  const interactiveClasses = interactive
-    ? 'cursor-pointer hover:border-primary-300 hover:shadow-raised hover:-translate-y-[1px] focus-within:ring-1 focus-within:ring-primary-500'
+  const interactiveClasses = isInteractive
+    ? 'cursor-pointer hover:border-primary-300 hover:shadow-raised hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 text-left w-full'
     : '';
 
-  return (
-    <div
-      onClick={onClick}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onKeyDown={
-        interactive
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick(e);
-              }
-            }
-          : undefined
-      }
-      className={`${base} ${interactiveClasses} ${className}`}
-    >
+  const content = (
+    <>
       {title && (
         <div className="text-heading font-semibold text-deep-slate mb-[17px]">
           {title}
@@ -38,6 +33,20 @@ export default function Card({
       )}
       <div>{children}</div>
       {footer && <div className="mt-[17px]">{footer}</div>}
-    </div>
+    </>
   );
+
+  if (isInteractive) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${base} ${interactiveClasses} ${className}`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={`${base} ${className}`}>{content}</div>;
 }
