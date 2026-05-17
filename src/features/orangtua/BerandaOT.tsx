@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Plus, ChevronRight, MessageCircle, Newspaper } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import PageHeader from '../../components/ui/PageHeader';
@@ -89,7 +89,7 @@ export default function BerandaOT() {
           <div className="flex flex-col gap-[13px]">
             {(anakList ?? []).map((anak) => {
               const umurBulan = anak.tanggal_lahir
-                ? moment().diff(moment(anak.tanggal_lahir), 'month')
+                ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
                 : null;
               return (
                 <Card

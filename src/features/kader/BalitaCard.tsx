@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { AlertTriangle, CheckCircle2, Pencil, Eye } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -7,7 +7,7 @@ import StatusBadge from '../../components/ui/StatusBadge';
 export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
   const { latest, latestBulanIni, status, sudahDiukur, perluPerhatian } = meta;
   const umurBulan = anak.tanggal_lahir
-    ? moment().diff(moment(anak.tanggal_lahir), 'month')
+    ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
     : null;
   const genderLabel = anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan';
 
@@ -51,7 +51,7 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
             {sudahDiukur ? (
               <>
                 <span className="text-success font-semibold">
-                  {moment(latestBulanIni.date).format('DD MMM')}
+                  {dayjs(latestBulanIni.date).format('DD MMM')}
                 </span>
                 <span className="text-graphite"> · </span>
                 <span className="font-semibold">{latestBulanIni.berat} kg</span>
@@ -60,7 +60,7 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
               </>
             ) : (
               <span className="text-graphite">
-                Terakhir: {moment(latest.date).format('DD MMM YYYY')} ·{' '}
+                Terakhir: {dayjs(latest.date).format('DD MMM YYYY')} ·{' '}
                 {latest.berat} kg
               </span>
             )}

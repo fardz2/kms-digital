@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import moment from 'moment';
 import { DatePicker } from 'antd';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
@@ -69,7 +68,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
   const umurBulan = useMemo(() => {
     if (!anak?.tanggal_lahir || !tanggal) return null;
-    return monthDiff(moment(anak.tanggal_lahir), moment(tanggal.toDate()));
+    return monthDiff(anak.tanggal_lahir, tanggal);
   }, [anak?.tanggal_lahir, tanggal]);
 
   const showLila = umurBulan != null && umurBulan >= 7;

@@ -1,9 +1,9 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { overallStatus, STATUS } from '../pengukuran/statusGizi';
 
 function matchesBulan(date, bulan) {
   if (!date) return false;
-  return moment(date).format('YYYY-MM') === bulan;
+  return dayjs(date).format('YYYY-MM') === bulan;
 }
 
 function computePengukuranStatus(p) {
@@ -36,7 +36,7 @@ export function aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan }) {
 
     if (inBulan.length === 0) {
       const umurBulan = anak.tanggal_lahir
-        ? moment().diff(moment(anak.tanggal_lahir), 'month')
+        ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
         : null;
       belumDiukurList.push({ id: anak.id, nama: anak.nama, umurBulan });
       return;

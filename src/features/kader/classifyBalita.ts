@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { overallStatus, STATUS } from '../pengukuran/statusGizi';
 
 const toZ = (v) => (v == null || v === '' ? null : Number(v));
@@ -15,7 +15,7 @@ export function classifyBalita(pengukuranList, currentBulan) {
   const latest = safe.slice().sort(compareByDateDesc)[0];
 
   const bulanIni = safe.filter(
-    (p) => moment(p.date).format('YYYY-MM') === currentBulan
+    (p) => dayjs(p.date).format('YYYY-MM') === currentBulan
   );
   const latestBulanIni = bulanIni.slice().sort(compareByDateDesc)[0];
 

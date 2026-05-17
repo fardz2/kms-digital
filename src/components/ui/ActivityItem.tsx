@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const ACCENT_BG: Record<string, string> = {
   primary: 'bg-primary-50 text-primary-600',
@@ -22,7 +22,7 @@ interface ActivityItemProps {
 
 function formatRelative(timestamp?: string): string {
   if (!timestamp) return '';
-  const m = moment(timestamp);
+  const m = dayjs(timestamp);
   if (!m.isValid()) return '';
   return m.fromNow();
 }

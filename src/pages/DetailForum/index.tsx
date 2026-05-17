@@ -1,5 +1,5 @@
 import { Form, Input } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
@@ -89,7 +89,7 @@ export default function DetailForum() {
                   </span>{" "}
                   ·{" "}
                   <span className="tabular-nums">
-                    {moment(detailPost.time).format("DD MMMM YYYY")}
+                    {dayjs(detailPost.time).format("DD MMMM YYYY")}
                   </span>
                 </p>
               </div>
@@ -157,7 +157,7 @@ export default function DetailForum() {
                         {item.nama}
                       </p>
                       <p className="text-caption text-graphite tabular-nums">
-                        {moment(item.time).format("DD MMM YYYY HH:mm")}
+                        {dayjs(item.time).format("DD MMM YYYY HH:mm")}
                       </p>
                     </div>
                     <p className="text-caption text-graphite mt-1">

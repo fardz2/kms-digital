@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Form, Input, DatePicker } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import Card from '../../components/ui/Card';
@@ -119,7 +119,7 @@ export default function AcaraSection() {
                 </div>
                 <div className="text-caption text-neutral-500">
                   {acara.tanggal_reminder
-                    ? moment(acara.tanggal_reminder).format('DD MMMM YYYY')
+                    ? dayjs(acara.tanggal_reminder).format('DD MMMM YYYY')
                     : '-'}
                 </div>
                 {acara.deskripsi && <div className="text-base mt-1">{acara.deskripsi}</div>}

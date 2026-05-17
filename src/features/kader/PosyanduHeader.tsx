@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { BarChart3, LogOut, Users } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
@@ -13,7 +13,7 @@ export default function PosyanduHeader({
   onLaporan,
   onKeluar,
 }) {
-  const bulanLabel = moment().format('MMMM YYYY');
+  const bulanLabel = dayjs().format('MMMM YYYY');
   const persen = totalCount ? Math.round((sudahCount / totalCount) * 100) : 0;
 
   return (

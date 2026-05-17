@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { ArrowLeft } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
@@ -47,7 +47,7 @@ export default function DetailAnak() {
     confirm({
       title: 'Hapus pengukuran?',
       icon: <ExclamationCircleOutlined />,
-      content: `Data tanggal ${moment(item.date).format('DD MMMM YYYY')} akan dihapus.`,
+      content: `Data tanggal ${dayjs(item.date).format('DD MMMM YYYY')} akan dihapus.`,
       okText: 'Ya, Hapus',
       cancelText: 'Batal',
       okButtonProps: { danger: true },
@@ -61,7 +61,7 @@ export default function DetailAnak() {
   };
 
   const umur = anak?.tanggal_lahir
-    ? moment().diff(moment(anak.tanggal_lahir), 'month')
+    ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
     : null;
 
   return (

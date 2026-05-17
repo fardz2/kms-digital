@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import bbPria from '../../json/ZScoreBeratBadanLakiLaki.json';
 import bbPerempuan from '../../json/ZScoreBeratBadanPerempuan.json';
 import tbPria from '../../json/ZScorePanjangBadanLakiLaki.json';
@@ -56,14 +56,14 @@ function findByPb(dataset: any[], pb: number) {
 
 export function computeZScoreBB({ berat, gender, tanggalLahir, tanggalPengukuran }: ZScoreInput) {
   if (berat == null || !tanggalLahir || !tanggalPengukuran) return null;
-  const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
+  const umur = monthDiff(dayjs(tanggalLahir), dayjs(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? bbPria : bbPerempuan;
   return zFromReference(berat, findByBulan(dataset, umur));
 }
 
 export function computeZScoreTB({ tinggi, gender, tanggalLahir, tanggalPengukuran }: ZScoreInput) {
   if (tinggi == null || !tanggalLahir || !tanggalPengukuran) return null;
-  const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
+  const umur = monthDiff(dayjs(tanggalLahir), dayjs(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? tbPria : tbPerempuan;
   return zFromReference(tinggi, findByBulan(dataset, umur));
 }
@@ -75,7 +75,7 @@ export function computeZScoreLK({
   tanggalPengukuran,
 }: ZScoreInput) {
   if (lingkarKepala == null || !tanggalLahir || !tanggalPengukuran) return null;
-  const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
+  const umur = monthDiff(dayjs(tanggalLahir), dayjs(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? lkPria : lkPerempuan;
   return zFromReference(lingkarKepala, findByBulan(dataset, umur));
 }
@@ -90,7 +90,7 @@ export function computeZScoreGizi({
   if (berat == null || tinggi == null || !tanggalLahir || !tanggalPengukuran) {
     return null;
   }
-  const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
+  const umur = monthDiff(dayjs(tanggalLahir), dayjs(tanggalPengukuran));
   if (umur < 0 || umur > 60) return null;
   const pb = roundPbToHalfStep(tinggi);
 

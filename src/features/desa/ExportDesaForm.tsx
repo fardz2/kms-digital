@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DatePicker, Form, Select, message } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Download, Printer } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -54,7 +54,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
       const html2pdfModule = await import('js-html2pdf');
       const html2pdf = html2pdfModule.default ?? html2pdfModule;
 
-      const filename = `Laporan-Desa-${user?.nama_desa ?? user?.desa_name ?? 'KMS'}-${moment().format('YYYY-MM-DD')}.pdf`;
+      const filename = `Laporan-Desa-${user?.nama_desa ?? user?.desa_name ?? 'KMS'}-${dayjs().format('YYYY-MM-DD')}.pdf`;
       const opt = {
         margin: [12, 12, 12, 12],
         filename,

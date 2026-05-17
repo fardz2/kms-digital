@@ -1,5 +1,5 @@
 import { Empty } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, Plus, ArrowRight } from "lucide-react";
@@ -28,7 +28,7 @@ export default function Post() {
     nama_posyandu: item.posyandu,
     description: item.nama,
     role: item.role,
-    content: moment(item.time).format("DD MMMM YYYY"),
+    content: dayjs(item.time).format("DD MMMM YYYY"),
     jawaban: item.jawaban_tenaga_kesehatan || [],
     id: item.post_id,
     user_id: item.user_id ?? item.id_user,
@@ -187,7 +187,7 @@ export default function Post() {
                   </p>
                   {item.jawaban.map((j, idx) => {
                     const ts = j.waktu ?? j.time ?? j.created_at ?? j.tanggal;
-                    const valid = ts && moment(ts).isValid();
+                    const valid = ts && dayjs(ts).isValid();
                     const stableKey =
                       j.comment_id ?? j.id ?? `${item.id}-${ts ?? idx}`;
                     return (
@@ -201,7 +201,7 @@ export default function Post() {
                         </p>
                         {valid && (
                           <p className="text-caption text-graphite mt-1 tabular-nums">
-                            {moment(ts).format("DD MMM YYYY HH:mm")}
+                            {dayjs(ts).format("DD MMM YYYY HH:mm")}
                           </p>
                         )}
                       </div>

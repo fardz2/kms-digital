@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -31,7 +31,7 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
     <Card>
       <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
         <div className="text-heading-sm font-semibold text-deep-slate">
-          {date ? moment(date).format('DD MMMM YYYY') : '-'}
+          {date ? dayjs(date).format('DD MMMM YYYY') : '-'}
         </div>
         <StatusBadge status={status} />
       </div>

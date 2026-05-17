@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ArrowLeft } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -21,7 +21,7 @@ export default function ArtikelDetailPage() {
       <PageHeader
         title={isLoading ? 'Memuat...' : title}
         subtitle={
-          artikel?.created_at ? moment(artikel.created_at).format('DD MMMM YYYY') : undefined
+          artikel?.created_at ? dayjs(artikel.created_at).format('DD MMMM YYYY') : undefined
         }
       />
 

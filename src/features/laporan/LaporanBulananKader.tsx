@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useQueries } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -24,7 +24,7 @@ import { aggregateKaderLaporan } from './aggregateKader';
 
 export default function LaporanBulananKader() {
   const navigate = useNavigate();
-  const [bulan, setBulan] = useState(moment().format('YYYY-MM'));
+  const [bulan, setBulan] = useState(dayjs().format('YYYY-MM'));
   const { role } = useSession();
   const { data: anakList, isLoading: anakLoading } = useAnakList();
 

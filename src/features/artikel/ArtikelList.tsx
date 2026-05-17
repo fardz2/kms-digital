@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
@@ -55,7 +55,7 @@ export default function ArtikelList() {
               </div>
               {item.created_at && (
                 <div className="text-caption text-graphite">
-                  {moment(item.created_at).format('DD MMMM YYYY')}
+                  {dayjs(item.created_at).format('DD MMMM YYYY')}
                 </div>
               )}
             </Card>

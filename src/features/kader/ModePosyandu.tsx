@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
@@ -35,7 +35,7 @@ export default function ModePosyandu() {
   const { data: pendingAnak } = usePendingAnak(true);
   const pendingCount = (pendingOT?.length ?? 0) + (pendingAnak?.length ?? 0);
 
-  const currentBulan = moment().format('YYYY-MM');
+  const currentBulan = dayjs().format('YYYY-MM');
 
   const balitaWithMeta = useMemo(() => {
     return (anakList ?? []).map((anak) => ({

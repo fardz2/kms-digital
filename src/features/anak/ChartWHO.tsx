@@ -11,7 +11,7 @@ import {
   registerables,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import Button from '../../components/ui/Button';
 
 import bbPria from '../../json/ZScoreBeratBadanLakiLaki.json';
@@ -62,7 +62,7 @@ function roundPb(t) {
 
 function mapDataByMonth(data, tanggalLahir, field) {
   const ageIndex = (data ?? []).map((it) =>
-    monthDiff(moment(tanggalLahir), moment(it.date))
+    monthDiff(dayjs(tanggalLahir), dayjs(it.date))
   );
   const result = [];
   let j = 0;
@@ -181,7 +181,7 @@ export default function ChartWHO({ anak, pengukuran }) {
 
   const ageAtFirst = useMemo(() => {
     if (!tanggalLahir || !pengukuran?.[0]?.date) return 0;
-    return monthDiff(moment(tanggalLahir), moment(pengukuran[0].date));
+    return monthDiff(dayjs(tanggalLahir), dayjs(pengukuran[0].date));
   }, [tanggalLahir, pengukuran]);
 
   const dataBB = useMemo(

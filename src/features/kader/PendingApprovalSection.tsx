@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { AlertTriangle, Check } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -36,7 +36,7 @@ function OrangTuaList({ data, isLoading, onApprove, onReject, askConfirm }) {
           {ot.alamat && <div className="text-caption text-graphite">{ot.alamat}</div>}
           {ot.created_at && (
             <div className="text-caption text-graphite mt-1">
-              Daftar: {moment(ot.created_at).format('DD MMM YYYY')}
+              Daftar: {dayjs(ot.created_at).format('DD MMM YYYY')}
             </div>
           )}
           <div className="flex gap-[8px] justify-end mt-[17px]">
@@ -77,7 +77,7 @@ function AnakList({ data, isLoading, onApprove, onReject, askConfirm }) {
     <div className="flex flex-col gap-[13px]">
       {data.map((anak) => {
         const umurBulan = anak.tanggal_lahir
-          ? moment().diff(moment(anak.tanggal_lahir), 'month')
+          ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
           : null;
         return (
           <Card key={anak.id}>
@@ -91,7 +91,7 @@ function AnakList({ data, isLoading, onApprove, onReject, askConfirm }) {
             )}
             {anak.created_at && (
               <div className="text-caption text-graphite mt-1">
-                Daftar: {moment(anak.created_at).format('DD MMM YYYY')}
+                Daftar: {dayjs(anak.created_at).format('DD MMM YYYY')}
               </div>
             )}
             <div className="flex gap-[8px] justify-end mt-[17px]">

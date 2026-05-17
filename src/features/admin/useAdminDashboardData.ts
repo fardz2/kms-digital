@@ -1,5 +1,5 @@
 import { useQueries } from '@tanstack/react-query';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { desaApi } from '../../api/desa.api';
 import { posyanduApi } from '../../api/posyandu.api';
 import { kaderApi } from '../../api/kader.api';
@@ -84,10 +84,10 @@ function mergeActivity(results, days = 7, limit = 10) {
   ]
     .filter((x) => {
       if (!x.timestamp) return false;
-      const m = moment(x.timestamp);
-      return m.isValid() && moment().diff(m, 'days') <= days;
+      const m = dayjs(x.timestamp);
+      return m.isValid() && dayjs().diff(m, 'days') <= days;
     })
-    .sort((a, b) => moment(b.timestamp).valueOf() - moment(a.timestamp).valueOf())
+    .sort((a, b) => dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf())
     .slice(0, limit);
 }
 
