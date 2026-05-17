@@ -1,7 +1,7 @@
-﻿// @ts-nocheck
-import React from 'react';
+﻿import React from 'react';
 import ReactDOM from 'react-dom/client';
 import moment from 'moment';
+// @ts-expect-error -- moment locale has no type declarations
 import 'moment/locale/id';
 import App from './App';
 
@@ -14,7 +14,10 @@ import './global.css';
 
 moment.locale('id');
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+
+const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <App />
