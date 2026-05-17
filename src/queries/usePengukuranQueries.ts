@@ -1,13 +1,28 @@
-﻿// @ts-nocheck
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { pengukuranApi } from '../api/pengukuran.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
+import type { Pengukuran } from '../types';
 
-export function usePengukuranAnak(anakId) {
+interface CreatePengukuranPayload {
+  id_anak: number;
+  date: string;
+  berat: number;
+  tinggi: number;
+  lingkar_kepala: number;
+  lila?: number | null;
+  catatan?: string | null;
+}
+
+interface UpdatePengukuranParams {
+  id: number;
+  payload: Partial<CreatePengukuranPayload>;
+}
+
+export function usePengukuranAnak(anakId: number | string | undefined) {
   const { role, isAuthenticated } = useSession();
 
-  return useQuery({
+  return useQuery<Pengukuran[]>({
     queryKey: qk.pengukuran.byAnak(anakId, role),
     queryFn: async () => {
       const res = await pengukuranApi.list(anakId, role);
@@ -20,12 +35,13 @@ export function usePengukuranAnak(anakId) {
   });
 }
 
-export function useCreatePengukuran(anakId) {
+export function useCreatePengukuran(anakId: number | string | undefined) {
   const qc = useQueryClient();
   const { role } = useSession();
 
   return useMutation({
-    mutationFn: (payload) => pengukuranApi.create(payload, role),
+    mutationFn: (payload: CreatePengukuranPayload) =>
+      pengukuranApi.create(payload, role),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.pengukuran.byAnak(anakId, role) });
       qc.invalidateQueries({ queryKey: qk.laporan.all });
@@ -33,12 +49,13 @@ export function useCreatePengukuran(anakId) {
   });
 }
 
-export function useUpdatePengukuran(anakId) {
+export function useUpdatePengukuran(anakId: number | string | undefined) {
   const qc = useQueryClient();
   const { role } = useSession();
 
   return useMutation({
-    mutationFn: ({ id, payload }) => pengukuranApi.update(id, payload),
+    mutationFn: ({ id, payload }: UpdatePengukuranParams) =>
+      pengukuranApi.update(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.pengukuran.byAnak(anakId, role) });
       qc.invalidateQueries({ queryKey: qk.laporan.all });
@@ -46,12 +63,12 @@ export function useUpdatePengukuran(anakId) {
   });
 }
 
-export function useDeletePengukuran(anakId) {
+export function useDeletePengukuran(anakId: number | string | undefined) {
   const qc = useQueryClient();
   const { role } = useSession();
 
   return useMutation({
-    mutationFn: (id) => pengukuranApi.remove(id),
+    mutationFn: (id: number) => pengukuranApi.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.pengukuran.byAnak(anakId, role) });
       qc.invalidateQueries({ queryKey: qk.laporan.all });
