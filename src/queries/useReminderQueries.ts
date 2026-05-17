@@ -2,10 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reminderApi } from '../api/reminder.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
+import type { Reminder } from '../types';
+
+interface CreateReminderPayload {
+  judul: string;
+  deskripsi?: string;
+  tanggal_reminder: string;
+}
 
 export function useReminderList() {
   const { isAuthenticated } = useSession();
-  return useQuery({
+  return useQuery<Reminder[]>({
     queryKey: qk.reminder.list,
     queryFn: async () => {
       const res = await reminderApi.list();
@@ -19,7 +26,7 @@ export function useReminderList() {
 export function useCreateReminder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload) => reminderApi.create(payload),
+    mutationFn: (payload: CreateReminderPayload) => reminderApi.create(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.reminder.all }),
   });
 }
@@ -27,7 +34,7 @@ export function useCreateReminder() {
 export function useDeleteReminder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id) => reminderApi.remove(id),
+    mutationFn: (id: number) => reminderApi.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.reminder.all }),
   });
 }

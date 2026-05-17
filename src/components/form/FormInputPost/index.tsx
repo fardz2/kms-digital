@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Modal, Input } from "antd";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";

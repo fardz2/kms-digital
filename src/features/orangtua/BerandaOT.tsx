@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
@@ -104,7 +103,7 @@ export default function BerandaOT() {
                         {anak.nama}
                       </div>
                       <div className="text-caption text-graphite mt-1">
-                        {umurBulan != null ? `${umurBulan} bulan · ` : ''}
+                        {umurBulan != null ? `${umurBulan} bulan � ` : ''}
                         {anak.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
                       </div>
                     </div>

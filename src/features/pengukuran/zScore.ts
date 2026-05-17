@@ -13,7 +13,22 @@ import { monthDiff } from '../../utils/monthDiff';
 
 const GENDER = { MALE: 'LAKI_LAKI', FEMALE: 'PEREMPUAN' };
 
-function zFromReference(value, ref) {
+interface Reference {
+  median: string;
+  SD1pos: string;
+  SD1neg: string;
+}
+
+interface ZScoreInput {
+  berat?: number | null;
+  tinggi?: number | null;
+  lingkarKepala?: number | null;
+  gender?: string;
+  tanggalLahir?: string;
+  tanggalPengukuran?: string;
+}
+
+function zFromReference(value: number | null | undefined, ref?: Reference): number | null {
   if (value == null || !ref) return null;
   const median = parseFloat(ref.median);
   if (value >= median) {
@@ -24,29 +39,29 @@ function zFromReference(value, ref) {
   return (value - median) / (median - sdNeg);
 }
 
-function findByBulan(dataset, umurBulan) {
-  return dataset.find((d) => d.bulan === String(umurBulan));
+function findByBulan(dataset: any[], umurBulan: number) {
+  return dataset.find((d: any) => d.bulan === String(umurBulan));
 }
 
-function roundPbToHalfStep(tinggi) {
+function roundPbToHalfStep(tinggi: number): number {
   const frac = tinggi - Math.floor(tinggi);
   if (frac === 0.5) return tinggi;
   if (frac < 0.5) return Math.floor(tinggi);
   return Math.floor(tinggi) + 0.5;
 }
 
-function findByPb(dataset, pb) {
-  return dataset.find((d) => parseFloat(d.pb) === pb);
+function findByPb(dataset: any[], pb: number) {
+  return dataset.find((d: any) => parseFloat(d.pb) === pb);
 }
 
-export function computeZScoreBB({ berat, gender, tanggalLahir, tanggalPengukuran }) {
+export function computeZScoreBB({ berat, gender, tanggalLahir, tanggalPengukuran }: ZScoreInput) {
   if (berat == null || !tanggalLahir || !tanggalPengukuran) return null;
   const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? bbPria : bbPerempuan;
   return zFromReference(berat, findByBulan(dataset, umur));
 }
 
-export function computeZScoreTB({ tinggi, gender, tanggalLahir, tanggalPengukuran }) {
+export function computeZScoreTB({ tinggi, gender, tanggalLahir, tanggalPengukuran }: ZScoreInput) {
   if (tinggi == null || !tanggalLahir || !tanggalPengukuran) return null;
   const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? tbPria : tbPerempuan;
@@ -58,7 +73,7 @@ export function computeZScoreLK({
   gender,
   tanggalLahir,
   tanggalPengukuran,
-}) {
+}: ZScoreInput) {
   if (lingkarKepala == null || !tanggalLahir || !tanggalPengukuran) return null;
   const umur = monthDiff(moment(tanggalLahir), moment(tanggalPengukuran));
   const dataset = gender === GENDER.MALE ? lkPria : lkPerempuan;
@@ -71,7 +86,7 @@ export function computeZScoreGizi({
   gender,
   tanggalLahir,
   tanggalPengukuran,
-}) {
+}: ZScoreInput) {
   if (berat == null || tinggi == null || !tanggalLahir || !tanggalPengukuran) {
     return null;
   }
@@ -88,7 +103,7 @@ export function computeZScoreGizi({
   return zFromReference(berat, findByPb(dataset, pb));
 }
 
-export function computeAllZScores(input) {
+export function computeAllZScores(input: ZScoreInput) {
   return {
     zScoreBB: computeZScoreBB(input),
     zScoreTB: computeZScoreTB(input),

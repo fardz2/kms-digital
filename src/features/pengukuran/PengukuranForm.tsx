@@ -16,6 +16,14 @@ import {
   useUpdatePengukuran,
 } from '../../queries/usePengukuranQueries';
 
+interface PengukuranFormProps {
+  open: boolean;
+  onClose: () => void;
+  anak?: any;
+  existing?: any;
+  prefillFrom?: any;
+}
+
 const DEFAULTS = {
   berat: 8.0,
   tinggi: 70.0,
@@ -24,7 +32,7 @@ const DEFAULTS = {
   catatan: '',
 };
 
-export default function PengukuranForm({ open, onClose, anak, existing, prefillFrom }) {
+export default function PengukuranForm({ open, onClose, anak, existing, prefillFrom }: PengukuranFormProps) {
   const toast = useToast();
   const createMutation = useCreatePengukuran(anak?.id);
   const updateMutation = useUpdatePengukuran(anak?.id);

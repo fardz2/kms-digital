@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Modal } from "antd";
 import React, { useState } from "react";
 import { FileSpreadsheet } from "lucide-react";

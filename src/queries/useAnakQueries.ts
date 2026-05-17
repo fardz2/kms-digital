@@ -2,11 +2,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { anakApi } from '../api/anak.api';
 import { qk } from './keys';
 import { useSession } from '../features/auth/useSession';
+import type { Anak } from '../types';
+
+interface CreateAnakPayload {
+  nama: string;
+  panggilan?: string;
+  tanggal_lahir: string;
+  gender: string;
+  alamat?: string;
+  status?: any;
+  id_orang_tua?: number;
+}
 
 export function useAnakList() {
   const { role, isAuthenticated } = useSession();
 
-  return useQuery({
+  return useQuery<Anak[]>({
     queryKey: qk.anak.list(role),
     queryFn: async () => {
       const res = await anakApi.list(role);
@@ -23,7 +34,7 @@ export function useCreateAnak() {
   const qc = useQueryClient();
   const { role } = useSession();
   return useMutation({
-    mutationFn: (payload) => anakApi.create(role, payload),
+    mutationFn: (payload: CreateAnakPayload) => anakApi.create(role, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
@@ -33,17 +44,17 @@ export function useCreateAnak() {
 export function useImportAnakExcel() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (formData) => anakApi.importExcel(formData),
+    mutationFn: (formData: FormData) => anakApi.importExcel(formData),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
   });
 }
 
-export function useAnakDetail(id) {
+export function useAnakDetail(id: number | string | undefined) {
   const { role, isAuthenticated } = useSession();
 
-  return useQuery({
+  return useQuery<Anak | null>({
     queryKey: qk.anak.detail(id, role),
     queryFn: async () => {
       const res = await anakApi.detail(id, role);
@@ -59,7 +70,7 @@ export function useDeleteAnak() {
   const { role } = useSession();
 
   return useMutation({
-    mutationFn: (id) => anakApi.remove(id),
+    mutationFn: (id: number) => anakApi.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.anak.list(role) });
     },

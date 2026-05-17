@@ -8,7 +8,13 @@ import { useSession } from "../../../features/auth/useSession";
 import { ortuApi } from "../../../api/ortu.api";
 import { useCreateAnak } from "../../../queries/useAnakQueries";
 
-export default function FormInputDataAnak({ isOpen, onCancel, kader }) {
+interface FormInputDataAnakProps {
+  isOpen: boolean;
+  onCancel: () => void;
+  kader?: any;
+}
+
+export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInputDataAnakProps) {
   const [form] = Form.useForm();
   const toast = useToast();
   const { isAuthenticated, role } = useSession();

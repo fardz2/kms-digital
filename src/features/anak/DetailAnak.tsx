@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
@@ -72,7 +71,7 @@ export default function DetailAnak() {
           title={anakLoading ? 'Memuat...' : (anak?.nama ?? '-')}
           subtitle={
             umur != null
-              ? `${umur} bulan · ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
+              ? `${umur} bulan � ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
               : undefined
           }
         />
@@ -84,7 +83,7 @@ export default function DetailAnak() {
             onClick={() => navigate(-1)}
             className="mb-4"
           >
-            ← Kembali
+            ? Kembali
           </Button>
 
           {canEdit && (
