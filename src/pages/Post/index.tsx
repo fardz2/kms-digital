@@ -185,9 +185,11 @@ export default function Post() {
                   {item.jawaban.map((j, idx) => {
                     const ts = j.waktu ?? j.time ?? j.created_at ?? j.tanggal;
                     const valid = ts && moment(ts).isValid();
+                    const stableKey =
+                      j.comment_id ?? j.id ?? `${item.id}-${ts ?? idx}`;
                     return (
                       <div
-                        key={idx}
+                        key={stableKey}
                         className="pb-[13px] border-b border-light-ash last:border-0 last:pb-0"
                       >
                         <p className="text-body-sm text-deep-slate">
