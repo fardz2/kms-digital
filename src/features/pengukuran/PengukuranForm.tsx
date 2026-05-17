@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import { DatePicker } from 'antd';
@@ -124,7 +123,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
     <>
       {toast.contextHolder}
       <Modal
-        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran — ${anak?.nama ?? ''}`}
+        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran � ${anak?.nama ?? ''}`}
         open={open}
         onCancel={onClose}
         width={560}
@@ -142,7 +141,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-overline text-neutral-600 mb-2 block">
-              📅 Tanggal Pengukuran
+              ?? Tanggal Pengukuran
             </label>
             <DatePicker
               value={tanggal}
@@ -159,7 +158,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           </div>
 
           <NumberSlider
-            label="⚖️ Berat Badan"
+            label="?? Berat Badan"
             min={0}
             max={20}
             step={0.1}
@@ -169,7 +168,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           />
 
           <NumberSlider
-            label="📏 Tinggi Badan"
+            label="?? Tinggi Badan"
             min={0}
             max={118}
             step={0.5}
@@ -179,7 +178,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           />
 
           <NumberSlider
-            label="🧠 Lingkar Kepala"
+            label="?? Lingkar Kepala"
             min={30}
             max={55}
             step={0.1}
@@ -190,7 +189,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
           {showLila && (
             <NumberSlider
-              label="💪 Lingkar Lengan (LILA)"
+              label="?? Lingkar Lengan (LILA)"
               min={5}
               max={20}
               step={0.1}

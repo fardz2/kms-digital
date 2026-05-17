@@ -1,6 +1,16 @@
 import React from 'react';
 
-export default function CatatanField({ value = '', onChange, placeholder }) {
+interface CatatanFieldProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+}
+
+export default function CatatanField({
+  value = '',
+  onChange,
+  placeholder,
+}: CatatanFieldProps) {
   return (
     <div className="py-4">
       <label className="text-overline text-neutral-600 mb-2 block">

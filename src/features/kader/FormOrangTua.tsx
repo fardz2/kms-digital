@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import React, { useEffect } from 'react';
 import { Form, Input, Select, message } from 'antd';
 import Modal from '../../components/ui/Modal';
@@ -144,10 +143,10 @@ export default function FormOrangTua({
             name="password"
             rules={
               isEdit
-                ? [{ pattern: '^.{8,}$', message: 'Minimal 8 karakter' }]
+                ? [{ pattern: /^.{8,}$/, message: 'Minimal 8 karakter' }]
                 : [
                     { required: true, message: 'Kata sandi masih kosong' },
-                    { pattern: '^.{8,}$', message: 'Minimal 8 karakter' },
+                    { pattern: /^.{8,}$/, message: 'Minimal 8 karakter' },
                   ]
             }
           >

@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Select } from "antd";
 import { lazy, Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +27,7 @@ export default function ArtikelForm() {
   const { data: dataKategori, isLoading: kategoriLoading } = useKategoriList();
 
   const createArtikelMutation = useMutation({
-    mutationFn: async (values) => {
+    mutationFn: async (values: { judul: string; kategori: string; penulis: string }) => {
       if (!imageFile)
         throw new Error("Silakan unggah cover artikel terlebih dahulu");
       const formData = new FormData();
@@ -41,7 +40,7 @@ export default function ArtikelForm() {
     },
     onSuccess: () => {
       toast.success("Artikel berhasil diterbitkan");
-      queryClient.invalidateQueries(["artikel"]);
+      queryClient.invalidateQueries({ queryKey: ["artikel"] });
       setTimeout(() => navigate("/admin/dashboard/artikel"), 700);
     },
     onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),
@@ -200,7 +199,7 @@ export default function ArtikelForm() {
                         <span className="text-body-sm">
                           <span className="font-semibold text-deep-slate">Klik untuk unggah</span> atau seret file
                         </span>
-                        <span className="text-caption">JPEG, PNG, JPG, GIF, SVG · Maks 2MB</span>
+                        <span className="text-caption">JPEG, PNG, JPG, GIF, SVG � Maks 2MB</span>
                       </div>
                     )}
                     <input

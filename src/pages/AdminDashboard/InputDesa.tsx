@@ -1,4 +1,3 @@
-﻿// @ts-nocheck
 import { Form, Input, Modal } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,13 +30,13 @@ export default function InputDesa() {
     mutationFn: (id) => desaApi.remove(id),
     onSuccess: () => {
       toast.success("Desa berhasil dihapus");
-      queryClient.invalidateQueries(["desa"]);
+      queryClient.invalidateQueries({ queryKey: ["desa"] });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal menghapus desa"),
   });
 
   const createDesaMutation = useMutation({
-    mutationFn: (values) =>
+    mutationFn: (values: { name: string; password: string; password_confirmation: string }) =>
       desaApi.create({
         name: values.name,
         password: values.password,
@@ -45,7 +44,7 @@ export default function InputDesa() {
       }),
     onSuccess: () => {
       toast.success("Desa dan akun berhasil disimpan");
-      queryClient.invalidateQueries(["desa"]);
+      queryClient.invalidateQueries({ queryKey: ["desa"] });
       form.resetFields();
       setIsModalVisible(false);
     },

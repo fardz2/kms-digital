@@ -1,7 +1,23 @@
 import React from 'react';
 import { Modal as AntModal } from 'antd';
 
-export default function Modal({ title, open, onCancel, footer, width, children }) {
+interface ModalProps {
+  title?: React.ReactNode;
+  open: boolean;
+  onCancel: () => void;
+  footer?: React.ReactNode;
+  width?: number;
+  children: React.ReactNode;
+}
+
+export default function Modal({
+  title,
+  open,
+  onCancel,
+  footer,
+  width,
+  children,
+}: ModalProps) {
   return (
     <AntModal
       title={
