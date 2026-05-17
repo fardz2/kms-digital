@@ -27,7 +27,7 @@ export default function AcaraSection() {
         const payload = {
           judul: values.judul,
           deskripsi: values.deskripsi ?? '',
-          tanggal_reminder: moment(values.tanggal).format('YYYY-MM-DD'),
+          tanggal_reminder: values.tanggal.format('YYYY-MM-DD'),
         };
         createMutation.mutate(payload, {
           onSuccess: () => {

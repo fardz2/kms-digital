@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import dayjs from 'dayjs';
 import moment from 'moment';
 import { DatePicker } from 'antd';
 import Modal from '../../components/ui/Modal';
@@ -39,7 +40,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
   const isEdit = !!existing;
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
-  const [tanggal, setTanggal] = useState(moment());
+  const [tanggal, setTanggal] = useState(dayjs());
   const [berat, setBerat] = useState(DEFAULTS.berat);
   const [tinggi, setTinggi] = useState(DEFAULTS.tinggi);
   const [lingkarKepala, setLingkarKepala] = useState(DEFAULTS.lingkarKepala);
@@ -50,14 +51,14 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
     if (!open) return;
     const source = existing ?? prefillFrom;
     if (source) {
-      setTanggal(existing?.date ? moment(existing.date) : moment());
+      setTanggal(existing?.date ? dayjs(existing.date) : dayjs());
       setBerat(Number(source.berat) || DEFAULTS.berat);
       setTinggi(Number(source.tinggi) || DEFAULTS.tinggi);
       setLingkarKepala(Number(source.lingkar_kepala) || DEFAULTS.lingkarKepala);
       setLila(Number(source.lila) || DEFAULTS.lila);
       setCatatan(existing?.catatan ?? '');
     } else {
-      setTanggal(moment());
+      setTanggal(dayjs());
       setBerat(DEFAULTS.berat);
       setTinggi(DEFAULTS.tinggi);
       setLingkarKepala(DEFAULTS.lingkarKepala);
@@ -68,7 +69,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
 
   const umurBulan = useMemo(() => {
     if (!anak?.tanggal_lahir || !tanggal) return null;
-    return monthDiff(moment(anak.tanggal_lahir), tanggal);
+    return monthDiff(moment(anak.tanggal_lahir), moment(tanggal.toDate()));
   }, [anak?.tanggal_lahir, tanggal]);
 
   const showLila = umurBulan != null && umurBulan >= 7;
@@ -123,7 +124,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
     <>
       {toast.contextHolder}
       <Modal
-        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran � ${anak?.nama ?? ''}`}
+        title={isEdit ? 'Ubah Pengukuran' : `Pengukuran · ${anak?.nama ?? ''}`}
         open={open}
         onCancel={onClose}
         width={560}
@@ -141,7 +142,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-overline text-neutral-600 mb-2 block">
-              ?? Tanggal Pengukuran
+              Tanggal Pengukuran
             </label>
             <DatePicker
               value={tanggal}
@@ -158,7 +159,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           </div>
 
           <NumberSlider
-            label="?? Berat Badan"
+            label="Berat Badan"
             min={0}
             max={20}
             step={0.1}

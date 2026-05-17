@@ -199,7 +199,7 @@ export default function ArtikelForm() {
                         <span className="text-body-sm">
                           <span className="font-semibold text-deep-slate">Klik untuk unggah</span> atau seret file
                         </span>
-                        <span className="text-caption">JPEG, PNG, JPG, GIF, SVG � Maks 2MB</span>
+                        <span className="text-caption">JPEG, PNG, JPG, GIF, SVG · Maks 2MB</span>
                       </div>
                     )}
                     <input

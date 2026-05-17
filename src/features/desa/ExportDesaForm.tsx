@@ -27,8 +27,8 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
         exportCsv.mutate(
           {
             desa: idDesa,
-            bulan: moment(values.waktu).format('MM'),
-            tahun: moment(values.waktu).format('YYYY'),
+            bulan: values.waktu.format('MM'),
+            tahun: values.waktu.format('YYYY'),
             id: values.posyandu ?? 'all',
           },
           {

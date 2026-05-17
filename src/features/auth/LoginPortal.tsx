@@ -178,7 +178,7 @@ export default function LoginPortal() {
           </div>
 
           <div className="relative text-caption text-white/50">
-            � {new Date().getFullYear()} Posyandu Lebakwangi
+            · {new Date().getFullYear()} Posyandu Lebakwangi
           </div>
         </aside>
 

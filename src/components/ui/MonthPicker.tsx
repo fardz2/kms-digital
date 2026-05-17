@@ -1,9 +1,14 @@
 import React from 'react';
 import { DatePicker } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
-export default function MonthPicker({ value, onChange }) {
-  const current = value ? moment(value, 'YYYY-MM') : moment();
+interface MonthPickerProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
+
+export default function MonthPicker({ value, onChange }: MonthPickerProps) {
+  const current = value ? dayjs(value, 'YYYY-MM') : dayjs();
   return (
     <DatePicker
       picker="month"

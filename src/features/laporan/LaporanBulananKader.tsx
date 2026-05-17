@@ -169,7 +169,7 @@ export default function LaporanBulananKader() {
                         className="text-danger shrink-0 mt-[3px]"
                       />
                       <span>
-                        <span className="font-semibold">{item.nama}</span> � {item.status}
+                        <span className="font-semibold">{item.nama}</span> · {item.status}
                       </span>
                     </li>
                   ))}

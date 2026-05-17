@@ -84,7 +84,7 @@ export default function LandingPage() {
               <div>
                 <span className="inline-flex items-center gap-[8px] text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[25px]">
                   <Sparkles size={14} strokeWidth={2.25} />
-                  KMS Digital � Posyandu Lebakwangi
+                  KMS Digital · Posyandu Lebakwangi
                 </span>
                 <h1 className="text-display md:text-display-lg font-bold text-deep-slate leading-[0.98] tracking-tight mb-[25px]">
                   Tumbuh kembang anak,{" "}
@@ -101,7 +101,7 @@ export default function LandingPage() {
                 </h1>
                 <p className="text-body-lg text-graphite mb-[33px] max-w-[560px] leading-relaxed">
                   Catat pengukuran balita, akses artikel kesehatan, dan ikuti
-                  perkembangan gizi anak bersama kader posyandu desa Anda �
+                  perkembangan gizi anak bersama kader posyandu desa Anda ·
                   dalam satu aplikasi sederhana.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-[13px] max-w-[420px]">
@@ -234,7 +234,7 @@ export default function LandingPage() {
             </div>
             <p className="text-body-lg text-graphite leading-relaxed md:pt-[25px]">
               KMS Digital dirancang untuk semua orang yang terlibat dalam
-              perjalanan gizi balita di desa � orang tua, kader, bidan, dan
+              perjalanan gizi balita di desa · orang tua, kader, bidan, dan
               pemerintah desa. Satu akun, sesuai peran.
             </p>
           </div>
@@ -266,7 +266,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features � editorial list */}
+        {/* Features · editorial list */}
         <section className="bg-white border-y border-light-ash">
           <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[67px] md:py-[95px]">
             <div className="max-w-[720px] mb-[50px]">
@@ -365,7 +365,7 @@ export default function LandingPage() {
                 KMS Digital
               </p>
               <p className="text-caption text-graphite mt-1">
-                � {new Date().getFullYear()} Posyandu Lebakwangi. Seluruh hak cipta dilindungi.
+                · {new Date().getFullYear()} Posyandu Lebakwangi. Seluruh hak cipta dilindungi.
               </p>
             </div>
             <nav className="flex items-center gap-[25px] text-body-sm text-graphite">

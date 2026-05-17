@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ArrowLeft } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
@@ -71,7 +72,7 @@ export default function DetailAnak() {
           title={anakLoading ? 'Memuat...' : (anak?.nama ?? '-')}
           subtitle={
             umur != null
-              ? `${umur} bulan � ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
+              ? `${umur} bulan · ${anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}`
               : undefined
           }
         />
@@ -80,10 +81,11 @@ export default function DetailAnak() {
           <Button
             variant="ghost"
             size="sm"
+            leadingIcon={<ArrowLeft size={16} strokeWidth={1.75} />}
             onClick={() => navigate(-1)}
             className="mb-4"
           >
-            ? Kembali
+            Kembali
           </Button>
 
           {canEdit && (

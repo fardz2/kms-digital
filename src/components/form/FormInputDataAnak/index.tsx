@@ -38,7 +38,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
         const base = {
           nama: values.nama,
           panggilan: values.panggilan,
-          tanggal_lahir: moment(values.tanggalLahir).format("YYYY-MM-DD"),
+          tanggal_lahir: values.tanggalLahir.format("YYYY-MM-DD"),
           gender: values.jenisKelamin,
           alamat: values.alamat,
           status: kader,

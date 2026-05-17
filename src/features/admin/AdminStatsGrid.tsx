@@ -56,7 +56,7 @@ export default function AdminStatsGrid({ stats, loading }) {
                 <div key={b.label} className="flex flex-col">
                   <span className="text-caption text-graphite">{b.label}</span>
                   <span className="text-body-sm font-bold text-deep-slate tabular-nums">
-                    {b.value ?? '�'}
+                    {b.value ?? '·'}
                   </span>
                 </div>
               ))}
