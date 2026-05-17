@@ -7,11 +7,11 @@ import {
 describe('session-storage', () => {
   beforeEach(() => {
     localStorage.clear();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const validSession = {
