@@ -5,6 +5,7 @@ import moment from 'moment';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { useArtikelDetail } from '../../queries/useArtikelQueries';
+import { sanitizeHtml } from '../../utilities/sanitize';
 
 export default function ArtikelDetailPage() {
   const { id } = useParams();
@@ -38,7 +39,7 @@ export default function ArtikelDetailPage() {
         ) : (
           <div
             className="bg-white p-[25px] rounded-default border border-light-ash text-base text-deep-slate leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
           />
         )}
       </div>
