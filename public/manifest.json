@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "name": "KMS Digital - Posyandu Lebakwangi",
+  "short_name": "KMS Digital",
+  "description": "Kartu Menuju Sehat Digital untuk Posyandu - pantau pertumbuhan balita, forum tanya jawab, dan laporan kesehatan",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,22 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#FF7070",
+  "background_color": "#f9f9fb",
+  "lang": "id",
+  "categories": ["health", "medical", "education"]
 }

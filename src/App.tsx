@@ -6,6 +6,8 @@ import idID from 'antd/locale/id_ID';
 import AppRoutes from './routes/AppRoutes';
 import ErrorBoundary from './components/ErrorBoundary';
 import TourProvider from './features/tour/TourProvider';
+import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +39,8 @@ export default function App() {
               <TourProvider>
                 <AppRoutes />
               </TourProvider>
+              <PWAUpdatePrompt />
+              <PWAInstallPrompt />
             </BrowserRouter>
           </AntApp>
         </ConfigProvider>
