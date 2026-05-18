@@ -6,9 +6,9 @@ Dijalankan sebelum merge tiap PR besar atau rilis ke production.
 
 Jalankan sebelum manual testing:
 ```bash
-npm test -- --watchAll=false
+npm test
 ```
-Expected: semua test PASS (saat ini: 73 tests di 7 suites).
+Expected: semua test PASS (saat ini: 201 tests di 19 suites).
 
 ## Login & Session
 - [ ] Login semua 5 role via `/masuk` portal sukses
@@ -90,12 +90,11 @@ Expected: semua test PASS (saat ini: 73 tests di 7 suites).
 - [ ] Tidak ada 404/ReferenceError saat navigate ke semua route
 - [ ] Build size lebih kecil dibanding sebelum cleanup
 - [ ] Tidak ada console error "Cannot resolve module 'xxx'"
-- [ ] `npm test -- --watchAll=false` 63/63 pass
+- [ ] `npm test` semua pass
 - [ ] Legacy redirect semua masih jalan (`/sign-in`, `/dashboard`, `/kader-posyandu/dashboard`, dll)
 
 ## Aesthetic Refresh (Plan 7)
-- [ ] Font Plus Jakarta Sans muncul di heading (Halo..., title halaman)
-- [ ] Font Inter muncul di body text
+- [ ] Font Sen muncul di heading dan body (satu font family)
 - [ ] Brand pink tetap dominan, tidak berubah
 - [ ] Neutral gray tinted warm (bukan cool gray)
 - [ ] BalitaCard border color berbeda per status (merah perhatian / hijau sudah / netral belum)
@@ -106,7 +105,7 @@ Expected: semua test PASS (saat ini: 73 tests di 7 suites).
 - [ ] StatusBadge soft pill (bg-bg + text-color pair)
 - [ ] Zero inline styles di file scope (kecuali dynamic value: width%, animationDelay, backgroundImage)
 - [ ] Tailwind arbitrary selector untuk slider thumb render correct di Chrome + Firefox
-- [ ] 64 tests pass, build success tanpa new warnings
+- [ ] Semua test pass, build success tanpa new warnings
 
 ## Legacy Pages Refresh (Plan 8)
 - [ ] LandingPage render dengan hero heading display font + CTA pink button
@@ -116,12 +115,12 @@ Expected: semua test PASS (saat ini: 73 tests di 7 suites).
 - [ ] Admin Sidebar 72 width, slide transition, active link primary-50
 - [ ] DashboardLayout mobile hamburger toggle
 - [ ] DropdownLink collapsible dengan chevron rotate
-- [ ] Table component: header primary-300 + overline caps, row hover primary-50/40
+- [ ] Table component: header `bg-polar-mist` + caption uppercase, row hover `bg-faint-fog`
 - [ ] Pagination rounded-button, active page primary highlight
 - [ ] Form components (InputDataAnak, InputPost, InputDataExcel, UpdateArtikel) modal title + footer Tailwind
 - [ ] Forum post card hover lift + avatar + role tag colored
 - [ ] DetailForum post detail + comment form + comment list
-- [ ] Admin CMS pages (InputDesa, InputPosyandu, Register*, ArtikelAdmin, DesaPage) tetap render (inherit Inter font, antd default internal acceptable)
+- [ ] Admin CMS pages (InputDesa, InputPosyandu, Register*, ArtikelAdmin, DesaPage) tetap render (inherit Sen font, antd default internal acceptable)
 
 ## Mode Posyandu (Plan 6)
 - [ ] Login kader → langsung render `/kader/balita` sebagai ModePosyandu (bukan BerandaKader)
@@ -209,7 +208,7 @@ Expected: semua test PASS (saat ini: 73 tests di 7 suites).
 - [ ] Toast pakai inline duration (tidak module-load `message.config()` yang trigger antd v4 bug)
 
 ### Verification
-- [ ] 73 tests pass (post/comment/profile/kategori query keys covered)
+- [ ] Semua test pass (post/comment/profile/kategori query keys covered)
 - [ ] `npm run build` Compiled successfully (zero ESLint warning)
 - [ ] Bundle size tidak naik signifikan
 

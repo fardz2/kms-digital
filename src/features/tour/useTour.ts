@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Role } from '../../types';
+import { getRoleFlow, getFirstStepForPath } from './tourSteps';
 
 const TOUR_FLAG_PREFIX = 'kms_tour_completed_';
 
@@ -29,34 +30,59 @@ function clearFlag(role: Role | null): void {
   window.localStorage.removeItem(key);
 }
 
-/**
- * useTour — kontrol open/close + flag completed per role.
- *
- * Auto-trigger pertama kali user dengan role tertentu akses page yang call hook ini.
- * Setelah complete/close, flag tersimpan di localStorage agar tidak muncul lagi.
- *
- * Pakai `replay()` untuk memunculkan tour kembali (mis. via tombol "Bantuan").
- */
 export function useTour(role: Role | null, autoStart = true) {
   const [open, setOpen] = useState(false);
+  const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!autoStart || !role) return;
     if (isCompleted(role)) return;
-    // Delay slight supaya ref target tersedia di DOM
-    const timer = window.setTimeout(() => setOpen(true), 600);
+    const flow = getRoleFlow(role);
+    if (!flow || flow.steps.length === 0) return;
+    const timer = window.setTimeout(() => {
+      setActiveStepId(flow.steps[0].id);
+      setOpen(true);
+    }, 600);
     return () => window.clearTimeout(timer);
   }, [role, autoStart]);
 
   const close = useCallback(() => {
     setOpen(false);
+    setActiveStepId(null);
     markCompleted(role);
   }, [role]);
 
   const replay = useCallback(() => {
     clearFlag(role);
+    const flow = getRoleFlow(role);
+    if (flow && flow.steps.length > 0) {
+      setActiveStepId(flow.steps[0].id);
+    }
     setOpen(true);
   }, [role]);
 
-  return { open, close, replay };
+  const startFromBeginning = useCallback((r: Role) => {
+    clearFlag(r);
+    const flow = getRoleFlow(r);
+    if (flow && flow.steps.length > 0) {
+      setActiveStepId(flow.steps[0].id);
+      setOpen(true);
+    }
+  }, []);
+
+  const replayFromPath = useCallback((r: Role, path: string) => {
+    const step = getFirstStepForPath(r, path);
+    if (step) {
+      setActiveStepId(step.id);
+      setOpen(true);
+    }
+  }, []);
+
+  const finishFlow = useCallback((r: Role) => {
+    setOpen(false);
+    setActiveStepId(null);
+    markCompleted(r);
+  }, []);
+
+  return { open, close, replay, activeStepId, startFromBeginning, replayFromPath, finishFlow };
 }

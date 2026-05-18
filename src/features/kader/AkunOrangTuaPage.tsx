@@ -153,7 +153,7 @@ export default function AkunOrangTuaPage() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[25px]">
-        <div className="flex gap-[8px] border-b border-light-ash">
+        <div data-tour-id="kader-akunortu-tabs" className="flex gap-[8px] border-b border-light-ash">
           {TABS.map((t) => {
             const active = t.key === tab;
             const count =
@@ -187,7 +187,7 @@ export default function AkunOrangTuaPage() {
         {tab === 'pending' && <PendingApprovalSection enabled={true} />}
 
         {tab === 'aktif' && (
-          <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
+          <div data-tour-id="kader-akunortu-table" className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
             <div className="flex items-center justify-between gap-[17px] flex-wrap">
               <h2 className="text-heading font-semibold text-deep-slate">
                 Daftar Orang Tua Aktif

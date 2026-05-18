@@ -25,3 +25,6 @@ yarn-error.log*
 # local agent skills (personal tooling, not project code)
 .agents/
 skills-lock.json
+
+# local worktrees
+.worktrees/

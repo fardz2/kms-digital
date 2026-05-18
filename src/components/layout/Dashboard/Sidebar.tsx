@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
-import { LogOut, Lock, X, Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LogOut, Lock, X, Heart, PanelLeftClose, PanelLeftOpen, HelpCircle } from "lucide-react";
 import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
 import { useToast } from "../../ui/Toast";
@@ -9,6 +9,7 @@ import ProfileModal from "../../ui/ProfileModal";
 import { readSession, clearSession } from "../../../features/auth/session-storage";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
+import { useTourContext } from "../../../features/tour/TourProvider";
 
 function isLinkActive(pathname, link) {
   const basePath = "/admin/dashboard";
@@ -22,6 +23,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const navigate = useNavigate();
   const toast = useToast();
   const confirm = useConfirmDialog();
+  const { replay } = useTourContext();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const session = readSession();
   const { collapsed, toggle } = useSidebarCollapsed();
@@ -187,6 +189,15 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
         >
           {collapsed ? (
             <>
+              <Tooltip title="Bantuan" placement="right">
+                <button
+                  onClick={replay}
+                  className="flex items-center justify-center w-full h-[48px] rounded-default text-graphite hover:text-deep-slate hover:bg-faint-fog transition-colors"
+                  aria-label="Bantuan"
+                >
+                  <HelpCircle size={20} strokeWidth={1.75} />
+                </button>
+              </Tooltip>
               <Tooltip title="Ubah Kata Sandi" placement="right">
                 <button
                   onClick={() => setIsProfileModalOpen(true)}
@@ -208,6 +219,13 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
             </>
           ) : (
             <>
+              <button
+                onClick={replay}
+                className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-deep-slate hover:bg-faint-fog transition-colors"
+              >
+                <HelpCircle size={20} strokeWidth={1.75} className="text-graphite" />
+                Bantuan
+              </button>
               <button
                 onClick={() => setIsProfileModalOpen(true)}
                 className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-deep-slate hover:bg-faint-fog transition-colors"

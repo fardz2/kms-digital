@@ -87,7 +87,7 @@ export default function BerandaOT() {
             </Card>
           )}
 
-          <div className="flex flex-col gap-[13px]">
+          <div data-tour-id="ot-home-anak-area" className="flex flex-col gap-[13px]">
             {(anakList ?? []).map((anak) => {
               const umurBulan = anak.tanggal_lahir
                 ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')

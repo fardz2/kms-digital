@@ -53,6 +53,7 @@ export default function PosyanduHeader({
               size="md"
               leadingIcon={<BarChart3 size={18} strokeWidth={2} />}
               onClick={onLaporan}
+              data-tour-id="kader-laporan"
             >
               Laporan
             </Button>
@@ -67,7 +68,7 @@ export default function PosyanduHeader({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-[25px] items-end">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-[25px] items-end" data-tour-id="kader-progress">
           <div className="space-y-[8px]">
             <div className="flex items-baseline gap-[13px]">
               <span className="text-display-lg font-bold text-deep-slate tabular-nums leading-none">

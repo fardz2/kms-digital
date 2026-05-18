@@ -76,7 +76,7 @@ export default function LaporanBulananKader() {
           Kembali
         </Button>
 
-        <div className="mb-[25px]">
+        <div data-tour-id="kader-laporan-picker" className="mb-[25px]">
           <div className="text-caption font-bold uppercase tracking-[0.12em] text-graphite mb-[8px]">
             Pilih Bulan
           </div>
@@ -94,7 +94,7 @@ export default function LaporanBulananKader() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px] mb-[25px]">
+            <div data-tour-id="kader-laporan-stats" className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px] mb-[25px]">
               <StatCard
                 label="Total Balita"
                 value={laporan.totalBalita}

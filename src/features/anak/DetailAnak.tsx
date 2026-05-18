@@ -113,7 +113,7 @@ export default function DetailAnak() {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 mb-10">
+          <div data-tour-id="anak-detail-riwayat" className="flex flex-col gap-3 mb-10">
             {[...(pengukuran ?? [])]
               .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
               .map((p) => (
@@ -132,7 +132,9 @@ export default function DetailAnak() {
               <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
                 Grafik Pertumbuhan (WHO)
               </h2>
-              <ChartWHO anak={anak} pengukuran={pengukuran} />
+              <div data-tour-id="anak-detail-chart">
+                <ChartWHO anak={anak} pengukuran={pengukuran} />
+              </div>
             </>
           )}
         </div>
