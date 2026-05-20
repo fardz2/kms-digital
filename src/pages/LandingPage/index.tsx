@@ -65,7 +65,7 @@ const STATS = [
   { value: "100%", label: "Berbahasa Indonesia", eyebrow: "Ramah Kader" },
 ];
 
-export default function LandingPage() {
+export function LandingPage() {
   const { isAuthenticated, role } = useSession();
   const dashboardPath = role ? ROLE_HOME[role] ?? '/' : '/masuk';
 
@@ -140,6 +140,15 @@ export default function LandingPage() {
                       </Link>
                     </>
                   )}
+                </div>
+                <div className="mt-[13px]">
+                  <Link
+                    to="/user-guide"
+                    className="inline-flex items-center gap-2 text-body-sm font-semibold text-primary-600 transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                  >
+                    User Guide
+                    <ArrowRight size={16} strokeWidth={2} />
+                  </Link>
                 </div>
                 <div className="mt-[33px] flex items-center gap-[17px] text-caption text-graphite">
                   <div className="flex items-center gap-[6px]">
@@ -405,3 +414,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+export default LandingPage;

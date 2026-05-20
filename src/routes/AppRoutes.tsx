@@ -15,6 +15,7 @@ import BerandaDesa from '../features/desa/BerandaDesa';
 import Post from '../pages/Post';
 import DetailForum from '../pages/DetailForum';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
+import UserGuidePage from '../pages/UserGuide';
 
 // Lazy: heavy or rarely-visited pages
 const DetailAnak = lazy(() => import('../features/anak/DetailAnak'));
@@ -45,6 +46,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/user-guide" element={<UserGuidePage />} />
       <Route path="/masuk" element={<LoginPortal />} />
       <Route path="/sign-up" element={withSuspense(<SignUp />)} />
 
