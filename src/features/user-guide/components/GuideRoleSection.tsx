@@ -1,17 +1,18 @@
 import React from 'react';
-import { guideContent } from '../data/guideContent';
 import type { GuideRole } from '../types';
 import GuideSectionCard from './GuideSectionCard';
 
 type GuideRoleSectionProps = {
   role: GuideRole;
+  position: number;
+  totalRoles: number;
 };
 
 function getRoleAnchor(roleId: string) {
   return `role-${roleId.toLowerCase()}`;
 }
 
-export default function GuideRoleSection({ role }: GuideRoleSectionProps) {
+export default function GuideRoleSection({ role, position, totalRoles }: GuideRoleSectionProps) {
   const anchorId = getRoleAnchor(role.id);
   const accent = role.accentColor ?? '#1D4ED8';
 
@@ -40,7 +41,7 @@ export default function GuideRoleSection({ role }: GuideRoleSectionProps) {
                 {role.sections.length} bagian
               </span>
               <span className="inline-flex items-center rounded-full bg-faint-fog px-[13px] py-[8px] text-caption font-semibold text-deep-slate">
-                {guideContent.findIndex((item) => item.id === role.id) + 1}/5 urutan
+                {position}/{totalRoles} urutan
               </span>
             </div>
           </div>

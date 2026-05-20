@@ -22,8 +22,13 @@ export function UserGuidePage() {
           </aside>
 
           <section className="space-y-[25px]">
-            {guideContent.map((role) => (
-              <GuideRoleSection key={role.id} role={role} />
+            {guideContent.map((role, index) => (
+              <GuideRoleSection
+                key={role.id}
+                role={role}
+                position={index + 1}
+                totalRoles={guideContent.length}
+              />
             ))}
           </section>
         </div>

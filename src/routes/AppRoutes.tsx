@@ -15,13 +15,13 @@ import BerandaDesa from '../features/desa/BerandaDesa';
 import Post from '../pages/Post';
 import DetailForum from '../pages/DetailForum';
 import LaporanBulananKader from '../features/laporan/LaporanBulananKader';
-import UserGuidePage from '../pages/UserGuide';
 
 // Lazy: heavy or rarely-visited pages
 const DetailAnak = lazy(() => import('../features/anak/DetailAnak'));
 const ArtikelPublic = lazy(() => import('../features/artikel/ArtikelList'));
 const ArtikelDetailPage = lazy(() => import('../features/artikel/ArtikelDetailPage'));
 const SignUp = lazy(() => import('../pages/SignUp'));
+const UserGuidePage = lazy(() => import('../pages/UserGuide'));
 
 // Admin pages — lazy
 const DashboardLayout = lazy(() => import('../components/layout/Dashboard/DashboardLayout'));
@@ -46,7 +46,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/user-guide" element={<UserGuidePage />} />
+      <Route path="/user-guide" element={withSuspense(<UserGuidePage />)} />
       <Route path="/masuk" element={<LoginPortal />} />
       <Route path="/sign-up" element={withSuspense(<SignUp />)} />
 
