@@ -28,3 +28,8 @@ skills-lock.json
 
 # local worktrees
 .worktrees/
+
+# local runtime artifacts
+.playwright-mcp/
+debug.log
+dev.log
