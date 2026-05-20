@@ -144,10 +144,7 @@ export default function ArtikelList() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[17px]">
-        <div
-          className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]"
-          data-tour-id="admin-artikel-table"
-        >
+        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]" data-tour-id="admin-artikel-table">
           <DataTable
             columns={columns}
             data={dataSource || []}

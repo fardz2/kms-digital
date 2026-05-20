@@ -199,6 +199,7 @@ export default function InputPosyandu() {
         dataTourId="admin-posyandu-header"
         action={
           <Button
+            data-tour-id="admin-posyandu-add-button"
             variant="primary"
             size="lg"
             leadingIcon={<Plus size={20} strokeWidth={2} />}
@@ -212,7 +213,10 @@ export default function InputPosyandu() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
-        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]">
+        <div
+          className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]"
+          data-tour-id="admin-posyandu-table"
+        >
           <DataTable
             columns={columns}
             data={dataSource || []}

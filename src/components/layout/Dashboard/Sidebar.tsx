@@ -53,7 +53,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       <aside
         data-tour-id="admin-sidebar"
         className={
-          "fixed inset-y-0 left-0 z-40 bg-white shadow-panel transform transition-all duration-250 ease-out-quart " +
+          "fixed inset-y-0 left-0 z-40 flex h-[100dvh] flex-col overflow-hidden bg-white shadow-panel transform transition-all duration-250 ease-out-quart " +
           width +
           " " +
           (showSidebar ? "translate-x-0" : "-translate-x-full")
@@ -118,7 +118,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
         {/* Nav */}
         <nav
           className={
-            "overflow-y-auto max-h-[calc(100vh-240px)] " +
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain " +
             (collapsed ? "px-[8px] py-[13px] space-y-[17px]" : "px-[13px] py-[13px] space-y-[25px]")
           }
         >
@@ -185,7 +185,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
         {/* Bottom */}
         <div
           className={
-            "absolute bottom-0 inset-x-0 border-t border-light-ash bg-white space-y-1 " +
+            "mt-auto shrink-0 border-t border-light-ash bg-white space-y-1 " +
             (collapsed ? "px-[8px] py-[13px]" : "px-[13px] py-[17px]")
           }
         >

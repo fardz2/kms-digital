@@ -277,6 +277,7 @@ export default function RegisterKaderPosyandu() {
         dataTourId="admin-kader-header"
         action={
           <Button
+            data-tour-id="admin-kader-add-button"
             variant="primary"
             size="lg"
             leadingIcon={<Plus size={20} strokeWidth={2} />}
@@ -290,12 +291,15 @@ export default function RegisterKaderPosyandu() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">
-        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
+        <div
+          className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]"
+          data-tour-id="admin-kader-table"
+        >
           <div className="flex items-center justify-between gap-[17px] flex-wrap">
             <h2 className="text-heading font-semibold text-deep-slate">
               Daftar Kader Posyandu
             </h2>
-            <div className="flex items-center gap-[8px] flex-wrap">
+            <div className="flex items-center gap-[8px] flex-wrap" data-tour-id="admin-kader-filter">
               <Select
                 value={statusFilter === null ? "ALL" : String(statusFilter)}
                 onChange={(v) => setStatusFilter(v === "ALL" ? null : v === "true")}

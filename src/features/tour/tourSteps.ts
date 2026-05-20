@@ -288,7 +288,23 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         targetSelector: '[data-tour-id="admin-desa-header"]',
         title: 'Kelola Desa',
         description:
-          'Halaman ini berisi master data desa. Tambah desa baru atau edit yang sudah ada.',
+          'Halaman ini berisi master data desa. Mulai dari sini untuk menambah atau menghapus data desa.',
+      },
+      {
+        id: 'admin-desa-add-button',
+        routePattern: '/admin/dashboard/desa',
+        targetSelector: '[data-tour-id="admin-desa-add-button"]',
+        title: 'Tambah Desa',
+        description:
+          'Klik tombol ini untuk membuka form tambah desa, lalu isi nama dan kata sandi desa baru.',
+      },
+      {
+        id: 'admin-desa-table',
+        routePattern: '/admin/dashboard/desa',
+        targetSelector: '[data-tour-id="admin-desa-table"]',
+        title: 'Daftar Desa',
+        description:
+          'Tabel ini dipakai untuk meninjau desa yang sudah terdaftar dan menghapus yang tidak dipakai.',
       },
       {
         id: 'admin-posyandu-header',
@@ -296,7 +312,23 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         targetSelector: '[data-tour-id="admin-posyandu-header"]',
         title: 'Kelola Posyandu',
         description:
-          'Master data posyandu per desa. Pastikan setiap posyandu punya kader yang aktif.',
+          'Master data posyandu per desa. Gunakan halaman ini untuk menambah, mengubah, atau menghapus posyandu.',
+      },
+      {
+        id: 'admin-posyandu-add-button',
+        routePattern: '/admin/dashboard/posyandu',
+        targetSelector: '[data-tour-id="admin-posyandu-add-button"]',
+        title: 'Tambah Posyandu',
+        description:
+          'Buka form posyandu baru dari tombol ini, lalu pilih desa yang sesuai sebelum menyimpan.',
+      },
+      {
+        id: 'admin-posyandu-table',
+        routePattern: '/admin/dashboard/posyandu',
+        targetSelector: '[data-tour-id="admin-posyandu-table"]',
+        title: 'Daftar Posyandu',
+        description:
+          'Periksa tabel untuk melihat alamat, desa terkait, dan aksi edit atau hapus yang tersedia.',
       },
       {
         id: 'admin-kader-header',
@@ -307,12 +339,52 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
           'Halaman ini dipakai untuk registrasi, filter status, dan edit data kader posyandu.',
       },
       {
+        id: 'admin-kader-filter',
+        routePattern: '/admin/dashboard/kader-posyandu',
+        targetSelector: '[data-tour-id="admin-kader-filter"]',
+        title: 'Filter Status',
+        description:
+          'Gunakan filter ini untuk memisahkan kader yang sudah disetujui dan yang masih menunggu.',
+      },
+      {
+        id: 'admin-kader-add-button',
+        routePattern: '/admin/dashboard/kader-posyandu',
+        targetSelector: '[data-tour-id="admin-kader-add-button"]',
+        title: 'Tambah Kader',
+        description:
+          'Klik tombol ini untuk membuka form registrasi kader, lalu pilih desa, posyandu, dan statusnya.',
+      },
+      {
+        id: 'admin-kader-table',
+        routePattern: '/admin/dashboard/kader-posyandu',
+        targetSelector: '[data-tour-id="admin-kader-table"]',
+        title: 'Daftar Kader',
+        description:
+          'Tabel ini membantu Anda meninjau data kader, memeriksa relasi desa-posyandu, dan mengubah akun.',
+      },
+      {
         id: 'admin-tenkes-header',
         routePattern: '/admin/dashboard/tenaga-kesehatan',
         targetSelector: '[data-tour-id="admin-tenkes-header"]',
         title: 'Kelola Tenaga Kesehatan',
         description:
           'Daftar bidan dan tenaga kesehatan dikelola dari halaman ini.',
+      },
+      {
+        id: 'admin-tenkes-add-button',
+        routePattern: '/admin/dashboard/tenaga-kesehatan',
+        targetSelector: '[data-tour-id="admin-tenkes-add-button"]',
+        title: 'Tambah Tenaga Kesehatan',
+        description:
+          'Gunakan tombol ini untuk membuka form registrasi tenaga kesehatan baru dan memilih desa terkait.',
+      },
+      {
+        id: 'admin-tenkes-table',
+        routePattern: '/admin/dashboard/tenaga-kesehatan',
+        targetSelector: '[data-tour-id="admin-tenkes-table"]',
+        title: 'Daftar Tenaga Kesehatan',
+        description:
+          'Periksa tabel untuk melihat akun yang aktif dan aksi hapus bila data sudah tidak dipakai.',
       },
       {
         id: 'admin-artikel-header',
@@ -323,12 +395,76 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
           'Halaman daftar artikel digunakan untuk mengubah atau menghapus konten edukasi.',
       },
       {
+        id: 'admin-artikel-new-button',
+        routePattern: '/admin/dashboard/artikel',
+        targetSelector: '[data-tour-id="admin-artikel-new-button"]',
+        title: 'Tulis Artikel Baru',
+        description:
+          'Klik tombol ini untuk masuk ke form penulisan artikel baru yang akan dipublikasikan.',
+      },
+      {
+        id: 'admin-artikel-table',
+        routePattern: '/admin/dashboard/artikel',
+        targetSelector: '[data-tour-id="admin-artikel-table"]',
+        title: 'Daftar Artikel',
+        description:
+          'Tabel artikel memuat judul, tanggal upload, dan aksi ubah atau hapus untuk tiap konten.',
+      },
+      {
+        id: 'admin-artikel-edit-button',
+        routePattern: '/admin/dashboard/artikel',
+        targetSelector: '[data-tour-id="admin-artikel-edit-button"]',
+        title: 'Ubah Artikel',
+        description:
+          'Gunakan aksi ini untuk membuka modal edit artikel dan memperbarui isi yang sudah terbit.',
+      },
+      {
+        id: 'admin-artikel-delete-button',
+        routePattern: '/admin/dashboard/artikel',
+        targetSelector: '[data-tour-id="admin-artikel-delete-button"]',
+        title: 'Hapus Artikel',
+        description:
+          'Gunakan tombol hapus untuk menghapus artikel yang tidak lagi dipakai setelah konfirmasi.',
+      },
+      {
         id: 'admin-artikel-baru-header',
         routePattern: '/admin/dashboard/artikel/baru',
         targetSelector: '[data-tour-id="admin-artikel-baru-header"]',
         title: 'Tulis Artikel Baru',
         description:
           'Buat artikel edukasi yang akan dibaca orang tua, kader, dan tenaga kesehatan.',
+      },
+      {
+        id: 'admin-artikel-category',
+        routePattern: '/admin/dashboard/artikel/baru',
+        targetSelector: '[data-tour-id="admin-artikel-category"]',
+        title: 'Pilih Kategori',
+        description:
+          'Pilih kategori artikel atau buat kategori baru sebelum menulis konten utama.',
+      },
+      {
+        id: 'admin-artikel-cover',
+        routePattern: '/admin/dashboard/artikel/baru',
+        targetSelector: '[data-tour-id="admin-artikel-cover"]',
+        title: 'Unggah Cover',
+        description:
+          'Unggah gambar cover agar artikel tampil lebih jelas di daftar dan beranda pengguna.',
+      },
+      {
+        id: 'admin-artikel-content',
+        routePattern: '/admin/dashboard/artikel/baru',
+        targetSelector: '[data-tour-id="admin-artikel-content"]',
+        title: 'Isi Konten',
+        description:
+          'Tulis isi artikel pada editor utama dengan gaya bahasa yang singkat dan mudah dibaca.',
+      },
+      {
+        id: 'admin-artikel-submit',
+        routePattern: '/admin/dashboard/artikel/baru',
+        targetSelector: '[data-tour-id="admin-artikel-submit"]',
+        title: 'Terbitkan Artikel',
+        description:
+          'Simpan lalu terbitkan artikel ketika seluruh judul, kategori, cover, dan isi sudah lengkap.',
       },
     ],
   },

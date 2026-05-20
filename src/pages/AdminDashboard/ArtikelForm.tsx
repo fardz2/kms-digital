@@ -114,42 +114,44 @@ export default function ArtikelForm() {
             autoComplete="off"
             layout="vertical"
           >
-            <Form.Item
-              label={<span className="text-body-sm font-medium text-deep-slate">Kategori</span>}
-              name="kategori"
-              rules={[{ required: !addingCategory, message: "Kategori masih kosong" }]}
-            >
-              <Select
-                listHeight={200}
-                optionFilterProp="children"
-                showSearch
-                placeholder="Pilih kategori"
-                disabled={kategoriLoading || isBusy}
-                className="h-[52px]"
-                dropdownRender={(menu) => (
-                  <div>
-                    {menu}
-                    <div className="border-t border-light-ash p-[8px]">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setAddingCategory(true)}
-                        disabled={isBusy}
-                      >
-                        + Tambah Kategori Baru
-                      </Button>
-                    </div>
-                  </div>
-                )}
+            <div data-tour-id="admin-artikel-category">
+              <Form.Item
+                label={<span className="text-body-sm font-medium text-deep-slate">Kategori</span>}
+                name="kategori"
+                rules={[{ required: !addingCategory, message: "Kategori masih kosong" }]}
               >
-                {!addingCategory &&
-                  dataKategori?.map((item) => (
-                    <Select.Option key={item.id} value={item.name}>
-                      {item.name}
-                    </Select.Option>
-                  ))}
-              </Select>
-            </Form.Item>
+                <Select
+                  listHeight={200}
+                  optionFilterProp="children"
+                  showSearch
+                  placeholder="Pilih kategori"
+                  disabled={kategoriLoading || isBusy}
+                  className="h-[52px]"
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <div className="border-t border-light-ash p-[8px]">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setAddingCategory(true)}
+                          disabled={isBusy}
+                        >
+                          + Tambah Kategori Baru
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                >
+                  {!addingCategory &&
+                    dataKategori?.map((item) => (
+                      <Select.Option key={item.id} value={item.name}>
+                        {item.name}
+                      </Select.Option>
+                    ))}
+                </Select>
+              </Form.Item>
+            </div>
 
             {addingCategory && (
               <Form.Item
@@ -187,6 +189,7 @@ export default function ArtikelForm() {
                   <label
                     htmlFor="artikel_cover"
                     className="flex flex-col justify-center items-center w-full h-[200px] bg-faint-fog rounded-default border border-dashed border-light-ash hover:border-primary-500 hover:bg-polar-mist cursor-pointer transition-colors duration-150"
+                    data-tour-id="admin-artikel-cover"
                   >
                     {imageFile ? (
                       <div className="flex flex-col items-center gap-2 text-deep-slate">
@@ -239,13 +242,15 @@ export default function ArtikelForm() {
                     },
                   ]}
                 >
-                  <Suspense fallback={<div className="h-[200px] bg-faint-fog rounded-default animate-pulse" />}>
-                    <ReactQuill
-                      theme="snow"
-                      value={valueContent}
-                      onChange={setValueContent}
-                    />
-                  </Suspense>
+                  <div data-tour-id="admin-artikel-content">
+                    <Suspense fallback={<div className="h-[200px] bg-faint-fog rounded-default animate-pulse" />}>
+                      <ReactQuill
+                        theme="snow"
+                        value={valueContent}
+                        onChange={setValueContent}
+                      />
+                    </Suspense>
+                  </div>
                 </Form.Item>
               </>
             )}
@@ -262,6 +267,7 @@ export default function ArtikelForm() {
                 </Button>
               )}
               <Button
+                data-tour-id="admin-artikel-submit"
                 variant="primary"
                 size="md"
                 type="submit"
