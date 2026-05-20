@@ -5,12 +5,14 @@ export const guideContent: GuideRole[] = [
     id: 'ADMIN',
     title: 'Admin',
     summary: 'Mengelola data master, konten, dan konfigurasi operasional aplikasi.',
+    accentColor: '#1D4ED8',
     sections: [
       {
         id: 'admin-dashboard-ringkas',
         title: 'Tinjau ringkasan dashboard',
         route: '/admin/dashboard',
         screenshotFile: 'admin-dashboard-home.png',
+        purpose: 'Memulai pemantauan operasional dari ringkasan utama.',
         steps: [
           {
             id: 'open-admin-dashboard',
@@ -37,6 +39,7 @@ export const guideContent: GuideRole[] = [
         title: 'Buat artikel baru',
         route: '/admin/dashboard/artikel/baru',
         screenshotFile: 'admin-artikel-baru.png',
+        purpose: 'Membuat konten baru untuk publikasi aplikasi.',
         steps: [
           {
             id: 'open-new-article-form',
@@ -64,12 +67,14 @@ export const guideContent: GuideRole[] = [
     id: 'DESA',
     title: 'Desa',
     summary: 'Memantau beranda desa dan informasi layanan yang ditampilkan untuk masyarakat.',
+    accentColor: '#0F766E',
     sections: [
       {
         id: 'desa-beranda',
         title: 'Lihat beranda desa',
         route: '/desa/beranda',
         screenshotFile: 'desa-beranda.png',
+        purpose: 'Meninjau informasi layanan yang tampil untuk warga.',
         steps: [
           {
             id: 'open-village-home',
@@ -97,12 +102,14 @@ export const guideContent: GuideRole[] = [
     id: 'KADER_POSYANDU',
     title: 'Kader Posyandu',
     summary: 'Mencatat data balita, mengelola data orang tua, dan menyusun laporan bulanan.',
+    accentColor: '#B45309',
     sections: [
       {
         id: 'kader-balita',
         title: 'Kelola daftar balita',
         route: '/kader/balita',
         screenshotFile: 'kader-balita.png',
+        purpose: 'Memeriksa dan memperbarui daftar balita terdaftar.',
         steps: [
           {
             id: 'open-child-list',
@@ -128,6 +135,7 @@ export const guideContent: GuideRole[] = [
         title: 'Kelola data orang tua',
         route: '/kader/orangtua',
         screenshotFile: 'kader-orangtua.png',
+        purpose: 'Memastikan data orang tua terhubung dengan balita.',
         steps: [
           {
             id: 'open-parent-data',
@@ -154,6 +162,7 @@ export const guideContent: GuideRole[] = [
         title: 'Susun laporan bulanan',
         route: '/kader/laporan',
         screenshotFile: 'kader-laporan.png',
+        purpose: 'Menyusun rekap kegiatan posyandu bulanan.',
         steps: [
           {
             id: 'open-monthly-report',
@@ -181,12 +190,14 @@ export const guideContent: GuideRole[] = [
     id: 'TENAGA_KESEHATAN',
     title: 'Tenaga Kesehatan',
     summary: 'Berinteraksi di forum dan meninjau detail balita untuk dukungan tindak lanjut.',
+    accentColor: '#DB2777',
     sections: [
       {
         id: 'tenkes-forum',
         title: 'Ikuti forum tenaga kesehatan',
         route: '/tenkes/forum',
         screenshotFile: 'tenkes-forum.png',
+        purpose: 'Mengoordinasikan diskusi tindak lanjut di forum.',
         steps: [
           {
             id: 'open-health-forum',
@@ -211,8 +222,9 @@ export const guideContent: GuideRole[] = [
       {
         id: 'tenkes-balita-detail',
         title: 'Buka detail balita',
-        route: '/tenkes/balita/:id',
+        route: '/tenkes/balita/1',
         screenshotFile: 'tenkes-balita-detail.png',
+        purpose: 'Membuka profil balita untuk peninjauan medis.',
         steps: [
           {
             id: 'open-child-detail-page',
@@ -240,12 +252,14 @@ export const guideContent: GuideRole[] = [
     id: 'ORANG_TUA',
     title: 'Orang Tua',
     summary: 'Memantau data balita, mengikuti forum, dan membuka detail diskusi atau anak.',
+    accentColor: '#0369A1',
     sections: [
       {
         id: 'orangtua-balita',
         title: 'Lihat data balita',
         route: '/orangtua/balita',
         screenshotFile: 'orangtua-balita.png',
+        purpose: 'Memantau ringkasan data tumbuh kembang anak.',
         steps: [
           {
             id: 'open-child-summary',
@@ -272,6 +286,7 @@ export const guideContent: GuideRole[] = [
         title: 'Masuk forum orang tua',
         route: '/orangtua/forum',
         screenshotFile: 'orangtua-forum.png',
+        purpose: 'Membaca dan mengikuti diskusi komunitas orang tua.',
         steps: [
           {
             id: 'open-parent-forum',
@@ -296,8 +311,9 @@ export const guideContent: GuideRole[] = [
       {
         id: 'orangtua-forum-detail',
         title: 'Buka detail forum',
-        route: '/orangtua/forum/:id',
+        route: '/orangtua/forum/1',
         screenshotFile: 'orangtua-forum-detail.png',
+        purpose: 'Meninjau percakapan topik forum secara lengkap.',
         steps: [
           {
             id: 'open-forum-topic',
@@ -322,8 +338,9 @@ export const guideContent: GuideRole[] = [
       {
         id: 'orangtua-balita-detail',
         title: 'Buka detail balita',
-        route: '/orangtua/balita/:id',
+        route: '/orangtua/balita/1',
         screenshotFile: 'orangtua-balita-detail.png',
+        purpose: 'Memeriksa detail anak sebelum melakukan tindak lanjut.',
         steps: [
           {
             id: 'open-child-detail-from-list',

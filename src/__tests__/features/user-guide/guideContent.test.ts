@@ -37,7 +37,9 @@ describe('guideContent', () => {
         const expectedStepIds = expectedStepIdsBySection[section.id as keyof typeof expectedStepIdsBySection];
 
         expect(section.route.startsWith('/')).toBe(true);
+        expect(section.route).not.toContain(':');
         expect(section.screenshotFile).toMatch(/\.png$/);
+        expect(section.purpose ?? section.screenshotHint).toBeTruthy();
         expect(section.steps.map((step) => step.id)).toEqual(expectedStepIds);
         expect(section.expectedResult).toBeTruthy();
         expect(section.tips.length).toBeGreaterThan(0);
@@ -52,6 +54,12 @@ describe('guideContent', () => {
           expect(Object.keys(step).sort()).toEqual(['action', 'id', 'label', 'result']);
         });
       });
+    });
+  });
+
+  test('includes presentation metadata for roles', () => {
+    guideContent.forEach((role) => {
+      expect(role.accentColor).toBeTruthy();
     });
   });
 });

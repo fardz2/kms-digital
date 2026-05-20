@@ -10,6 +10,7 @@ export type GuideStep = {
   label: string;
   action: string;
   result: string;
+  targetSelector?: string;
 };
 
 export type GuideSection = {
@@ -17,6 +18,8 @@ export type GuideSection = {
   title: string;
   route: string;
   screenshotFile: string;
+  purpose?: string;
+  screenshotHint?: string;
   steps: GuideStep[];
   expectedResult: string;
   tips: string[];
@@ -26,5 +29,6 @@ export type GuideRole = {
   id: GuideRoleId;
   title: string;
   summary: string;
+  accentColor?: string;
   sections: GuideSection[];
 };
