@@ -12,8 +12,18 @@ export const guideContent: GuideRole[] = [
         route: '/admin/dashboard',
         screenshotFile: 'admin-dashboard-home.png',
         steps: [
-          'Buka menu Admin lalu masuk ke dashboard utama.',
-          'Periksa kartu ringkasan untuk melihat status data terbaru.',
+          {
+            id: 'open-admin-dashboard',
+            label: 'Buka dashboard',
+            action: 'Buka menu Admin lalu masuk ke dashboard utama.',
+            result: 'Halaman dashboard utama terbuka.',
+          },
+          {
+            id: 'review-summary-cards',
+            label: 'Tinjau ringkasan',
+            action: 'Periksa kartu ringkasan untuk melihat status data terbaru.',
+            result: 'Status data terbaru terlihat pada kartu ringkasan.',
+          },
         ],
         expectedResult:
           'Dashboard menampilkan ringkasan operasional dan akses cepat ke area administrasi.',
@@ -28,8 +38,18 @@ export const guideContent: GuideRole[] = [
         route: '/admin/dashboard/artikel/baru',
         screenshotFile: 'admin-artikel-baru.png',
         steps: [
-          'Buka menu Artikel lalu pilih aksi untuk membuat artikel baru.',
-          'Isi judul, konten, dan informasi pendukung sebelum menyimpan.',
+          {
+            id: 'open-new-article-form',
+            label: 'Buka form artikel',
+            action: 'Buka menu Artikel lalu pilih aksi untuk membuat artikel baru.',
+            result: 'Form artikel baru terbuka.',
+          },
+          {
+            id: 'fill-article-fields',
+            label: 'Isi detail artikel',
+            action: 'Isi judul, konten, dan informasi pendukung sebelum menyimpan.',
+            result: 'Detail artikel siap disimpan.',
+          },
         ],
         expectedResult:
           'Form artikel baru terbuka dan admin dapat menyimpan konten untuk publikasi.',
@@ -51,8 +71,18 @@ export const guideContent: GuideRole[] = [
         route: '/desa/beranda',
         screenshotFile: 'desa-beranda.png',
         steps: [
-          'Masuk ke halaman beranda desa dari navigasi yang tersedia.',
-          'Tinjau informasi layanan, pengumuman, dan ringkasan aktivitas yang tampil.',
+          {
+            id: 'open-village-home',
+            label: 'Buka beranda',
+            action: 'Masuk ke halaman beranda desa dari navigasi yang tersedia.',
+            result: 'Halaman beranda desa tampil.',
+          },
+          {
+            id: 'review-village-info',
+            label: 'Tinjau informasi',
+            action: 'Tinjau informasi layanan, pengumuman, dan ringkasan aktivitas yang tampil.',
+            result: 'Informasi layanan dan ringkasan aktivitas terlihat jelas.',
+          },
         ],
         expectedResult:
           'Beranda desa terbuka dengan informasi ringkas yang siap dipantau oleh petugas desa.',
@@ -74,8 +104,18 @@ export const guideContent: GuideRole[] = [
         route: '/kader/balita',
         screenshotFile: 'kader-balita.png',
         steps: [
-          'Buka halaman daftar balita untuk melihat data yang sudah terdaftar.',
-          'Pilih salah satu entri untuk meninjau atau memperbarui detailnya.',
+          {
+            id: 'open-child-list',
+            label: 'Buka daftar balita',
+            action: 'Buka halaman daftar balita untuk melihat data yang sudah terdaftar.',
+            result: 'Daftar balita tampil di layar.',
+          },
+          {
+            id: 'open-child-detail',
+            label: 'Tinjau entri',
+            action: 'Pilih salah satu entri untuk meninjau atau memperbarui detailnya.',
+            result: 'Detail balita dapat ditinjau atau diperbarui.',
+          },
         ],
         expectedResult: 'Daftar balita tampil lengkap dan kader dapat melanjutkan ke detail data.',
         tips: [
@@ -89,8 +129,18 @@ export const guideContent: GuideRole[] = [
         route: '/kader/orangtua',
         screenshotFile: 'kader-orangtua.png',
         steps: [
-          'Masuk ke halaman data orang tua dari menu Kader.',
-          'Tinjau akun orang tua yang sudah terhubung dengan data balita.',
+          {
+            id: 'open-parent-data',
+            label: 'Buka data orang tua',
+            action: 'Masuk ke halaman data orang tua dari menu Kader.',
+            result: 'Halaman data orang tua terbuka.',
+          },
+          {
+            id: 'review-parent-account',
+            label: 'Tinjau akun',
+            action: 'Tinjau akun orang tua yang sudah terhubung dengan data balita.',
+            result: 'Keterhubungan akun orang tua dengan balita terlihat.',
+          },
         ],
         expectedResult:
           'Data orang tua terlihat dan kader dapat memeriksa keterhubungannya dengan balita.',
@@ -105,8 +155,18 @@ export const guideContent: GuideRole[] = [
         route: '/kader/laporan',
         screenshotFile: 'kader-laporan.png',
         steps: [
-          'Buka halaman laporan bulanan untuk melihat rekap kegiatan.',
-          'Lengkapi data yang dibutuhkan sebelum mengirim laporan.',
+          {
+            id: 'open-monthly-report',
+            label: 'Buka laporan bulanan',
+            action: 'Buka halaman laporan bulanan untuk melihat rekap kegiatan.',
+            result: 'Rekap kegiatan bulanan tampil.',
+          },
+          {
+            id: 'complete-report-data',
+            label: 'Lengkapi laporan',
+            action: 'Lengkapi data yang dibutuhkan sebelum mengirim laporan.',
+            result: 'Laporan siap dikirim setelah data terisi.',
+          },
         ],
         expectedResult:
           'Laporan bulanan kader siap direkap dan disimpan untuk monitoring berikutnya.',
@@ -128,8 +188,18 @@ export const guideContent: GuideRole[] = [
         route: '/tenkes/forum',
         screenshotFile: 'tenkes-forum.png',
         steps: [
-          'Buka forum tenaga kesehatan dari navigasi utama.',
-          'Pilih diskusi yang relevan untuk membaca atau menanggapi percakapan.',
+          {
+            id: 'open-health-forum',
+            label: 'Buka forum',
+            action: 'Buka forum tenaga kesehatan dari navigasi utama.',
+            result: 'Forum tenaga kesehatan terbuka.',
+          },
+          {
+            id: 'select-relevant-discussion',
+            label: 'Pilih diskusi',
+            action: 'Pilih diskusi yang relevan untuk membaca atau menanggapi percakapan.',
+            result: 'Percakapan yang relevan siap dibaca atau ditanggapi.',
+          },
         ],
         expectedResult:
           'Forum tenaga kesehatan tampil dan siap digunakan untuk diskusi serta koordinasi.',
@@ -144,8 +214,18 @@ export const guideContent: GuideRole[] = [
         route: '/tenkes/balita/:id',
         screenshotFile: 'tenkes-balita-detail.png',
         steps: [
-          'Masuk ke halaman detail balita dari daftar atau tautan forum.',
-          'Tinjau informasi yang dibutuhkan untuk mendukung penanganan lanjutan.',
+          {
+            id: 'open-child-detail-page',
+            label: 'Buka detail balita',
+            action: 'Masuk ke halaman detail balita dari daftar atau tautan forum.',
+            result: 'Halaman detail balita terbuka.',
+          },
+          {
+            id: 'review-supporting-info',
+            label: 'Tinjau informasi',
+            action: 'Tinjau informasi yang dibutuhkan untuk mendukung penanganan lanjutan.',
+            result: 'Informasi pendukung untuk tindak lanjut terlihat.',
+          },
         ],
         expectedResult:
           'Detail balita terbuka sehingga tenaga kesehatan dapat meninjau data pendukung.',
@@ -167,8 +247,18 @@ export const guideContent: GuideRole[] = [
         route: '/orangtua/balita',
         screenshotFile: 'orangtua-balita.png',
         steps: [
-          'Buka halaman balita milik orang tua yang sedang login.',
-          'Tinjau ringkasan data tumbuh kembang yang tersedia di halaman tersebut.',
+          {
+            id: 'open-child-summary',
+            label: 'Buka data balita',
+            action: 'Buka halaman balita milik orang tua yang sedang login.',
+            result: 'Ringkasan data balita tampil.',
+          },
+          {
+            id: 'review-growth-summary',
+            label: 'Tinjau ringkasan',
+            action: 'Tinjau ringkasan data tumbuh kembang yang tersedia di halaman tersebut.',
+            result: 'Data tumbuh kembang dapat dipantau.',
+          },
         ],
         expectedResult:
           'Daftar atau ringkasan balita tampil sehingga orang tua dapat memantau data anak.',
@@ -183,8 +273,18 @@ export const guideContent: GuideRole[] = [
         route: '/orangtua/forum',
         screenshotFile: 'orangtua-forum.png',
         steps: [
-          'Buka halaman forum orang tua dari menu utama.',
-          'Cari topik diskusi yang sesuai dengan kebutuhan atau pertanyaan Anda.',
+          {
+            id: 'open-parent-forum',
+            label: 'Buka forum',
+            action: 'Buka halaman forum orang tua dari menu utama.',
+            result: 'Forum orang tua terbuka.',
+          },
+          {
+            id: 'find-discussion-topic',
+            label: 'Cari topik',
+            action: 'Cari topik diskusi yang sesuai dengan kebutuhan atau pertanyaan Anda.',
+            result: 'Topik diskusi yang relevan ditemukan.',
+          },
         ],
         expectedResult:
           'Forum orang tua terbuka dan siap dipakai untuk membaca atau membuat diskusi.',
@@ -199,8 +299,18 @@ export const guideContent: GuideRole[] = [
         route: '/orangtua/forum/:id',
         screenshotFile: 'orangtua-forum-detail.png',
         steps: [
-          'Pilih salah satu topik forum untuk melihat isi percakapan lengkap.',
-          'Baca jawaban yang sudah tersedia sebelum menambahkan balasan baru.',
+          {
+            id: 'open-forum-topic',
+            label: 'Buka topik',
+            action: 'Pilih salah satu topik forum untuk melihat isi percakapan lengkap.',
+            result: 'Halaman detail forum terbuka.',
+          },
+          {
+            id: 'read-existing-replies',
+            label: 'Baca jawaban',
+            action: 'Baca jawaban yang sudah tersedia sebelum menambahkan balasan baru.',
+            result: 'Konteks percakapan siap ditinjau sebelum membalas.',
+          },
         ],
         expectedResult:
           'Halaman detail forum menampilkan seluruh percakapan pada topik yang dipilih.',
@@ -215,8 +325,18 @@ export const guideContent: GuideRole[] = [
         route: '/orangtua/balita/:id',
         screenshotFile: 'orangtua-balita-detail.png',
         steps: [
-          'Buka detail salah satu balita dari halaman daftar anak.',
-          'Tinjau informasi detail untuk memastikan data anak yang tampil sudah benar.',
+          {
+            id: 'open-child-detail-from-list',
+            label: 'Buka detail anak',
+            action: 'Buka detail salah satu balita dari halaman daftar anak.',
+            result: 'Halaman detail balita terbuka.',
+          },
+          {
+            id: 'verify-child-data',
+            label: 'Periksa detail',
+            action: 'Tinjau informasi detail untuk memastikan data anak yang tampil sudah benar.',
+            result: 'Data anak dapat diverifikasi.',
+          },
         ],
         expectedResult:
           'Halaman detail balita terbuka dan orang tua dapat memeriksa data anak secara lengkap.',

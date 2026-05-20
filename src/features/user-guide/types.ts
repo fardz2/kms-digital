@@ -5,12 +5,19 @@ export type GuideRoleId =
   | 'TENAGA_KESEHATAN'
   | 'ORANG_TUA';
 
+export type GuideStep = {
+  id: string;
+  label: string;
+  action: string;
+  result: string;
+};
+
 export type GuideSection = {
   id: string;
   title: string;
   route: string;
   screenshotFile: string;
-  steps: string[];
+  steps: GuideStep[];
   expectedResult: string;
   tips: string[];
 };
