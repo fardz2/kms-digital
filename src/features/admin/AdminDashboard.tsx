@@ -24,6 +24,7 @@ export default function AdminDashboard() {
         eyebrow={`Panel Admin · ${greetingPart()}`}
         title={`Halo, ${adminName}`}
         subtitle="Ringkasan aktivitas KMS Digital Lebakwangi."
+        dataTourId="admin-dashboard-header"
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[33px]">

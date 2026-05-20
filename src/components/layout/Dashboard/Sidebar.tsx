@@ -6,7 +6,8 @@ import { sidebarlink } from "./sidebarLinks";
 import DropdownLink from "./DropdownLink";
 import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
-import { readSession, clearSession } from "../../../features/auth/session-storage";
+import { readSession } from "../../../features/auth/session-storage";
+import { useSession } from "../../../features/auth/useSession";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
 import { useTourContext } from "../../../features/tour/TourProvider";
@@ -25,6 +26,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const confirm = useConfirmDialog();
   const { replay } = useTourContext();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { logout } = useSession();
   const session = readSession();
   const { collapsed, toggle } = useSidebarCollapsed();
 
@@ -36,7 +38,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
       cancelText: "Batal",
       okButtonProps: { danger: true },
       onOk: () => {
-        clearSession();
+        logout();
         toast.success("Berhasil logout");
         navigate("/masuk", { replace: true });
       },

@@ -2,18 +2,31 @@ import { describe, expect, test } from 'vitest';
 import { guideContent } from '../../../features/user-guide/data/guideContent';
 
 const expectedStepIdsBySection = {
-  'admin-dashboard-ringkas': ['open-admin-dashboard', 'review-summary-cards'],
-  'admin-artikel-baru': ['open-new-article-form', 'fill-article-fields'],
-  'desa-beranda': ['open-village-home', 'review-village-info'],
-  'kader-balita': ['open-child-list', 'open-child-detail'],
-  'kader-orangtua': ['open-parent-data', 'review-parent-account'],
-  'kader-laporan': ['open-monthly-report', 'complete-report-data'],
-  'tenkes-forum': ['open-health-forum', 'select-relevant-discussion'],
-  'tenkes-balita-detail': ['open-child-detail-page', 'review-supporting-info'],
-  'orangtua-balita': ['open-child-summary', 'review-growth-summary'],
-  'orangtua-forum': ['open-parent-forum', 'find-discussion-topic'],
-  'orangtua-forum-detail': ['open-forum-topic', 'read-existing-replies'],
-  'orangtua-balita-detail': ['open-child-detail-from-list', 'verify-child-data'],
+  'admin-dashboard-ringkas': ['open-admin-dashboard', 'review-summary-cards', 'open-admin-sidebar', 'review-activity-feed'],
+  'admin-desa': ['open-desa-module', 'add-village', 'fill-village-form', 'review-village-table'],
+  'admin-posyandu': ['open-posyandu-module', 'choose-village-for-posyandu', 'save-posyandu', 'review-posyandu-table'],
+  'admin-kader-posyandu': ['open-kader-module', 'filter-kader-status', 'register-kader', 'fill-kader-form', 'save-kader'],
+  'admin-tenaga-kesehatan': ['open-nakes-module', 'register-nakes', 'fill-nakes-form', 'remove-nakes'],
+  'admin-artikel': [
+    'open-article-module',
+    'review-article-list',
+    'search-article-list',
+    'edit-article-item',
+    'delete-article-item',
+    'open-new-article-link',
+  ],
+  'admin-artikel-baru': ['open-new-article-form', 'select-article-category', 'fill-article-fields', 'publish-article'],
+  'desa-beranda': ['open-village-home', 'export-village-report', 'review-village-info', 'fill-village-event'],
+  'kader-balita': ['open-child-list', 'filter-child-list', 'open-child-detail', 'fill-measurement-form', 'create-new-child'],
+  'kader-balita-detail': ['open-child-detail-as-kader', 'review-child-history-as-kader', 'edit-child-measurement', 'delete-child-measurement'],
+  'kader-orangtua': ['open-parent-data', 'switch-parent-tab', 'review-parent-account', 'fill-parent-form'],
+  'kader-laporan': ['open-monthly-report', 'choose-report-month', 'review-report-summary', 'complete-report-data'],
+  'tenkes-forum': ['open-health-forum', 'select-relevant-discussion', 'review-forum-details', 'reply-forum-thread'],
+  'tenkes-balita-detail': ['open-forum-detail-page', 'review-forum-context', 'reply-to-forum'],
+  'orangtua-balita': ['open-child-summary', 'fill-new-child-form', 'review-growth-summary'],
+  'orangtua-forum': ['open-parent-forum', 'switch-forum-tab', 'find-discussion-topic', 'write-new-question'],
+  'orangtua-forum-detail': ['open-forum-topic', 'read-existing-replies', 'post-followup-comment'],
+  'orangtua-balita-detail': ['open-child-detail-from-list', 'verify-child-data', 'review-child-history'],
 } as const;
 
 describe('guideContent', () => {

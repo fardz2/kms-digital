@@ -75,109 +75,111 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
   };
 
   return (
-    <Card
-      title={
-        <div>
-          <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[6px]">
-            Ekspor Data
-          </p>
-          <span className="text-heading font-semibold text-deep-slate">
-            Unduh Laporan
-          </span>
-        </div>
-      }
-    >
-      {toast.contextHolder}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[25px]">
-        <div className="space-y-[13px]">
+    <div data-tour-id="desa-export">
+      <Card
+        title={
           <div>
-            <p className="text-body-sm font-semibold text-deep-slate">
-              Ekspor CSV data pengukuran
+            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[6px]">
+              Ekspor Data
             </p>
-            <p className="text-caption text-graphite mt-1">
-              Pilih bulan dan posyandu untuk mengunduh detail pengukuran balita.
-            </p>
+            <span className="text-heading font-semibold text-deep-slate">
+              Unduh Laporan
+            </span>
           </div>
-          <Form form={form} name="export_csv" layout="vertical">
-            <Form.Item
-              label={
-                <span className="text-body-sm font-medium text-deep-slate">
-                  Periode pengukuran
-                </span>
-              }
-              name="waktu"
-              rules={[{ required: true, message: 'Pilih bulan dan tahun' }]}
-            >
-              <DatePicker
-                picker="month"
-                className="w-full h-[52px] text-base"
-                placeholder="Pilih bulan dan tahun"
-              />
-            </Form.Item>
+        }
+      >
+        {toast.contextHolder}
 
-            <Form.Item
-              label={
-                <span className="text-body-sm font-medium text-deep-slate">
-                  Posyandu
-                </span>
-              }
-              name="posyandu"
-              initialValue="all"
-            >
-              <Select
-                listHeight={200}
-                optionFilterProp="children"
-                showSearch
-                className="h-[52px]"
-                placeholder="Semua Posyandu"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[25px]">
+          <div className="space-y-[13px]">
+            <div>
+              <p className="text-body-sm font-semibold text-deep-slate">
+                Ekspor CSV data pengukuran
+              </p>
+              <p className="text-caption text-graphite mt-1">
+                Pilih bulan dan posyandu untuk mengunduh detail pengukuran balita.
+              </p>
+            </div>
+            <Form form={form} name="export_csv" layout="vertical">
+              <Form.Item
+                label={
+                  <span className="text-body-sm font-medium text-deep-slate">
+                    Periode pengukuran
+                  </span>
+                }
+                name="waktu"
+                rules={[{ required: true, message: 'Pilih bulan dan tahun' }]}
               >
-                <Select.Option value="all">Semua Posyandu</Select.Option>
-                {posyanduList.map((item) => (
-                  <Select.Option
-                    key={item.id_posyandu}
-                    value={item.id_posyandu}
-                  >
-                    {item.nama_posyandu}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <DatePicker
+                  picker="month"
+                  className="w-full h-[52px] text-base"
+                  placeholder="Pilih bulan dan tahun"
+                />
+              </Form.Item>
 
-            <Button
-              variant="primary"
-              size="md"
-              leadingIcon={<Download size={18} strokeWidth={2} />}
-              onClick={onSubmitCsv}
-              disabled={exportCsv.isPending}
-              loading={exportCsv.isPending}
-            >
-              {exportCsv.isPending ? 'Mengunduh...' : 'Unduh CSV'}
-            </Button>
-          </Form>
-        </div>
+              <Form.Item
+                label={
+                  <span className="text-body-sm font-medium text-deep-slate">
+                    Posyandu
+                  </span>
+                }
+                name="posyandu"
+                initialValue="all"
+              >
+                <Select
+                  listHeight={200}
+                  optionFilterProp="children"
+                  showSearch
+                  className="h-[52px]"
+                  placeholder="Semua Posyandu"
+                >
+                  <Select.Option value="all">Semua Posyandu</Select.Option>
+                  {posyanduList.map((item) => (
+                    <Select.Option
+                      key={item.id_posyandu}
+                      value={item.id_posyandu}
+                    >
+                      {item.nama_posyandu}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-        <div className="space-y-[13px] md:border-l md:border-light-ash md:pl-[25px]">
-          <div>
-            <p className="text-body-sm font-semibold text-deep-slate">
-              Cetak laporan PDF
-            </p>
-            <p className="text-caption text-graphite mt-1">
-              Unduh rekap statistik gizi desa dalam format PDF siap cetak.
-            </p>
+              <Button
+                variant="primary"
+                size="md"
+                leadingIcon={<Download size={18} strokeWidth={2} />}
+                onClick={onSubmitCsv}
+                disabled={exportCsv.isPending}
+                loading={exportCsv.isPending}
+              >
+                {exportCsv.isPending ? 'Mengunduh...' : 'Unduh CSV'}
+              </Button>
+            </Form>
           </div>
-          <Button
-            variant="default"
-            size="md"
-            leadingIcon={<Printer size={18} strokeWidth={2} />}
-            onClick={handlePrintPdf}
-            disabled={isPrinting || !printableRef}
-            loading={isPrinting}
-          >
-            {isPrinting ? 'Menyiapkan...' : 'Unduh PDF'}
-          </Button>
+
+          <div className="space-y-[13px] md:border-l md:border-light-ash md:pl-[25px]">
+            <div>
+              <p className="text-body-sm font-semibold text-deep-slate">
+                Cetak laporan PDF
+              </p>
+              <p className="text-caption text-graphite mt-1">
+                Unduh rekap statistik gizi desa dalam format PDF siap cetak.
+              </p>
+            </div>
+            <Button
+              variant="default"
+              size="md"
+              leadingIcon={<Printer size={18} strokeWidth={2} />}
+              onClick={handlePrintPdf}
+              disabled={isPrinting || !printableRef}
+              loading={isPrinting}
+            >
+              {isPrinting ? 'Menyiapkan...' : 'Unduh PDF'}
+            </Button>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }

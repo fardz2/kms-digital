@@ -2,6 +2,12 @@ import type { Session } from '../../types';
 
 const STORAGE_KEY = 'kms_session_v1';
 const LEGACY_KEY = 'login_data';
+export const SESSION_CHANGE_EVENT = 'kms_session_v1:change';
+
+function emitSessionChange(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(SESSION_CHANGE_EVENT));
+}
 
 export function readSession(): Session | null {
   if (typeof window === 'undefined') return null;
@@ -32,6 +38,7 @@ export function writeSession(data: Session): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    emitSessionChange();
   } catch (e) {
     console.error('writeSession error:', e);
   }
@@ -42,6 +49,7 @@ export function clearSession(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_KEY);
+    emitSessionChange();
   } catch (e) {
     console.error('clearSession error:', e);
   }

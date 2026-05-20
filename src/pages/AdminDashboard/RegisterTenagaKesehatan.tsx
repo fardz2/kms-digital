@@ -157,6 +157,7 @@ export default function RegisterTenagaKesehatan() {
         eyebrow="Akun Pengguna"
         title="Kelola Tenaga Kesehatan"
         subtitle="Daftar bidan dan tenaga kesehatan yang terdaftar di tiap desa."
+        dataTourId="admin-tenkes-header"
         action={
           <Button
             variant="primary"

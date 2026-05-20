@@ -7,7 +7,6 @@ import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
 import { useTourContext } from "../../../features/tour/TourProvider";
-import { clearSession } from "../../../features/auth/session-storage";
 
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
@@ -94,7 +93,7 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const toast = useToast();
-  const { user, role } = useSession();
+  const { user, role, logout } = useSession();
   const { replay } = useTourContext();
 
   useEffect(() => {
@@ -105,7 +104,7 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
   }, []);
 
   const handleLogout = () => {
-    clearSession();
+    logout();
     toast.success("Berhasil logout");
     navigate("/");
   };

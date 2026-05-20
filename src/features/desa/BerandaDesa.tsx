@@ -33,6 +33,7 @@ export default function BerandaDesa() {
         title={`Desa ${user?.nama_desa ?? user?.desa_name ?? ''}`}
         eyebrow="Pemerintah Desa"
         subtitle="Rekap gizi balita dan kelola acara posyandu."
+        dataTourId="desa-header"
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[33px]">

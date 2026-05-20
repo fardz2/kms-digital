@@ -91,6 +91,7 @@ export default function ArtikelForm() {
         eyebrow="Tulis Baru"
         title="Artikel Baru"
         subtitle="Buat artikel edukasi untuk orang tua dan kader posyandu."
+        dataTourId="admin-artikel-baru-header"
         action={
           <Button
             variant="default"

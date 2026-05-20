@@ -196,6 +196,7 @@ export default function InputPosyandu() {
         eyebrow="Data Master"
         title="Kelola Posyandu"
         subtitle="Daftar posyandu yang terdaftar di setiap desa."
+        dataTourId="admin-posyandu-header"
         action={
           <Button
             variant="primary"

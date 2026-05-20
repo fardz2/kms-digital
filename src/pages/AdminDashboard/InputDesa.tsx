@@ -106,6 +106,7 @@ export default function InputDesa() {
         eyebrow="Data Master"
         title="Kelola Desa"
         subtitle="Daftar desa yang terdaftar dalam sistem posyandu."
+        dataTourId="admin-desa-header"
         action={
           <Button
             variant="primary"

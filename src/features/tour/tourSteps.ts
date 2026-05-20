@@ -1,4 +1,5 @@
 import type { TourStepProps } from 'antd';
+import { matchPath } from 'react-router-dom';
 import type { Role } from '../../types';
 
 export interface FlowStep {
@@ -49,11 +50,67 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
           'Setujui pendaftaran orang tua dan kelola data akun di sini. Badge angka menunjukkan jumlah yang menunggu persetujuan.',
       },
       {
+        id: 'kader-laporan',
+        routePattern: '/kader/balita',
+        targetSelector: '[data-tour-id="kader-laporan"]',
+        title: 'Laporan Bulanan',
+        description:
+          'Buka ringkasan pengukuran balita untuk melihat progres dan status gizi per bulan.',
+      },
+      {
         id: 'kader-tambah',
         routePattern: '/kader/balita',
         targetSelector: '[data-tour-id="kader-tambah"]',
         title: 'Tambah Balita Baru',
         description: 'Klik untuk daftarkan balita baru yang belum ada di sistem.',
+      },
+      {
+        id: 'kader-orangtua-header',
+        routePattern: '/kader/orangtua',
+        targetSelector: '[data-tour-id="kader-orangtua-header"]',
+        title: 'Kelola Akun Orang Tua',
+        description:
+          'Halaman ini memuat persetujuan pendaftaran dan daftar akun orang tua aktif.',
+      },
+      {
+        id: 'kader-orangtua-tabs',
+        routePattern: '/kader/orangtua',
+        targetSelector: '[data-tour-id="kader-akunortu-tabs"]',
+        title: 'Tab Persetujuan',
+        description:
+          'Gunakan tab untuk berganti antara daftar menunggu persetujuan dan akun yang aktif.',
+      },
+      {
+        id: 'kader-orangtua-table',
+        routePattern: '/kader/orangtua',
+        targetSelector: '[data-tour-id="kader-akunortu-table"]',
+        title: 'Daftar Orang Tua Aktif',
+        description:
+          'Tabel ini dipakai untuk menambah, mengubah, dan menghapus akun orang tua yang aktif.',
+      },
+      {
+        id: 'kader-laporan-header',
+        routePattern: '/kader/laporan',
+        targetSelector: '[data-tour-id="kader-laporan-header"]',
+        title: 'Laporan Bulanan Kader',
+        description:
+          'Halaman rekap ini menampilkan ringkasan pengukuran balita dan distribusi status gizi.',
+      },
+      {
+        id: 'kader-laporan-picker',
+        routePattern: '/kader/laporan',
+        targetSelector: '[data-tour-id="kader-laporan-picker"]',
+        title: 'Pilih Bulan',
+        description:
+          'Ganti bulan untuk melihat laporan pengukuran pada periode yang berbeda.',
+      },
+      {
+        id: 'kader-laporan-stats',
+        routePattern: '/kader/laporan',
+        targetSelector: '[data-tour-id="kader-laporan-stats"]',
+        title: 'Ringkasan Bulanan',
+        description:
+          'Stat card ini menunjukkan total balita, yang sudah diukur, dan yang belum diukur.',
       },
     ],
   },
@@ -90,6 +147,30 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         title: 'Artikel Edukasi',
         description: 'Baca artikel pilihan tentang gizi dan pengasuhan balita.',
       },
+      {
+        id: 'ot-forum-header',
+        routePattern: '/orangtua/forum',
+        targetSelector: '[data-tour-id="ot-forum-header"]',
+        title: 'Forum Tanya Jawab',
+        description:
+          'Halaman ini dipakai untuk membaca dan menulis pertanyaan terkait tumbuh kembang anak.',
+      },
+      {
+        id: 'ot-forum-tabs',
+        routePattern: '/orangtua/forum',
+        targetSelector: '[data-tour-id="ot-forum-tabs"]',
+        title: 'Filter Forum',
+        description:
+          'Pakai tab untuk berpindah antara semua pertanyaan dan pertanyaan milik Anda.',
+      },
+      {
+        id: 'ot-forum-detail-form',
+        routePattern: '/orangtua/forum/:id',
+        targetSelector: '[data-tour-id="ot-forum-detail-form"]',
+        title: 'Kirim Komentar',
+        description:
+          'Balas pertanyaan yang sedang dibuka lewat form komentar di halaman detail forum.',
+      },
     ],
   },
 
@@ -103,6 +184,22 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         description:
           'Halaman forum berisi pertanyaan dari orang tua. Anda bisa menjawab dan memberi saran kesehatan.',
       },
+      {
+        id: 'tenkes-forum-list',
+        routePattern: '/tenkes/forum',
+        targetSelector: '[data-tour-id="tenkes-forum-list"]',
+        title: 'Daftar Pertanyaan',
+        description:
+          'Daftar ini menampilkan pertanyaan dari orang tua yang bisa Anda buka untuk menjawab.',
+      },
+      {
+        id: 'tenkes-detail-form',
+        routePattern: '/tenkes/balita/:id',
+        targetSelector: '[data-tour-id="tenkes-forum-detail-form"]',
+        title: 'Tulis Jawaban',
+        description:
+          'Gunakan form komentar untuk mengirim jawaban atau saran kesehatan pada detail forum.',
+      },
     ],
   },
 
@@ -115,6 +212,30 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         title: 'Selamat datang Pemerintah Desa',
         description:
           'Pantau rekap gizi balita se-desa, ekspor laporan, dan kelola acara posyandu.',
+      },
+      {
+        id: 'desa-header',
+        routePattern: '/desa/beranda',
+        targetSelector: '[data-tour-id="desa-header"]',
+        title: 'Ringkasan Desa',
+        description:
+          'Header ini menunjukkan nama desa dan memberi konteks halaman rekap yang sedang dibuka.',
+      },
+      {
+        id: 'desa-export',
+        routePattern: '/desa/beranda',
+        targetSelector: '[data-tour-id="desa-export"]',
+        title: 'Ekspor Data',
+        description:
+          'Unduh rekap CSV atau PDF langsung dari kartu ekspor data di bagian atas halaman.',
+      },
+      {
+        id: 'desa-laporan',
+        routePattern: '/desa/beranda',
+        targetSelector: '[data-tour-id="desa-laporan"]',
+        title: 'Laporan Desa',
+        description:
+          'Bagian ini menampilkan statistik gizi, progres per posyandu, dan distribusi total desa.',
       },
       {
         id: 'desa-acara',
@@ -138,6 +259,14 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
           'Dashboard admin untuk kelola data master desa, posyandu, kader, tenaga kesehatan, dan artikel.',
       },
       {
+        id: 'admin-dashboard-header',
+        routePattern: '/admin/dashboard',
+        targetSelector: '[data-tour-id="admin-dashboard-header"]',
+        title: 'Ringkasan Admin',
+        description:
+          'Header dashboard menunjukkan konteks panel dan sapaan pengguna yang sedang login.',
+      },
+      {
         id: 'admin-dashboard-stats',
         routePattern: '/admin/dashboard',
         targetSelector: '[data-tour-id="admin-stats"]',
@@ -156,6 +285,7 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
       {
         id: 'admin-desa-header',
         routePattern: '/admin/dashboard/desa',
+        targetSelector: '[data-tour-id="admin-desa-header"]',
         title: 'Kelola Desa',
         description:
           'Halaman ini berisi master data desa. Tambah desa baru atau edit yang sudah ada.',
@@ -163,13 +293,39 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
       {
         id: 'admin-posyandu-header',
         routePattern: '/admin/dashboard/posyandu',
+        targetSelector: '[data-tour-id="admin-posyandu-header"]',
         title: 'Kelola Posyandu',
         description:
           'Master data posyandu per desa. Pastikan setiap posyandu punya kader yang aktif.',
       },
       {
+        id: 'admin-kader-header',
+        routePattern: '/admin/dashboard/kader-posyandu',
+        targetSelector: '[data-tour-id="admin-kader-header"]',
+        title: 'Kelola Kader Posyandu',
+        description:
+          'Halaman ini dipakai untuk registrasi, filter status, dan edit data kader posyandu.',
+      },
+      {
+        id: 'admin-tenkes-header',
+        routePattern: '/admin/dashboard/tenaga-kesehatan',
+        targetSelector: '[data-tour-id="admin-tenkes-header"]',
+        title: 'Kelola Tenaga Kesehatan',
+        description:
+          'Daftar bidan dan tenaga kesehatan dikelola dari halaman ini.',
+      },
+      {
+        id: 'admin-artikel-header',
+        routePattern: '/admin/dashboard/artikel',
+        targetSelector: '[data-tour-id="admin-artikel-header"]',
+        title: 'Kelola Artikel',
+        description:
+          'Halaman daftar artikel digunakan untuk mengubah atau menghapus konten edukasi.',
+      },
+      {
         id: 'admin-artikel-baru-header',
         routePattern: '/admin/dashboard/artikel/baru',
+        targetSelector: '[data-tour-id="admin-artikel-baru-header"]',
         title: 'Tulis Artikel Baru',
         description:
           'Buat artikel edukasi yang akan dibaca orang tua, kader, dan tenaga kesehatan.',
@@ -189,7 +345,7 @@ export function getFirstStepForPath(
 ): FlowStep | null {
   const flow = getRoleFlow(role);
   if (!flow) return null;
-  return flow.steps.find((step) => step.routePattern === path) ?? null;
+  return flow.steps.find((step) => matchesRoute(step.routePattern, path)) ?? null;
 }
 
 export function getNextStep(role: Role | null, currentId: string): FlowStep | null {
@@ -221,6 +377,10 @@ function toAntdStep(step: FlowStep): TourStepProps {
   };
 }
 
+function matchesRoute(routePattern: string, pathname: string) {
+  return Boolean(matchPath({ path: routePattern, end: true }, pathname));
+}
+
 /**
  * Build antd Tour steps untuk role + (opsional) filter ke current path.
  * Backward-compatible: tanpa `path`, kembalikan seluruh step role.
@@ -229,7 +389,7 @@ export function buildSteps(role: Role | null, path?: string): TourStepProps[] {
   const flow = getRoleFlow(role);
   if (!flow) return [];
   const filtered = path
-    ? flow.steps.filter((step) => step.routePattern === path)
+    ? flow.steps.filter((step) => matchesRoute(step.routePattern, path))
     : flow.steps;
   return filtered.map(toAntdStep);
 }

@@ -19,6 +19,7 @@ export default function DetailForum() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useSession();
+  const isOrangTua = user?.role === "ORANG_TUA";
   const [form] = Form.useForm();
   const toast = useToast();
 
@@ -64,7 +65,10 @@ export default function DetailForum() {
         )}
 
         {!postLoading && detailPost?.title && (
-          <article className="bg-white border border-light-ash rounded-default p-[25px]">
+          <article
+            className="bg-white border border-light-ash rounded-default p-[25px]"
+            data-tour-id={isOrangTua ? 'ot-forum-detail-post' : 'tenkes-forum-detail-post'}
+          >
             <div className="flex items-start gap-[13px] mb-[17px]">
               <img
                 src={avatar}
@@ -103,7 +107,10 @@ export default function DetailForum() {
           </article>
         )}
 
-        <section className="bg-white border border-light-ash rounded-default p-[25px]">
+        <section
+          className="bg-white border border-light-ash rounded-default p-[25px]"
+          data-tour-id={isOrangTua ? 'ot-forum-detail-form' : 'tenkes-forum-detail-form'}
+        >
           <h2 className="text-heading-sm font-semibold text-deep-slate mb-[13px]">
             Tulis komentar
           </h2>

@@ -82,6 +82,7 @@ export default function ArtikelList() {
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button
+            data-tour-id="admin-artikel-edit-button"
             variant="default"
             size="sm"
             leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
@@ -94,6 +95,7 @@ export default function ArtikelList() {
             Ubah
           </Button>
           <Button
+            data-tour-id="admin-artikel-delete-button"
             variant="destructive"
             size="sm"
             leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
@@ -124,9 +126,11 @@ export default function ArtikelList() {
         eyebrow="Konten Edukasi"
         title="Kelola Artikel"
         subtitle="Daftar artikel terbit untuk orang tua dan kader."
+        dataTourId="admin-artikel-header"
         action={
           <Link to="/admin/dashboard/artikel/baru">
             <Button
+              data-tour-id="admin-artikel-new-button"
               variant="primary"
               size="lg"
               leadingIcon={<Plus size={20} strokeWidth={2} />}
@@ -140,7 +144,10 @@ export default function ArtikelList() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[17px]">
-        <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]">
+        <div
+          className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px]"
+          data-tour-id="admin-artikel-table"
+        >
           <DataTable
             columns={columns}
             data={dataSource || []}

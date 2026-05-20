@@ -1,14 +1,14 @@
-import React from 'react';
-import { Form, Input } from 'antd';
-import { Mail, KeyRound, LogIn, AlertTriangle } from 'lucide-react';
-import Button from '../../components/ui/Button';
+import React from "react";
+import { Form, Input } from "antd";
+import { Mail, KeyRound, LogIn, AlertTriangle } from "lucide-react";
+import Button from "../../components/ui/Button";
 
 const ROLE_LABELS = {
-  ORANG_TUA: 'Orang Tua',
-  KADER_POSYANDU: 'Kader Posyandu',
-  TENAGA_KESEHATAN: 'Tenaga Kesehatan',
-  DESA: 'Pemerintah Desa',
-  ADMIN: 'Admin',
+  ORANG_TUA: "Orang Tua",
+  KADER_POSYANDU: "Kader Posyandu",
+  TENAGA_KESEHATAN: "Tenaga Kesehatan",
+  DESA: "Pemerintah Desa",
+  ADMIN: "Admin",
 };
 
 export default function LoginForm({ role, onSubmit, loading, errorText }) {
@@ -22,7 +22,7 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
     <div className="w-full">
       <div className="mb-[25px]">
         <p className="text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[13px]">
-          {ROLE_LABELS[role] ?? 'Pengguna'}
+          {ROLE_LABELS[role] ?? "Pengguna"}
         </p>
         <h2 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
           Masuk ke akun Anda
@@ -52,8 +52,8 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
           }
           name="email"
           rules={[
-            { required: true, message: 'Email masih kosong' },
-            { type: 'email', message: 'Format email tidak valid' },
+            { required: true, message: "Email masih kosong" },
+            { type: "email", message: "Format email tidak valid" },
           ]}
         >
           <Input
@@ -79,7 +79,7 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
             </div>
           }
           name="password"
-          rules={[{ required: true, message: 'Kata sandi masih kosong' }]}
+          rules={[{ required: true, message: "Kata sandi masih kosong" }]}
         >
           <Input.Password
             prefix={
@@ -100,10 +100,12 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
           variant="primary"
           size="lg"
           loading={loading}
-          trailingIcon={!loading ? <LogIn size={20} strokeWidth={2.25} /> : null}
+          trailingIcon={
+            !loading ? <LogIn size={20} strokeWidth={2.25} /> : null
+          }
           className="w-full mt-[8px]"
         >
-          {loading ? 'Memproses...' : 'Masuk'}
+          {loading ? "Memproses..." : "Masuk"}
         </Button>
       </Form>
     </div>

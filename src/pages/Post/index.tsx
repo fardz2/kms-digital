@@ -44,7 +44,10 @@ export default function Post() {
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
-        <header className="flex items-start justify-between gap-[17px] flex-wrap">
+        <header
+          className="flex items-start justify-between gap-[17px] flex-wrap"
+          data-tour-id={isOrangTua ? 'ot-forum-header' : 'tenkes-forum-header'}
+        >
           <div className="min-w-0 flex-1">
             <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
               Forum
@@ -69,7 +72,7 @@ export default function Post() {
         </header>
 
         {isOrangTua && (
-          <div className="flex gap-[8px] border-b border-light-ash">
+          <div className="flex gap-[8px] border-b border-light-ash" data-tour-id="ot-forum-tabs">
             {[
               { key: 'semua', label: 'Semua' },
               { key: 'saya', label: 'Punya Saya' },
@@ -128,7 +131,10 @@ export default function Post() {
           </div>
         )}
 
-        <div className="space-y-[17px]">
+        <div
+          className="space-y-[17px]"
+          data-tour-id={isOrangTua ? 'ot-forum-list' : 'tenkes-forum-list'}
+        >
           {filteredPosts.map((item) => (
             <article
               key={item.id}

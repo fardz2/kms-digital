@@ -274,6 +274,7 @@ export default function RegisterKaderPosyandu() {
         eyebrow="Akun Pengguna"
         title="Kelola Kader Posyandu"
         subtitle="Daftar kader yang membantu operasional posyandu di desa."
+        dataTourId="admin-kader-header"
         action={
           <Button
             variant="primary"

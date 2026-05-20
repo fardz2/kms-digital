@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { Tour } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/useSession';
-import { buildSteps } from './tourSteps';
+import { buildSteps, getRoleFlow } from './tourSteps';
 import { useTour } from './useTour';
 
 interface TourContextValue {
@@ -28,9 +29,38 @@ export function useTourContext(): TourContextValue {
  */
 export default function TourProvider({ children }: { children: React.ReactNode }) {
   const { role } = useSession();
-  const { open, close, replay } = useTour(role, true);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { open, close, replayFromPath, activeStepId, setActiveStepId } = useTour(
+    role,
+    true,
+    pathname
+  );
+  const flow = useMemo(() => getRoleFlow(role), [role]);
 
   const steps = useMemo(() => buildSteps(role), [role]);
+  const current = useMemo(() => {
+    if (!flow || !activeStepId) return 0;
+    const idx = flow.steps.findIndex((step) => step.id === activeStepId);
+    return idx >= 0 ? idx : 0;
+  }, [flow, activeStepId]);
+
+  const handleChange = useCallback(
+    (next: number) => {
+      if (!flow || !flow.steps[next]) return;
+      const nextStep = flow.steps[next];
+      setActiveStepId(nextStep.id);
+      if (nextStep.routePattern !== pathname) {
+        navigate(nextStep.routePattern);
+      }
+    },
+    [flow, navigate, pathname, setActiveStepId]
+  );
+
+  const replay = useCallback(() => {
+    if (!role) return;
+    replayFromPath(role, pathname);
+  }, [pathname, replayFromPath, role]);
 
   const value = useMemo<TourContextValue>(() => ({ replay }), [replay]);
 
@@ -40,6 +70,8 @@ export default function TourProvider({ children }: { children: React.ReactNode }
       {steps.length > 0 && (
         <Tour
           open={open}
+          current={current}
+          onChange={handleChange}
           onClose={close}
           onFinish={close}
           steps={steps}

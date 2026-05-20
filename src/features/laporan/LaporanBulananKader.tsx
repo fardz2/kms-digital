@@ -63,6 +63,7 @@ export default function LaporanBulananKader() {
         title="Laporan Bulanan"
         eyebrow="Rekap Posyandu"
         subtitle="Rekap pengukuran balita di posyandu Anda."
+        dataTourId="kader-laporan-header"
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px]">

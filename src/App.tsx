@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntApp, ConfigProvider } from 'antd';
 import idID from 'antd/locale/id_ID';
@@ -29,6 +29,20 @@ const theme = {
   },
 };
 
+function AppPrompts() {
+  const location = useLocation();
+  const hidePrompts = location.pathname.startsWith('/user-guide');
+
+  if (hidePrompts) return null;
+
+  return (
+    <>
+      <PWAUpdatePrompt />
+      <PWAInstallPrompt />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -39,8 +53,7 @@ export default function App() {
               <TourProvider>
                 <AppRoutes />
               </TourProvider>
-              <PWAUpdatePrompt />
-              <PWAInstallPrompt />
+              <AppPrompts />
             </BrowserRouter>
           </AntApp>
         </ConfigProvider>

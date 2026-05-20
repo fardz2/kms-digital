@@ -8,6 +8,7 @@ interface PageHeaderProps {
   search?: React.ReactNode;
   stats?: React.ReactNode;
   children?: React.ReactNode;
+  dataTourId?: string;
 }
 
 export default function PageHeader({
@@ -18,12 +19,13 @@ export default function PageHeader({
   search,
   stats,
   children,
+  dataTourId,
 }: PageHeaderProps) {
   const topLine = eyebrow ?? subtitle;
   const showSubtitleBelow = Boolean(eyebrow && subtitle);
 
   return (
-    <header className="relative">
+    <header className="relative" data-tour-id={dataTourId}>
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] pt-[33px] md:pt-[50px] pb-[25px]">
         <div className="flex items-start justify-between gap-[17px] flex-wrap">
           <div className="min-w-0 flex-1">

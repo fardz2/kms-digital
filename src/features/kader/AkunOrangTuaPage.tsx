@@ -140,6 +140,7 @@ export default function AkunOrangTuaPage() {
         eyebrow="Kader Posyandu"
         title="Akun Orang Tua"
         subtitle="Kelola pendaftaran dan akun orang tua di posyandu Anda."
+        dataTourId="kader-orangtua-header"
         action={
           <Button
             variant="ghost"
@@ -152,7 +153,10 @@ export default function AkunOrangTuaPage() {
         }
       />
 
-      <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[25px]">
+      <div
+        className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[25px]"
+        data-tour-id="kader-akunortu-table"
+      >
         <div data-tour-id="kader-akunortu-tabs" className="flex gap-[8px] border-b border-light-ash">
           {TABS.map((t) => {
             const active = t.key === tab;
@@ -187,7 +191,7 @@ export default function AkunOrangTuaPage() {
         {tab === 'pending' && <PendingApprovalSection enabled={true} />}
 
         {tab === 'aktif' && (
-          <div data-tour-id="kader-akunortu-table" className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
+          <div className="bg-white border border-light-ash rounded-default shadow-card border-t-2 border-t-primary-500 p-[25px] space-y-[17px]">
             <div className="flex items-center justify-between gap-[17px] flex-wrap">
               <h2 className="text-heading font-semibold text-deep-slate">
                 Daftar Orang Tua Aktif

@@ -144,7 +144,7 @@ const LaporanDesa = forwardRef<HTMLDivElement>(function LaporanDesa(_props, ref)
   }
 
   return (
-    <div ref={ref} className="flex flex-col gap-[17px] bg-faint-fog">
+    <div ref={ref} data-tour-id="desa-laporan" className="flex flex-col gap-[17px] bg-faint-fog">
       <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[17px]">
         <StatCard
           label="Total Balita"

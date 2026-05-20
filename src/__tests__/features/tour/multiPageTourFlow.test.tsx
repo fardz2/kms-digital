@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, test, beforeEach } from 'vitest';
+import { describe, expect, test, beforeEach, vi, afterEach } from 'vitest';
 import {
   getRoleFlow,
   getFirstStepForPath,
@@ -18,10 +18,47 @@ describe('multi-page tour flow manifest', () => {
     expect(flow?.steps.some((step) => step.routePattern === '/admin/dashboard/artikel/baru')).toBe(true);
   });
 
+  test('covers key routes for every role', () => {
+    const expectations: Array<[Parameters<typeof getRoleFlow>[0], string[]]> = [
+      ['KADER_POSYANDU', ['/kader/balita', '/kader/orangtua', '/kader/laporan']],
+      ['ORANG_TUA', ['/orangtua/balita', '/orangtua/forum', '/orangtua/forum/:id']],
+      ['TENAGA_KESEHATAN', ['/tenkes/forum', '/tenkes/balita/:id']],
+      ['DESA', ['/desa/beranda']],
+      [
+        'ADMIN',
+        [
+          '/admin/dashboard',
+          '/admin/dashboard/desa',
+          '/admin/dashboard/posyandu',
+          '/admin/dashboard/kader-posyandu',
+          '/admin/dashboard/tenaga-kesehatan',
+          '/admin/dashboard/artikel',
+          '/admin/dashboard/artikel/baru',
+        ],
+      ],
+    ];
+
+    expectations.forEach(([role, routes]) => {
+      const flow = getRoleFlow(role);
+      const flowRoutes = flow?.steps.map((step) => step.routePattern) ?? [];
+
+      expect(flow).toBeTruthy();
+      expect(flowRoutes).toEqual(expect.arrayContaining(routes));
+    });
+  });
+
   test('finds first step for current route inside role flow', () => {
     const step = getFirstStepForPath('ADMIN', '/admin/dashboard/posyandu');
 
     expect(step?.routePattern).toBe('/admin/dashboard/posyandu');
+  });
+
+  test('matches dynamic route patterns when resolving first step', () => {
+    const otStep = getFirstStepForPath('ORANG_TUA', '/orangtua/forum/123');
+    const tenkesStep = getFirstStepForPath('TENAGA_KESEHATAN', '/tenkes/balita/456');
+
+    expect(otStep?.routePattern).toBe('/orangtua/forum/:id');
+    expect(tenkesStep?.routePattern).toBe('/tenkes/balita/:id');
   });
 
   test('returns next step across route boundaries', () => {
@@ -48,6 +85,10 @@ describe('useTour route-aware state', () => {
     window.localStorage.clear();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   test('auto-start begins from first step for role', () => {
     const { result } = renderHook(() => useTour('ADMIN', true));
 
@@ -56,6 +97,36 @@ describe('useTour route-aware state', () => {
     });
 
     expect(result.current.activeStepId).toBe('admin-dashboard-intro');
+    expect(result.current.open).toBe(true);
+  });
+
+  test('auto-start respects the current path when provided', () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() =>
+      useTour('ADMIN', true, '/admin/dashboard/desa')
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(result.current.activeStepId).toBe('admin-desa-header');
+    expect(result.current.open).toBe(true);
+  });
+
+  test('auto-start resolves dynamic paths', () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() =>
+      useTour('ORANG_TUA', true, '/orangtua/forum/123')
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(result.current.activeStepId).toBe('ot-forum-detail-form');
     expect(result.current.open).toBe(true);
   });
 

@@ -30,7 +30,7 @@ function clearFlag(role: Role | null): void {
   window.localStorage.removeItem(key);
 }
 
-export function useTour(role: Role | null, autoStart = true) {
+export function useTour(role: Role | null, autoStart = true, pathname?: string) {
   const [open, setOpen] = useState(false);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
@@ -39,12 +39,15 @@ export function useTour(role: Role | null, autoStart = true) {
     if (isCompleted(role)) return;
     const flow = getRoleFlow(role);
     if (!flow || flow.steps.length === 0) return;
+    const startStep = pathname
+      ? getFirstStepForPath(role, pathname) ?? flow.steps[0]
+      : flow.steps[0];
     const timer = window.setTimeout(() => {
-      setActiveStepId(flow.steps[0].id);
+      setActiveStepId(startStep.id);
       setOpen(true);
     }, 600);
     return () => window.clearTimeout(timer);
-  }, [role, autoStart]);
+  }, [role, autoStart, pathname]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -71,6 +74,7 @@ export function useTour(role: Role | null, autoStart = true) {
   }, []);
 
   const replayFromPath = useCallback((r: Role, path: string) => {
+    clearFlag(r);
     const step = getFirstStepForPath(r, path);
     if (step) {
       setActiveStepId(step.id);
@@ -84,5 +88,14 @@ export function useTour(role: Role | null, autoStart = true) {
     markCompleted(r);
   }, []);
 
-  return { open, close, replay, activeStepId, startFromBeginning, replayFromPath, finishFlow };
+  return {
+    open,
+    close,
+    replay,
+    activeStepId,
+    setActiveStepId,
+    startFromBeginning,
+    replayFromPath,
+    finishFlow,
+  };
 }
