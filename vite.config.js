@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'favicon.svg', 'logo192.png', 'logo512.png', 'robots.txt'],
       manifest: {
         name: 'KMS Digital - Posyandu Lebakwangi',
         short_name: 'KMS Digital',
