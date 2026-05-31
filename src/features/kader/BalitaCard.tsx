@@ -1,10 +1,10 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { AlertTriangle, CheckCircle2, Pencil, Eye } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Pencil, Eye, LineChart } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
 
-export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
+export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat, onGrafik }) {
   const { latest, latestBulanIni, status, sudahDiukur, perluPerhatian } = meta;
   const umurBulan = anak.tanggal_lahir
     ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
@@ -96,6 +96,16 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
             onClick={() => onUkur?.(anak, latest)}
           >
             Ukur
+          </Button>
+        )}
+        {latest && (
+          <Button
+            variant="ghost"
+            size="sm"
+            leadingIcon={<LineChart size={16} strokeWidth={1.75} />}
+            onClick={() => onGrafik?.(anak)}
+          >
+            Grafik
           </Button>
         )}
       </div>
