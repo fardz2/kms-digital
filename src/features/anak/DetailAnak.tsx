@@ -18,7 +18,8 @@ import RiwayatCard from './RiwayatCard';
 import ChartWHO from './ChartWHO';
 
 export default function DetailAnak() {
-  const { id } = useParams();
+  const { id: idParam } = useParams();
+  const id = idParam != null && idParam !== '' ? Number(idParam) : undefined;
   const navigate = useNavigate();
   const toast = useToast();
   const confirm = useConfirmDialog();
