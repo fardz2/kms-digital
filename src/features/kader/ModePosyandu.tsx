@@ -5,6 +5,7 @@ import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
+import ChartModal from './ChartModal';
 import { classifyBalita, priority } from './classifyBalita';
 import Button from '../../components/ui/Button';
 import PengukuranForm from '../pengukuran/PengukuranForm';
@@ -30,6 +31,7 @@ export default function ModePosyandu() {
   const [existingPengukuran, setExistingPengukuran] = useState(null);
   const [prefillFrom, setPrefillFrom] = useState(null);
   const [tambahOpen, setTambahOpen] = useState(false);
+  const [chartAnak, setChartAnak] = useState(null);
 
   const { data: pendingOT } = usePendingOrangTua(true);
   const { data: pendingAnak } = usePendingAnak(true);
@@ -112,6 +114,10 @@ export default function ModePosyandu() {
     navigate(`/kader/balita/${anak.id}`);
   };
 
+  const handleGrafik = (anak) => {
+    setChartAnak(anak);
+  };
+
   const closeForm = () => {
     setFormOpen(false);
     setSelectedAnak(null);
@@ -178,6 +184,7 @@ export default function ModePosyandu() {
                 onUkur={(a) => handleUkur(a, meta.latest)}
                 onUlang={handleUlang}
                 onLihat={handleLihat}
+                onGrafik={handleGrafik}
               />
             </div>
           ))}
@@ -210,6 +217,12 @@ export default function ModePosyandu() {
       <FormInputDataAnak
         isOpen={tambahOpen}
         onCancel={() => setTambahOpen(false)}
+      />
+
+      <ChartModal
+        anak={chartAnak}
+        pengukuran={chartAnak ? (pengukuranByAnak[chartAnak.id] ?? []) : []}
+        onClose={() => setChartAnak(null)}
       />
     </div>
   );
