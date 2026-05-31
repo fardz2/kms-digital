@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Input } from "antd";
-import { Mail, KeyRound, LogIn, AlertTriangle } from "lucide-react";
+import { User, KeyRound, LogIn, AlertTriangle } from "lucide-react";
 import Button from "../../components/ui/Button";
 
 const ROLE_LABELS = {
@@ -15,7 +15,7 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
   const [form] = Form.useForm();
 
   const handleFinish = (values) => {
-    onSubmit?.({ email: values.email, password: values.password, role });
+    onSubmit?.({ login: values.login, password: values.password, role });
   };
 
   return (
@@ -47,26 +47,25 @@ export default function LoginForm({ role, onSubmit, loading, errorText }) {
         <Form.Item
           label={
             <span className="text-body-sm font-semibold text-deep-slate">
-              Email
+              Username atau Email
             </span>
           }
-          name="email"
+          name="login"
           rules={[
-            { required: true, message: "Email masih kosong" },
-            { type: "email", message: "Format email tidak valid" },
+            { required: true, message: "Username atau email masih kosong" },
           ]}
         >
           <Input
             prefix={
-              <Mail
+              <User
                 size={18}
                 strokeWidth={1.75}
                 className="text-graphite mr-[6px]"
               />
             }
-            placeholder="email@contoh.com"
+            placeholder="Username atau email"
             className="h-[52px] text-base"
-            autoComplete="email"
+            autoComplete="username"
           />
         </Form.Item>
 

@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../api/auth.api';
 
 interface LoginCredentials {
-  email: string;
+  login: string;
   password: string;
 }
 

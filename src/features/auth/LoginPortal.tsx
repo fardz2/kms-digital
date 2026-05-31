@@ -75,10 +75,10 @@ export default function LoginPortal() {
     }
   }, [isAuthenticated, currentRole, navigate]);
 
-  const handleLogin = ({ email, password, role }) => {
+  const handleLogin = ({ login: loginId, password, role }) => {
     setErrorText(null);
     loginMutation.mutate(
-      { email, password },
+      { login: loginId, password },
       {
         onSuccess: (data) => {
           const userRole = data?.user?.role;
@@ -103,7 +103,7 @@ export default function LoginPortal() {
           navigate(ROLE_HOME[userRole] ?? '/', { replace: true });
         },
         onError: (err) => {
-          setErrorText(err?.message ?? 'Email atau kata sandi salah');
+          setErrorText(err?.message ?? 'Login atau kata sandi salah');
         },
       }
     );
