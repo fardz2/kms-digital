@@ -1,10 +1,10 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { AlertTriangle, CheckCircle2, Pencil, Eye, LineChart } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Pencil } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
 
-export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat, onGrafik }) {
+export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
   const { latest, latestBulanIni, status, sudahDiukur, perluPerhatian } = meta;
   const umurBulan = anak.tanggal_lahir
     ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
@@ -15,9 +15,32 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat, onGra
     ? 'border-danger/30'
     : 'border-light-ash';
 
+  const openDetail = () => onLihat?.(anak);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openDetail();
+    }
+  };
+
+  const handleAction = (e) => {
+    e.stopPropagation();
+    if (sudahDiukur) {
+      onUlang?.(anak, latestBulanIni);
+    } else {
+      onUkur?.(anak, latest);
+    }
+  };
+
   return (
     <article
-      className={`group flex items-start justify-between gap-[17px] p-[21px] bg-white border ${stateClasses} rounded-default transition-colors duration-150 ease-out-quart hover:border-graphite/30 focus-within:ring-1 focus-within:ring-primary-500`}
+      role="button"
+      tabIndex={0}
+      aria-label={`Buka detail ${anak.nama}`}
+      onClick={openDetail}
+      onKeyDown={handleKeyDown}
+      className={`group flex items-start justify-between gap-[17px] p-[21px] bg-white border ${stateClasses} rounded-default cursor-pointer transition-colors duration-150 ease-out-quart hover:border-graphite/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500`}
     >
       <div className="shrink-0 mt-[2px]">
         {perluPerhatian ? (
@@ -66,48 +89,20 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat, onGra
             )}
           </p>
         )}
+        <p className="text-caption text-graphite mt-[8px]">
+          Ketuk kartu untuk lihat riwayat &amp; grafik
+        </p>
       </div>
 
-      <div className="shrink-0 flex flex-col gap-[6px]">
-        {sudahDiukur ? (
-          <>
-            <Button
-              variant="default"
-              size="sm"
-              leadingIcon={<Eye size={16} strokeWidth={1.75} />}
-              onClick={() => onLihat?.(anak)}
-            >
-              Riwayat
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
-              onClick={() => onUlang?.(anak, latestBulanIni)}
-            >
-              Ubah
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="primary"
-            size="md"
-            leadingIcon={<Pencil size={18} strokeWidth={1.75} />}
-            onClick={() => onUkur?.(anak, latest)}
-          >
-            Ukur
-          </Button>
-        )}
-        {latest && (
-          <Button
-            variant="ghost"
-            size="sm"
-            leadingIcon={<LineChart size={16} strokeWidth={1.75} />}
-            onClick={() => onGrafik?.(anak)}
-          >
-            Grafik
-          </Button>
-        )}
+      <div className="shrink-0 flex flex-col justify-center">
+        <Button
+          variant={sudahDiukur ? 'default' : 'primary'}
+          size="md"
+          leadingIcon={<Pencil size={18} strokeWidth={1.75} />}
+          onClick={handleAction}
+        >
+          {sudahDiukur ? 'Ubah' : 'Ukur'}
+        </Button>
       </div>
     </article>
   );
