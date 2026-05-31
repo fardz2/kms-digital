@@ -26,7 +26,9 @@ export function usePengukuranBulananKader() {
   const pengukuranByAnak = useMemo(() => {
     const map = {};
     (anakList ?? []).forEach((anak, idx) => {
-      map[anak.id] = queries[idx]?.data ?? [];
+      map[anak.id] = [...(queries[idx]?.data ?? [])].sort((a, b) =>
+        (a.date ?? '').localeCompare(b.date ?? '')
+      );
     });
     return map;
     // eslint-disable-next-line react-hooks/exhaustive-deps
