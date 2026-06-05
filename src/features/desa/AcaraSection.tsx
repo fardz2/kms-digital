@@ -57,7 +57,7 @@ export default function AcaraSection() {
     });
   };
 
-  const sorted = [...(reminders ?? [])].sort((a, b) =>
+  const sorted = (reminders ?? []).toSorted((a, b) =>
     (b.tanggal_reminder ?? '').localeCompare(a.tanggal_reminder ?? '')
   );
 

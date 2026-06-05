@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [
     react({
       include: /\.(jsx|js|tsx|ts)$/,
+      babel: {
+        plugins: [['babel-plugin-react-compiler', { target: '19' }]],
+      },
     }),
     VitePWA({
       registerType: 'autoUpdate',

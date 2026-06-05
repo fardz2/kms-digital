@@ -8,7 +8,9 @@ import { useToast } from '../../components/ui/Toast';
 import { useExportCsvDesa } from '../../queries/useExportQueries';
 import { useSession } from '../auth/useSession';
 
-export default function ExportDesaForm({ posyanduList = [], printableRef }) {
+const EMPTY_POSYANDU_LIST = [];
+
+export default function ExportDesaForm({ posyanduList = EMPTY_POSYANDU_LIST, printableRef }) {
   const [form] = Form.useForm();
   const toast = useToast();
   const { user } = useSession();
@@ -52,6 +54,7 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
     }
     try {
       setIsPrinting(true);
+      // react-doctor-disable-next-line -- dynamic import() intentionally code-splits the heavy js-html2pdf lib; React Compiler can't lower import expressions yet, bailout is expected.
       const html2pdfModule = await import('js-html2pdf');
       const html2pdf = html2pdfModule.default ?? html2pdfModule;
 
@@ -66,10 +69,10 @@ export default function ExportDesaForm({ posyanduList = [], printableRef }) {
 
       await html2pdf(printableRef.current, opt).save();
       toast.success('Laporan PDF berhasil dibuat');
+      setIsPrinting(false);
     } catch (err) {
       console.error('PDF export error:', err);
       toast.error('Gagal membuat laporan PDF');
-    } finally {
       setIsPrinting(false);
     }
   };

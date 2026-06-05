@@ -236,10 +236,12 @@ export function LandingPage() {
                 className="absolute -inset-[13px] md:-inset-[17px] bg-primary-100/50 rounded-default -z-10"
               />
               <div className="relative aspect-video rounded-default overflow-hidden bg-deep-slate border border-light-ash shadow-card">
+                {/* react-doctor-disable-next-line react-doctor/iframe-missing-sandbox -- YouTube embed requires both allow-scripts and allow-same-origin to play; this is the documented minimum for the official embed. */}
                 <iframe
                   className="absolute inset-0 w-full h-full"
                   src="https://www.youtube.com/embed/oYwKLxEDNXU?autoplay=0&mute=1&loop=1&playlist=oYwKLxEDNXU&iv_load_policy=3&rel=0&vq=hd1080"
                   title="Video perkenalan KMS Digital"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />

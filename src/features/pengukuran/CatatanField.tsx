@@ -13,13 +13,14 @@ export default function CatatanField({
 }: CatatanFieldProps) {
   return (
     <div className="py-4">
-      <label className="text-overline text-neutral-600 mb-2 block">
+      <label htmlFor="catatan-pengukuran" className="text-overline text-neutral-600 mb-2 block">
         📝 Catatan{' '}
         <span className="font-normal text-neutral-500 normal-case tracking-normal">
           (opsional)
         </span>
       </label>
       <textarea
+        id="catatan-pengukuran"
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder ?? 'Contoh: anak sedang sakit, baru sembuh demam...'}

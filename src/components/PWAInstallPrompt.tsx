@@ -75,6 +75,7 @@ export default function PWAInstallPrompt() {
         </div>
       </div>
       <button
+        type="button"
         onClick={handleDismiss}
         aria-label="Tutup"
         className="flex-shrink-0 text-graphite hover:text-deep-slate"

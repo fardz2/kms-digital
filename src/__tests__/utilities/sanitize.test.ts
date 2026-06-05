@@ -28,6 +28,18 @@ describe('sanitizeHtml', () => {
     expect(clean).toContain('href="https://example.com"');
   });
 
+  test('adds rel="noopener noreferrer" to links opening a new tab', () => {
+    const dirty = '<a href="https://example.com" target="_blank">link</a>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).toContain('rel="noopener noreferrer"');
+  });
+
+  test('strips javascript: protocol from href', () => {
+    const dirty = '<a href="javascript:alert(1)">x</a>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).not.toContain('javascript:');
+  });
+
   test('handles null/undefined safely', () => {
     expect(sanitizeHtml('')).toEqual('');
     expect(sanitizeHtml(null)).toEqual('');

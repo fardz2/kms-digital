@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   readSession,
@@ -31,16 +31,16 @@ export function useSession() {
     };
   }, []);
 
-  const login = useCallback((data) => {
+  const login = (data) => {
     writeSession(data);
     setSession(data);
-  }, []);
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     clearSession();
     queryClient.clear();
     setSession(null);
-  }, [queryClient]);
+  };
 
   return {
     session,

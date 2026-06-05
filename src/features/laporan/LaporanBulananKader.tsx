@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useQueries } from '@tanstack/react-query';
@@ -24,7 +24,7 @@ import { aggregateKaderLaporan } from './aggregateKader';
 
 export default function LaporanBulananKader() {
   const navigate = useNavigate();
-  const [bulan, setBulan] = useState(dayjs().format('YYYY-MM'));
+  const [bulan, setBulan] = useState(() => dayjs().format('YYYY-MM'));
   const { role } = useSession();
   const { data: anakList, isLoading: anakLoading } = useAnakList();
 
@@ -41,19 +41,12 @@ export default function LaporanBulananKader() {
 
   const isFetchingPengukuran = pengukuranQueries.some((q) => q.isLoading);
 
-  const pengukuranByAnak = useMemo(() => {
-    const map = {};
-    (anakList ?? []).forEach((anak, idx) => {
-      map[anak.id] = pengukuranQueries[idx]?.data ?? [];
-    });
-    return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anakList, pengukuranQueries.map((q) => q.dataUpdatedAt).join(',')]);
+  const pengukuranByAnak = {};
+  (anakList ?? []).forEach((anak, idx) => {
+    pengukuranByAnak[anak.id] = pengukuranQueries[idx]?.data ?? [];
+  });
 
-  const laporan = useMemo(
-    () => aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan }),
-    [anakList, pengukuranByAnak, bulan]
-  );
+  const laporan = aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan });
 
   const isLoading = anakLoading || isFetchingPengukuran;
 

@@ -31,6 +31,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
   loading?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 /**
@@ -39,21 +40,19 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
  * Variants: primary | dark | default | secondary (alias of default) | ghost | destructive | link
  * Sizes:    sm | md | lg | icon
  */
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  {
-    variant = 'primary',
-    size = 'md',
-    className = '',
-    type = 'button',
-    children,
-    leadingIcon,
-    trailingIcon,
-    loading = false,
-    disabled,
-    ...rest
-  },
-  ref
-) {
+function Button({
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  type = 'button',
+  children,
+  leadingIcon,
+  trailingIcon,
+  loading = false,
+  disabled,
+  ref,
+  ...rest
+}: ButtonProps) {
   const classes = [BASE, VARIANTS[variant] ?? VARIANTS.primary, SIZES[size] ?? SIZES.md, className]
     .filter(Boolean)
     .join(' ');
@@ -69,6 +68,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       {trailingIcon && !loading ? <span className="inline-flex shrink-0">{trailingIcon}</span> : null}
     </button>
   );
-});
+}
 
 export default Button;

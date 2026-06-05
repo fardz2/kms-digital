@@ -31,7 +31,7 @@ export function usePengukuranAnak(anakId: number | string | undefined) {
     enabled: isAuthenticated && !!role && !!anakId,
     staleTime: 5 * 60 * 1000,
     select: (data) =>
-      [...data].sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '')),
+      data.toSorted((a, b) => (a.date ?? '').localeCompare(b.date ?? '')),
   });
 }
 

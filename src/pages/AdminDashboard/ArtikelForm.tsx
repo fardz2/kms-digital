@@ -15,6 +15,23 @@ import {
   useCreateKategori,
 } from "../../queries/useKategoriQueries";
 
+const validateImage = (file) => {
+  const validTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "image/gif",
+    "image/svg+xml",
+  ];
+  const maxSize = 2 * 1024 * 1024;
+  if (!file) return Promise.reject(new Error("Cover masih kosong"));
+  if (!validTypes.includes(file.type))
+    return Promise.reject(new Error("Format file tidak valid."));
+  if (file.size > maxSize)
+    return Promise.reject(new Error("Ukuran file maksimal 2MB"));
+  return Promise.resolve();
+};
+
 export default function ArtikelForm() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -61,23 +78,6 @@ export default function ArtikelForm() {
 
   const isBusy =
     createArtikelMutation.isPending || createKategoriMutation.isPending;
-
-  const validateImage = (file) => {
-    const validTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "image/gif",
-      "image/svg+xml",
-    ];
-    const maxSize = 2 * 1024 * 1024;
-    if (!file) return Promise.reject(new Error("Cover masih kosong"));
-    if (!validTypes.includes(file.type))
-      return Promise.reject(new Error("Format file tidak valid."));
-    if (file.size > maxSize)
-      return Promise.reject(new Error("Ukuran file maksimal 2MB"));
-    return Promise.resolve();
-  };
 
   const onFinish = (values) => {
     if (addingCategory) handleCreateKategori(values);

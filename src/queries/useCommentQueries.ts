@@ -27,7 +27,7 @@ export function useCommentList(postId: number | string | undefined) {
     queryFn: async () => {
       const res = await commentApi.listByPost(postId);
       const list: Comment[] = res.data ?? [];
-      return [...list].sort((a, b) =>
+      return list.toSorted((a, b) =>
         (b.time ?? '').localeCompare(a.time ?? '')
       );
     },

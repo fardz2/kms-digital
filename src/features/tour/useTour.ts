@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Role } from '../../types';
 import { getRoleFlow, getFirstStepForPath } from './tourSteps';
 
@@ -49,44 +49,44 @@ export function useTour(role: Role | null, autoStart = true, pathname?: string) 
     return () => window.clearTimeout(timer);
   }, [role, autoStart, pathname]);
 
-  const close = useCallback(() => {
+  const close = () => {
     setOpen(false);
     setActiveStepId(null);
     markCompleted(role);
-  }, [role]);
+  };
 
-  const replay = useCallback(() => {
+  const replay = () => {
     clearFlag(role);
     const flow = getRoleFlow(role);
     if (flow && flow.steps.length > 0) {
       setActiveStepId(flow.steps[0].id);
     }
     setOpen(true);
-  }, [role]);
+  };
 
-  const startFromBeginning = useCallback((r: Role) => {
+  const startFromBeginning = (r: Role) => {
     clearFlag(r);
     const flow = getRoleFlow(r);
     if (flow && flow.steps.length > 0) {
       setActiveStepId(flow.steps[0].id);
       setOpen(true);
     }
-  }, []);
+  };
 
-  const replayFromPath = useCallback((r: Role, path: string) => {
+  const replayFromPath = (r: Role, path: string) => {
     clearFlag(r);
     const step = getFirstStepForPath(r, path);
     if (step) {
       setActiveStepId(step.id);
       setOpen(true);
     }
-  }, []);
+  };
 
-  const finishFlow = useCallback((r: Role) => {
+  const finishFlow = (r: Role) => {
     setOpen(false);
     setActiveStepId(null);
     markCompleted(r);
-  }, []);
+  };
 
   return {
     open,

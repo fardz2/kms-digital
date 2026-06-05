@@ -8,6 +8,8 @@ const ACCENT = {
   neutral: 'text-deep-slate',
 };
 
+const EMPTY_ITEMS = [];
+
 function StatItem({ label, value, accent = 'neutral', loading }) {
   const colorClass = ACCENT[accent] ?? ACCENT.neutral;
   return (
@@ -26,7 +28,7 @@ function StatItem({ label, value, accent = 'neutral', loading }) {
   );
 }
 
-export default function InlineStatBar({ items = [], loading = false, className = '' }) {
+export default function InlineStatBar({ items = EMPTY_ITEMS, loading = false, className = '' }) {
   if (!items.length) return null;
   return (
     <div className={`flex flex-wrap items-start gap-x-[33px] gap-y-[17px] ${className}`}>

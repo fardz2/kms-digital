@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 
 type GuideScreenshotProps = {
@@ -17,10 +17,12 @@ export default function GuideScreenshot({
   accentColor,
 }: GuideScreenshotProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
 
-  useEffect(() => {
+  if (src !== prevSrc) {
+    setPrevSrc(src);
     setImageFailed(false);
-  }, [src]);
+  }
 
   return (
     <figure

@@ -52,6 +52,7 @@ export default function DataTable({
     pageSize,
   });
 
+  // react-doctor-disable-next-line react-hooks/incompatible-library -- TanStack Table's useReactTable returns non-memoizable functions by design; compiler bailout is expected and harmless here.
   const table = useReactTable({
     data: data || [],
     columns,

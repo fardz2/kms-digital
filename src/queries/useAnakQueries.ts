@@ -26,7 +26,7 @@ export function useAnakList() {
     enabled: isAuthenticated && !!role,
     staleTime: 5 * 60 * 1000,
     select: (data) =>
-      [...data].sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? '')),
+      data.toSorted((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? '')),
   });
 }
 

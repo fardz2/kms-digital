@@ -16,8 +16,21 @@ const ALLOWED_ATTR = [
   'class', 'style',
 ];
 
+let hookRegistered = false;
+
+function ensureLinkSafetyHook() {
+  if (hookRegistered) return;
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A' && node.hasAttribute('target')) {
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+  hookRegistered = true;
+}
+
 export function sanitizeHtml(dirty: string | null | undefined): string {
   if (!dirty) return '';
+  ensureLinkSafetyHook();
   return DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 const KEY = 'admin-sidebar-collapsed';
 
@@ -13,7 +13,7 @@ export function useSidebarCollapsed() {
     window.localStorage.setItem(KEY, collapsed ? '1' : '0');
   }, [collapsed]);
 
-  const toggle = useCallback(() => setCollapsed((v) => !v), []);
+  const toggle = () => setCollapsed((v) => !v);
 
   return { collapsed, toggle, setCollapsed };
 }

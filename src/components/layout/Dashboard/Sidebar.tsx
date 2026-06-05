@@ -88,6 +88,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
 
           {!collapsed && (
             <button
+              type="button"
               onClick={closeSidebar}
               className="md:hidden p-2 rounded-default text-graphite hover:bg-faint-fog transition-colors"
               aria-label="Tutup sidebar"
@@ -193,6 +194,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
             <>
               <Tooltip title="Bantuan" placement="right">
                 <button
+                  type="button"
                   onClick={replay}
                   className="flex items-center justify-center w-full h-[48px] rounded-default text-graphite hover:text-deep-slate hover:bg-faint-fog transition-colors"
                   aria-label="Bantuan"
@@ -202,6 +204,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
               </Tooltip>
               <Tooltip title="Ubah Kata Sandi" placement="right">
                 <button
+                  type="button"
                   onClick={() => setIsProfileModalOpen(true)}
                   className="flex items-center justify-center w-full h-[48px] rounded-default text-deep-slate hover:bg-faint-fog transition-colors"
                   aria-label="Ubah Kata Sandi"
@@ -211,6 +214,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
               </Tooltip>
               <Tooltip title="Keluar" placement="right">
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="flex items-center justify-center w-full h-[48px] rounded-default text-danger hover:bg-danger/10 transition-colors"
                   aria-label="Keluar"
@@ -222,6 +226,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
           ) : (
             <>
               <button
+                type="button"
                 onClick={replay}
                 className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-deep-slate hover:bg-faint-fog transition-colors"
               >
@@ -229,6 +234,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                 Bantuan
               </button>
               <button
+                type="button"
                 onClick={() => setIsProfileModalOpen(true)}
                 className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-deep-slate hover:bg-faint-fog transition-colors"
               >
@@ -236,6 +242,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                 Ubah Kata Sandi
               </button>
               <button
+                type="button"
                 onClick={handleLogout}
                 className="flex items-center gap-3 h-[50px] w-full px-[13px] rounded-default text-body-sm text-danger hover:bg-danger/10 transition-colors"
               >
