@@ -21,7 +21,9 @@ const ICON_MAP = {
   artikel:  <Newspaper size={18} strokeWidth={1.75} />,
 };
 
-export default function AdminActivityFeed({ items = [], loading, hasPartialError }) {
+const EMPTY_ITEMS = [];
+
+export default function AdminActivityFeed({ items = EMPTY_ITEMS, loading, hasPartialError }) {
   return (
     <section className="bg-white border border-light-ash rounded-default shadow-card p-[25px]">
       <header className="flex items-center justify-between mb-[17px]">

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { AlertTriangle, Search, Plus } from 'lucide-react';
@@ -37,23 +37,18 @@ export default function ModePosyandu() {
 
   const currentBulan = dayjs().format('YYYY-MM');
 
-  const balitaWithMeta = useMemo(() => {
-    return (anakList ?? []).map((anak) => ({
-      anak,
-      meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
-    }));
-  }, [anakList, pengukuranByAnak, currentBulan]);
+  const balitaWithMeta = (anakList ?? []).map((anak) => ({
+    anak,
+    meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
+  }));
 
-  const counts = useMemo(
-    () => ({
-      semua: balitaWithMeta.length,
-      belum: balitaWithMeta.filter((x) => !x.meta.sudahDiukur).length,
-      perhatian: balitaWithMeta.filter((x) => x.meta.perluPerhatian).length,
-    }),
-    [balitaWithMeta]
-  );
+  const counts = {
+    semua: balitaWithMeta.length,
+    belum: balitaWithMeta.filter((x) => !x.meta.sudahDiukur).length,
+    perhatian: balitaWithMeta.filter((x) => x.meta.perluPerhatian).length,
+  };
 
-  const filtered = useMemo(() => {
+  const filtered = (() => {
     const q = search.trim().toLowerCase();
     return balitaWithMeta
       .filter(({ anak, meta }) => {
@@ -68,7 +63,7 @@ export default function ModePosyandu() {
         if (pa !== pb) return pa - pb;
         return (a.anak.nama ?? '').localeCompare(b.anak.nama ?? '');
       });
-  }, [balitaWithMeta, search, filter]);
+  })();
 
   const handleKeluar = () => {
     confirm({

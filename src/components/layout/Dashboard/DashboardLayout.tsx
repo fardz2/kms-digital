@@ -42,6 +42,7 @@ export default function DashboardLayout() {
 
       {!sidebarOpen && (
         <button
+          type="button"
           onClick={() => setSidebarOpen(true)}
           className="fixed top-4 left-4 z-30 p-[13px] rounded-default bg-white/95 backdrop-blur-sm border border-light-ash text-deep-slate hover:bg-canvas-veil transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 shadow-card"
           aria-label="Buka sidebar"

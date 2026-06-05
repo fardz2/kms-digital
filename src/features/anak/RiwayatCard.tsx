@@ -5,6 +5,8 @@ import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { overallStatus } from '../pengukuran/statusGizi';
 
+const toZ = (v) => (v == null || v === '' ? null : Number(v));
+
 export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = true }) {
   const {
     date,
@@ -19,7 +21,6 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
     z_score_gizi,
   } = pengukuran;
 
-  const toZ = (v) => (v == null || v === '' ? null : Number(v));
   const status = overallStatus({
     zScoreBB: toZ(z_score_berat),
     zScoreTB: toZ(z_score_tinggi),

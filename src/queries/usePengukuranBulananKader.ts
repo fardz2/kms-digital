@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useAnakList } from './useAnakQueries';
 import { pengukuranApi } from '../api/pengukuran.api';
@@ -23,16 +22,12 @@ export function usePengukuranBulananKader() {
 
   const isFetchingPengukuran = queries.some((q) => q.isLoading);
 
-  const pengukuranByAnak = useMemo(() => {
-    const map = {};
-    (anakList ?? []).forEach((anak, idx) => {
-      map[anak.id] = [...(queries[idx]?.data ?? [])].sort((a, b) =>
-        (a.date ?? '').localeCompare(b.date ?? '')
-      );
-    });
-    return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anakList, queries.map((q) => q.dataUpdatedAt).join(',')]);
+  const pengukuranByAnak = {};
+  (anakList ?? []).forEach((anak, idx) => {
+    pengukuranByAnak[anak.id] = (queries[idx]?.data ?? []).toSorted((a, b) =>
+      (a.date ?? '').localeCompare(b.date ?? '')
+    );
+  });
 
   return {
     anakList: anakList ?? [],

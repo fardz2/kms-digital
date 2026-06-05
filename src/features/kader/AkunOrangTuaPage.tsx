@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../components/ui/Toast';
-import { message } from 'antd';
 import { ArrowLeft, AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -47,14 +46,10 @@ export default function AkunOrangTuaPage() {
   const { data: rawList, isLoading } = useOrangTuaList(true);
   const deleteMutation = useDeleteOrangTua();
 
-  const aktifList = useMemo(
-    () =>
-      (rawList ?? []).map((item) => ({
-        ...item,
-        status: normalizeStatus(item.status),
-      })),
-    [rawList]
-  );
+  const aktifList = (rawList ?? []).map((item) => ({
+    ...item,
+    status: normalizeStatus(item.status),
+  }));
 
   const showDeleteConfirm = (record) => {
     confirm({

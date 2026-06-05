@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, use } from 'react';
 import { Tour } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/useSession';
@@ -15,7 +15,7 @@ const TourContext = createContext<TourContextValue | null>(null);
  * useTourContext — akses replay() dari component lain (mis. Navbar tombol Bantuan).
  */
 export function useTourContext(): TourContextValue {
-  const ctx = useContext(TourContext);
+  const ctx = use(TourContext);
   if (!ctx) {
     throw new Error('useTourContext must be used within TourProvider');
   }
@@ -36,33 +36,30 @@ export default function TourProvider({ children }: { children: React.ReactNode }
     true,
     pathname
   );
-  const flow = useMemo(() => getRoleFlow(role), [role]);
+  const flow = getRoleFlow(role);
 
-  const steps = useMemo(() => buildSteps(role), [role]);
-  const current = useMemo(() => {
+  const steps = buildSteps(role);
+  const current = (() => {
     if (!flow || !activeStepId) return 0;
     const idx = flow.steps.findIndex((step) => step.id === activeStepId);
     return idx >= 0 ? idx : 0;
-  }, [flow, activeStepId]);
+  })();
 
-  const handleChange = useCallback(
-    (next: number) => {
-      if (!flow || !flow.steps[next]) return;
-      const nextStep = flow.steps[next];
-      setActiveStepId(nextStep.id);
-      if (nextStep.routePattern !== pathname) {
-        navigate(nextStep.routePattern);
-      }
-    },
-    [flow, navigate, pathname, setActiveStepId]
-  );
+  const handleChange = (next: number) => {
+    if (!flow || !flow.steps[next]) return;
+    const nextStep = flow.steps[next];
+    setActiveStepId(nextStep.id);
+    if (nextStep.routePattern !== pathname) {
+      navigate(nextStep.routePattern);
+    }
+  };
 
-  const replay = useCallback(() => {
+  const replay = () => {
     if (!role) return;
     replayFromPath(role, pathname);
-  }, [pathname, replayFromPath, role]);
+  };
 
-  const value = useMemo<TourContextValue>(() => ({ replay }), [replay]);
+  const value: TourContextValue = { replay };
 
   return (
     <TourContext.Provider value={value}>

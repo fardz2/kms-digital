@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
@@ -15,7 +15,7 @@ import {
 import { useSession } from '../auth/useSession';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import RiwayatCard from './RiwayatCard';
-import ChartWHO from './ChartWHO';
+const ChartWHO = lazy(() => import('./ChartWHO'));
 
 export default function DetailAnak() {
   const { id: idParam } = useParams();
@@ -115,8 +115,8 @@ export default function DetailAnak() {
           )}
 
           <div data-tour-id="anak-detail-riwayat" className="flex flex-col gap-3 mb-10">
-            {[...(pengukuran ?? [])]
-              .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+            {(pengukuran ?? [])
+              .toSorted((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
               .map((p) => (
                 <RiwayatCard
                   key={p.id}
@@ -134,7 +134,13 @@ export default function DetailAnak() {
                 Grafik Pertumbuhan (WHO)
               </h2>
               <div data-tour-id="anak-detail-chart">
-                <ChartWHO anak={anak} pengukuran={pengukuran} />
+                <Suspense
+                  fallback={
+                    <div className="h-[300px] bg-polar-mist animate-pulse rounded-default" />
+                  }
+                >
+                  <ChartWHO anak={anak} pengukuran={pengukuran} />
+                </Suspense>
               </div>
             </>
           )}

@@ -9,6 +9,7 @@ import {
   Mail,
   KeyRound,
   UserCircle,
+  AtSign,
   MapPin,
   Home,
   UserPlus,
@@ -43,6 +44,10 @@ const ROLES = [
     Icon: Users,
   },
 ];
+
+const prefixIcon = (Icon) => (
+  <Icon size={18} strokeWidth={1.75} className="text-graphite mr-[6px]" />
+);
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -88,6 +93,7 @@ export default function SignUp() {
     mutationFn: (values: Record<string, any>) =>
       kaderApi.register({
         nama: values.nama,
+        username: values.username,
         email: values.email,
         password: values.password,
         id_desa: values.desa,
@@ -104,6 +110,7 @@ export default function SignUp() {
     mutationFn: (values: Record<string, any>) =>
       ortuApi.register({
         nama: values.nama,
+        username: values.username,
         email: values.email,
         password: values.password,
         id_desa: values.desa,
@@ -124,10 +131,6 @@ export default function SignUp() {
 
   const loading =
     posyanduRegisterMutation.isPending || orangTuaRegisterMutation.isPending;
-
-  const prefixIcon = (Icon) => (
-    <Icon size={18} strokeWidth={1.75} className="text-graphite mr-[6px]" />
-  );
 
   return (
     <>
@@ -253,6 +256,23 @@ export default function SignUp() {
                     placeholder="Nama lengkap"
                     className="h-[52px] text-base"
                     autoComplete="name"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label={
+                    <span className="text-body-sm font-semibold text-deep-slate">
+                      Username
+                    </span>
+                  }
+                  name="username"
+                  rules={[{ required: true, message: "Username masih kosong" }]}
+                >
+                  <Input
+                    prefix={prefixIcon(AtSign)}
+                    placeholder="username"
+                    className="h-[52px] text-base"
+                    autoComplete="username"
                   />
                 </Form.Item>
 

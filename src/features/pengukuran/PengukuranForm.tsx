@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import { DatePicker } from 'antd';
 import Modal from '../../components/ui/Modal';
@@ -47,51 +47,52 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
   const isEdit = !!existing;
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
-  const [tanggal, setTanggal] = useState(dayjs());
+  const [tanggal, setTanggal] = useState(() => dayjs());
   const [berat, setBerat] = useState(DEFAULTS.berat);
   const [tinggi, setTinggi] = useState(DEFAULTS.tinggi);
   const [lingkarKepala, setLingkarKepala] = useState(DEFAULTS.lingkarKepala);
   const [lila, setLila] = useState(DEFAULTS.lila);
   const [catatan, setCatatan] = useState(DEFAULTS.catatan);
+  const [prevOpen, setPrevOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    const source = existing ?? prefillFrom;
-    if (source) {
-      setTanggal(existing?.date ? dayjs(existing.date) : dayjs());
-      setBerat(Number(source.berat) || DEFAULTS.berat);
-      setTinggi(Number(source.tinggi) || DEFAULTS.tinggi);
-      setLingkarKepala(Number(source.lingkar_kepala) || DEFAULTS.lingkarKepala);
-      setLila(Number(source.lila) || DEFAULTS.lila);
-      setCatatan(existing?.catatan ?? '');
-    } else {
-      setTanggal(dayjs());
-      setBerat(DEFAULTS.berat);
-      setTinggi(DEFAULTS.tinggi);
-      setLingkarKepala(DEFAULTS.lingkarKepala);
-      setLila(DEFAULTS.lila);
-      setCatatan(DEFAULTS.catatan);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      const source = existing ?? prefillFrom;
+      if (source) {
+        setTanggal(existing?.date ? dayjs(existing.date) : dayjs());
+        setBerat(Number(source.berat) || DEFAULTS.berat);
+        setTinggi(Number(source.tinggi) || DEFAULTS.tinggi);
+        setLingkarKepala(Number(source.lingkar_kepala) || DEFAULTS.lingkarKepala);
+        setLila(Number(source.lila) || DEFAULTS.lila);
+        setCatatan(existing?.catatan ?? '');
+      } else {
+        setTanggal(dayjs());
+        setBerat(DEFAULTS.berat);
+        setTinggi(DEFAULTS.tinggi);
+        setLingkarKepala(DEFAULTS.lingkarKepala);
+        setLila(DEFAULTS.lila);
+        setCatatan(DEFAULTS.catatan);
+      }
     }
-  }, [open, existing, prefillFrom]);
+  }
 
-  const umurBulan = useMemo(() => {
-    if (!anak?.tanggal_lahir || !tanggal) return null;
-    return monthDiff(anak.tanggal_lahir, tanggal);
-  }, [anak?.tanggal_lahir, tanggal]);
+  const umurBulan =
+    anak?.tanggal_lahir && tanggal ? monthDiff(anak.tanggal_lahir, tanggal) : null;
 
   const showLila = umurBulan != null && umurBulan >= 7;
 
-  const zScores = useMemo(() => {
-    if (!anak?.gender || !anak?.tanggal_lahir || !tanggal) return null;
-    return computeAllZScores({
-      berat,
-      tinggi,
-      lingkarKepala,
-      gender: anak.gender,
-      tanggalLahir: anak.tanggal_lahir,
-      tanggalPengukuran: tanggal.format('YYYY-MM-DD'),
-    });
-  }, [anak, tanggal, berat, tinggi, lingkarKepala]);
+  const zScores =
+    anak?.gender && anak?.tanggal_lahir && tanggal
+      ? computeAllZScores({
+          berat,
+          tinggi,
+          lingkarKepala,
+          gender: anak.gender,
+          tanggalLahir: anak.tanggal_lahir,
+          tanggalPengukuran: tanggal.format('YYYY-MM-DD'),
+        })
+      : null;
 
   const status = zScores ? overallStatus(zScores) : STATUS.UNKNOWN;
 
@@ -148,10 +149,11 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
       >
         <div className="flex flex-col gap-4">
           <div>
-            <label className="text-overline text-neutral-600 mb-2 block">
+            <label htmlFor="tanggal-pengukuran" className="text-overline text-neutral-600 mb-2 block">
               Tanggal Pengukuran
             </label>
             <DatePicker
+              id="tanggal-pengukuran"
               value={tanggal}
               onChange={(v) => v && setTanggal(v)}
               allowClear={false}

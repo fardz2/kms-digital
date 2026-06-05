@@ -19,12 +19,18 @@ export default function FormUpdateDataArtikel({ isOpen, onCancel, fetch, data })
   const [form] = Form.useForm();
   const toast = useToast();
   const [imageFile, setImageFile] = useState(null);
-  const [valueContent, setValueContent] = useState("");
+  const [valueContent, setValueContent] = useState(data?.content ?? "");
+  const [prevDataId, setPrevDataId] = useState(data?.id);
   const [statePageKateogries, setStatePageKateogries] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
   const { data: dataKategori = [] } = useKategoriList(isOpen);
   const createKategori = useCreateKategori();
+
+  if (data && data.id !== prevDataId) {
+    setPrevDataId(data.id);
+    setValueContent(data.content);
+  }
 
   useEffect(() => {
     if (data) {
@@ -33,7 +39,6 @@ export default function FormUpdateDataArtikel({ isOpen, onCancel, fetch, data })
         kategori: data.kategori,
         penulis: data.penulis,
       });
-      setValueContent(data.content);
     }
   }, [form, data]);
 

@@ -31,6 +31,7 @@ export default function NumberSlider({
 
       <input
         type="range"
+        aria-label={label ? `${label}${unit ? ' (' + unit + ')' : ''}` : 'Nilai'}
         min={min}
         max={max}
         step={step}

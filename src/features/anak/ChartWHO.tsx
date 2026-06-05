@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -61,13 +61,13 @@ function roundPb(t) {
 }
 
 function mapDataByMonth(data, tanggalLahir, field) {
-  const ageIndex = (data ?? []).map((it) =>
-    monthDiff(dayjs(tanggalLahir), dayjs(it.date))
+  const ageIndex = new Set(
+    (data ?? []).map((it) => monthDiff(dayjs(tanggalLahir), dayjs(it.date)))
   );
   const result = [];
   let j = 0;
   for (let i = 0; i <= 60; i++) {
-    if (ageIndex.includes(i) && j < data.length) {
+    if (ageIndex.has(i) && j < data.length) {
       result.push(Number(data[j][field]));
       j++;
     } else {
@@ -179,27 +179,15 @@ export default function ChartWHO({ anak, pengukuran }) {
   const gender = anak?.gender;
   const tanggalLahir = anak?.tanggal_lahir;
 
-  const ageAtFirst = useMemo(() => {
-    if (!tanggalLahir || !pengukuran?.[0]?.date) return 0;
-    return monthDiff(dayjs(tanggalLahir), dayjs(pengukuran[0].date));
-  }, [tanggalLahir, pengukuran]);
+  const ageAtFirst =
+    !tanggalLahir || !pengukuran?.[0]?.date
+      ? 0
+      : monthDiff(dayjs(tanggalLahir), dayjs(pengukuran[0].date));
 
-  const dataBB = useMemo(
-    () => mapDataByMonth(pengukuran, tanggalLahir, 'berat'),
-    [pengukuran, tanggalLahir]
-  );
-  const dataTB = useMemo(
-    () => mapDataByMonth(pengukuran, tanggalLahir, 'tinggi'),
-    [pengukuran, tanggalLahir]
-  );
-  const dataLK = useMemo(
-    () => mapDataByMonth(pengukuran, tanggalLahir, 'lingkar_kepala'),
-    [pengukuran, tanggalLahir]
-  );
-  const dataGizi = useMemo(
-    () => mapGiziByPb(pengukuran, gender, ageAtFirst),
-    [pengukuran, gender, ageAtFirst]
-  );
+  const dataBB = mapDataByMonth(pengukuran, tanggalLahir, 'berat');
+  const dataTB = mapDataByMonth(pengukuran, tanggalLahir, 'tinggi');
+  const dataLK = mapDataByMonth(pengukuran, tanggalLahir, 'lingkar_kepala');
+  const dataGizi = mapGiziByPb(pengukuran, gender, ageAtFirst);
 
   const refBB = gender === 'LAKI_LAKI' ? bbPria : bbPerempuan;
   const refTB = gender === 'LAKI_LAKI' ? tbPria : tbPerempuan;

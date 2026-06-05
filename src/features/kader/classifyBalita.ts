@@ -10,14 +10,21 @@ function compareByDateDesc(a, b) {
   return (b.created_at ?? '').localeCompare(a.created_at ?? '');
 }
 
+function mostRecent(list) {
+  return list.reduce(
+    (best, item) => (best == null || compareByDateDesc(item, best) < 0 ? item : best),
+    null
+  );
+}
+
 export function classifyBalita(pengukuranList, currentBulan) {
   const safe = pengukuranList ?? [];
-  const latest = safe.slice().sort(compareByDateDesc)[0];
+  const latest = mostRecent(safe);
 
   const bulanIni = safe.filter(
     (p) => dayjs(p.date).format('YYYY-MM') === currentBulan
   );
-  const latestBulanIni = bulanIni.slice().sort(compareByDateDesc)[0];
+  const latestBulanIni = mostRecent(bulanIni);
 
   const status = latest
     ? overallStatus({

@@ -34,7 +34,7 @@ export function usePostList() {
           ? await postApi.listByOrangTua(userId)
           : await postApi.listByTenkes(userId);
       const list: Post[] = res.data ?? [];
-      return [...list].sort((a, b) =>
+      return list.toSorted((a, b) =>
         (b.time ?? '').localeCompare(a.time ?? '')
       );
     },

@@ -29,7 +29,7 @@ export function usePendingAnak(enabled = true) {
     queryFn: async () => {
       const res = await approveApi.listAnakBelumApprove();
       const list = res.data ?? [];
-      return [...list].sort((a, b) =>
+      return list.toSorted((a, b) =>
         (b.created_at ?? '').localeCompare(a.created_at ?? '')
       );
     },

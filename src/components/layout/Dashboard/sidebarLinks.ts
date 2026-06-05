@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Home,
-  FileText,
   Building2,
   Newspaper,
   UserCog,
@@ -31,5 +30,3 @@ export const sidebarlink = [
     ],
   },
 ];
-
-export const _reservedIcons = { FileText };

@@ -92,7 +92,7 @@ export default function InputPosyandu() {
     { label: "Total Posyandu", value: rows.length },
     {
       label: "Tersebar di",
-      value: new Set(rows.map((p) => p.id_desa).filter(Boolean)).size + " desa",
+      value: new Set(rows.flatMap((p) => (p.id_desa ? [p.id_desa] : []))).size + " desa",
       accent: "neutral",
     },
     {

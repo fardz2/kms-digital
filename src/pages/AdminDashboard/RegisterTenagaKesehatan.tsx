@@ -99,7 +99,7 @@ export default function RegisterTenagaKesehatan() {
     { label: "Total Tenaga Kesehatan", value: rows.length },
     {
       label: "Tersebar di",
-      value: new Set(rows.map((r) => r.desa?.id ?? r.id_desa).filter(Boolean)).size + " desa",
+      value: new Set(rows.flatMap((r) => { const id = r.desa?.id ?? r.id_desa; return id ? [id] : []; })).size + " desa",
       accent: "neutral",
     },
     {

@@ -6,7 +6,9 @@ const OPTIONS = [
   { key: 'perhatian', label: '\u26A0 Perhatian' },
 ];
 
-export default function FilterChip({ value = 'semua', onChange, counts = {} }) {
+const EMPTY_COUNTS = {};
+
+export default function FilterChip({ value = 'semua', onChange, counts = EMPTY_COUNTS }) {
   return (
     <div className="flex gap-2 flex-wrap">
       {OPTIONS.map((opt) => {
@@ -15,6 +17,7 @@ export default function FilterChip({ value = 'semua', onChange, counts = {} }) {
         return (
           <button
             key={opt.key}
+            type="button"
             onClick={() => onChange?.(opt.key)}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 ${
               active

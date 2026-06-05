@@ -50,6 +50,7 @@ export default function DetailForum() {
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
         <button
+          type="button"
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-body-sm font-medium text-graphite hover:text-deep-slate transition-colors"
         >

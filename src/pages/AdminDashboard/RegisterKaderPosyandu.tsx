@@ -1,5 +1,5 @@
 import { Form, Input, Select, Modal } from "antd";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import DataTable from "../../components/ui/DataTable";
 import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
@@ -153,7 +153,7 @@ export default function RegisterKaderPosyandu() {
     setIsModalVisible(true);
   };
 
-  const rows = useMemo(() => kaderData ?? [], [kaderData]);
+  const rows = kaderData ?? [];
   const stats = [
     { label: "Total Kader", value: rows.length },
     {
@@ -259,13 +259,13 @@ export default function RegisterKaderPosyandu() {
     form.resetFields();
   };
 
-  const filteredKaderData = useMemo(() => {
+  const filteredKaderData = (() => {
     let data = rows;
     if (statusFilter !== null) {
       data = data.filter((r) => normalizeStatus(r.status) === statusFilter);
     }
     return data;
-  }, [rows, statusFilter]);
+  })();
 
   return (
     <div>

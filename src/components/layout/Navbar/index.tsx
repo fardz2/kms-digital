@@ -90,7 +90,9 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(
+    () => typeof window !== 'undefined' && window.scrollY > 8
+  );
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const toast = useToast();
   const { user, role, logout } = useSession();
@@ -98,7 +100,6 @@ export default function NavbarComp({ isLogin }: { isLogin?: boolean }) {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);

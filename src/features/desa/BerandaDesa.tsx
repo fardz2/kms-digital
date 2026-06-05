@@ -21,7 +21,11 @@ export default function BerandaDesa() {
     if (hash === '#acara') {
       const el = document.getElementById('acara');
       if (el) {
-        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        const timer = setTimeout(
+          () => el.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+          100
+        );
+        return () => clearTimeout(timer);
       }
     }
   }, [hash]);

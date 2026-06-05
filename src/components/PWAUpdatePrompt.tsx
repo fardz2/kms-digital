@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from 'antd';
 import { RefreshCw } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export default function PWAUpdatePrompt() {
-  const [showReload, setShowReload] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -19,11 +19,7 @@ export default function PWAUpdatePrompt() {
     },
   });
 
-  useEffect(() => {
-    if (needRefresh) setShowReload(true);
-  }, [needRefresh]);
-
-  if (!showReload) return null;
+  if (!needRefresh || dismissed) return null;
 
   const handleReload = () => {
     updateServiceWorker(true);
@@ -31,7 +27,7 @@ export default function PWAUpdatePrompt() {
 
   const handleDismiss = () => {
     setNeedRefresh(false);
-    setShowReload(false);
+    setDismissed(true);
   };
 
   return (
