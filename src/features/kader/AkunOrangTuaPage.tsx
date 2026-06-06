@@ -152,7 +152,7 @@ export default function AkunOrangTuaPage() {
         className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[25px]"
         data-tour-id="kader-akunortu-table"
       >
-        <div data-tour-id="kader-akunortu-tabs" className="flex gap-[8px] border-b border-light-ash">
+        <div data-tour-id="kader-akunortu-tabs" className="flex gap-[8px] border-b border-light-ash overflow-x-auto">
           {TABS.map((t) => {
             const active = t.key === tab;
             const count =
@@ -162,7 +162,7 @@ export default function AkunOrangTuaPage() {
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className={`px-[17px] py-[13px] text-body-sm font-semibold transition-colors border-b-2 -mb-px ${
+                className={`px-[17px] py-[13px] text-body-sm font-semibold transition-colors border-b-2 -mb-px whitespace-nowrap ${
                   active
                     ? 'text-primary-600 border-primary-500'
                     : 'text-graphite border-transparent hover:text-deep-slate'

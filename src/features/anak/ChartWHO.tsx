@@ -136,7 +136,7 @@ function buildAgeDatasets(genderRef, dataPoints) {
   ];
 }
 
-function ageChartOptions(yLabel, unit, shortLabel) {
+function ageChartOptions(yLabel, unit, shortLabel, xTickLimit) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -147,7 +147,7 @@ function ageChartOptions(yLabel, unit, shortLabel) {
       },
       x: {
         title: { display: true, text: 'Umur (Bulan)', font: { size: 14 } },
-        ticks: { maxTicksLimit: 61, font: { size: 12 } },
+        ticks: { maxTicksLimit: xTickLimit, autoSkip: true, font: { size: 12 } },
         min: 0,
         max: 60,
       },
@@ -175,6 +175,10 @@ function ageChartOptions(yLabel, unit, shortLabel) {
 
 export default function ChartWHO({ anak, pengukuran }) {
   const [tab, setTab] = useState('BB');
+
+  const isMobile =
+    typeof window !== 'undefined' && window.innerWidth < 640;
+  const xTickLimit = isMobile ? 12 : 61;
 
   const gender = anak?.gender;
   const tanggalLahir = anak?.tanggal_lahir;
@@ -206,15 +210,15 @@ export default function ChartWHO({ anak, pengukuran }) {
   const charts = {
     BB: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refBB, dataBB) },
-      options: ageChartOptions('Berat Badan', 'kg', 'Berat'),
+      options: ageChartOptions('Berat Badan', 'kg', 'Berat', xTickLimit),
     },
     TB: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refTB, dataTB) },
-      options: ageChartOptions('Tinggi Badan', 'cm', 'Tinggi'),
+      options: ageChartOptions('Tinggi Badan', 'cm', 'Tinggi', xTickLimit),
     },
     LK: {
       data: { labels: MONTH_LABELS, datasets: buildAgeDatasets(refLK, dataLK) },
-      options: ageChartOptions('Lingkar Kepala', 'cm', 'Lingkar Kepala'),
+      options: ageChartOptions('Lingkar Kepala', 'cm', 'Lingkar Kepala', xTickLimit),
     },
     Gizi: {
       data: { labels: pbLabels, datasets: buildAgeDatasets(refGizi, dataGizi) },
@@ -228,7 +232,7 @@ export default function ChartWHO({ anak, pengukuran }) {
           },
           x: {
             title: { display: true, text: 'Panjang Badan (cm)', font: { size: 14 } },
-            ticks: { maxTicksLimit: 61, font: { size: 12 } },
+            ticks: { maxTicksLimit: xTickLimit, autoSkip: true, font: { size: 12 } },
             min: 45,
             max: 110,
           },
@@ -276,7 +280,7 @@ export default function ChartWHO({ anak, pengukuran }) {
           </Button>
         ))}
       </div>
-      <div className="w-full min-h-[500px] p-[17px] bg-white border border-light-ash rounded-default">
+      <div className="w-full h-[62vw] min-h-[320px] max-h-[500px] p-[13px] sm:p-[17px] bg-white border border-light-ash rounded-default">
         <Line data={current.data} options={current.options} />
       </div>
     </div>

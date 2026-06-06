@@ -1,3 +1,5 @@
+import { paginationRange } from '../../../utils/paginationRange';
+
 function PageButton({ children, className = '', active = false, ...rest }) {
   const base = 'relative inline-flex items-center justify-center min-w-[40px] h-[40px] px-[13px] text-body-sm font-medium transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed';
   const styles = active
@@ -21,7 +23,7 @@ export default function DataTablePagination({
   const canNext = table.getCanNextPage();
 
   return (
-    <div className="pt-[17px] flex items-center justify-between gap-4 flex-wrap">
+    <div className="pt-[17px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-[13px]">
       <div className="flex gap-[17px] items-center">
         <span className="text-body-sm text-graphite">
           Halaman <span className="font-semibold text-deep-slate">{pageIndex + 1}</span> dari{' '}
@@ -43,7 +45,7 @@ export default function DataTablePagination({
         </label>
       </div>
       <nav
-        className="inline-flex items-center gap-1 rounded-default border border-light-ash overflow-hidden bg-white"
+        className="inline-flex items-center gap-1 rounded-default border border-light-ash overflow-x-auto bg-white max-w-full"
         aria-label="Pagination"
       >
         <PageButton
@@ -60,16 +62,28 @@ export default function DataTablePagination({
         >
           <span className="sr-only">Previous</span>‹
         </PageButton>
-        {Array.from({ length: pageCount }, (_, index) => (
-          <PageButton
-            key={index}
-            onClick={() => table.setPageIndex(index)}
-            active={pageIndex === index}
-            className="border-r border-light-ash rounded-none last-of-type:border-r-0"
-          >
-            {index + 1}
-          </PageButton>
-        ))}
+        {paginationRange(pageIndex + 1, Math.max(pageCount, 1)).map((item, idx) =>
+          item === '...' ? (
+            <span
+              key={`dots-${idx}`}
+              className="inline-flex items-center justify-center min-w-[40px] h-[40px] text-body-sm text-graphite select-none"
+              aria-hidden
+            >
+              …
+            </span>
+          ) : (
+            <PageButton
+              key={item}
+              onClick={() => table.setPageIndex(item - 1)}
+              active={pageIndex === item - 1}
+              aria-current={pageIndex === item - 1 ? 'page' : undefined}
+              aria-label={`Halaman ${item}`}
+              className="border-r border-light-ash rounded-none last-of-type:border-r-0"
+            >
+              {item}
+            </PageButton>
+          )
+        )}
         <PageButton
           onClick={() => table.nextPage()}
           disabled={!canNext}

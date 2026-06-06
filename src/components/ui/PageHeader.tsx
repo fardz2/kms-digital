@@ -27,7 +27,7 @@ export default function PageHeader({
   return (
     <header className="relative" data-tour-id={dataTourId}>
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] pt-[33px] md:pt-[50px] pb-[25px]">
-        <div className="flex items-start justify-between gap-[17px] flex-wrap">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-[17px]">
           <div className="min-w-0 flex-1">
             {topLine && (
               <p className="inline-flex items-center gap-[10px] text-caption font-bold uppercase tracking-[0.14em] text-primary-600 mb-[13px]">
@@ -50,7 +50,7 @@ export default function PageHeader({
             )}
           </div>
           {(search || action) && (
-            <div className="flex items-center gap-[13px] shrink-0 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-[13px] w-full md:w-auto md:shrink-0">
               {search && <div className="w-full md:w-auto">{search}</div>}
               {action}
             </div>
