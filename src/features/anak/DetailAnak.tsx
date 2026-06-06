@@ -1,8 +1,8 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
@@ -16,6 +16,7 @@ import { useSession } from '../auth/useSession';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import RiwayatCard from './RiwayatCard';
 import ErrorState from '../../components/ui/ErrorState';
+import { printElementToPdf } from '../../utils/printElementToPdf';
 const ChartWHO = lazy(() => import('./ChartWHO'));
 
 export default function DetailAnak() {
@@ -32,6 +33,24 @@ export default function DetailAnak() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  const printRef = useRef<HTMLDivElement>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const hasPengukuran = !!pengukuran && pengukuran.length > 0;
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsPrinting(true);
+      const filename = `Kartu-KMS-${(anak?.nama ?? 'anak').replace(/\s+/g, '-')}-${dayjs().format('YYYY-MM-DD')}.pdf`;
+      await printElementToPdf(printRef.current, filename);
+      toast.success('Kartu KMS PDF berhasil dibuat');
+    } catch {
+      toast.error('Gagal membuat PDF');
+    } finally {
+      setIsPrinting(false);
+    }
+  };
 
   const canEdit = role === 'KADER_POSYANDU';
 
@@ -99,6 +118,20 @@ export default function DetailAnak() {
             />
           )}
 
+          {hasPengukuran && (
+            <Button
+              variant="secondary"
+              size="sm"
+              leadingIcon={<Printer size={16} strokeWidth={1.75} />}
+              onClick={handleDownloadPdf}
+              loading={isPrinting}
+              disabled={isPrinting || anakLoading}
+              className="mb-4 ml-2"
+            >
+              Unduh Kartu KMS (PDF)
+            </Button>
+          )}
+
           {canEdit && (
             <Button
               variant="primary"
@@ -110,50 +143,62 @@ export default function DetailAnak() {
             </Button>
           )}
 
-          <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
-            Riwayat Pengukuran
-          </h2>
-
-          {pengukuranLoading && !pengukuranError && (
-            <div className="text-neutral-500 py-6">Memuat...</div>
-          )}
-
-          {!pengukuranLoading && !pengukuranError && (!pengukuran || pengukuran.length === 0) && (
-            <div className="p-[33px] text-center bg-white border border-light-ash rounded-default text-body-sm text-graphite">
-              Belum ada data pengukuran
+          <div ref={printRef} className="bg-white p-[17px]">
+            <div className="mb-[17px]">
+              <h1 className="text-heading font-bold text-deep-slate">
+                {anak?.nama ?? '-'}
+              </h1>
+              <p className="text-body-sm text-graphite">
+                {umur != null ? `${umur} bulan · ` : ''}
+                {anak?.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}
+              </p>
             </div>
-          )}
 
-          <div data-tour-id="anak-detail-riwayat" className="flex flex-col gap-3 mb-10">
-            {(pengukuran ?? [])
-              .toSorted((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
-              .map((p) => (
-                <RiwayatCard
-                  key={p.id}
-                  pengukuran={p}
-                  canEdit={canEdit}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))}
-          </div>
+            <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
+              Riwayat Pengukuran
+            </h2>
 
-          {pengukuran && pengukuran.length > 0 && (
-            <>
-              <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
-                Grafik Pertumbuhan (WHO)
-              </h2>
-              <div data-tour-id="anak-detail-chart">
-                <Suspense
-                  fallback={
-                    <div className="h-[300px] bg-polar-mist animate-pulse rounded-default" />
-                  }
-                >
-                  <ChartWHO anak={anak} pengukuran={pengukuran} />
-                </Suspense>
+            {pengukuranLoading && !pengukuranError && (
+              <div className="text-neutral-500 py-6">Memuat...</div>
+            )}
+
+            {!pengukuranLoading && !pengukuranError && (!pengukuran || pengukuran.length === 0) && (
+              <div className="p-[33px] text-center bg-white border border-light-ash rounded-default text-body-sm text-graphite">
+                Belum ada data pengukuran
               </div>
-            </>
-          )}
+            )}
+
+            <div data-tour-id="anak-detail-riwayat" className="flex flex-col gap-3 mb-10">
+              {(pengukuran ?? [])
+                .toSorted((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+                .map((p) => (
+                  <RiwayatCard
+                    key={p.id}
+                    pengukuran={p}
+                    canEdit={canEdit}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+            </div>
+
+            {pengukuran && pengukuran.length > 0 && (
+              <>
+                <h2 className="text-heading font-semibold text-deep-slate mb-[17px]">
+                  Grafik Pertumbuhan (WHO)
+                </h2>
+                <div data-tour-id="anak-detail-chart">
+                  <Suspense
+                    fallback={
+                      <div className="h-[300px] bg-polar-mist animate-pulse rounded-default" />
+                    }
+                  >
+                    <ChartWHO anak={anak} pengukuran={pengukuran} />
+                  </Suspense>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <PengukuranForm

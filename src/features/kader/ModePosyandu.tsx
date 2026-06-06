@@ -47,6 +47,9 @@ export default function ModePosyandu() {
     semua: balitaWithMeta.length,
     belum: balitaWithMeta.filter((x) => !x.meta.sudahDiukur).length,
     perhatian: balitaWithMeta.filter((x) => x.meta.perluPerhatian).length,
+    stunting: balitaWithMeta.filter((x) => x.meta.status === 'stunting').length,
+    kurang: balitaWithMeta.filter((x) => x.meta.status === 'kurang').length,
+    obesitas: balitaWithMeta.filter((x) => x.meta.status === 'obesitas').length,
   };
 
   const filtered = (() => {
@@ -56,6 +59,9 @@ export default function ModePosyandu() {
         if (q && !(anak.nama ?? '').toLowerCase().includes(q)) return false;
         if (filter === 'belum') return !meta.sudahDiukur;
         if (filter === 'perhatian') return meta.perluPerhatian;
+        if (filter === 'stunting' || filter === 'kurang' || filter === 'obesitas') {
+          return meta.status === filter;
+        }
         return true;
       })
       .sort((a, b) => {

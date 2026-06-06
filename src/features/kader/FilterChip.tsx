@@ -4,6 +4,9 @@ const OPTIONS = [
   { key: 'semua', label: 'Semua' },
   { key: 'belum', label: 'Belum diukur' },
   { key: 'perhatian', label: '\u26A0 Perhatian' },
+  { key: 'stunting', label: 'Stunting' },
+  { key: 'kurang', label: 'Kurang' },
+  { key: 'obesitas', label: 'Obesitas' },
 ];
 
 const EMPTY_COUNTS = {};
