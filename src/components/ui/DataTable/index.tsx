@@ -91,8 +91,8 @@ export default function DataTable({
         />
       )}
 
-      <div className="overflow-x-auto">
-        <div className="rounded-default border border-light-ash bg-white shadow-card overflow-hidden">
+      <div className="rounded-default border border-light-ash bg-white shadow-card overflow-hidden">
+        <div className="overflow-x-auto table-scroll-shadow">
           <table className="w-full">
             <thead className="bg-gradient-to-b from-polar-mist to-polar-mist/60 border-b-2 border-primary-500">
               {table.getHeaderGroups().map((headerGroup) => (
