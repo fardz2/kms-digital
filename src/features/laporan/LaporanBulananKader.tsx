@@ -21,12 +21,13 @@ import { pengukuranApi } from '../../api/pengukuran.api';
 import { useSession } from '../auth/useSession';
 import { qk } from '../../queries/keys';
 import { aggregateKaderLaporan } from './aggregateKader';
+import ErrorState from '../../components/ui/ErrorState';
 
 export default function LaporanBulananKader() {
   const navigate = useNavigate();
   const [bulan, setBulan] = useState(() => dayjs().format('YYYY-MM'));
   const { role } = useSession();
-  const { data: anakList, isLoading: anakLoading } = useAnakList();
+  const { data: anakList, isLoading: anakLoading, isError: anakError, refetch: refetchAnak } = useAnakList();
 
   const pengukuranQueries = useQueries({
     queries: (anakList ?? []).map((anak) => ({
@@ -40,6 +41,12 @@ export default function LaporanBulananKader() {
   });
 
   const isFetchingPengukuran = pengukuranQueries.some((q) => q.isLoading);
+
+  const isError = anakError || pengukuranQueries.some((q) => q.isError);
+  const refetchAll = () => {
+    refetchAnak();
+    pengukuranQueries.forEach((q) => q.refetch());
+  };
 
   const pengukuranByAnak = {};
   (anakList ?? []).forEach((anak, idx) => {
@@ -77,7 +84,9 @@ export default function LaporanBulananKader() {
           <MonthPicker value={bulan} onChange={setBulan} />
         </div>
 
-        {isLoading ? (
+        {isError && <ErrorState onRetry={refetchAll} />}
+
+        {!isError && (isLoading ? (
           <div className="space-y-[17px]">
             <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[17px]">
               <div className="h-[100px] bg-polar-mist animate-pulse rounded-default" />
@@ -171,7 +180,7 @@ export default function LaporanBulananKader() {
               )}
             </Card>
           </>
-        )}
+        ))}
       </div>
     </div>
   );
