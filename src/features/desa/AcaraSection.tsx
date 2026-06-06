@@ -113,8 +113,8 @@ export default function AcaraSection() {
               key={acara.id}
               className="p-[17px] bg-polar-mist rounded-default flex justify-between items-center gap-[13px]"
             >
-              <div>
-                <div className="text-body-sm font-semibold text-deep-slate">
+              <div className="min-w-0">
+                <div className="text-body-sm font-semibold text-deep-slate break-words">
                   {acara.judul}
                 </div>
                 <div className="text-caption text-neutral-500">
@@ -122,12 +122,13 @@ export default function AcaraSection() {
                     ? dayjs(acara.tanggal_reminder).format('DD MMMM YYYY')
                     : '-'}
                 </div>
-                {acara.deskripsi && <div className="text-base mt-1">{acara.deskripsi}</div>}
+                {acara.deskripsi && <div className="text-base mt-1 break-words">{acara.deskripsi}</div>}
               </div>
               <Button
                 variant="danger"
                 size="sm"
                 onClick={() => handleDelete(acara.id, acara.judul)}
+                className="shrink-0"
               >
                 Hapus
               </Button>

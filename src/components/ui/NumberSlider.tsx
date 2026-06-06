@@ -64,7 +64,7 @@ export default function NumberSlider({
         >
           <Minus size={24} strokeWidth={2} />
         </button>
-        <span className="text-caption text-graphite">Geser atau tap</span>
+        <span className="hidden min-[360px]:inline text-caption text-graphite">Geser atau tap</span>
         <button
           type="button"
           onClick={inc}
