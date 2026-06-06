@@ -42,7 +42,7 @@ export default function ArtikelDetailPage() {
           </div>
         ) : (
           <div
-            className="bg-white p-[25px] rounded-default border border-light-ash text-base text-deep-slate leading-relaxed"
+            className="bg-white p-[25px] rounded-default border border-light-ash text-base text-deep-slate leading-relaxed overflow-x-auto break-words [&_img]:max-w-full [&_img]:h-auto"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
           />
         )}
