@@ -138,4 +138,34 @@ describe('aggregateKaderLaporan', () => {
     expect(r.distribusi.normal).toBe(0);
     expect(r.perluPerhatian).toEqual([]);
   });
+
+  test('perluPerhatian pakai pengukuran terakhir kapan saja, walau belum diukur bulan terpilih', () => {
+    const r = aggregateKaderLaporan({
+      anakList: [anakB],
+      pengukuranByAnak: {
+        2: [{ date: '2026-04-10', z_score_tinggi: -3.5 }],
+      },
+      bulan: '2026-05',
+    });
+    // belum diukur bulan ini
+    expect(r.sudahDiukur).toBe(0);
+    expect(r.belumDiukur).toBe(1);
+    // tapi status historis stunting tetap muncul di perluPerhatian
+    expect(r.perluPerhatian).toHaveLength(1);
+    expect(r.perluPerhatian[0].status).toBe('stunting');
+  });
+
+  test('perluPerhatian pakai pengukuran terbaru lintas-bulan (membaik -> tidak muncul)', () => {
+    const r = aggregateKaderLaporan({
+      anakList: [anakC],
+      pengukuranByAnak: {
+        3: [
+          { date: '2026-03-01', z_score_tinggi: -3.5 },
+          { date: '2026-05-20', z_score_tinggi: 0, z_score_berat: 0, z_score_lingkar_kepala: 0, z_score_gizi: 0 },
+        ],
+      },
+      bulan: '2026-05',
+    });
+    expect(r.perluPerhatian).toEqual([]);
+  });
 });

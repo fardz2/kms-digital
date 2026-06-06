@@ -39,17 +39,25 @@ export function aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan }) {
         ? dayjs().diff(dayjs(anak.tanggal_lahir), 'month')
         : null;
       belumDiukurList.push({ id: anak.id, nama: anak.nama, umurBulan });
-      return;
+    } else {
+      sudahDiukur += 1;
+      const latest = inBulan.reduce((a, b) =>
+        (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
+      );
+      const status = computePengukuranStatus(latest);
+      if (distribusi[status] != null) distribusi[status] += 1;
     }
 
-    sudahDiukur += 1;
-    const latest = inBulan.reduce((a, b) =>
-      (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
-    );
-    const status = computePengukuranStatus(latest);
-    if (distribusi[status] != null) distribusi[status] += 1;
-    if (status !== STATUS.NORMAL && status !== STATUS.UNKNOWN) {
-      perluPerhatian.push({ id: anak.id, nama: anak.nama, status });
+    // "Perlu Perhatian" memakai pengukuran TERAKHIR kapan saja (konsisten
+    // dengan halaman /kader/balita), bukan hanya bulan terpilih.
+    if (pengukuran.length > 0) {
+      const latestEver = pengukuran.reduce((a, b) =>
+        (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
+      );
+      const statusEver = computePengukuranStatus(latestEver);
+      if (statusEver !== STATUS.NORMAL && statusEver !== STATUS.UNKNOWN) {
+        perluPerhatian.push({ id: anak.id, nama: anak.nama, status: statusEver });
+      }
     }
   });
 
