@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
+import { useSidebarCollapsed } from "../../../hooks/useSidebarCollapsed";
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(

@@ -6,7 +6,7 @@ import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { SkeletonText } from '../../components/ui/Skeleton';
 import { useArtikelDetail } from '../../queries/useArtikelQueries';
-import { sanitizeHtml } from '../../utilities/sanitize';
+import { sanitizeHtml } from '../../utils/sanitize';
 
 export default function ArtikelDetailPage() {
   const { id } = useParams();

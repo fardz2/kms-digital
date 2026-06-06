@@ -8,7 +8,7 @@ import { useToast } from "../../ui/Toast";
 import ProfileModal from "../../ui/ProfileModal";
 import { readSession } from "../../../features/auth/session-storage";
 import { useSession } from "../../../features/auth/useSession";
-import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
+import { useSidebarCollapsed } from "../../../hooks/useSidebarCollapsed";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
 import { useTourContext } from "../../../features/tour/TourProvider";
 import { isMobileViewport } from "../../../utils/isMobileViewport";

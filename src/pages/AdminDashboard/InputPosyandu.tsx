@@ -6,7 +6,7 @@ import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { isThisMonth } from "../../utilities/isThisMonth";
+import { isThisMonth } from "../../utils/isThisMonth";
 import { useToast } from "../../components/ui/Toast";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";

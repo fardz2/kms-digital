@@ -15,8 +15,8 @@ import InlineStatBar from "../../components/ui/InlineStatBar";
 import FormUpdateDataArtikel from "../../components/form/FormUpdateDataArtikel";
 import { useToast } from "../../components/ui/Toast";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
-import { formatDate2 } from "../../utilities/Format";
-import { isThisMonth, isWithinDays } from "../../utilities/isThisMonth";
+import { formatDate2 } from "../../utils/Format";
+import { isThisMonth, isWithinDays } from "../../utils/isThisMonth";
 import { artikelApi } from "../../api/artikel.api";
 import { useSession } from "../../features/auth/useSession";
 
