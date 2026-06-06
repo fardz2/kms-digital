@@ -31,3 +31,13 @@ body {
   background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
   background-attachment: local, local, scroll, scroll;
 }
+
+@media (max-width: 575px) {
+  .ant-modal {
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+  }
+  .ant-modal-content {
+    padding: 18px;
+  }
+}
