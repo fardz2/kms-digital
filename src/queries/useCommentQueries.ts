@@ -38,10 +38,32 @@ export function useCommentList(postId: number | string | undefined) {
 
 export function useCreateComment() {
   const qc = useQueryClient();
+  const { user } = useSession();
   return useMutation({
     mutationFn: (payload: CreateCommentPayload) => commentApi.create(payload),
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: qk.comment.byPost(variables.post_id) });
+    onMutate: async (payload: CreateCommentPayload) => {
+      const key = qk.comment.byPost(payload.post_id);
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<Comment[]>(key);
+      const optimistic: Comment = {
+        comment_id: `temp-${Date.now()}` as unknown as number,
+        user_id: payload.user_id as number,
+        post_id: payload.post_id as number,
+        content: payload.content,
+        nama: user?.name,
+        role: user?.role,
+        time: new Date().toISOString(),
+      };
+      qc.setQueryData<Comment[]>(key, (old) => [optimistic, ...(old ?? [])]);
+      return { previous, key };
+    },
+    onError: (_err, _payload, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(ctx.key, ctx.previous);
+      }
+    },
+    onSettled: (_data, _err, payload) => {
+      qc.invalidateQueries({ queryKey: qk.comment.byPost(payload.post_id) });
     },
   });
 }
