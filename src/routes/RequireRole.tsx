@@ -17,7 +17,11 @@ export default function RequireRole({ allow, children }: RequireRoleProps) {
     return <Navigate to="/masuk" state={{ from: location }} replace />;
   }
 
-  if (allow && allow.length > 0 && role && !allow.includes(role)) {
+  if (!role) {
+    return <Navigate to="/masuk" state={{ from: location }} replace />;
+  }
+
+  if (allow && allow.length > 0 && !allow.includes(role)) {
     const home = ROLE_HOME[role] ?? '/';
     return <Navigate to={home} replace />;
   }
