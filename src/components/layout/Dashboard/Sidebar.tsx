@@ -11,6 +11,7 @@ import { useSession } from "../../../features/auth/useSession";
 import { useSidebarCollapsed } from "../../../hook/useSidebarCollapsed";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
 import { useTourContext } from "../../../features/tour/TourProvider";
+import { isMobileViewport } from "../../../utils/isMobileViewport";
 
 function isLinkActive(pathname, link) {
   const basePath = "/admin/dashboard";
@@ -29,6 +30,10 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
   const { logout } = useSession();
   const session = readSession();
   const { collapsed, toggle } = useSidebarCollapsed();
+
+  const handleNavClick = () => {
+    if (isMobileViewport()) closeSidebar();
+  };
 
   const handleLogout = () => {
     confirm({
@@ -141,6 +146,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                         icon={<link.icon size={20} strokeWidth={1.75} />}
                         title={link.title}
                         dropdown={link.dropdown}
+                        onNavigate={handleNavClick}
                       />
                     ) : null;
                   }
@@ -164,7 +170,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                   if (collapsed) {
                     return (
                       <Tooltip key={link.path} title={link.title} placement="right">
-                        <Link to={target} className={classes}>
+                        <Link to={target} className={classes} onClick={handleNavClick}>
                           {iconEl}
                         </Link>
                       </Tooltip>
@@ -172,7 +178,7 @@ export default function Sidebar({ showSidebar, closeSidebar }) {
                   }
 
                   return (
-                    <Link key={link.path} to={target} className={classes}>
+                    <Link key={link.path} to={target} className={classes} onClick={handleNavClick}>
                       {iconEl}
                       {link.title}
                     </Link>
