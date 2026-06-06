@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
 
-export function monthDiff(start: any, end: any): number {
-  return Math.abs(dayjs(end).diff(dayjs(start), 'month'));
+export function monthDiff(
+  start: dayjs.ConfigType,
+  end: dayjs.ConfigType,
+): number {
+  return dayjs(end).diff(dayjs(start), 'month');
 }
