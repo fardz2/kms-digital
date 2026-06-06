@@ -42,7 +42,20 @@ export function useApproveOrangTua() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id) => approveApi.approveOrangTua(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: qk.approve.orangTua });
+      const previous = qc.getQueryData(qk.approve.orangTua);
+      qc.setQueryData(qk.approve.orangTua, (old) =>
+        Array.isArray(old) ? old.filter((x) => x.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(qk.approve.orangTua, ctx.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: qk.approve.orangTua });
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
@@ -53,7 +66,20 @@ export function useApproveAnak() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id) => approveApi.approveAnak(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: qk.approve.anak });
+      const previous = qc.getQueryData(qk.approve.anak);
+      qc.setQueryData(qk.approve.anak, (old) =>
+        Array.isArray(old) ? old.filter((x) => x.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(qk.approve.anak, ctx.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: qk.approve.anak });
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
@@ -64,7 +90,20 @@ export function useRejectOrangTua() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id) => approveApi.rejectOrangTua(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.approve.orangTua }),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: qk.approve.orangTua });
+      const previous = qc.getQueryData(qk.approve.orangTua);
+      qc.setQueryData(qk.approve.orangTua, (old) =>
+        Array.isArray(old) ? old.filter((x) => x.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(qk.approve.orangTua, ctx.previous);
+      }
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: qk.approve.orangTua }),
   });
 }
 
@@ -72,7 +111,20 @@ export function useRejectAnak() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id) => approveApi.rejectAnak(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: qk.approve.anak });
+      const previous = qc.getQueryData(qk.approve.anak);
+      qc.setQueryData(qk.approve.anak, (old) =>
+        Array.isArray(old) ? old.filter((x) => x.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(qk.approve.anak, ctx.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: qk.approve.anak });
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
