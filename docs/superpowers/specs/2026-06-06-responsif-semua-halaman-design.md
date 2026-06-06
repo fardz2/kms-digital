@@ -50,6 +50,14 @@ di-scroll horizontal, agar user tahu ada kolom tersembunyi.
 Lebar penuh dengan margin di HP, lebar tetap di desktop. Diterapkan konsisten
 pada Modal form admin dan forum.
 
+### 5. Header: tombol aksi turun ke bawah di HP
+Pada `PageHeader` (`src/components/ui/PageHeader.tsx`) dan `PosyanduHeader`
+(`src/features/kader/PosyanduHeader.tsx`), saat ini tombol aksi sejajar di
+kanan judul. Di HP tombol harus turun penuh ke bawah judul (susun vertikal /
+sebaris rapi di bawah), dan tetap sejajar kanan di desktop. Ubah container
+aksi: `flex-col` di HP lalu `md:flex-row md:items-start md:justify-end`, dan
+judul mengambil lebar penuh di HP (`w-full md:flex-1`). Tidak full-width tombol.
+
 ## Audit menyeluruh
 
 Periksa manual setiap halaman pada 320/375/768px:
