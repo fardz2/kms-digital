@@ -7,10 +7,11 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { SkeletonCard } from '../../components/ui/Skeleton';
 import { useArtikelList } from '../../queries/useArtikelQueries';
+import ErrorState from '../../components/ui/ErrorState';
 
 export default function ArtikelList() {
   const navigate = useNavigate();
-  const { data: artikel, isLoading } = useArtikelList();
+  const { data: artikel, isLoading, isError, error, refetch } = useArtikelList();
 
   return (
     <div className="min-h-screen bg-faint-fog">
@@ -30,7 +31,9 @@ export default function ArtikelList() {
           Kembali
         </Button>
 
-        {isLoading && (
+        {isError && <ErrorState onRetry={() => refetch()} error={error} />}
+
+        {isLoading && !isError && (
           <div className="flex flex-col gap-[13px]">
             <SkeletonCard lines={2} />
             <SkeletonCard lines={2} />
@@ -38,7 +41,7 @@ export default function ArtikelList() {
           </div>
         )}
 
-        {!isLoading && (!artikel || artikel.length === 0) && (
+        {!isLoading && !isError && (!artikel || artikel.length === 0) && (
           <Card>
             <div className="flex flex-col items-center gap-[13px] py-[25px] text-graphite">
               <BookOpen size={32} strokeWidth={1.75} />

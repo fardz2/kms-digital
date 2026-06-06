@@ -17,12 +17,13 @@ import {
 } from '../../queries/useApproveQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import ErrorState from '../../components/ui/ErrorState';
 
 export default function ModePosyandu() {
   const navigate = useNavigate();
   const { user, logout } = useSession();
   const confirm = useConfirmDialog();
-  const { anakList, pengukuranByAnak, isLoading } = usePengukuranBulananKader();
+  const { anakList, pengukuranByAnak, isLoading, isError, refetch } = usePengukuranBulananKader();
   const [filter, setFilter] = useState('semua');
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
@@ -150,9 +151,11 @@ export default function ModePosyandu() {
           </div>
         </div>
 
-        {isLoading && <SkeletonList count={3} />}
+        {isError && <ErrorState onRetry={() => refetch()} />}
 
-        {!isLoading && filtered.length === 0 && (
+        {isLoading && !isError && <SkeletonList count={3} />}
+
+        {!isLoading && !isError && filtered.length === 0 && (
           <div className="text-center py-[50px] text-body-sm text-graphite">
             {balitaWithMeta.length === 0
               ? 'Belum ada data balita. Tambah balita baru di tombol bawah.'

@@ -10,6 +10,7 @@ import { useSession } from '../auth/useSession';
 import { useAnakList } from '../../queries/useAnakQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import { SkeletonList } from '../../components/ui/Skeleton';
+import ErrorState from '../../components/ui/ErrorState';
 
 function QuickLink({ Icon, title, desc, onClick }) {
   return (
@@ -33,7 +34,7 @@ function QuickLink({ Icon, title, desc, onClick }) {
 export default function BerandaOT() {
   const navigate = useNavigate();
   const { user } = useSession();
-  const { data: anakList, isLoading, refetch } = useAnakList();
+  const { data: anakList, isLoading, isError, error, refetch } = useAnakList();
   const [formOpen, setFormOpen] = useState(false);
 
   return (
@@ -67,9 +68,11 @@ export default function BerandaOT() {
             </Button>
           </div>
 
-          {isLoading && <SkeletonList count={2} />}
+          {isError && <ErrorState onRetry={() => refetch()} error={error} />}
 
-          {!isLoading && (!anakList || anakList.length === 0) && (
+          {isLoading && !isError && <SkeletonList count={2} />}
+
+          {!isLoading && !isError && (!anakList || anakList.length === 0) && (
             <Card>
               <div className="text-center py-[33px] space-y-[13px]">
                 <p className="text-body-sm text-graphite">

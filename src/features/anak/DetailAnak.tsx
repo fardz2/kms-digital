@@ -15,6 +15,7 @@ import {
 import { useSession } from '../auth/useSession';
 import PengukuranForm from '../pengukuran/PengukuranForm';
 import RiwayatCard from './RiwayatCard';
+import ErrorState from '../../components/ui/ErrorState';
 const ChartWHO = lazy(() => import('./ChartWHO'));
 
 export default function DetailAnak() {
@@ -25,8 +26,8 @@ export default function DetailAnak() {
   const confirm = useConfirmDialog();
   const { role } = useSession();
 
-  const { data: anak, isLoading: anakLoading } = useAnakDetail(id);
-  const { data: pengukuran, isLoading: pengukuranLoading } = usePengukuranAnak(id);
+  const { data: anak, isLoading: anakLoading, isError: anakError, refetch: refetchAnak } = useAnakDetail(id);
+  const { data: pengukuran, isLoading: pengukuranLoading, isError: pengukuranError, refetch: refetchPengukuran } = usePengukuranAnak(id);
   const deleteMutation = useDeletePengukuran(id);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -89,6 +90,15 @@ export default function DetailAnak() {
             Kembali
           </Button>
 
+          {(anakError || pengukuranError) && (
+            <ErrorState
+              onRetry={() => {
+                refetchAnak();
+                refetchPengukuran();
+              }}
+            />
+          )}
+
           {canEdit && (
             <Button
               variant="primary"
@@ -104,11 +114,11 @@ export default function DetailAnak() {
             Riwayat Pengukuran
           </h2>
 
-          {pengukuranLoading && (
+          {pengukuranLoading && !pengukuranError && (
             <div className="text-neutral-500 py-6">Memuat...</div>
           )}
 
-          {!pengukuranLoading && (!pengukuran || pengukuran.length === 0) && (
+          {!pengukuranLoading && !pengukuranError && (!pengukuran || pengukuran.length === 0) && (
             <div className="p-[33px] text-center bg-white border border-light-ash rounded-default text-body-sm text-graphite">
               Belum ada data pengukuran
             </div>

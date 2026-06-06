@@ -6,7 +6,12 @@ import { qk } from './keys';
 
 export function usePengukuranBulananKader() {
   const { role, isAuthenticated } = useSession();
-  const { data: anakList, isLoading: anakLoading } = useAnakList();
+  const {
+    data: anakList,
+    isLoading: anakLoading,
+    isError: anakError,
+    refetch: refetchAnak,
+  } = useAnakList();
 
   const queries = useQueries({
     queries: (anakList ?? []).map((anak) => ({
@@ -22,6 +27,13 @@ export function usePengukuranBulananKader() {
 
   const isFetchingPengukuran = queries.some((q) => q.isLoading);
 
+  const isError = anakError || queries.some((q) => q.isError);
+
+  const refetch = () => {
+    refetchAnak();
+    queries.forEach((q) => q.refetch());
+  };
+
   const pengukuranByAnak = {};
   (anakList ?? []).forEach((anak, idx) => {
     pengukuranByAnak[anak.id] = (queries[idx]?.data ?? []).toSorted((a, b) =>
@@ -33,5 +45,7 @@ export function usePengukuranBulananKader() {
     anakList: anakList ?? [],
     pengukuranByAnak,
     isLoading: anakLoading || isFetchingPengukuran,
+    isError,
+    refetch,
   };
 }

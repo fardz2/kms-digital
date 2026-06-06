@@ -7,6 +7,7 @@ import { useStatistikGiziDesa } from '../../queries/useLaporanQueries';
 import LaporanDesa from '../laporan/LaporanDesa';
 import ExportDesaForm from './ExportDesaForm';
 import AcaraSection from './AcaraSection';
+import ErrorState from '../../components/ui/ErrorState';
 
 export default function BerandaDesa() {
   const { user } = useSession();
@@ -14,7 +15,7 @@ export default function BerandaDesa() {
   const { hash } = useLocation();
 
   const idDesa = user?.id_desa;
-  const { data: statistikData } = useStatistikGiziDesa(idDesa);
+  const { data: statistikData, isError, refetch } = useStatistikGiziDesa(idDesa);
   const posyanduList = Array.isArray(statistikData) ? statistikData : [];
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function BerandaDesa() {
       />
 
       <div className="max-w-page mx-auto px-[17px] md:px-[25px] py-[33px] space-y-[33px]">
+        {isError && <ErrorState onRetry={() => refetch()} />}
         <ExportDesaForm posyanduList={posyanduList} printableRef={printableRef} />
         <LaporanDesa ref={printableRef} />
         <AcaraSection />
