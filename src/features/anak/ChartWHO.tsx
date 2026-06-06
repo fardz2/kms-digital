@@ -26,6 +26,7 @@ import bbtbPerempuan24 from '../../json/ZScoreBeratTinggiBadanPerempuan24.json';
 import bbtbPerempuan60 from '../../json/ZScoreBeratTinggiBadanPerempuan60.json';
 
 import { monthDiff } from '../../utils/monthDiff';
+import { roundPbToHalfStep } from '../pengukuran/zScore';
 
 ChartJS.register(
   CategoryScale,
@@ -53,13 +54,6 @@ function buildPbLabels(start, end) {
 const PB_LABELS_24 = buildPbLabels(45.0, 110.0);
 const PB_LABELS_60 = buildPbLabels(65.0, 110.0);
 
-function roundPb(t) {
-  const frac = t - Math.floor(t);
-  if (frac === 0.5) return t;
-  if (frac < 0.5) return Math.floor(t);
-  return Math.floor(t) + 0.5;
-}
-
 function mapDataByMonth(data, tanggalLahir, field) {
   const ageIndex = new Set(
     (data ?? []).map((it) => monthDiff(dayjs(tanggalLahir), dayjs(it.date)))
@@ -78,7 +72,7 @@ function mapDataByMonth(data, tanggalLahir, field) {
 }
 
 function mapGiziByPb(data, gender, ageAtFirst) {
-  const pbs = (data ?? []).map((it) => roundPb(Number(it.tinggi)));
+  const pbs = (data ?? []).map((it) => roundPbToHalfStep(Number(it.tinggi)));
   let ref;
   if (gender === 'LAKI_LAKI') {
     ref = ageAtFirst <= 24 ? bbtbPria24 : bbtbPria60;

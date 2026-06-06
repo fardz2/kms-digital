@@ -43,7 +43,7 @@ function findByBulan(dataset: any[], umurBulan: number) {
   return dataset.find((d: any) => d.bulan === String(umurBulan));
 }
 
-function roundPbToHalfStep(tinggi: number): number {
+export function roundPbToHalfStep(tinggi: number): number {
   const frac = tinggi - Math.floor(tinggi);
   if (frac === 0.5) return tinggi;
   if (frac < 0.5) return Math.floor(tinggi);
