@@ -8,6 +8,7 @@ export default function DropdownLink({
   icon,
   title,
   dropdown,
+  onNavigate,
 }) {
   const [isOpen, setIsOpen] = React.useState(
     basepath && pathname.includes(basepath)
@@ -47,6 +48,7 @@ export default function DropdownLink({
               <li key={item.title}>
                 <Link
                   to={item.path}
+                  onClick={onNavigate}
                   className={`flex items-center gap-3 px-[13px] py-2 rounded-default text-body-sm transition-colors ${
                     isActive
                       ? "text-primary-600 font-semibold"
