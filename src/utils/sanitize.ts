@@ -13,7 +13,7 @@ const ALLOWED_TAGS = [
 const ALLOWED_ATTR = [
   'href', 'target', 'rel',
   'src', 'alt', 'title',
-  'class', 'style',
+  'class',
 ];
 
 let hookRegistered = false;

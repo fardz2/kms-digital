@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useToast } from "../../components/ui/Toast";
 import { useSession } from "../../features/auth/useSession";
-import { isThisMonth } from "../../utilities/isThisMonth";
+import { isThisMonth } from "../../utils/isThisMonth";
 import { desaApi } from "../../api/desa.api";
 import { nakesApi } from "../../api/nakes.api";
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { sanitizeHtml } from '../../utilities/sanitize';
+import { sanitizeHtml } from '../../utils/sanitize';
 
 describe('sanitizeHtml', () => {
   test('strips script tag', () => {
@@ -44,5 +44,18 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('')).toEqual('');
     expect(sanitizeHtml(null)).toEqual('');
     expect(sanitizeHtml(undefined)).toEqual('');
+  });
+
+  test('strips style attribute', () => {
+    const dirty = '<p style="position:fixed;top:0">x</p>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).not.toContain('style=');
+    expect(clean).toContain('<p');
+  });
+
+  test('keeps class attribute', () => {
+    const dirty = '<p class="intro">x</p>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).toContain('class="intro"');
   });
 });

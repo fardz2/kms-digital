@@ -9,7 +9,7 @@ import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useToast } from "../../components/ui/Toast";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";
-import { isThisMonth } from "../../utilities/isThisMonth";
+import { isThisMonth } from "../../utils/isThisMonth";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
