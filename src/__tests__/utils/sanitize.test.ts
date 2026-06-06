@@ -45,4 +45,17 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(null)).toEqual('');
     expect(sanitizeHtml(undefined)).toEqual('');
   });
+
+  test('strips style attribute', () => {
+    const dirty = '<p style="position:fixed;top:0">x</p>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).not.toContain('style=');
+    expect(clean).toContain('<p');
+  });
+
+  test('keeps class attribute', () => {
+    const dirty = '<p class="intro">x</p>';
+    const clean = sanitizeHtml(dirty);
+    expect(clean).toContain('class="intro"');
+  });
 });
