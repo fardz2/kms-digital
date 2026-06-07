@@ -67,7 +67,7 @@ export default function ExportDesaForm({ posyanduList = EMPTY_POSYANDU_LIST, pri
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
 
-      await new Html2Pdf(printableRef.current, opt).save();
+      await new Html2Pdf(printableRef.current, opt).getPdf(true);
       toast.success('Laporan PDF berhasil dibuat');
       setIsPrinting(false);
     } catch (err) {

@@ -16,5 +16,5 @@ export async function printElementToPdf(
   const mod = await import('js-html2pdf');
   const Html2Pdf = (mod as any).default ?? mod;
   const opt = { ...DEFAULT_OPT, filename };
-  await new Html2Pdf(element, opt).save();
+  await new Html2Pdf(element, opt).getPdf(true);
 }
