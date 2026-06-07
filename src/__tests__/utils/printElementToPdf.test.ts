@@ -1,7 +1,9 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
 const saveMock = vi.fn(() => Promise.resolve());
-const html2pdfMock = vi.fn(() => ({ save: saveMock }));
+const html2pdfMock = vi.fn(function (_element: HTMLElement, _opt: { filename: string }) {
+  return { save: saveMock };
+});
 
 vi.mock('js-html2pdf', () => ({ default: html2pdfMock }));
 

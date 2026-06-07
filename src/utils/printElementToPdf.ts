@@ -14,7 +14,7 @@ export async function printElementToPdf(
   }
   // react-doctor-disable-next-line -- dynamic import() intentionally code-splits the heavy js-html2pdf lib.
   const mod = await import('js-html2pdf');
-  const html2pdf = (mod as any).default ?? mod;
+  const Html2Pdf = (mod as any).default ?? mod;
   const opt = { ...DEFAULT_OPT, filename };
-  await html2pdf(element, opt).save();
+  await new Html2Pdf(element, opt).save();
 }

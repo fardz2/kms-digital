@@ -56,7 +56,7 @@ export default function ExportDesaForm({ posyanduList = EMPTY_POSYANDU_LIST, pri
       setIsPrinting(true);
       // react-doctor-disable-next-line -- dynamic import() intentionally code-splits the heavy js-html2pdf lib; React Compiler can't lower import expressions yet, bailout is expected.
       const html2pdfModule = await import('js-html2pdf');
-      const html2pdf = html2pdfModule.default ?? html2pdfModule;
+      const Html2Pdf = html2pdfModule.default ?? html2pdfModule;
 
       const filename = `Laporan-Desa-${user?.nama_desa ?? user?.desa_name ?? 'KMS'}-${dayjs().format('YYYY-MM-DD')}.pdf`;
       const opt = {
@@ -67,7 +67,7 @@ export default function ExportDesaForm({ posyanduList = EMPTY_POSYANDU_LIST, pri
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
 
-      await html2pdf(printableRef.current, opt).save();
+      await new Html2Pdf(printableRef.current, opt).save();
       toast.success('Laporan PDF berhasil dibuat');
       setIsPrinting(false);
     } catch (err) {

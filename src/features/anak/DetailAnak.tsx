@@ -45,7 +45,8 @@ export default function DetailAnak() {
       const filename = `Kartu-KMS-${(anak?.nama ?? 'anak').replace(/\s+/g, '-')}-${dayjs().format('YYYY-MM-DD')}.pdf`;
       await printElementToPdf(printRef.current, filename);
       toast.success('Kartu KMS PDF berhasil dibuat');
-    } catch {
+    } catch (err) {
+      console.error('Kartu KMS PDF export error:', err);
       toast.error('Gagal membuat PDF');
     } finally {
       setIsPrinting(false);
