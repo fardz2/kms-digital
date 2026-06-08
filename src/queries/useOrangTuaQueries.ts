@@ -6,6 +6,7 @@ import { useSession } from '../features/auth/useSession';
 interface OrangTua {
   id: number;
   nama: string;
+  username?: string;
   email?: string;
   alamat?: string;
   status?: boolean | number | string;
@@ -18,6 +19,7 @@ interface CreateOrangTuaPayload {
   email: string;
   password: string;
   nama: string;
+  username?: string;
   alamat: string;
   status?: boolean;
   id_posyandu?: number;

@@ -63,6 +63,7 @@ export default function RegisterKaderPosyandu() {
     mutationFn: (values: Record<string, any>) =>
       kaderApi.register({
         nama: values.nama,
+        username: values.username,
         email: values.email,
         password: values.password,
         id_desa: values.desa,
@@ -83,6 +84,7 @@ export default function RegisterKaderPosyandu() {
     mutationFn: ({ id, values }: { id: number; values: Record<string, any> }) =>
       kaderApi.update(id, {
         nama: values.nama,
+        username: values.username,
         email: values.email,
         password: values.password || undefined,
         id_desa: values.desa,
@@ -145,6 +147,7 @@ export default function RegisterKaderPosyandu() {
     setSelectedUser(record);
     form.setFieldsValue({
       nama: record.nama,
+      username: record.username,
       email: record.email,
       desa: record.desa?.id,
       posyandu: record.posyandu?.id,
@@ -351,6 +354,14 @@ export default function RegisterKaderPosyandu() {
             rules={[{ required: true, message: "Nama masih kosong", type: "string" }]}
           >
             <Input placeholder="Nama Lengkap" className="h-[52px] text-base" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Username</span>}
+            name="username"
+            rules={[{ required: true, message: "Username masih kosong" }]}
+          >
+            <Input placeholder="username" className="h-[52px] text-base" />
           </Form.Item>
 
           <Form.Item

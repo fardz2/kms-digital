@@ -45,6 +45,7 @@ export default function RegisterTenagaKesehatan() {
     mutationFn: (values: Record<string, any>) =>
       nakesApi.register({
         nama: values.nama,
+        username: values.username,
         email: values.email,
         password: values.password,
         id_desa: values.desa,
@@ -212,6 +213,13 @@ export default function RegisterTenagaKesehatan() {
             rules={[{ required: true, message: "Nama masih kosong" }]}
           >
             <Input placeholder="Nama Lengkap" className="h-[52px] text-base" />
+          </Form.Item>
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Username</span>}
+            name="username"
+            rules={[{ required: true, message: "Username masih kosong" }]}
+          >
+            <Input placeholder="username" className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
             label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}

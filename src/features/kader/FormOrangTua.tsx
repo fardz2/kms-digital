@@ -35,6 +35,7 @@ export default function FormOrangTua({
     if (mode === 'edit' && initialValues) {
       form.setFieldsValue({
         nama: initialValues.nama,
+        username: initialValues.username,
         email: initialValues.email,
         alamat: initialValues.alamat,
         status: normalizeStatus(initialValues.status),
@@ -59,6 +60,7 @@ export default function FormOrangTua({
               email: values.email,
               password: values.password,
               nama: values.nama,
+              username: values.username,
               alamat: values.alamat,
               status: values.status ?? false,
               id_posyandu: idPosyandu,
@@ -81,6 +83,7 @@ export default function FormOrangTua({
                 email: values.email,
                 password: values.password || undefined,
                 nama: values.nama,
+                username: values.username,
                 alamat: values.alamat,
                 status: values.status,
               },
@@ -126,6 +129,14 @@ export default function FormOrangTua({
             rules={[{ required: true, message: 'Nama masih kosong' }]}
           >
             <Input placeholder="Nama lengkap" className="h-[52px] text-base" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-body-sm font-medium text-deep-slate">Username</span>}
+            name="username"
+            rules={[{ required: true, message: 'Username masih kosong' }]}
+          >
+            <Input placeholder="username" className="h-[52px] text-base" />
           </Form.Item>
 
           <Form.Item
