@@ -60,9 +60,10 @@ export default defineConfig({
             urlPattern: ({ url }) =>
               url.origin === 'https://api.kmslebakwangi.com' &&
               /\/api\/(artikel|kategori|desa|posyandu)/.test(url.pathname),
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-public-cache',
+              networkTimeoutSeconds: 8,
               expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 },
               cacheableResponse: { statuses: [0, 200] },
             },
