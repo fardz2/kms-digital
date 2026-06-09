@@ -68,5 +68,6 @@ export const qk = {
   orangTua: {
     all: ['orangTua'],
     list: ['orangTua', 'list'],
+    forKader: ['orangTua', 'for-kader'],
   },
 };

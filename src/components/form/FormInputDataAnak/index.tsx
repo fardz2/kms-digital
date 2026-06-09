@@ -4,6 +4,7 @@ import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
 import { useSession } from "../../../features/auth/useSession";
 import { ortuApi } from "../../../api/ortu.api";
+import { qk } from "../../../queries/keys";
 import { useCreateAnak } from "../../../queries/useAnakQueries";
 
 interface FormInputDataAnakProps {
@@ -19,7 +20,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
   const isOrangTua = role === "ORANG_TUA";
 
   const { data: dataOrangTua, isLoading: orangTuaLoading } = useQuery({
-    queryKey: ["orang-tua-kader-form"],
+    queryKey: qk.orangTua.forKader,
     queryFn: async () => {
       const res = await ortuApi.forKader();
       return res.data ?? [];

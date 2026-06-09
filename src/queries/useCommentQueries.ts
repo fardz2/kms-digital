@@ -64,6 +64,7 @@ export function useCreateComment() {
     },
     onSettled: (_data, _err, payload) => {
       qc.invalidateQueries({ queryKey: qk.comment.byPost(payload.post_id) });
+      qc.invalidateQueries({ queryKey: qk.post.all });
     },
   });
 }
