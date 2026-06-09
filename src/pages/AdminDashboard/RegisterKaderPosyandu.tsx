@@ -448,20 +448,23 @@ export default function RegisterKaderPosyandu() {
             }
             name="confirm"
             dependencies={["password"]}
-            rules={
-              modalMode === "add" || form.getFieldValue("password")
-                ? [
-                    { required: true, message: "Konfirmasi kata sandi" },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue("password") === value)
-                          return Promise.resolve();
-                        return Promise.reject(new Error("Kata sandi tidak sesuai"));
-                      },
-                    }),
-                  ]
-                : []
-            }
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const password = getFieldValue("password");
+                  if (modalMode !== "add" && !password) {
+                    return Promise.resolve();
+                  }
+                  if (!value) {
+                    return Promise.reject(new Error("Konfirmasi kata sandi"));
+                  }
+                  if (password !== value) {
+                    return Promise.reject(new Error("Kata sandi tidak sesuai"));
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
           >
             <Input.Password placeholder="Ulangi kata sandi" className="h-[52px] text-base" />
           </Form.Item>

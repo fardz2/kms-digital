@@ -2,7 +2,7 @@ import { api } from './client';
 
 export const approveApi = {
   listOrangTua: () =>
-    api.get(`/api/posyandu/orang-tua/list?_=${Date.now()}`),
+    api.get('/api/posyandu/orang-tua/list'),
 
   listAnakBelumApprove: () => api.get('/api/posyandu/belum-approve'),
 
@@ -18,7 +18,7 @@ export const approveApi = {
 };
 
 export const orangTuaApi = {
-  list: () => api.get(`/api/posyandu/orang-tua/list?_=${Date.now()}`),
+  list: () => api.get('/api/posyandu/orang-tua/list'),
   create: (payload) => api.post('/api/auth/orang-tua/register', payload),
   update: (id, payload) => api.put(`/api/auth/users/${id}`, payload),
   remove: (id) => api.delete(`/api/auth/users/${id}`),

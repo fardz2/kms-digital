@@ -11,6 +11,12 @@ api.interceptors.request.use(
   (cfg) => {
     const token = readSession()?.token?.value;
     if (token) cfg.headers.Authorization = `Bearer ${token}`;
+
+    if ((cfg.method ?? 'get').toLowerCase() === 'get') {
+      cfg.params = { ...(cfg.params ?? {}), _t: Date.now() };
+      cfg.headers['Cache-Control'] = 'no-cache';
+      cfg.headers.Pragma = 'no-cache';
+    }
     return cfg;
   },
   (err) => Promise.reject(err)
