@@ -11,6 +11,7 @@ import { useSession } from "../../features/auth/useSession";
 import { isThisMonth } from "../../utils/isThisMonth";
 import { desaApi } from "../../api/desa.api";
 import { nakesApi } from "../../api/nakes.api";
+import { qk } from "../../queries/keys";
 
 export default function RegisterTenagaKesehatan() {
   const [form] = Form.useForm();
@@ -23,7 +24,7 @@ export default function RegisterTenagaKesehatan() {
   const { isAuthenticated } = useSession();
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
-    queryKey: ["desa"],
+    queryKey: qk.desa.list,
     queryFn: async () => {
       const res = await desaApi.list();
       return res.data ?? [];
@@ -33,7 +34,7 @@ export default function RegisterTenagaKesehatan() {
 
   const { data: tenagaKesehatanData, isLoading: tenagaKesehatanLoading } =
     useQuery({
-      queryKey: ["tenaga-kesehatan"],
+      queryKey: qk.nakes.list,
       queryFn: async () => {
         const res = await nakesApi.list();
         return res.data ?? [];
@@ -55,23 +56,36 @@ export default function RegisterTenagaKesehatan() {
       toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
-      queryClient.invalidateQueries({ queryKey: ["tenaga-kesehatan"] });
+      queryClient.invalidateQueries({ queryKey: qk.nakes.all });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
   const deleteTenagaKesehatanMutation = useMutation({
     mutationFn: (id) => nakesApi.remove(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: qk.nakes.list });
+      const previous = queryClient.getQueryData(qk.nakes.list);
+      queryClient.setQueryData(qk.nakes.list, (old) =>
+        Array.isArray(old) ? old.filter((item) => item.id !== id) : old
+      );
+      return { previous };
+    },
     onSuccess: () => {
       toast.success("Tenaga Kesehatan berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["tenaga-kesehatan"] });
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
-    onError: (err) => {
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.nakes.list, ctx.previous);
+      }
       toast.error(err?.message ?? "Gagal menghapus Tenaga Kesehatan");
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.nakes.all });
     },
   });
 

@@ -29,10 +29,11 @@ function makeWrapper() {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
+  const spy = vi.spyOn(qc, 'invalidateQueries');
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   );
-  return { qc, wrapper };
+  return { qc, wrapper, spy };
 }
 
 beforeEach(() => {
@@ -52,6 +53,15 @@ describe('useApproveOrangTua (optimistic)', () => {
       expect(list.find((x) => x.id === 1)).toBeUndefined();
     });
     expect(approveApi.approveOrangTua).toHaveBeenCalledWith(1);
+  });
+
+  test('refreshes the admin orangTua list after approval', async () => {
+    const { wrapper, spy } = makeWrapper();
+    const { result } = renderHook(() => useApproveOrangTua(), { wrapper });
+    result.current.mutate(1);
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(spy).toHaveBeenCalledWith({ queryKey: qk.orangTua.all });
   });
 });
 

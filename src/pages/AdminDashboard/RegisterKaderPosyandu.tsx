@@ -12,6 +12,7 @@ import { isThisMonth } from "../../utils/isThisMonth";
 import { desaApi } from "../../api/desa.api";
 import { posyanduApi } from "../../api/posyandu.api";
 import { kaderApi } from "../../api/kader.api";
+import { qk } from "../../queries/keys";
 
 const normalizeStatus = (status) => {
   if (typeof status === "string") return status === "true" || status === "1";
@@ -33,7 +34,7 @@ export default function RegisterKaderPosyandu() {
   const { isAuthenticated } = useSession();
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
-    queryKey: ["desa"],
+    queryKey: qk.desa.list,
     queryFn: async () => {
       const res = await desaApi.list();
       return res.data ?? [];
@@ -42,7 +43,7 @@ export default function RegisterKaderPosyandu() {
   });
 
   const { data: dataSource, isLoading: posyanduLoading } = useQuery({
-    queryKey: ["posyandu"],
+    queryKey: qk.posyandu.list,
     queryFn: async () => {
       const res = await posyanduApi.list();
       return res.data ?? [];
@@ -51,7 +52,7 @@ export default function RegisterKaderPosyandu() {
   });
 
   const { data: kaderData, isLoading: kaderLoading } = useQuery({
-    queryKey: ["kader-posyandu"],
+    queryKey: qk.kader.list,
     queryFn: async () => {
       const res = await kaderApi.list();
       return res.data ?? [];
@@ -75,7 +76,7 @@ export default function RegisterKaderPosyandu() {
       toast.success("Register Berhasil");
       form.resetFields();
       setIsModalVisible(false);
-      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
+      queryClient.invalidateQueries({ queryKey: qk.kader.all });
     },
     onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
@@ -92,30 +93,76 @@ export default function RegisterKaderPosyandu() {
         status: values.status,
         role: "KADER_POSYANDU",
       }),
+    onMutate: async ({ id, values }) => {
+      await queryClient.cancelQueries({ queryKey: qk.kader.list });
+      const previous = queryClient.getQueryData(qk.kader.list);
+      queryClient.setQueryData(qk.kader.list, (old) =>
+        Array.isArray(old)
+          ? old.map((item) =>
+              item.id === id
+                ? {
+                    ...item,
+                    nama: values.nama,
+                    username: values.username,
+                    email: values.email,
+                    status: values.status,
+                    desa: values.desa
+                      ? dataDesa?.find((d) => d.id === values.desa) ?? item.desa
+                      : item.desa,
+                    posyandu: values.posyandu
+                      ? dataSource?.find((p) => p.id === values.posyandu) ??
+                        item.posyandu
+                      : item.posyandu,
+                  }
+                : item
+            )
+          : old
+      );
+      return { previous };
+    },
     onSuccess: () => {
       toast.success("Kader Posyandu berhasil diperbarui");
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedUser(null);
-      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
     },
-    onError: (err) =>
-      toast.error(err?.message ?? "Gagal memperbarui Kader Posyandu"),
+    onError: (err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.kader.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Gagal memperbarui Kader Posyandu");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.kader.all });
+    },
   });
 
   const deleteKaderMutation = useMutation({
     mutationFn: (id) => kaderApi.remove(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: qk.kader.list });
+      const previous = queryClient.getQueryData(qk.kader.list);
+      queryClient.setQueryData(qk.kader.list, (old) =>
+        Array.isArray(old) ? old.filter((item) => item.id !== id) : old
+      );
+      return { previous };
+    },
     onSuccess: () => {
       toast.success("Kader Posyandu berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["kader-posyandu"] });
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
     },
-    onError: (err) => {
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.kader.list, ctx.previous);
+      }
       toast.error(err?.message ?? "Gagal menghapus Kader Posyandu");
       setIsDeleteModalVisible(false);
       setUserToDelete(null);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.kader.all });
     },
   });
 

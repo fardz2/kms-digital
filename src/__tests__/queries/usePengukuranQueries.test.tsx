@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import {
@@ -94,6 +94,30 @@ describe('useUpdatePengukuran', () => {
     });
     expect(spy).toHaveBeenCalledWith({ queryKey: qk.laporan.all });
   });
+
+  test('optimistically patches the cached measurement', async () => {
+    const { wrapper } = makeWrapper();
+    const { result, rerender } = renderHook(
+      () => {
+        const qc = useQueryClient();
+        return { qc, mutation: useUpdatePengukuran(ANAK_ID) };
+      },
+      { wrapper },
+    );
+    const key = qk.pengukuran.byAnak(ANAK_ID, 'KADER_POSYANDU');
+    result.current.qc.setQueryData(key, [
+      { id: 1, berat: 8 },
+      { id: 2, berat: 9 },
+    ]);
+    rerender();
+
+    result.current.mutation.mutate({ id: 1, payload: { berat: 12 } });
+
+    await waitFor(() => {
+      const list = result.current.qc.getQueryData(key) as any[];
+      expect(list.find((x) => x.id === 1)?.berat).toBe(12);
+    });
+  });
 });
 
 describe('useDeletePengukuran', () => {
@@ -109,5 +133,28 @@ describe('useDeletePengukuran', () => {
       queryKey: qk.pengukuran.byAnak(ANAK_ID, 'KADER_POSYANDU'),
     });
     expect(spy).toHaveBeenCalledWith({ queryKey: qk.laporan.all });
+  });
+
+  test('optimistically removes the cached measurement and rolls back on error', async () => {
+    (pengukuranApi.remove as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('boom'),
+    );
+    const { wrapper } = makeWrapper();
+    const { result, rerender } = renderHook(
+      () => {
+        const qc = useQueryClient();
+        return { qc, mutation: useDeletePengukuran(ANAK_ID) };
+      },
+      { wrapper },
+    );
+    const key = qk.pengukuran.byAnak(ANAK_ID, 'KADER_POSYANDU');
+    result.current.qc.setQueryData(key, [{ id: 1 }, { id: 2 }]);
+    rerender();
+
+    result.current.mutation.mutate(1);
+
+    await waitFor(() => expect(result.current.mutation.isError).toBe(true));
+    const list = result.current.qc.getQueryData(key) as any[];
+    expect(list).toHaveLength(2);
   });
 });

@@ -57,6 +57,7 @@ export function useApproveOrangTua() {
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: qk.approve.orangTua });
+      qc.invalidateQueries({ queryKey: qk.orangTua.all });
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
   });
@@ -103,7 +104,10 @@ export function useRejectOrangTua() {
         qc.setQueryData(qk.approve.orangTua, ctx.previous);
       }
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: qk.approve.orangTua }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: qk.approve.orangTua });
+      qc.invalidateQueries({ queryKey: qk.orangTua.all });
+    },
   });
 }
 

@@ -11,6 +11,7 @@ import { useToast } from "../../components/ui/Toast";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";
 import { posyanduApi } from "../../api/posyandu.api";
+import { qk } from "../../queries/keys";
 
 export default function InputPosyandu() {
   const [form] = Form.useForm();
@@ -22,7 +23,7 @@ export default function InputPosyandu() {
   const queryClient = useQueryClient();
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
-    queryKey: ["desa"],
+    queryKey: qk.desa.list,
     queryFn: async () => {
       const res = await desaApi.list();
       return res.data ?? [];
@@ -30,7 +31,7 @@ export default function InputPosyandu() {
   });
 
   const { data: dataSource, isLoading: posyanduLoading } = useQuery({
-    queryKey: ["posyandu"],
+    queryKey: qk.posyandu.list,
     queryFn: async () => {
       const res = await posyanduApi.list();
       return res.data ?? [];
@@ -46,7 +47,7 @@ export default function InputPosyandu() {
       }),
     onSuccess: () => {
       toast.success("Posyandu berhasil disimpan");
-      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
+      queryClient.invalidateQueries({ queryKey: qk.posyandu.all });
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
@@ -62,24 +63,65 @@ export default function InputPosyandu() {
         nama: values.posyandu,
         alamat: values.alamat,
       }),
+    onMutate: async ({ id, values }) => {
+      await queryClient.cancelQueries({ queryKey: qk.posyandu.list });
+      const previous = queryClient.getQueryData(qk.posyandu.list);
+      queryClient.setQueryData(qk.posyandu.list, (old) =>
+        Array.isArray(old)
+          ? old.map((item) =>
+              item.id === id
+                ? {
+                    ...item,
+                    id_desa: values.desa,
+                    nama: values.posyandu,
+                    alamat: values.alamat,
+                  }
+                : item
+            )
+          : old
+      );
+      return { previous };
+    },
+    onError: (err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.posyandu.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Gagal memperbarui posyandu");
+    },
     onSuccess: () => {
       toast.success("Posyandu berhasil diperbarui");
-      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
       form.resetFields();
       setIsModalVisible(false);
       setModalMode("add");
       setSelectedPosyandu(null);
     },
-    onError: (err) => toast.error(err?.message ?? "Gagal memperbarui posyandu"),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.posyandu.all });
+    },
   });
 
   const deletePosyanduMutation = useMutation({
     mutationFn: (id) => posyanduApi.remove(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: qk.posyandu.list });
+      const previous = queryClient.getQueryData(qk.posyandu.list);
+      queryClient.setQueryData(qk.posyandu.list, (old) =>
+        Array.isArray(old) ? old.filter((item) => item.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.posyandu.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Gagal menghapus posyandu");
+    },
     onSuccess: () => {
       toast.success("Posyandu berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["posyandu"] });
     },
-    onError: (err) => toast.error(err?.message ?? "Gagal menghapus posyandu"),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.posyandu.all });
+    },
   });
 
   const isBusy =

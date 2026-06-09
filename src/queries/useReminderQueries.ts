@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reminderApi } from '../api/reminder.api';
 import { qk } from './keys';
+import { optimisticRemove } from './optimistic';
 import { useSession } from '../features/auth/useSession';
 import type { Reminder } from '../types';
 
@@ -33,8 +34,11 @@ export function useCreateReminder() {
 
 export function useDeleteReminder() {
   const qc = useQueryClient();
+  const optimistic = optimisticRemove<Reminder>(qc, qk.reminder.list);
   return useMutation({
     mutationFn: (id: number) => reminderApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.reminder.all }),
+    onMutate: optimistic.onMutate,
+    onError: optimistic.onError,
+    onSettled: () => qc.invalidateQueries({ queryKey: qk.reminder.all }),
   });
 }

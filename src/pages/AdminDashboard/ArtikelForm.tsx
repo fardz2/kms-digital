@@ -10,6 +10,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import { useToast } from "../../components/ui/Toast";
 import { artikelApi } from "../../api/artikel.api";
+import { qk } from "../../queries/keys";
 import {
   useKategoriList,
   useCreateKategori,
@@ -57,7 +58,7 @@ export default function ArtikelForm() {
     },
     onSuccess: () => {
       toast.success("Artikel berhasil diterbitkan");
-      queryClient.invalidateQueries({ queryKey: ["artikel"] });
+      queryClient.invalidateQueries({ queryKey: qk.artikel.all });
       setTimeout(() => navigate("/admin/dashboard/artikel"), 700);
     },
     onError: (err) => toast.error(err?.message ?? "Data gagal tersimpan"),

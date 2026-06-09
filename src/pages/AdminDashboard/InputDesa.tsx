@@ -10,6 +10,7 @@ import { useToast } from "../../components/ui/Toast";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { desaApi } from "../../api/desa.api";
 import { isThisMonth } from "../../utils/isThisMonth";
+import { qk } from "../../queries/keys";
 
 export default function InputDesa() {
   const [form] = Form.useForm();
@@ -19,7 +20,7 @@ export default function InputDesa() {
   const queryClient = useQueryClient();
 
   const { data: dataSource, isLoading } = useQuery({
-    queryKey: ["desa"],
+    queryKey: qk.desa.list,
     queryFn: async () => {
       const res = await desaApi.list();
       return res.data ?? [];
@@ -28,11 +29,26 @@ export default function InputDesa() {
 
   const deleteDesaMutation = useMutation({
     mutationFn: (id) => desaApi.remove(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: qk.desa.list });
+      const previous = queryClient.getQueryData(qk.desa.list);
+      queryClient.setQueryData(qk.desa.list, (old) =>
+        Array.isArray(old) ? old.filter((item) => item.id !== id) : old
+      );
+      return { previous };
+    },
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.desa.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Gagal menghapus desa");
+    },
     onSuccess: () => {
       toast.success("Desa berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["desa"] });
     },
-    onError: (err) => toast.error(err?.message ?? "Gagal menghapus desa"),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.desa.all });
+    },
   });
 
   const createDesaMutation = useMutation({
@@ -44,7 +60,7 @@ export default function InputDesa() {
       }),
     onSuccess: () => {
       toast.success("Desa dan akun berhasil disimpan");
-      queryClient.invalidateQueries({ queryKey: ["desa"] });
+      queryClient.invalidateQueries({ queryKey: qk.desa.all });
       form.resetFields();
       setIsModalVisible(false);
     },

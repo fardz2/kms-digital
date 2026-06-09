@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { anakApi } from '../api/anak.api';
 import { qk } from './keys';
+import { optimisticRemove } from './optimistic';
 import { useSession } from '../features/auth/useSession';
 import type { Anak } from '../types';
 
@@ -68,11 +69,13 @@ export function useAnakDetail(id: number | string | undefined) {
 export function useDeleteAnak() {
   const qc = useQueryClient();
   const { role } = useSession();
-
+  const optimistic = optimisticRemove<Anak>(qc, qk.anak.list(role));
   return useMutation({
     mutationFn: (id: number) => anakApi.remove(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.anak.list(role) });
+    onMutate: optimistic.onMutate,
+    onError: optimistic.onError,
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: qk.anak.all });
     },
   });
 }

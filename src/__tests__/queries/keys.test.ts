@@ -128,4 +128,29 @@ describe('query key factory (qk)', () => {
     expect(qk.orangTua.all).toEqual(['orangTua']);
     expect(qk.orangTua.list).toEqual(['orangTua', 'list']);
   });
+
+  test('master data namespaces (desa, posyandu, kader, nakes)', () => {
+    expect(qk.desa.all).toEqual(['desa']);
+    expect(qk.desa.list).toEqual(['desa', 'list']);
+    expect(qk.posyandu.all).toEqual(['posyandu']);
+    expect(qk.posyandu.list).toEqual(['posyandu', 'list']);
+    expect(qk.kader.all).toEqual(['kader']);
+    expect(qk.kader.list).toEqual(['kader', 'list']);
+    expect(qk.nakes.all).toEqual(['nakes']);
+    expect(qk.nakes.list).toEqual(['nakes', 'list']);
+  });
+
+  test('list keys are prefixed by their namespace .all for invalidation', () => {
+    const pairs = [
+      [qk.desa.all, qk.desa.list],
+      [qk.posyandu.all, qk.posyandu.list],
+      [qk.kader.all, qk.kader.list],
+      [qk.nakes.all, qk.nakes.list],
+      [qk.artikel.all, qk.artikel.list],
+      [qk.orangTua.all, qk.orangTua.list],
+    ];
+    for (const [all, list] of pairs) {
+      expect(list.slice(0, all.length)).toEqual(all);
+    }
+  });
 });

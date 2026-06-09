@@ -23,6 +23,7 @@ import { desaApi } from "../../api/desa.api";
 import { posyanduApi } from "../../api/posyandu.api";
 import { kaderApi } from "../../api/kader.api";
 import { ortuApi } from "../../api/ortu.api";
+import { qk } from "../../queries/keys";
 
 const BENEFITS = [
   'Catat pertumbuhan anak bulanan',
@@ -74,7 +75,7 @@ export default function SignUp() {
   });
 
   const { data: dataDesa, isLoading: desaLoading } = useQuery({
-    queryKey: ["desa"],
+    queryKey: qk.desa.list,
     queryFn: async () => {
       const res = await desaApi.list();
       return res.data ?? [];
@@ -82,7 +83,7 @@ export default function SignUp() {
   });
 
   const { data: dataPosyandu, isLoading: posyanduLoading } = useQuery({
-    queryKey: ["posyandu"],
+    queryKey: qk.posyandu.list,
     queryFn: async () => {
       const res = await posyanduApi.list();
       return res.data ?? [];

@@ -18,6 +18,7 @@ import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { formatDate2 } from "../../utils/Format";
 import { isThisMonth, isWithinDays } from "../../utils/isThisMonth";
 import { artikelApi } from "../../api/artikel.api";
+import { qk } from "../../queries/keys";
 import { useSession } from "../../features/auth/useSession";
 
 export default function ArtikelList() {
@@ -29,7 +30,7 @@ export default function ArtikelList() {
   const { isAuthenticated } = useSession();
 
   const { data: dataSource, isLoading: artikelLoading } = useQuery({
-    queryKey: ["artikel"],
+    queryKey: qk.artikel.list,
     queryFn: async () => {
       const res = await artikelApi.list();
       return res.data ?? [];
@@ -39,11 +40,28 @@ export default function ArtikelList() {
 
   const deleteArtikelMutation = useMutation({
     mutationFn: (id) => artikelApi.remove(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: qk.artikel.list });
+      const previous = queryClient.getQueryData(qk.artikel.list);
+      queryClient.setQueryData(qk.artikel.list, (old) =>
+        Array.isArray(old)
+          ? old.filter((item) => (item.id ?? item.artikel_id) !== id)
+          : old
+      );
+      return { previous };
+    },
+    onError: (err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.artikel.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Data gagal dihapus");
+    },
     onSuccess: () => {
       toast.success("Artikel berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["artikel"] });
     },
-    onError: (err) => toast.error(err?.message ?? "Data gagal dihapus"),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.artikel.all });
+    },
   });
 
   const isBusy = deleteArtikelMutation.isPending;
@@ -157,7 +175,7 @@ export default function ArtikelList() {
               variant="ghost"
               size="sm"
               leadingIcon={<RotateCcw size={16} strokeWidth={1.75} />}
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["artikel"] })}
+              onClick={() => queryClient.invalidateQueries({ queryKey: qk.artikel.all })}
               disabled={isBusy}
             >
               Muat ulang
@@ -169,7 +187,7 @@ export default function ArtikelList() {
       <FormUpdateDataArtikel
         isOpen={isOpenModalUpdateDataArtikel}
         onCancel={() => setIsOpenModalUpdateDataArtikel(false)}
-        fetch={() => queryClient.invalidateQueries({ queryKey: ["artikel"] })}
+        fetch={() => queryClient.invalidateQueries({ queryKey: qk.artikel.all })}
         data={dataArtikel}
       />
     </div>
