@@ -10,6 +10,9 @@ export interface PerPosyanduSummary {
   id?: number;
   nama?: string;
   total: number;
+  beratBadan: Record<string, number>;
+  tinggiBadan: Record<string, number>;
+  lingkarKepala: Record<string, number>;
 }
 
 export interface AggregatedDesa {
@@ -36,11 +39,18 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
     };
   }
 
-  const perPosyandu: PerPosyanduSummary[] = statistik.map((p: PosyanduStat) => ({
-    id: p.id_posyandu,
-    nama: p.nama_posyandu,
-    total: sumCategory(p.berat_badan),
-  }));
+  const perPosyandu: PerPosyanduSummary[] = statistik
+    .map((p: PosyanduStat) => ({
+      id: p.id_posyandu,
+      nama: p.nama_posyandu,
+      total: sumCategory(p.berat_badan),
+      beratBadan: p.berat_badan ?? {},
+      tinggiBadan: p.tinggi_badan ?? {},
+      lingkarKepala: p.lingkar_kepala ?? {},
+    }))
+    .sort((a, b) =>
+      (a.nama ?? '').localeCompare(b.nama ?? '', 'id', { sensitivity: 'base' })
+    );
   const totalBalita = perPosyandu.reduce((acc, x) => acc + x.total, 0);
 
   const reduceCategory = (key: 'berat_badan' | 'tinggi_badan' | 'lingkar_kepala') => {
