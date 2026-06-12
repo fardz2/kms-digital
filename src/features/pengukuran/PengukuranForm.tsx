@@ -170,7 +170,7 @@ export default function PengukuranForm({ open, onClose, anak, existing, prefillF
           <NumberSlider
             label="Berat Badan"
             min={0}
-            max={20}
+            max={25}
             step={0.1}
             value={berat}
             onChange={setBerat}

@@ -47,7 +47,7 @@ export default function RegisterTenagaKesehatan() {
       nakesApi.register({
         nama: values.nama,
         username: values.username,
-        email: values.email,
+        email: values.email || undefined,
         password: values.password,
         id_desa: values.desa,
         status: true,
@@ -236,10 +236,9 @@ export default function RegisterTenagaKesehatan() {
             <Input placeholder="username" className="h-[52px] text-base" />
           </Form.Item>
           <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Email (opsional)</span>}
             name="email"
             rules={[
-              { required: true, message: "Email masih kosong" },
               { type: "email", message: "Format email tidak valid" },
             ]}
           >

@@ -65,7 +65,7 @@ export default function RegisterKaderPosyandu() {
       kaderApi.register({
         nama: values.nama,
         username: values.username,
-        email: values.email,
+        email: values.email || undefined,
         password: values.password,
         id_desa: values.desa,
         id_posyandu: values.posyandu,
@@ -86,7 +86,7 @@ export default function RegisterKaderPosyandu() {
       kaderApi.update(id, {
         nama: values.nama,
         username: values.username,
-        email: values.email,
+        email: values.email || undefined,
         password: values.password || undefined,
         id_desa: values.desa,
         id_posyandu: values.posyandu,
@@ -104,7 +104,7 @@ export default function RegisterKaderPosyandu() {
                     ...item,
                     nama: values.nama,
                     username: values.username,
-                    email: values.email,
+                    email: values.email || undefined,
                     status: values.status,
                     desa: values.desa
                       ? dataDesa?.find((d) => d.id === values.desa) ?? item.desa
@@ -412,12 +412,9 @@ export default function RegisterKaderPosyandu() {
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Email (opsional)</span>}
             name="email"
-            rules={[
-              { required: true, message: "Email masih kosong" },
-              { type: "email", message: "Format email tidak valid" },
-            ]}
+            rules={[{ type: "email", message: "Format email tidak valid" }]}
           >
             <Input placeholder="email@contoh.com" className="h-[52px] text-base" />
           </Form.Item>

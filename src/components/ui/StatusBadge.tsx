@@ -1,30 +1,38 @@
 import React from 'react';
+import {
+  STATUS_LABEL,
+  INDICATOR_LABEL,
+  INDICATOR_TONE,
+} from '../../features/pengukuran/statusGizi';
 
-const STYLES = {
-  normal:   'bg-success-bg text-success',
-  kurang:   'bg-warning-bg text-amber-800',
-  stunting: 'bg-danger-bg text-danger',
-  obesitas: 'bg-danger-bg text-danger',
-  unknown:  'bg-neutral-100 text-neutral-500',
+const TONE_STYLES = {
+  normal:  'bg-success-bg text-success',
+  warning: 'bg-warning-bg text-amber-800',
+  danger:  'bg-danger-bg text-danger',
+  unknown: 'bg-neutral-100 text-neutral-500',
 };
 
-const LABELS = {
-  normal: 'Normal',
-  kurang: 'Kurang',
-  stunting: 'Stunting',
-  obesitas: 'Obesitas',
-  unknown: '-',
+// Tone untuk ringkasan status (4 kategori).
+const SUMMARY_TONE = {
+  normal: 'normal',
+  kurang: 'warning',
+  stunting: 'danger',
+  obesitas: 'danger',
+  unknown: 'unknown',
 };
 
-export default function StatusBadge({ status }) {
+export default function StatusBadge({ status, label }) {
   const key = String(status || 'unknown').toLowerCase();
-  const style = STYLES[key] || STYLES.unknown;
-  const label = LABELS[key] || LABELS.unknown;
+  const tone =
+    INDICATOR_TONE[key] || SUMMARY_TONE[key] || 'unknown';
+  const style = TONE_STYLES[tone] || TONE_STYLES.unknown;
+  const text =
+    label ?? INDICATOR_LABEL[key] ?? STATUS_LABEL[key] ?? '-';
   return (
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${style}`}
     >
-      {label}
+      {text}
     </span>
   );
 }

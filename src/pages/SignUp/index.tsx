@@ -95,7 +95,7 @@ export default function SignUp() {
       kaderApi.register({
         nama: values.nama,
         username: values.username,
-        email: values.email,
+        email: values.email || undefined,
         password: values.password,
         id_desa: values.desa,
         id_posyandu: values.posyandu,
@@ -112,7 +112,7 @@ export default function SignUp() {
       ortuApi.register({
         nama: values.nama,
         username: values.username,
-        email: values.email,
+        email: values.email || undefined,
         password: values.password,
         id_desa: values.desa,
         id_posyandu: values.posyandu,
@@ -298,12 +298,11 @@ export default function SignUp() {
                 <Form.Item
                   label={
                     <span className="text-body-sm font-semibold text-deep-slate">
-                      Email
+                      Email (opsional)
                     </span>
                   }
                   name="email"
                   rules={[
-                    { required: true, message: "Email masih kosong" },
                     { type: "email", message: "Format email tidak valid" },
                   ]}
                 >

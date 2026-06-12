@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
-import { overallStatus } from '../pengukuran/statusGizi';
+import { classifyAll } from '../pengukuran/statusGizi';
 
 const toZ = (v) => (v == null || v === '' ? null : Number(v));
 
@@ -21,7 +21,7 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
     z_score_gizi,
   } = pengukuran;
 
-  const status = overallStatus({
+  const { bbu, tbu, bbtb, lku } = classifyAll({
     zScoreBB: toZ(z_score_berat),
     zScoreTB: toZ(z_score_tinggi),
     zScoreLK: toZ(z_score_lingkar_kepala),
@@ -34,7 +34,12 @@ export default function RiwayatCard({ pengukuran, onEdit, onDelete, canEdit = tr
         <div className="text-heading-sm font-semibold text-deep-slate">
           {date ? dayjs(date).format('DD MMMM YYYY') : '-'}
         </div>
-        <StatusBadge status={status} />
+        <div className="flex flex-wrap gap-1.5 justify-end">
+          <StatusBadge status={bbtb} />
+          <StatusBadge status={tbu} />
+          <StatusBadge status={bbu} />
+          <StatusBadge status={lku} />
+        </div>
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3 mb-3 text-base">

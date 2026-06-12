@@ -57,7 +57,7 @@ export default function FormOrangTua({
         if (mode === 'add') {
           createMutation.mutate(
             {
-              email: values.email,
+              email: values.email || undefined,
               password: values.password,
               nama: values.nama,
               username: values.username,
@@ -80,7 +80,7 @@ export default function FormOrangTua({
             {
               id: initialValues.id,
               payload: {
-                email: values.email,
+                email: values.email || undefined,
                 password: values.password || undefined,
                 nama: values.nama,
                 username: values.username,
@@ -140,10 +140,9 @@ export default function FormOrangTua({
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-body-sm font-medium text-deep-slate">Email</span>}
+            label={<span className="text-body-sm font-medium text-deep-slate">Email (opsional)</span>}
             name="email"
             rules={[
-              { required: true, message: 'Email masih kosong' },
               { type: 'email', message: 'Format email tidak valid' },
             ]}
           >

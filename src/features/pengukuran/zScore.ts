@@ -14,9 +14,13 @@ import { monthDiff } from '../../utils/monthDiff';
 const GENDER = { MALE: 'LAKI_LAKI', FEMALE: 'PEREMPUAN' };
 
 interface Reference {
+  SD3neg: string;
+  SD2neg: string;
+  SD1neg: string;
   median: string;
   SD1pos: string;
-  SD1neg: string;
+  SD2pos: string;
+  SD3pos: string;
 }
 
 interface ZScoreInput {
@@ -30,13 +34,33 @@ interface ZScoreInput {
 
 function zFromReference(value: number | null | undefined, ref?: Reference): number | null {
   if (value == null || !ref) return null;
-  const median = parseFloat(ref.median);
-  if (value >= median) {
-    const sdPos = parseFloat(ref.SD1pos);
-    return (value - median) / (sdPos - median);
+
+  const cuts: [number, number][] = [
+    [parseFloat(ref.SD3neg), -3],
+    [parseFloat(ref.SD2neg), -2],
+    [parseFloat(ref.SD1neg), -1],
+    [parseFloat(ref.median), 0],
+    [parseFloat(ref.SD1pos), 1],
+    [parseFloat(ref.SD2pos), 2],
+    [parseFloat(ref.SD3pos), 3],
+  ];
+
+  if (value <= cuts[0][0]) {
+    const width = cuts[1][0] - cuts[0][0];
+    return -3 + (value - cuts[0][0]) / width;
   }
-  const sdNeg = parseFloat(ref.SD1neg);
-  return (value - median) / (median - sdNeg);
+  if (value >= cuts[6][0]) {
+    const width = cuts[6][0] - cuts[5][0];
+    return 3 + (value - cuts[6][0]) / width;
+  }
+  for (let i = 0; i < cuts.length - 1; i++) {
+    const [lo, zLo] = cuts[i];
+    const [hi, zHi] = cuts[i + 1];
+    if (value >= lo && value <= hi) {
+      return zLo + ((value - lo) / (hi - lo)) * (zHi - zLo);
+    }
+  }
+  return null;
 }
 
 function findByBulan(dataset: any[], umurBulan: number) {
