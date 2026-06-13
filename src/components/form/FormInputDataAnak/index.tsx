@@ -1,23 +1,35 @@
 import { DatePicker, Form, Input, Modal, Select } from "antd";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import Button from "../../ui/Button";
 import { useToast } from "../../ui/Toast";
 import { useSession } from "../../../features/auth/useSession";
 import { ortuApi } from "../../../api/ortu.api";
 import { qk } from "../../../queries/keys";
-import { useCreateAnak } from "../../../queries/useAnakQueries";
+import { useCreateAnak, useUpdateAnak } from "../../../queries/useAnakQueries";
+import type { Anak } from "../../../types";
 
 interface FormInputDataAnakProps {
   isOpen: boolean;
   onCancel: () => void;
   kader?: boolean;
+  mode?: "add" | "edit";
+  initialValues?: Anak | null;
 }
 
-export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInputDataAnakProps) {
+export default function FormInputDataAnak({
+  isOpen,
+  onCancel,
+  kader,
+  mode = "add",
+  initialValues,
+}: FormInputDataAnakProps) {
   const [form] = Form.useForm();
   const toast = useToast();
   const { isAuthenticated, role } = useSession();
   const isOrangTua = role === "ORANG_TUA";
+  const isEdit = mode === "edit";
 
   const { data: dataOrangTua, isLoading: orangTuaLoading } = useQuery({
     queryKey: qk.orangTua.forKader,
@@ -30,6 +42,27 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
   });
 
   const createAnak = useCreateAnak();
+  const updateAnak = useUpdateAnak();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (isEdit && initialValues) {
+      form.setFieldsValue({
+        nama: initialValues.nama,
+        panggilan: initialValues.panggilan,
+        jenisKelamin: initialValues.gender,
+        tanggalLahir: initialValues.tanggal_lahir
+          ? dayjs(initialValues.tanggal_lahir)
+          : null,
+        alamat: initialValues.alamat,
+        orangTua: initialValues.id_orang_tua,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [isOpen, isEdit, initialValues, form]);
+
+  const isPending = createAnak.isPending || updateAnak.isPending;
 
   const onOK = () => {
     form
@@ -41,11 +74,29 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
           tanggal_lahir: values.tanggalLahir.format("YYYY-MM-DD"),
           gender: values.jenisKelamin,
           alamat: values.alamat,
-          status: kader,
         };
+
+        if (isEdit && initialValues) {
+          const payload = isOrangTua
+            ? base
+            : { ...base, id_orang_tua: values.orangTua };
+          updateAnak.mutate(
+            { id: initialValues.id, payload },
+            {
+              onSuccess: () => {
+                toast.success("Data balita berhasil diperbarui");
+                setTimeout(() => onCancel(), 800);
+              },
+              onError: (err) =>
+                toast.error(err?.message ?? "Data gagal diperbarui"),
+            }
+          );
+          return;
+        }
+
         const payload = isOrangTua
-          ? base
-          : { ...base, id_orang_tua: values.orangTua };
+          ? { ...base, status: kader }
+          : { ...base, status: kader, id_orang_tua: values.orangTua };
 
         createAnak.mutate(payload, {
           onSuccess: () => {
@@ -68,7 +119,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
         onCancel={onCancel}
         title={
           <span className="text-heading font-semibold text-deep-slate">
-            Tambah Data Anak
+            {isEdit ? "Ubah Data Balita" : "Tambah Data Anak"}
           </span>
         }
         footer={
@@ -77,7 +128,7 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
               variant="default"
               size="md"
               onClick={onCancel}
-              disabled={createAnak.isPending}
+              disabled={isPending}
             >
               Batal
             </Button>
@@ -85,9 +136,13 @@ export default function FormInputDataAnak({ isOpen, onCancel, kader }: FormInput
               variant="primary"
               size="md"
               onClick={onOK}
-              disabled={createAnak.isPending || orangTuaLoading}
+              disabled={isPending || orangTuaLoading}
             >
-              {createAnak.isPending ? "Menyimpan..." : "Simpan"}
+              {isPending
+                ? "Menyimpan..."
+                : isEdit
+                  ? "Simpan Perubahan"
+                  : "Simpan"}
             </Button>
           </div>
         }

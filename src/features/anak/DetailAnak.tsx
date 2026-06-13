@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { ArrowLeft, Printer, Pencil } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
@@ -14,6 +14,7 @@ import {
 } from '../../queries/usePengukuranQueries';
 import { useSession } from '../auth/useSession';
 import PengukuranForm from '../pengukuran/PengukuranForm';
+import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import RiwayatCard from './RiwayatCard';
 import ErrorState from '../../components/ui/ErrorState';
 import { printElementToPdf } from '../../utils/printElementToPdf';
@@ -33,6 +34,7 @@ export default function DetailAnak() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [editAnakOpen, setEditAnakOpen] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -135,6 +137,19 @@ export default function DetailAnak() {
 
           {canEdit && (
             <Button
+              variant="default"
+              size="sm"
+              leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
+              onClick={() => setEditAnakOpen(true)}
+              disabled={anakLoading || !anak}
+              className="mb-4 ml-2"
+            >
+              Ubah Data Balita
+            </Button>
+          )}
+
+          {canEdit && (
+            <Button
               variant="primary"
               size="lg"
               onClick={handleAdd}
@@ -210,6 +225,13 @@ export default function DetailAnak() {
           }}
           anak={anak}
           existing={editing}
+        />
+
+        <FormInputDataAnak
+          isOpen={editAnakOpen}
+          onCancel={() => setEditAnakOpen(false)}
+          mode="edit"
+          initialValues={anak}
         />
       </div>
     </>

@@ -64,9 +64,9 @@ function RekapTabel({
   }
 
   const cellCls =
-    'px-[13px] py-[10px] text-body-sm text-right tabular-nums whitespace-nowrap border-l border-polar-mist';
+    'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l border-polar-mist align-middle';
   const headCls =
-    'px-[13px] py-[10px] text-caption font-semibold text-graphite text-right whitespace-nowrap border-l border-polar-mist';
+    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l border-deep-slate/30 bg-deep-slate';
 
   const sumCat = (cat: Record<string, number>) =>
     Object.values(cat).reduce((acc, v) => acc + Number(v || 0), 0);
@@ -75,24 +75,24 @@ function RekapTabel({
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-charcoal">
         <thead>
-          <tr className="border-b border-polar-mist bg-faint-fog">
-            <th rowSpan={2} className={`${headCls} text-left border-l-0 align-bottom`}>
+          <tr>
+            <th rowSpan={2} className={`${headCls} border-l-0`}>
               Posyandu
             </th>
-            <th rowSpan={2} className={`${headCls} align-bottom`}>
+            <th rowSpan={2} className={headCls}>
               Jumlah Balita
             </th>
             {groups.map((g) => (
               <th
                 key={g.field}
                 colSpan={g.statuses.length}
-                className={`${headCls} text-center`}
+                className={headCls}
               >
                 {g.label}
               </th>
             ))}
           </tr>
-          <tr className="border-b border-polar-mist bg-faint-fog">
+          <tr>
             {groups.flatMap((g) =>
               g.statuses.map((s) => (
                 <th key={`${g.field}-${s}`} className={headCls}>
@@ -103,28 +103,32 @@ function RekapTabel({
           </tr>
         </thead>
         <tbody>
-          {perPosyandu.map((p) => (
-            <tr key={p.id} className="border-b border-polar-mist last:border-0">
-              <td className="px-[13px] py-[10px] text-body-sm text-left font-medium">
+          {perPosyandu.map((p, idx) => (
+            <tr
+              key={p.id}
+              className={`border-b border-polar-mist ${idx % 2 === 1 ? 'bg-faint-fog' : 'bg-white'}`}
+            >
+              <td className="px-[13px] py-[10px] text-body-sm text-center font-medium align-middle">
                 {p.nama}
               </td>
               <td className={cellCls}>{sumCat(p.beratBadan)}</td>
               {groups.flatMap((g) => {
                 const cat = p[g.field] ?? {};
-                const rowTotal = sumCat(cat);
                 return g.statuses.map((s) => {
                   const v = Number(cat[s] || 0);
                   return (
                     <td key={`${g.field}-${s}`} className={cellCls}>
-                      {v} ({pct(v, rowTotal)})
+                      {v}
                     </td>
                   );
                 });
               })}
             </tr>
           ))}
-          <tr className="border-t-2 border-polar-mist font-semibold bg-faint-fog">
-            <td className="px-[13px] py-[10px] text-body-sm text-left">Total Desa</td>
+          <tr className="border-t-2 border-deep-slate/40 font-semibold bg-polar-mist">
+            <td className="px-[13px] py-[10px] text-body-sm text-center align-middle">
+              Total Desa
+            </td>
             <td className={cellCls}>{sumCat(distribusiBB)}</td>
             {groups.flatMap((g) => {
               const dist = distribusiMap[g.distribusi];
@@ -133,7 +137,10 @@ function RekapTabel({
                 const v = Number(dist[s] || 0);
                 return (
                   <td key={`${g.field}-${s}`} className={cellCls}>
-                    {v} ({pct(v, grand)})
+                    <div className="leading-tight">{v}</div>
+                    <div className="text-caption font-normal text-graphite">
+                      {pct(v, grand)}
+                    </div>
                   </td>
                 );
               });

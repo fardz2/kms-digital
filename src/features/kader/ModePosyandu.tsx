@@ -18,6 +18,9 @@ import {
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import ErrorState from '../../components/ui/ErrorState';
+import Card from '../../components/ui/Card';
+import { aggregateKaderRekap } from '../laporan/aggregateKader';
+import RekapPosyanduTable from '../laporan/RekapPosyanduTable';
 
 export default function ModePosyandu() {
   const navigate = useNavigate();
@@ -42,6 +45,8 @@ export default function ModePosyandu() {
     anak,
     meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
   }));
+
+  const rekap = aggregateKaderRekap({ anakList, pengukuranByAnak });
 
   const counts = {
     semua: balitaWithMeta.length,
@@ -160,6 +165,12 @@ export default function ModePosyandu() {
         {isError && <ErrorState onRetry={() => refetch()} />}
 
         {isLoading && !isError && <SkeletonList count={3} />}
+
+        {!isLoading && !isError && rekap.totalDiukur > 0 && (
+          <Card title="Rekap Gizi Posyandu">
+            <RekapPosyanduTable data={rekap} />
+          </Card>
+        )}
 
         {!isLoading && !isError && filtered.length === 0 && (
           <div className="text-center py-[50px] text-body-sm text-graphite">

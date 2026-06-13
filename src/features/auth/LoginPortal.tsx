@@ -20,12 +20,6 @@ import { ROLE_HOME } from './roleHome';
 
 const ROLES = [
   {
-    key: 'ORANG_TUA',
-    label: 'Orang Tua',
-    Icon: Heart,
-    desc: 'Pantau pertumbuhan anak Anda',
-  },
-  {
     key: 'KADER_POSYANDU',
     label: 'Kader Posyandu',
     Icon: Users,
@@ -42,6 +36,12 @@ const ROLES = [
     label: 'Pemerintah Desa',
     Icon: Building2,
     desc: 'Rekap gizi se-desa',
+  },
+  {
+    key: 'ORANG_TUA',
+    label: 'Orang Tua',
+    Icon: Heart,
+    desc: 'Pantau pertumbuhan anak Anda',
   },
   {
     key: 'ADMIN',

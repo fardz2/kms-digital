@@ -10,6 +10,8 @@ export const anakApi = {
   remove: (id) => api.delete(`/api/posyandu/data-anak/${id}`),
   create: (role, payload) =>
     api.post(`/api/${scopeForRole(role)}/data-anak`, payload),
+  update: (id, role, payload) =>
+    api.put(`/api/${scopeForRole(role)}/data-anak/${id}`, payload),
   importExcel: (formData) =>
     api.post('/api/posyandu/data-anak-excel', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

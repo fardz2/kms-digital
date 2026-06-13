@@ -15,6 +15,8 @@ interface CreateAnakPayload {
   id_orang_tua?: number;
 }
 
+type UpdateAnakPayload = Partial<CreateAnakPayload>;
+
 export function useAnakList() {
   const { role, isAuthenticated } = useSession();
 
@@ -36,6 +38,18 @@ export function useCreateAnak() {
   const { role } = useSession();
   return useMutation({
     mutationFn: (payload: CreateAnakPayload) => anakApi.create(role, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.anak.all });
+    },
+  });
+}
+
+export function useUpdateAnak() {
+  const qc = useQueryClient();
+  const { role } = useSession();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateAnakPayload }) =>
+      anakApi.update(id, role, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.anak.all });
     },
