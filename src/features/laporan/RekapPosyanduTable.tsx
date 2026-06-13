@@ -43,10 +43,10 @@ export default function RekapPosyanduTable({ data }: { data: RekapData }) {
   const cellCls =
     'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l border-polar-mist align-middle';
   const headCls =
-    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l border-deep-slate/30 bg-deep-slate';
+    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l border-white/20 bg-primary-600';
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-default border border-polar-mist">
       <table className="w-full border-collapse text-charcoal">
         <thead>
           <tr>
@@ -83,7 +83,7 @@ export default function RekapPosyanduTable({ data }: { data: RekapData }) {
               ));
             })}
           </tr>
-          <tr className="border-t-2 border-deep-slate/40 font-semibold bg-polar-mist">
+          <tr className="border-t-2 border-primary-600/40 font-semibold bg-primary-50">
             <td className="px-[13px] py-[10px] text-body-sm text-center align-middle">
               Total
             </td>
