@@ -21,7 +21,13 @@ const SUMMARY_TONE = {
   unknown: 'unknown',
 };
 
-export default function StatusBadge({ status, label }) {
+export default function StatusBadge({
+  status,
+  label,
+}: {
+  status?: string;
+  label?: string;
+}) {
   const key = String(status || 'unknown').toLowerCase();
   const tone =
     INDICATOR_TONE[key] || SUMMARY_TONE[key] || 'unknown';

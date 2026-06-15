@@ -5,7 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import InlineStatBar from "../../components/ui/InlineStatBar";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "../../components/ui/Toast";
 import { useSession } from "../../features/auth/useSession";
 import { isThisMonth } from "../../utils/isThisMonth";
@@ -17,6 +17,8 @@ export default function RegisterTenagaKesehatan() {
   const [form] = Form.useForm();
   const toast = useToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState("add");
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const queryClient = useQueryClient();
@@ -61,6 +63,56 @@ export default function RegisterTenagaKesehatan() {
     onError: (err) => toast.error(err?.message ?? "Gagal Registrasi"),
   });
 
+  const updateTenagaKesehatanMutation = useMutation({
+    mutationFn: ({ id, values }: { id: number; values: Record<string, any> }) =>
+      nakesApi.update(id, {
+        nama: values.nama,
+        username: values.username,
+        email: values.email || undefined,
+        password: values.password || undefined,
+        id_desa: values.desa,
+        status: true,
+      }),
+    onMutate: async ({ id, values }) => {
+      await queryClient.cancelQueries({ queryKey: qk.nakes.list });
+      const previous = queryClient.getQueryData(qk.nakes.list);
+      queryClient.setQueryData(qk.nakes.list, (old) =>
+        Array.isArray(old)
+          ? old.map((item) =>
+              item.id === id
+                ? {
+                    ...item,
+                    nama: values.nama,
+                    username: values.username,
+                    email: values.email || undefined,
+                    desa: values.desa
+                      ? dataDesa?.find((d) => d.id === values.desa) ?? item.desa
+                      : item.desa,
+                  }
+                : item
+            )
+          : old
+      );
+      return { previous };
+    },
+    onSuccess: () => {
+      toast.success("Tenaga Kesehatan berhasil diperbarui");
+      form.resetFields();
+      setIsModalVisible(false);
+      setModalMode("add");
+      setSelectedUser(null);
+    },
+    onError: (err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        queryClient.setQueryData(qk.nakes.list, ctx.previous);
+      }
+      toast.error(err?.message ?? "Gagal memperbarui Tenaga Kesehatan");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: qk.nakes.all });
+    },
+  });
+
   const deleteTenagaKesehatanMutation = useMutation({
     mutationFn: (id) => nakesApi.remove(id),
     onMutate: async (id) => {
@@ -91,6 +143,7 @@ export default function RegisterTenagaKesehatan() {
 
   const isBusy =
     createTenagaKesehatanMutation.isPending ||
+    updateTenagaKesehatanMutation.isPending ||
     deleteTenagaKesehatanMutation.isPending;
 
   const showDeleteConfirm = (id) => {
@@ -107,6 +160,18 @@ export default function RegisterTenagaKesehatan() {
   const handleDeleteCancel = () => {
     setIsDeleteModalVisible(false);
     setUserToDelete(null);
+  };
+
+  const handleEdit = (record) => {
+    setModalMode("edit");
+    setSelectedUser(record);
+    form.setFieldsValue({
+      nama: record.nama,
+      username: record.username,
+      email: record.email,
+      desa: record.desa?.id ?? record.id_desa,
+    });
+    setIsModalVisible(true);
   };
 
   const rows = tenagaKesehatanData ?? [];
@@ -126,6 +191,7 @@ export default function RegisterTenagaKesehatan() {
 
   const columns = [
     { accessorKey: "nama", header: "Nama", enableSorting: true },
+    { accessorKey: "username", header: "Username", enableSorting: true },
     { accessorKey: "email", header: "Email", enableSorting: true },
     {
       id: "desa",
@@ -139,29 +205,49 @@ export default function RegisterTenagaKesehatan() {
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
-        <Button
-          variant="destructive"
-          size="sm"
-          leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
-          onClick={() => showDeleteConfirm(row.original.id)}
-          disabled={isBusy}
-        >
-          Hapus
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            leadingIcon={<Pencil size={16} strokeWidth={1.75} />}
+            onClick={() => handleEdit(row.original)}
+            disabled={isBusy}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            leadingIcon={<Trash2 size={16} strokeWidth={1.75} />}
+            onClick={() => showDeleteConfirm(row.original.id)}
+            disabled={isBusy}
+          >
+            Hapus
+          </Button>
+        </div>
       ),
     },
   ];
 
   const onFinish = (values) => {
-    createTenagaKesehatanMutation.mutate(values);
+    if (modalMode === "edit" && selectedUser) {
+      updateTenagaKesehatanMutation.mutate({ id: selectedUser.id, values });
+    } else {
+      createTenagaKesehatanMutation.mutate(values);
+    }
   };
 
   const showModal = () => {
+    setModalMode("add");
+    setSelectedUser(null);
+    form.resetFields();
     setIsModalVisible(true);
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
+    setModalMode("add");
+    setSelectedUser(null);
     form.resetFields();
   };
 
@@ -207,7 +293,9 @@ export default function RegisterTenagaKesehatan() {
       <Modal
         title={
           <span className="text-heading font-semibold text-deep-slate">
-            Registrasi Tenaga Kesehatan
+            {modalMode === "add"
+              ? "Registrasi Tenaga Kesehatan"
+              : "Edit Tenaga Kesehatan"}
           </span>
         }
         open={isModalVisible}
@@ -247,12 +335,19 @@ export default function RegisterTenagaKesehatan() {
           <Form.Item
             label={<span className="text-body-sm font-medium text-deep-slate">Kata Sandi</span>}
             name="password"
-            rules={[
-              { required: true, message: "Kata sandi masih kosong" },
-              { pattern: /^.{8,}$/, message: "Minimal 8 karakter" },
-            ]}
+            rules={
+              modalMode === "add"
+                ? [
+                    { required: true, message: "Kata sandi masih kosong" },
+                    { pattern: /^.{8,}$/, message: "Minimal 8 karakter" },
+                  ]
+                : [{ pattern: /^.{8,}$/, message: "Minimal 8 karakter" }]
+            }
           >
-            <Input.Password placeholder="Minimal 8 karakter" className="h-[52px] text-base" />
+            <Input.Password
+              placeholder={modalMode === "add" ? "Minimal 8 karakter" : "Kosongkan jika tidak diubah"}
+              className="h-[52px] text-base"
+            />
           </Form.Item>
           <Form.Item
             label={
@@ -263,12 +358,19 @@ export default function RegisterTenagaKesehatan() {
             name="confirm"
             dependencies={["password"]}
             rules={[
-              { required: true, message: "Konfirmasi kata sandi" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value)
+                  const password = getFieldValue("password");
+                  if (modalMode !== "add" && !password) {
                     return Promise.resolve();
-                  return Promise.reject(new Error("Kata sandi tidak sesuai"));
+                  }
+                  if (!value) {
+                    return Promise.reject(new Error("Konfirmasi kata sandi"));
+                  }
+                  if (password !== value) {
+                    return Promise.reject(new Error("Kata sandi tidak sesuai"));
+                  }
+                  return Promise.resolve();
                 },
               }),
             ]}
@@ -300,7 +402,10 @@ export default function RegisterTenagaKesehatan() {
               variant="default"
               size="md"
               onClick={handleCancel}
-              disabled={createTenagaKesehatanMutation.isPending}
+              disabled={
+                createTenagaKesehatanMutation.isPending ||
+                updateTenagaKesehatanMutation.isPending
+              }
             >
               Batal
             </Button>
@@ -308,9 +413,15 @@ export default function RegisterTenagaKesehatan() {
               variant="primary"
               size="md"
               type="submit"
-              disabled={createTenagaKesehatanMutation.isPending}
+              disabled={
+                createTenagaKesehatanMutation.isPending ||
+                updateTenagaKesehatanMutation.isPending
+              }
             >
-              {createTenagaKesehatanMutation.isPending ? "Menyimpan..." : "Simpan"}
+              {createTenagaKesehatanMutation.isPending ||
+              updateTenagaKesehatanMutation.isPending
+                ? "Menyimpan..."
+                : "Simpan"}
             </Button>
           </div>
         </Form>

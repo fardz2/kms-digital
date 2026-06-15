@@ -225,6 +225,7 @@ export default function RegisterKaderPosyandu() {
 
   const columns = [
     { accessorKey: "nama", header: "Nama", enableSorting: true },
+    { accessorKey: "username", header: "Username", enableSorting: true },
     { accessorKey: "email", header: "Email", enableSorting: true },
     {
       id: "desa",

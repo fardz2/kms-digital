@@ -5,6 +5,7 @@ import {
   classifyBBU,
   classifyTBU,
   classifyLKU,
+  classifyBBTB,
   BBU,
   TBU,
   LKU,
@@ -129,4 +130,43 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
     tinggiBadan,
     lingkarKepala,
   };
+}
+
+// Rekap per-balita (per nama) memakai pengukuran TERAKHIR tiap balita.
+// Tiap baris = 1 balita, dengan klasifikasi BB/U, TB/U, LK/U, dan Gizi (BB/TB).
+export function aggregateKaderPerBalita({ anakList, pengukuranByAnak }) {
+  const safeAnak = anakList ?? [];
+
+  return safeAnak
+    .map((anak) => {
+      const pengukuran = pengukuranByAnak?.[anak.id] ?? [];
+      if (pengukuran.length === 0) {
+        return {
+          id: anak.id,
+          nama: anak.nama,
+          tanggalUkur: null,
+          bbu: BBU.UNKNOWN,
+          tbu: TBU.UNKNOWN,
+          lku: LKU.UNKNOWN,
+          gizi: 'unknown',
+        };
+      }
+
+      const latest = pengukuran.reduce((a, b) =>
+        (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
+      );
+
+      return {
+        id: anak.id,
+        nama: anak.nama,
+        tanggalUkur: latest.date ?? null,
+        bbu: classifyBBU(toZ(latest.z_score_berat)),
+        tbu: classifyTBU(toZ(latest.z_score_tinggi)),
+        lku: classifyLKU(toZ(latest.z_score_lingkar_kepala)),
+        gizi: classifyBBTB(toZ(latest.z_score_gizi)),
+      };
+    })
+    .sort((a, b) =>
+      (a.nama ?? '').localeCompare(b.nama ?? '', 'id', { sensitivity: 'base' })
+    );
 }

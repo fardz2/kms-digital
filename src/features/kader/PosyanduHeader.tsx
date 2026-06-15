@@ -1,6 +1,6 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { BarChart3, LogOut, Users } from 'lucide-react';
+import { BarChart3, LogOut, Users, Lock } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 export default function PosyanduHeader({
@@ -11,6 +11,7 @@ export default function PosyanduHeader({
   pendingCount = 0,
   onAkunOrangTua,
   onLaporan,
+  onUbahSandi,
   onKeluar,
 }) {
   const bulanLabel = dayjs().format('MMMM YYYY');
@@ -56,6 +57,14 @@ export default function PosyanduHeader({
               data-tour-id="kader-laporan"
             >
               Laporan
+            </Button>
+            <Button
+              variant="default"
+              size="md"
+              leadingIcon={<Lock size={18} strokeWidth={2} />}
+              onClick={onUbahSandi}
+            >
+              Ubah Sandi
             </Button>
             <Button
               variant="ghost"

@@ -64,7 +64,7 @@ export default function BalitaCard({ anak, meta, onUkur, onUlang, onLihat }) {
             <h3 className="text-heading-sm font-semibold text-deep-slate truncate">
               {anak.nama}
             </h3>
-            {perluPerhatian && <StatusBadge status={status} />}
+            {status && status !== 'unknown' && <StatusBadge status={status} />}
           </div>
           <p className="text-caption text-graphite mt-1">
             {umurBulan != null ? `${umurBulan} bulan · ` : ''}

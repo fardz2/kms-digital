@@ -18,9 +18,7 @@ import {
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import ErrorState from '../../components/ui/ErrorState';
-import Card from '../../components/ui/Card';
-import { aggregateKaderRekap } from '../laporan/aggregateKader';
-import RekapPosyanduTable from '../laporan/RekapPosyanduTable';
+import ProfileModal from '../../components/ui/ProfileModal';
 
 export default function ModePosyandu() {
   const navigate = useNavigate();
@@ -34,6 +32,7 @@ export default function ModePosyandu() {
   const [existingPengukuran, setExistingPengukuran] = useState(null);
   const [prefillFrom, setPrefillFrom] = useState(null);
   const [tambahOpen, setTambahOpen] = useState(false);
+  const [sandiOpen, setSandiOpen] = useState(false);
 
   const { data: pendingOT } = usePendingOrangTua(true);
   const { data: pendingAnak } = usePendingAnak(true);
@@ -45,8 +44,6 @@ export default function ModePosyandu() {
     anak,
     meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
   }));
-
-  const rekap = aggregateKaderRekap({ anakList, pengukuranByAnak });
 
   const counts = {
     semua: balitaWithMeta.length,
@@ -136,6 +133,7 @@ export default function ModePosyandu() {
         pendingCount={pendingCount}
         onAkunOrangTua={() => navigate('/kader/orangtua')}
         onLaporan={() => navigate('/kader/laporan')}
+        onUbahSandi={() => setSandiOpen(true)}
         onKeluar={handleKeluar}
       />
 
@@ -165,12 +163,6 @@ export default function ModePosyandu() {
         {isError && <ErrorState onRetry={() => refetch()} />}
 
         {isLoading && !isError && <SkeletonList count={3} />}
-
-        {!isLoading && !isError && rekap.totalDiukur > 0 && (
-          <Card title="Rekap Gizi Posyandu">
-            <RekapPosyanduTable data={rekap} />
-          </Card>
-        )}
 
         {!isLoading && !isError && filtered.length === 0 && (
           <div className="text-center py-[50px] text-body-sm text-graphite">
@@ -225,6 +217,13 @@ export default function ModePosyandu() {
       <FormInputDataAnak
         isOpen={tambahOpen}
         onCancel={() => setTambahOpen(false)}
+      />
+
+      <ProfileModal
+        open={sandiOpen}
+        onClose={() => setSandiOpen(false)}
+        fallbackName={user?.name}
+        variant="password-only"
       />
     </div>
   );

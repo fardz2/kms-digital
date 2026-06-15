@@ -1,4 +1,7 @@
-import { aggregateKaderLaporan } from '../../../features/laporan/aggregateKader';
+import {
+  aggregateKaderLaporan,
+  aggregateKaderPerBalita,
+} from '../../../features/laporan/aggregateKader';
 
 const anakA = { id: 1, nama: 'Budi', tanggal_lahir: '2025-05-12' };
 const anakB = { id: 2, nama: 'Siti', tanggal_lahir: '2025-01-01' };
@@ -167,5 +170,75 @@ describe('aggregateKaderLaporan', () => {
       bulan: '2026-05',
     });
     expect(r.perluPerhatian).toEqual([]);
+  });
+});
+
+describe('aggregateKaderPerBalita', () => {
+  test('empty list returns empty array', () => {
+    expect(aggregateKaderPerBalita({ anakList: [], pengukuranByAnak: {} })).toEqual([]);
+  });
+
+  test('anak tanpa pengukuran => semua indikator unknown, tanggalUkur null', () => {
+    const rows = aggregateKaderPerBalita({
+      anakList: [anakA],
+      pengukuranByAnak: { 1: [] },
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      id: 1,
+      nama: 'Budi',
+      tanggalUkur: null,
+      bbu: 'unknown',
+      tbu: 'unknown',
+      lku: 'unknown',
+      gizi: 'unknown',
+    });
+  });
+
+  test('klasifikasi per indikator dari pengukuran terakhir', () => {
+    const rows = aggregateKaderPerBalita({
+      anakList: [anakB],
+      pengukuranByAnak: {
+        2: [
+          {
+            date: '2026-05-10',
+            z_score_berat: 0,
+            z_score_tinggi: -3.5,
+            z_score_lingkar_kepala: 0,
+            z_score_gizi: 2.5,
+          },
+        ],
+      },
+    });
+    expect(rows[0]).toMatchObject({
+      id: 2,
+      tanggalUkur: '2026-05-10',
+      bbu: 'bb_normal',
+      tbu: 'sangat_pendek',
+      lku: 'lk_normal',
+      gizi: 'gizi_lebih',
+    });
+  });
+
+  test('pakai pengukuran terbaru ketika ada banyak entri', () => {
+    const rows = aggregateKaderPerBalita({
+      anakList: [anakC],
+      pengukuranByAnak: {
+        3: [
+          { date: '2026-03-01', z_score_gizi: -3.5 },
+          { date: '2026-05-20', z_score_gizi: 0 },
+        ],
+      },
+    });
+    expect(rows[0].tanggalUkur).toBe('2026-05-20');
+    expect(rows[0].gizi).toBe('gizi_baik');
+  });
+
+  test('hasil terurut berdasarkan nama (id locale)', () => {
+    const rows = aggregateKaderPerBalita({
+      anakList: [anakB, anakA, anakC],
+      pengukuranByAnak: { 1: [], 2: [], 3: [] },
+    });
+    expect(rows.map((r) => r.nama)).toEqual(['Budi', 'Rina', 'Siti']);
   });
 });

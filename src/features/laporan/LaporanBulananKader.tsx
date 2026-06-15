@@ -14,14 +14,13 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import MonthPicker from '../../components/ui/MonthPicker';
 import StatCard from '../../components/ui/StatCard';
-import StatusDistribution from '../../components/ui/StatusDistribution';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { useAnakList } from '../../queries/useAnakQueries';
 import { pengukuranApi } from '../../api/pengukuran.api';
 import { useSession } from '../auth/useSession';
 import { qk } from '../../queries/keys';
-import { aggregateKaderLaporan, aggregateKaderRekap } from './aggregateKader';
-import RekapPosyanduTable from './RekapPosyanduTable';
+import { aggregateKaderLaporan, aggregateKaderPerBalita } from './aggregateKader';
+import RekapPerBalitaTable from './RekapPerBalitaTable';
 import ErrorState from '../../components/ui/ErrorState';
 
 export default function LaporanBulananKader() {
@@ -55,7 +54,7 @@ export default function LaporanBulananKader() {
   });
 
   const laporan = aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan });
-  const rekap = aggregateKaderRekap({ anakList, pengukuranByAnak });
+  const perBalita = aggregateKaderPerBalita({ anakList, pengukuranByAnak });
 
   const isLoading = anakLoading || isFetchingPengukuran;
 
@@ -127,15 +126,8 @@ export default function LaporanBulananKader() {
               />
             </Card>
 
-            <Card title="Sebaran Status Gizi" className="mb-[17px]">
-              <StatusDistribution
-                distribusi={laporan.distribusi}
-                total={Object.values(laporan.distribusi).reduce((a, b) => a + b, 0)}
-              />
-            </Card>
-
-            <Card title="Rekap Gizi Posyandu" className="mb-[17px]">
-              <RekapPosyanduTable data={rekap} />
+            <Card title="Rekap Gizi per Balita" className="mb-[17px]">
+              <RekapPerBalitaTable data={perBalita} />
             </Card>
 
             <Card
