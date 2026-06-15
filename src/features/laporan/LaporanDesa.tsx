@@ -33,9 +33,9 @@ const GROUPS: {
   field: 'beratBadan' | 'tinggiBadan' | 'lingkarKepala';
   distribusi: 'distribusiBB' | 'distribusiTB' | 'distribusiLK';
 }[] = [
-  { label: 'Berat Badan', field: 'beratBadan', distribusi: 'distribusiBB' },
-  { label: 'Tinggi Badan', field: 'tinggiBadan', distribusi: 'distribusiTB' },
-  { label: 'Lingkar Kepala', field: 'lingkarKepala', distribusi: 'distribusiLK' },
+  { label: 'Berat Badan (BB/U)', field: 'beratBadan', distribusi: 'distribusiBB' },
+  { label: 'Tinggi Badan (TB/U)', field: 'tinggiBadan', distribusi: 'distribusiTB' },
+  { label: 'Lingkar Kepala (LK/U)', field: 'lingkarKepala', distribusi: 'distribusiLK' },
 ];
 
 function RekapTabel({
@@ -64,15 +64,15 @@ function RekapTabel({
   }
 
   const cellCls =
-    'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l border-polar-mist align-middle';
+    'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l-2 border-light-ash align-middle';
   const headCls =
-    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l border-white/20 bg-primary-600';
+    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l-2 border-white/40 bg-primary-600';
 
   const sumCat = (cat: Record<string, number>) =>
     Object.values(cat).reduce((acc, v) => acc + Number(v || 0), 0);
 
   return (
-    <div className="overflow-x-auto rounded-default border border-polar-mist">
+      <div className="overflow-x-auto rounded-default border-2 border-light-ash">
       <table className="w-full border-collapse text-charcoal">
         <thead>
           <tr>
@@ -106,7 +106,7 @@ function RekapTabel({
           {perPosyandu.map((p, idx) => (
             <tr
               key={p.id}
-              className={`border-b border-polar-mist ${idx % 2 === 1 ? 'bg-faint-fog' : 'bg-white'}`}
+              className={`border-b-2 border-light-ash ${idx % 2 === 1 ? 'bg-faint-fog' : 'bg-white'}`}
             >
               <td className="px-[13px] py-[10px] text-body-sm text-center font-medium align-middle">
                 {p.nama}
@@ -127,7 +127,7 @@ function RekapTabel({
           ))}
           <tr className="border-t-2 border-primary-600/40 font-semibold bg-primary-50">
             <td className="px-[13px] py-[10px] text-body-sm text-center align-middle">
-              Total Desa
+              Total
             </td>
             <td className={cellCls}>{sumCat(distribusiBB)}</td>
             {groups.flatMap((g) => {

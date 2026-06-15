@@ -28,6 +28,15 @@ function sumCategory(cat: Record<string, number> | undefined): number {
   return Object.values(cat).reduce((acc: number, v) => acc + Number(v || 0), 0);
 }
 
+function isAggregateRow(p: PosyanduStat): boolean {
+  const nama = (p.nama_posyandu ?? '').toLowerCase().trim();
+  return (
+    nama === '' ||
+    nama.includes('semua posyandu') ||
+    nama.startsWith('total')
+  );
+}
+
 export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDesa {
   if (!Array.isArray(statistik) || statistik.length === 0) {
     return {
@@ -39,7 +48,11 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
     };
   }
 
-  const perPosyandu: PerPosyanduSummary[] = statistik
+  const realPosyandu = statistik.filter(
+    (p: PosyanduStat) => !isAggregateRow(p)
+  );
+
+  const perPosyandu: PerPosyanduSummary[] = realPosyandu
     .map((p: PosyanduStat) => ({
       id: p.id_posyandu,
       nama: p.nama_posyandu,
@@ -55,7 +68,7 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
 
   const reduceCategory = (key: 'berat_badan' | 'tinggi_badan' | 'lingkar_kepala') => {
     const acc: Record<string, number> = {};
-    statistik.forEach((p: PosyanduStat) => {
+    realPosyandu.forEach((p: PosyanduStat) => {
       const cat = p[key] ?? {};
       Object.entries(cat).forEach(([k, v]) => {
         acc[k] = (acc[k] ?? 0) + Number(v || 0);

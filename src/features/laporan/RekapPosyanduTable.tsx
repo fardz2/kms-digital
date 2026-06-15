@@ -41,12 +41,12 @@ export default function RekapPosyanduTable({ data }: { data: RekapData }) {
   }
 
   const cellCls =
-    'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l border-polar-mist align-middle';
+    'px-[13px] py-[10px] text-body-sm text-center tabular-nums whitespace-nowrap border-l-2 border-light-ash align-middle';
   const headCls =
-    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l border-white/20 bg-primary-600';
+    'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap border-l-2 border-white/40 bg-primary-600';
 
   return (
-    <div className="overflow-x-auto rounded-default border border-polar-mist">
+    <div className="overflow-x-auto rounded-default border-2 border-light-ash">
       <table className="w-full border-collapse text-charcoal">
         <thead>
           <tr>
@@ -70,7 +70,7 @@ export default function RekapPosyanduTable({ data }: { data: RekapData }) {
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b border-polar-mist bg-white">
+          <tr className="border-b-2 border-light-ash bg-white">
             <td className="px-[13px] py-[10px] text-body-sm text-center font-medium align-middle">
               Jumlah Balita
             </td>
