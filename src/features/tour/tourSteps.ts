@@ -136,7 +136,7 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         id: 'ot-forum',
         routePattern: '/orangtua/balita',
         targetSelector: '[data-tour-id="ot-forum"]',
-        title: 'Forum Tanya Jawab',
+        title: 'Ajukan Pertanyaan',
         description:
           'Tanyakan apa pun tentang gizi atau tumbuh kembang anak ke tenaga kesehatan.',
       },
@@ -146,30 +146,6 @@ const FLOWS: Partial<Record<Role, RoleFlow>> = {
         targetSelector: '[data-tour-id="ot-artikel"]',
         title: 'Artikel Edukasi',
         description: 'Baca artikel pilihan tentang gizi dan pengasuhan balita.',
-      },
-      {
-        id: 'ot-forum-header',
-        routePattern: '/orangtua/forum',
-        targetSelector: '[data-tour-id="ot-forum-header"]',
-        title: 'Forum Tanya Jawab',
-        description:
-          'Halaman ini dipakai untuk membaca dan menulis pertanyaan terkait tumbuh kembang anak.',
-      },
-      {
-        id: 'ot-forum-tabs',
-        routePattern: '/orangtua/forum',
-        targetSelector: '[data-tour-id="ot-forum-tabs"]',
-        title: 'Filter Forum',
-        description:
-          'Pakai tab untuk berpindah antara semua pertanyaan dan pertanyaan milik Anda.',
-      },
-      {
-        id: 'ot-forum-detail-form',
-        routePattern: '/orangtua/forum/:id',
-        targetSelector: '[data-tour-id="ot-forum-detail-form"]',
-        title: 'Kirim Komentar',
-        description:
-          'Balas pertanyaan yang sedang dibuka lewat form komentar di halaman detail forum.',
       },
     ],
   },

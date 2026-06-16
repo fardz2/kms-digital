@@ -26,15 +26,16 @@ import {
 import {
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
+  indicatorWarningBgClass,
 } from './indicatorTableStyles';
 import TablePagination from './TablePagination';
 
 const LABEL_MAP: Record<string, string> = {
   normal: 'Normal',
-  [BBU.SANGAT_KURANG]: 'BB Sangat Kurang',
-  [BBU.KURANG]: 'BB Kurang',
-  [BBU.NORMAL]: 'BB Normal',
-  [BBU.LEBIH]: 'BB Lebih',
+  [BBU.SANGAT_KURANG]: 'Sangat Kurus',
+  [BBU.KURANG]: 'Kurus',
+  [BBU.NORMAL]: 'Normal',
+  [BBU.LEBIH]: 'Gemuk',
   kurus: 'Kurus',
   sangat_kurus: 'Sangat Kurus',
   gemuk: 'Gemuk',
@@ -44,11 +45,6 @@ const LABEL_MAP: Record<string, string> = {
   makrosefali: 'Makrosefali',
   mikrosefali: 'Mikrosefali',
 };
-
-function pct(value: number, total: number): string {
-  if (!total) return '0%';
-  return `${Math.round((value / total) * 100)}%`;
-}
 
 const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 const BB_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
@@ -149,7 +145,7 @@ export function RekapTabel({
 
   return (
     <div className="space-y-[17px]">
-      <div className="overflow-x-auto rounded-default border-2 border-light-ash">
+      <div className="max-h-[70vh] overflow-auto rounded-default border-2 border-light-ash">
         <table className="w-full border-collapse text-charcoal">
           <thead>
             <tr>
@@ -162,26 +158,25 @@ export function RekapTabel({
               >
                 Jumlah Balita
               </th>
-              {groups.map((g, gIdx) => (
-                <th
-                  key={g.field}
-                  colSpan={g.statuses.length}
-                  className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 ${indicatorGroupBorderClass('header', gIdx > 0)}`}
-                >
-                  {g.label}
-                </th>
-              ))}
+            {groups.map((g, gIdx) => (
+              <th
+                key={g.field}
+                colSpan={g.statuses.length}
+                className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 ${indicatorGroupBorderClass('header', gIdx > 0)}`}
+              >
+                {g.label}
+              </th>
+            ))}
             </tr>
             <tr>
               {groups.flatMap((g, gIdx) =>
                 g.statuses.map((s, sIdx) => {
                   const toneKey = g.toneMap[s] ?? s;
-                  const tone = INDICATOR_TONE[toneKey] || 'unknown';
                   const label = g.field === 'gizi' ? STATUS_LABEL[s] ?? s : LABEL_MAP[s] ?? s;
                   return (
                     <th
                       key={`${g.field}-${s}`}
-                      className={`${headCls} ${SUBHEADER_ROW_CLASS} ${indicatorHeaderToneClass(tone)} ${indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0)}`}
+                      className={`${headCls} ${SUBHEADER_ROW_CLASS} ${indicatorHeaderToneClass(INDICATOR_TONE[toneKey] || 'unknown')} ${indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0)}`}
                     >
                       {label}
                     </th>
@@ -206,10 +201,16 @@ export function RekapTabel({
                   const cat = p[g.field] ?? {};
                   return g.statuses.map((s, sIdx) => {
                     const v = Number(cat[s] || 0);
+                    const toneKey = g.toneMap[s] ?? s;
+                    const tone = INDICATOR_TONE[toneKey] || 'unknown';
+                    const cellClass =
+                      tone === 'normal'
+                        ? `${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`
+                        : `${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)} ${v > 0 ? indicatorWarningBgClass() : ''}`;
                     return (
                       <td
                         key={`${g.field}-${s}`}
-                        className={`${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`}
+                        className={cellClass}
                       >
                         {v}
                       </td>
@@ -227,7 +228,6 @@ export function RekapTabel({
               </td>
               {groups.flatMap((g, gIdx) => {
                 const dist = distribusiMap[g.distribusi];
-                const grand = sumCat(dist);
                 return g.statuses.map((s, sIdx) => {
                   const v = Number(dist[s] || 0);
                   return (
@@ -235,10 +235,7 @@ export function RekapTabel({
                       key={`${g.field}-total-${s}`}
                       className={`${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`}
                     >
-                      <div className="leading-tight">{v}</div>
-                      <div className="text-caption font-normal text-graphite">
-                        {pct(v, grand)}
-                      </div>
+                      {v}
                     </td>
                   );
                 });
@@ -284,10 +281,7 @@ const LaporanDesa = function LaporanDesa({ ref }: { ref?: Ref<HTMLDivElement> })
         anakList,
         pengukuranByAnak,
       });
-      const hasCalculatedData =
-        anakList.length > 0 &&
-        Object.values(pengukuranByAnak).some((items) => (items ?? []).length > 0);
-      return hasCalculatedData ? calculated : fallback;
+      return anakList.length > 0 ? calculated : fallback;
     },
     [statistikData, anakList, pengukuranByAnak]
   );

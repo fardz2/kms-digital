@@ -1,7 +1,7 @@
 import { Form, Input } from "antd";
 import dayjs from "dayjs";
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
@@ -17,9 +17,9 @@ import {
 
 export default function DetailForum() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useSession();
   const isOrangTua = user?.role === "ORANG_TUA";
+  const backHref = isOrangTua ? '/orangtua/forum' : '/tenkes/forum';
   const [form] = Form.useForm();
   const toast = useToast();
 
@@ -49,14 +49,13 @@ export default function DetailForum() {
       <Navbar isLogin />
 
       <div className="max-w-[720px] mx-auto px-[17px] md:px-[25px] py-[25px] space-y-[25px]">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
+        <Link
+          to={backHref}
           className="inline-flex items-center gap-2 text-body-sm font-medium text-graphite hover:text-deep-slate transition-colors"
         >
           <ArrowLeft size={16} strokeWidth={1.75} />
-          Kembali ke forum
-        </button>
+          Kembali ke daftar pertanyaan
+        </Link>
 
         {isLoading && (
           <div className="space-y-[17px]">

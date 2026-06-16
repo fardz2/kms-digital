@@ -21,7 +21,7 @@ describe('multi-page tour flow manifest', () => {
   test('covers key routes for every role', () => {
     const expectations: Array<[Parameters<typeof getRoleFlow>[0], string[]]> = [
       ['KADER_POSYANDU', ['/kader/balita', '/kader/orangtua', '/kader/laporan']],
-      ['ORANG_TUA', ['/orangtua/balita', '/orangtua/forum', '/orangtua/forum/:id']],
+      ['ORANG_TUA', ['/orangtua/balita']],
       ['TENAGA_KESEHATAN', ['/tenkes/forum', '/tenkes/balita/:id']],
       ['DESA', ['/desa/beranda']],
       [
@@ -54,10 +54,10 @@ describe('multi-page tour flow manifest', () => {
   });
 
   test('matches dynamic route patterns when resolving first step', () => {
-    const otStep = getFirstStepForPath('ORANG_TUA', '/orangtua/forum/123');
+    const otStep = getFirstStepForPath('ORANG_TUA', '/orangtua/balita/123');
     const tenkesStep = getFirstStepForPath('TENAGA_KESEHATAN', '/tenkes/balita/456');
 
-    expect(otStep?.routePattern).toBe('/orangtua/forum/:id');
+    expect(otStep).toBeNull();
     expect(tenkesStep?.routePattern).toBe('/tenkes/balita/:id');
   });
 
@@ -119,14 +119,14 @@ describe('useTour route-aware state', () => {
     vi.useFakeTimers();
 
     const { result } = renderHook(() =>
-      useTour('ORANG_TUA', true, '/orangtua/forum/123')
+      useTour('ORANG_TUA', true, '/orangtua/balita')
     );
 
     act(() => {
       vi.advanceTimersByTime(600);
     });
 
-    expect(result.current.activeStepId).toBe('ot-forum-detail-form');
+    expect(result.current.activeStepId).toBe('ot-intro');
     expect(result.current.open).toBe(true);
   });
 

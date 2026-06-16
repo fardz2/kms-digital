@@ -14,6 +14,7 @@ import {
   indicatorCellToneClass,
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
+  indicatorWarningBgClass,
 } from './indicatorTableStyles';
 import TablePagination from './TablePagination';
 
@@ -47,6 +48,19 @@ const DEFAULT_PAGE_SIZE = 5;
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
+const INDICATOR_LABEL_MAP: Record<string, string> = {
+  bb_sangat_kurang: 'Sangat Kurus',
+  bb_kurang: 'Kurus',
+  bb_normal: 'Normal',
+  bb_lebih: 'Gemuk',
+  sangat_pendek: 'Sangat Pendek',
+  pendek: 'Pendek',
+  tb_normal: 'Normal',
+  tinggi: 'Tinggi',
+  mikrosefali: 'Mikrosefali',
+  lk_normal: 'Normal',
+  makrosefali: 'Makrosefali',
+};
 
 export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
   const rows = useMemo(
@@ -74,7 +88,9 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
     }, {} as Record<string, Record<string, number>>);
   }, [rows]);
   const getStatusLabel = (field: 'bbu' | 'tbu' | 'lku' | 'gizi', status: string) =>
-    field === 'gizi' ? STATUS_LABEL[status] ?? status : INDICATOR_LABEL[status] ?? status;
+    field === 'gizi'
+      ? STATUS_LABEL[status] ?? status
+      : INDICATOR_LABEL_MAP[status] ?? INDICATOR_LABEL[status] ?? status;
 
   if (rows.length === 0) {
     return (
@@ -86,7 +102,7 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
 
   return (
     <div className="space-y-[17px]">
-      <div className="overflow-x-auto rounded-default border-2 border-light-ash">
+      <div className="max-h-[70vh] overflow-auto rounded-default border-2 border-light-ash">
       <table className="w-full border-collapse text-charcoal">
         <thead>
           <tr>
@@ -100,7 +116,7 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
               rowSpan={2}
               className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 ${indicatorGroupBorderClass('header', false)}`}
             >
-              Tgl Ukur
+              Tanggal Ukur Terakhir
             </th>
             {GROUPS.map((g, gIdx) => (
               <th
@@ -116,12 +132,11 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
             {GROUPS.flatMap((g, gIdx) =>
               g.statuses.map((s, sIdx) => {
                 const tone = INDICATOR_TONE[s] || 'unknown';
-                const bgClass = indicatorHeaderToneClass(tone);
                 const borderClass = indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0);
                 return (
                   <th
                     key={`${g.field}-${s}`}
-                    className={`${headCls} ${SUBHEADER_ROW_CLASS} ${bgClass} ${borderClass}`}
+                    className={`${headCls} ${SUBHEADER_ROW_CLASS} ${indicatorHeaderToneClass(tone)} ${borderClass}`}
                   >
                     {getStatusLabel(g.field, s)}
                   </th>
@@ -144,19 +159,19 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
               </td>
               {GROUPS.flatMap((g, gIdx) =>
                 g.statuses.map((s, sIdx) => {
-                  const checked = r[g.field] === s;
-                  const tone =
-                    g.field === 'gizi'
-                      ? s === STATUS.NORMAL
-                        ? 'normal'
-                        : 'danger'
-                      : INDICATOR_TONE[s] || 'unknown';
-                  const textClass = indicatorCellToneClass(tone);
-                  const borderClass = indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0);
-                  return (
-                    <td key={`${g.field}-${s}`} className={`${cellCls} ${borderClass} ${checked ? textClass : ''}`}>
-                      {checked ? (
-                        <Check
+                const checked = r[g.field] === s;
+                const tone = INDICATOR_TONE[s] || 'unknown';
+                const textClass = indicatorCellToneClass(tone);
+                const borderClass = indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0);
+                const isNormalStatus = tone === 'normal' || (g.field === 'gizi' && s === STATUS.NORMAL);
+                const cellClass =
+                  isNormalStatus
+                    ? `${cellCls} ${borderClass} !bg-transparent ${checked ? textClass : ''}`
+                    : `${cellCls} ${borderClass} ${checked ? indicatorWarningBgClass() : ''}`;
+                return (
+                  <td key={`${g.field}-${s}`} className={cellClass}>
+                    {checked ? (
+                      <Check
                           size={18}
                           strokeWidth={2.5}
                           className="inline"
@@ -177,10 +192,10 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
             <td className="px-[13px] py-[10px] text-body-sm text-left align-middle">
               Total
             </td>
-            <td className="px-[13px] py-[10px] text-body-sm text-center align-middle tabular-nums border-l-2 border-light-ash">
+              <td className="px-[13px] py-[10px] text-body-sm text-center align-middle tabular-nums border-l-2 border-light-ash">
               {rows.length}
             </td>
-            {GROUPS.flatMap((g, gIdx) =>
+              {GROUPS.flatMap((g, gIdx) =>
               g.statuses.map((s, sIdx) => {
                 const v = Number(totalByGroup[g.field]?.[s] || 0);
                 const borderClass = indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0);

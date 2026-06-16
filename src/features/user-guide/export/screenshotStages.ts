@@ -547,7 +547,7 @@ const SECTION_SHOTS: Record<string, GuideShot[]> = {
       'page',
       'page',
       'Forum orang tua bersih',
-      'Forum orang tua terbuka dengan tab, daftar diskusi, dan tombol tulis pertanyaan.',
+      'Forum orang tua terbuka dengan daftar diskusi dan tombol tulis pertanyaan.',
       ['[data-tour-id="ot-forum-header"]', '[data-tour-id="ot-forum-list"]']
     ),
     shot(
@@ -556,13 +556,6 @@ const SECTION_SHOTS: Record<string, GuideShot[]> = {
       'Daftar forum',
       'Sorot daftar thread agar user melihat semua diskusi yang tersedia.',
       ['[data-tour-id="ot-forum-list"]']
-    ),
-    shot(
-      'tab',
-      'tab',
-      'Filter forum',
-      'Tampilkan tab Semua dan Punya Saya untuk membedakan daftar publik dan milik sendiri.',
-      ['[data-tour-id="ot-forum-tabs"]']
     ),
     shot(
       'create',

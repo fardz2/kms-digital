@@ -185,7 +185,7 @@ export default function BerandaOT() {
             <div data-tour-id="ot-forum">
               <QuickLink
                 Icon={MessageCircle}
-                title="Forum Tanya Jawab"
+                title="Ajukan Pertanyaan"
                 desc="Tanya tenaga kesehatan tentang anak Anda"
                 onClick={() => navigate('/orangtua/forum')}
               />

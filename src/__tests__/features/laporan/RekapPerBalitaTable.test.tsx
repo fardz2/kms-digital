@@ -21,7 +21,10 @@ describe('RekapPerBalitaTable', () => {
   test('header sticky dan pagination bekerja', () => {
     render(<RekapPerBalitaTable data={rows} />);
 
+    expect(screen.getByRole('columnheader', { name: 'Tanggal Ukur Terakhir' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('sticky');
+    expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('top-0');
+    expect(screen.getAllByRole('columnheader', { name: 'Normal' })[0]).toHaveClass('top-[44px]');
     expect(screen.queryByText('Balita 6')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /halaman 2/i }));
@@ -42,6 +45,15 @@ describe('RekapPerBalitaTable', () => {
     render(<RekapPerBalitaTable data={rows} />);
 
     const stuntingIcon = screen.getByLabelText('Stunting');
-    expect(stuntingIcon.closest('td')).toHaveClass('text-warning');
+    expect(stuntingIcon.closest('td')).toHaveClass('bg-warning-bg');
+  });
+
+  test('gizi normal di body tabel tidak diberi warna kuning', () => {
+    render(<RekapPerBalitaTable data={rows} />);
+
+    const row = screen.getByText('Balita 1').closest('tr');
+    expect(row).not.toBeNull();
+    const cells = row?.querySelectorAll('td');
+    expect(cells?.[13]).not.toHaveClass('bg-warning-bg');
   });
 });

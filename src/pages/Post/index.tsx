@@ -1,22 +1,20 @@
 import { Empty } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { MessageCircle, Plus, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MessageCircle, Plus, ArrowRight, ArrowLeft } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
 import { SkeletonCard } from "../../components/ui/Skeleton";
 import FormInputPost from "../../components/form/FormInputPost";
 import avatar from "../../assets/icon/user.png";
 import { useSession } from "../../features/auth/useSession";
+import { ROLE_HOME } from "../../features/auth/roleHome";
 import { usePostList } from "../../queries/usePostQueries";
 
 export default function Post() {
   const [isOpenModalInputPost, setIsOpenModalInputPost] = useState(false);
   const { user, role } = useSession();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab') === 'saya' ? 'saya' : 'semua';
-
   const { data: dataPost, isLoading: postsLoading } = usePostList();
 
   const isOrangTua = role === "ORANG_TUA";
@@ -34,10 +32,10 @@ export default function Post() {
     user_id: item.user_id ?? item.id_user,
   }));
 
-  const filteredPosts =
-    isOrangTua && tab === 'saya' && user?.id
-      ? posts.filter((p) => String(p.user_id ?? '') === String(user.id))
-      : posts;
+  const headerTitle = isOrangTua ? "Ajukan Pertanyaan" : "Jawab Pertanyaan";
+  const headerSubtitle = isOrangTua
+    ? "Ajukan pertanyaan kepada tenaga kesehatan tentang perkembangan anak Anda."
+    : "Lihat pertanyaan dari orang tua dan berikan jawaban yang jelas.";
 
   return (
     <div className="min-h-screen bg-faint-fog">
@@ -49,14 +47,23 @@ export default function Post() {
           data-tour-id={isOrangTua ? 'ot-forum-header' : 'tenkes-forum-header'}
         >
           <div className="min-w-0 flex-1">
+            {isOrangTua && (
+              <Link
+                to={ROLE_HOME.ORANG_TUA}
+                className="inline-flex items-center gap-[8px] text-body-sm font-medium text-graphite hover:text-deep-slate transition-colors mb-[13px]"
+              >
+                <ArrowLeft size={16} strokeWidth={1.75} />
+                Kembali ke Beranda
+              </Link>
+            )}
             <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[13px]">
               Forum
             </p>
             <h1 className="text-heading-lg md:text-display font-bold text-deep-slate leading-[1.05] tracking-tight">
-              Tanya Jawab
+              {headerTitle}
             </h1>
             <p className="text-body-lg text-graphite mt-[13px] max-w-[560px]">
-              Tanyakan kepada tenaga kesehatan tentang perkembangan anak Anda.
+              {headerSubtitle}
             </p>
           </div>
           {isOrangTua && (
@@ -71,33 +78,6 @@ export default function Post() {
           )}
         </header>
 
-        {isOrangTua && (
-          <div className="flex gap-[8px] border-b border-light-ash" data-tour-id="ot-forum-tabs">
-            {[
-              { key: 'semua', label: 'Semua' },
-              { key: 'saya', label: 'Punya Saya' },
-            ].map((t) => {
-              const active = t.key === tab;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() =>
-                    setSearchParams(t.key === 'semua' ? {} : { tab: t.key })
-                  }
-                  className={`px-[17px] py-[13px] text-body-sm font-semibold transition-colors border-b-2 -mb-px ${
-                    active
-                      ? 'text-primary-600 border-primary-500'
-                      : 'text-graphite border-transparent hover:text-deep-slate'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         {postsLoading && (
           <div className="flex flex-col gap-[13px]">
             <SkeletonCard lines={3} />
@@ -106,15 +86,13 @@ export default function Post() {
           </div>
         )}
 
-        {!postsLoading && filteredPosts.length === 0 && (
+        {!postsLoading && posts.length === 0 && (
           <div className="bg-white border border-light-ash rounded-default py-[50px] px-[25px] text-center space-y-[17px]">
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
               description={
                 <span className="text-body-sm text-graphite">
-                  {tab === 'saya'
-                    ? 'Anda belum pernah menulis pertanyaan'
-                    : 'Belum ada pertanyaan di forum'}
+                  Belum ada pertanyaan di forum
                 </span>
               }
             />
@@ -135,7 +113,7 @@ export default function Post() {
           className="space-y-[17px]"
           data-tour-id={isOrangTua ? 'ot-forum-list' : 'tenkes-forum-list'}
         >
-          {filteredPosts.map((item) => (
+          {posts.map((item) => (
             <article
               key={item.id}
               className="bg-white border border-light-ash rounded-default p-[25px] transition-colors duration-150 ease-out-quart hover:border-graphite/30"
@@ -162,7 +140,7 @@ export default function Post() {
                         ? "Orang Tua"
                         : "Tenaga Kesehatan"}
                     </span>
-                    {item.nama_posyandu ? ` · ${item.nama_posyandu}` : ""} ·{" "}
+                    {item.nama_posyandu ? ` Â· ${item.nama_posyandu}` : ""} Â·{" "}
                     {item.content}
                   </p>
                 </div>
@@ -182,7 +160,7 @@ export default function Post() {
                 className="inline-flex items-center gap-[6px] text-body-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
               >
                 <MessageCircle size={16} strokeWidth={1.75} />
-                Jawab pertanyaan
+                Buka pertanyaan
                 <ArrowRight size={16} strokeWidth={1.75} />
               </Link>
 
@@ -205,11 +183,9 @@ export default function Post() {
                           <strong className="font-semibold">{j.nama}</strong>:{" "}
                           {j.content}
                         </p>
-                        {valid && (
-                          <p className="text-caption text-graphite mt-1 tabular-nums">
-                            {dayjs(ts).format("DD MMM YYYY HH:mm")}
-                          </p>
-                        )}
+                        <p className="text-caption text-graphite mt-1">
+                          {valid ? dayjs(ts).format("DD MMMM YYYY") : ""}
+                        </p>
                       </div>
                     );
                   })}
@@ -221,7 +197,6 @@ export default function Post() {
       </div>
 
       <FormInputPost
-        key={isOpenModalInputPost.toString()}
         isOpen={isOpenModalInputPost}
         onCancel={() => setIsOpenModalInputPost(false)}
       />

@@ -601,7 +601,7 @@ export const guideContent: GuideRole[] = [
   {
     id: 'ORANG_TUA',
     title: 'Orang Tua',
-    summary: 'Memantau data balita, mengirim pertanyaan ke forum, dan membuka artikel edukasi yang relevan.',
+    summary: 'Memantau data balita, mengajukan pertanyaan ke forum, dan membuka artikel edukasi yang relevan.',
     accentColor: '#0369A1',
     sections: [
       {
@@ -649,12 +649,6 @@ export const guideContent: GuideRole[] = [
             label: 'Buka forum',
             action: 'Buka halaman forum orang tua dari menu utama.',
             result: 'Forum orang tua terbuka.',
-          },
-          {
-            id: 'switch-forum-tab',
-            label: 'Pilih tab',
-            action: 'Gunakan tab Semua atau Punya Saya untuk melihat daftar yang sesuai.',
-            result: 'Forum tersaring sesuai pilihan tab.',
           },
           {
             id: 'find-discussion-topic',

@@ -13,6 +13,7 @@ describe('aggregateDesaDariAnak', () => {
       anakList: [
         { id: 1, id_posyandu: 10 },
         { id: 2, id_posyandu: 10 },
+        { id: 3, id_posyandu: 10 },
       ],
       pengukuranByAnak: {
         1: [
@@ -36,8 +37,9 @@ describe('aggregateDesaDariAnak', () => {
       },
     });
 
-    expect(result.totalBalita).toBe(2);
+    expect(result.totalBalita).toBe(3);
     expect(result.perPosyandu).toHaveLength(1);
+    expect(result.perPosyandu[0].total).toBe(3);
     expect(result.perPosyandu[0].beratBadan.bb_normal).toBe(2);
     expect(result.perPosyandu[0].gizi.normal).toBe(1);
     expect(result.perPosyandu[0].gizi.obesitas).toBe(1);

@@ -11,7 +11,7 @@ import { useTourContext } from "../../../features/tour/TourProvider";
 const LINKS_BY_ROLE = {
   ORANG_TUA: [
     { to: "/orangtua/balita", label: "Beranda" },
-    { to: "/orangtua/forum", label: "Tanya Jawab" },
+    { to: "/orangtua/forum", label: "Ajukan Pertanyaan" },
     { to: "/artikel", label: "Artikel" },
   ],
   TENAGA_KESEHATAN: [

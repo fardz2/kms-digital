@@ -203,7 +203,19 @@ export function aggregateDesaDariAnak({
 
   safeAnak.forEach((anak: AnakDesaStat) => {
     const latest = latestPengukuran(pengukuranByAnak?.[anak.id]);
-    if (!latest) return;
+    const idPosyandu = anak.id_posyandu;
+    if (idPosyandu == null) return;
+
+    const row =
+      summaryMap.get(idPosyandu) ??
+      createSummary(idPosyandu, metaById.get(idPosyandu));
+
+    row.total += 1;
+
+    if (!latest) {
+      summaryMap.set(idPosyandu, row);
+      return;
+    }
 
     const bbu = classifyBBU(toZ(latest.z_score_berat));
     const tbu = classifyTBU(toZ(latest.z_score_tinggi));
@@ -215,16 +227,11 @@ export function aggregateDesaDariAnak({
       zScoreGizi: toZ(latest.z_score_gizi),
     });
 
-    if ([bbu, tbu, lku, gizi].some((status) => status === 'unknown')) return;
+    if ([bbu, tbu, lku, gizi].some((status) => status === 'unknown')) {
+      summaryMap.set(idPosyandu, row);
+      return;
+    }
 
-    const idPosyandu = anak.id_posyandu;
-    if (idPosyandu == null) return;
-
-    const row =
-      summaryMap.get(idPosyandu) ??
-      createSummary(idPosyandu, metaById.get(idPosyandu));
-
-    row.total += 1;
     row.beratBadan[bbu] = (row.beratBadan[bbu] ?? 0) + 1;
     row.tinggiBadan[tbu] = (row.tinggiBadan[tbu] ?? 0) + 1;
     row.lingkarKepala[lku] = (row.lingkarKepala[lku] ?? 0) + 1;

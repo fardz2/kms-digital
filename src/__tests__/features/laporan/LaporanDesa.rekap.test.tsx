@@ -11,7 +11,7 @@ const perPosyandu = Array.from({ length: 6 }, (_, idx) => ({
   lingkarKepala: { mikrosefali: 1, normal: 8, makrosefali: 1 },
   gizi: {
     normal: 5,
-    kurang: 2,
+    kurang: 0,
     stunting: 1,
     obesitas: 2,
   },
@@ -36,7 +36,9 @@ describe('RekapTabel', () => {
       'Lingkar Kepala',
       'Status Gizi',
     ]);
+    expect(screen.getByRole('columnheader', { name: 'Berat Badan' })).toHaveClass('top-0');
     expect(screen.getAllByRole('columnheader', { name: 'Normal' })[0]).toHaveClass('sticky');
+    expect(screen.getAllByRole('columnheader', { name: 'Normal' })[0]).toHaveClass('top-[44px]');
     expect(screen.queryByRole('columnheader', { name: 'Gizi Buruk' })).not.toBeInTheDocument();
   });
 
@@ -52,7 +54,9 @@ describe('RekapTabel', () => {
     );
 
     expect(screen.getByRole('columnheader', { name: 'Posyandu' })).toHaveClass('sticky');
+    expect(screen.getByRole('columnheader', { name: 'Posyandu' })).toHaveClass('top-0');
     expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('sticky');
+    expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('top-0');
     expect(screen.queryByText('Posyandu 6')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /halaman 2/i }));
@@ -74,9 +78,11 @@ describe('RekapTabel', () => {
 
     expect(screen.getByRole('columnheader', { name: 'Tinggi Badan' })).toHaveClass('border-l-4');
     expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('border-l-4');
+    expect(screen.getByRole('columnheader', { name: 'Kurus' })).toHaveClass('bg-primary-600');
+    expect(screen.getByRole('columnheader', { name: 'Pendek' })).toHaveClass('bg-primary-600');
   });
 
-  test('status bahaya di body tabel desa dipoles kuning lewat status badge cells', () => {
+  test('status warning di body tabel desa dipoles kuning lewat kolomnya', () => {
     render(
       <RekapTabel
         perPosyandu={perPosyandu.slice(0, 1)}
@@ -88,6 +94,11 @@ describe('RekapTabel', () => {
     );
 
     expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Stunting' })).toHaveClass('bg-primary-600');
+    const row = screen.getByText('Posyandu 1').closest('tr');
+    expect(row).not.toBeNull();
+    const cells = row?.querySelectorAll('td');
+    expect(cells?.[3]).toHaveClass('bg-warning-bg');
+    expect(cells?.[16]).toHaveClass('bg-warning-bg');
+    expect(cells?.[14]).not.toHaveClass('bg-warning-bg');
   });
 });
