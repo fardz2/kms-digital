@@ -216,7 +216,7 @@ describe('aggregateKaderPerBalita', () => {
       bbu: 'bb_normal',
       tbu: 'sangat_pendek',
       lku: 'lk_normal',
-      gizi: 'gizi_lebih',
+      gizi: 'stunting',
     });
   });
 
@@ -231,7 +231,7 @@ describe('aggregateKaderPerBalita', () => {
       },
     });
     expect(rows[0].tanggalUkur).toBe('2026-05-20');
-    expect(rows[0].gizi).toBe('gizi_baik');
+    expect(rows[0].gizi).toBe('normal');
   });
 
   test('hasil terurut berdasarkan nama (id locale)', () => {

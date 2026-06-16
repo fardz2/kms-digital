@@ -1,5 +1,6 @@
 import {
-  classifyBBTB,
+  overallStatus,
+  STATUS,
   classifyBBU,
   classifyLKU,
   classifyTBU,
@@ -66,24 +67,18 @@ function isAggregateRow(p: PosyanduStat): boolean {
   );
 }
 
-// Kategori `berat_badan` dari endpoint statistik-gizi memakai istilah BB/TB
-// (sangat_kurus / kurus / normal / gemuk), sama seperti klasifikasi status gizi
-// di Detail Anak. Petakan ke label status gizi yang eksplisit.
-const GIZI_MAP: Record<string, string> = {
-  sangat_kurus: 'gizi_buruk',
-  kurus: 'gizi_kurang',
-  normal: 'gizi_baik',
-  gemuk: 'gizi_lebih',
-  obesitas: 'obesitas',
-};
+const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 
+// Fallback dari endpoint summary lama hanya punya kategori BB, bukan status
+// ringkas per-anak. Kita collapse ke 4 status supaya UI tetap konsisten.
+// `stunting` tidak bisa diturunkan persis dari summary ini, jadi tetap 0.
 function toGizi(cat: Record<string, number>): Record<string, number> {
-  const acc: Record<string, number> = {};
-  Object.entries(cat ?? {}).forEach(([k, v]) => {
-    const key = GIZI_MAP[k] ?? k;
-    acc[key] = (acc[key] ?? 0) + Number(v || 0);
-  });
-  return acc;
+  return {
+    [STATUS.NORMAL]: Number(cat?.normal || 0),
+    [STATUS.KURANG]: Number(cat?.sangat_kurus || 0) + Number(cat?.kurus || 0),
+    [STATUS.STUNTING]: 0,
+    [STATUS.OBESITAS]: Number(cat?.gemuk || 0) + Number(cat?.obesitas || 0),
+  };
 }
 
 export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDesa {
@@ -141,14 +136,6 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
 const BBU_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
 const TBU_ORDER = ['sangat_pendek', 'pendek', 'normal', 'tinggi'];
 const LKU_ORDER = ['mikrosefali', 'normal', 'makrosefali'];
-const BBTB_ORDER = [
-  'gizi_buruk',
-  'gizi_kurang',
-  'gizi_baik',
-  'berisiko_gizi_lebih',
-  'gizi_lebih',
-  'obesitas',
-];
 
 function latestPengukuran(
   pengukuran: PengukuranDesaStat[] | undefined
@@ -171,7 +158,7 @@ function createSummary(id?: number, nama?: string): PerPosyanduSummary {
     beratBadan: makeEmptyCounts(BBU_ORDER),
     tinggiBadan: makeEmptyCounts(TBU_ORDER),
     lingkarKepala: makeEmptyCounts(LKU_ORDER),
-    gizi: makeEmptyCounts(BBTB_ORDER),
+    gizi: makeEmptyCounts(GIZI_ORDER),
   };
 }
 
@@ -221,7 +208,12 @@ export function aggregateDesaDariAnak({
     const bbu = classifyBBU(toZ(latest.z_score_berat));
     const tbu = classifyTBU(toZ(latest.z_score_tinggi));
     const lku = classifyLKU(toZ(latest.z_score_lingkar_kepala));
-    const gizi = classifyBBTB(toZ(latest.z_score_gizi));
+    const gizi = overallStatus({
+      zScoreBB: toZ(latest.z_score_berat),
+      zScoreTB: toZ(latest.z_score_tinggi),
+      zScoreLK: toZ(latest.z_score_lingkar_kepala),
+      zScoreGizi: toZ(latest.z_score_gizi),
+    });
 
     if ([bbu, tbu, lku, gizi].some((status) => status === 'unknown')) return;
 

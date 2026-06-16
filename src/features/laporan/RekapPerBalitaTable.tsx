@@ -6,7 +6,8 @@ import {
   BBU,
   TBU,
   LKU,
-  BBTB,
+  STATUS,
+  STATUS_LABEL,
 } from '../pengukuran/statusGizi';
 import {
   indicatorCellToneClass,
@@ -27,14 +28,7 @@ interface BalitaRow {
 const BBU_ORDER = [BBU.SANGAT_KURANG, BBU.KURANG, BBU.NORMAL, BBU.LEBIH];
 const TBU_ORDER = [TBU.SANGAT_PENDEK, TBU.PENDEK, TBU.NORMAL, TBU.TINGGI];
 const LKU_ORDER = [LKU.MIKROSEFALI, LKU.NORMAL, LKU.MAKROSEFALI];
-const BBTB_ORDER = [
-  BBTB.GIZI_BURUK,
-  BBTB.GIZI_KURANG,
-  BBTB.GIZI_BAIK,
-  BBTB.BERISIKO_LEBIH,
-  BBTB.GIZI_LEBIH,
-  BBTB.OBESITAS,
-];
+const STATUS_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 
 const GROUPS: {
   label: string;
@@ -44,7 +38,7 @@ const GROUPS: {
   { label: 'Berat Badan (BB/U)', field: 'bbu', statuses: BBU_ORDER },
   { label: 'Tinggi Badan (TB/U)', field: 'tbu', statuses: TBU_ORDER },
   { label: 'Lingkar Kepala (LK/U)', field: 'lku', statuses: LKU_ORDER },
-  { label: 'Gizi (BB/TB)', field: 'gizi', statuses: BBTB_ORDER },
+  { label: 'Status Gizi', field: 'gizi', statuses: STATUS_ORDER },
 ];
 
 export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
@@ -93,9 +87,10 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
                 const tone = INDICATOR_TONE[s] || 'unknown';
                 const bgClass = indicatorHeaderToneClass(tone);
                 const borderClass = indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0);
+                const label = g.field === 'gizi' ? STATUS_LABEL[s] ?? s : INDICATOR_LABEL[s] ?? s;
                 return (
                   <th key={`${g.field}-${s}`} className={`${headCls} ${bgClass} ${borderClass}`}>
-                    {INDICATOR_LABEL[s] ?? s}
+                    {label}
                   </th>
                 );
               })

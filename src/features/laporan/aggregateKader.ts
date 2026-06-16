@@ -5,7 +5,6 @@ import {
   classifyBBU,
   classifyTBU,
   classifyLKU,
-  classifyBBTB,
   BBU,
   TBU,
   LKU,
@@ -93,6 +92,7 @@ function emptyCount(order) {
 }
 
 const toZ = (v) => (v == null || v === '' ? null : Number(v));
+const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 
 // Rekap distribusi per-indikator (BB/U, TB/U, LK/U) memakai pengukuran
 // TERAKHIR tiap balita. Dipakai untuk tabel rekap posyandu (scope 1 posyandu),
@@ -103,6 +103,7 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
   const beratBadan = emptyCount(BBU_ORDER);
   const tinggiBadan = emptyCount(TBU_ORDER);
   const lingkarKepala = emptyCount(LKU_ORDER);
+  const gizi = emptyCount(GIZI_ORDER);
   let totalDiukur = 0;
 
   safeAnak.forEach((anak) => {
@@ -117,10 +118,17 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
     const bbu = classifyBBU(toZ(latest.z_score_berat));
     const tbu = classifyTBU(toZ(latest.z_score_tinggi));
     const lku = classifyLKU(toZ(latest.z_score_lingkar_kepala));
+    const statusGizi = overallStatus({
+      zScoreBB: toZ(latest.z_score_berat),
+      zScoreTB: toZ(latest.z_score_tinggi),
+      zScoreLK: toZ(latest.z_score_lingkar_kepala),
+      zScoreGizi: toZ(latest.z_score_gizi),
+    });
 
     if (beratBadan[bbu] != null) beratBadan[bbu] += 1;
     if (tinggiBadan[tbu] != null) tinggiBadan[tbu] += 1;
     if (lingkarKepala[lku] != null) lingkarKepala[lku] += 1;
+    if (gizi[statusGizi] != null) gizi[statusGizi] += 1;
   });
 
   return {
@@ -129,6 +137,7 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
     beratBadan,
     tinggiBadan,
     lingkarKepala,
+    gizi,
   };
 }
 
@@ -163,7 +172,12 @@ export function aggregateKaderPerBalita({ anakList, pengukuranByAnak }) {
         bbu: classifyBBU(toZ(latest.z_score_berat)),
         tbu: classifyTBU(toZ(latest.z_score_tinggi)),
         lku: classifyLKU(toZ(latest.z_score_lingkar_kepala)),
-        gizi: classifyBBTB(toZ(latest.z_score_gizi)),
+        gizi: overallStatus({
+          zScoreBB: toZ(latest.z_score_berat),
+          zScoreTB: toZ(latest.z_score_tinggi),
+          zScoreLK: toZ(latest.z_score_lingkar_kepala),
+          zScoreGizi: toZ(latest.z_score_gizi),
+        }),
       };
     })
     .sort((a, b) =>

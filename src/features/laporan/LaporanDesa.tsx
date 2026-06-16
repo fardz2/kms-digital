@@ -15,7 +15,14 @@ import {
   aggregateDesaDariAnak,
   type PerPosyanduSummary,
 } from './aggregateDesa';
-import { INDICATOR_TONE, BBU, BBTB, LKU, TBU } from '../pengukuran/statusGizi';
+import {
+  INDICATOR_TONE,
+  BBU,
+  LKU,
+  STATUS,
+  STATUS_LABEL,
+  TBU,
+} from '../pengukuran/statusGizi';
 import {
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
@@ -35,12 +42,6 @@ const LABEL_MAP: Record<string, string> = {
   sangat_pendek: 'Sangat Pendek',
   makrosefali: 'Makrosefali',
   mikrosefali: 'Mikrosefali',
-  gizi_buruk: 'Gizi Buruk',
-  gizi_kurang: 'Gizi Kurang',
-  gizi_baik: 'Gizi Baik',
-  berisiko_gizi_lebih: 'Berisiko Gizi Lebih',
-  gizi_lebih: 'Gizi Lebih',
-  obesitas: 'Obesitas',
 };
 
 function pct(value: number, total: number): string {
@@ -48,14 +49,7 @@ function pct(value: number, total: number): string {
   return `${Math.round((value / total) * 100)}%`;
 }
 
-const GIZI_ORDER = [
-  'gizi_buruk',
-  'gizi_kurang',
-  'gizi_baik',
-  'berisiko_gizi_lebih',
-  'gizi_lebih',
-  'obesitas',
-];
+const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 const BB_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
 const TBU_ORDER = ['sangat_pendek', 'pendek', 'normal', 'tinggi'];
 const LKU_ORDER = ['mikrosefali', 'normal', 'makrosefali'];
@@ -81,12 +75,10 @@ const LKU_TONE_MAP: Record<string, string> = {
 };
 
 const GIZI_TONE_MAP: Record<string, string> = {
-  gizi_buruk: BBTB.GIZI_BURUK,
-  gizi_kurang: BBTB.GIZI_KURANG,
-  gizi_baik: BBTB.GIZI_BAIK,
-  berisiko_gizi_lebih: BBTB.BERISIKO_LEBIH,
-  gizi_lebih: BBTB.GIZI_LEBIH,
-  obesitas: BBTB.OBESITAS,
+  normal: STATUS.NORMAL,
+  kurang: STATUS.KURANG,
+  stunting: STATUS.STUNTING,
+  obesitas: STATUS.OBESITAS,
 };
 
 function sumCat(cat: Record<string, number>): number {
@@ -103,7 +95,7 @@ const GROUPS: {
   { label: 'Berat Badan (BB/U)', field: 'beratBadan', distribusi: 'distribusiBB', order: BB_ORDER, toneMap: BB_TONE_MAP },
   { label: 'Tinggi Badan (TB/U)', field: 'tinggiBadan', distribusi: 'distribusiTB', order: TBU_ORDER, toneMap: TBU_TONE_MAP },
   { label: 'Lingkar Kepala (LK/U)', field: 'lingkarKepala', distribusi: 'distribusiLK', order: LKU_ORDER, toneMap: LKU_TONE_MAP },
-  { label: 'Gizi (BB/TB)', field: 'gizi', distribusi: 'distribusiGizi', order: GIZI_ORDER, toneMap: GIZI_TONE_MAP },
+  { label: 'Status Gizi', field: 'gizi', distribusi: 'distribusiGizi', order: GIZI_ORDER, toneMap: GIZI_TONE_MAP },
 ];
 
 export function RekapTabel({
@@ -172,12 +164,13 @@ export function RekapTabel({
               g.statuses.map((s, sIdx) => {
                 const toneKey = g.toneMap[s] ?? s;
                 const tone = INDICATOR_TONE[toneKey] || 'unknown';
+                const label = g.field === 'gizi' ? STATUS_LABEL[s] ?? s : LABEL_MAP[s] ?? s;
                 return (
                   <th
                     key={`${g.field}-${s}`}
                     className={`${headCls} ${indicatorHeaderToneClass(tone)} ${indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0)}`}
                   >
-                    {LABEL_MAP[s] ?? s}
+                    {label}
                   </th>
                 );
               })

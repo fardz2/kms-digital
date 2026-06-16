@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { aggregateDesaDariAnak } from '../../../features/laporan/aggregateDesa';
 
 describe('aggregateDesaDariAnak', () => {
-  test('menghitung gizi desa dari pengukuran anak, bukan menyalin BB', () => {
+  test('menghitung gizi desa ke 4 status ringkas', () => {
     const result = aggregateDesaDariAnak({
       posyanduStats: [
         {
@@ -39,10 +39,10 @@ describe('aggregateDesaDariAnak', () => {
     expect(result.totalBalita).toBe(2);
     expect(result.perPosyandu).toHaveLength(1);
     expect(result.perPosyandu[0].beratBadan.bb_normal).toBe(2);
-    expect(result.perPosyandu[0].gizi.gizi_baik).toBe(1);
+    expect(result.perPosyandu[0].gizi.normal).toBe(1);
     expect(result.perPosyandu[0].gizi.obesitas).toBe(1);
     expect(result.distribusiBB.bb_normal).toBe(2);
-    expect(result.distribusiGizi.gizi_baik).toBe(1);
+    expect(result.distribusiGizi.normal).toBe(1);
     expect(result.distribusiGizi.obesitas).toBe(1);
   });
 });
