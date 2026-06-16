@@ -1,12 +1,9 @@
 export function indicatorHeaderToneClass(tone: string): string {
-  if (tone === 'danger') return 'bg-danger';
-  if (tone === 'warning') return 'bg-warning';
-  if (tone === 'normal') return 'bg-primary-600';
-  return 'bg-neutral-500';
+  return 'bg-primary-600';
 }
 
 export function indicatorCellToneClass(tone: string): string {
-  if (tone === 'danger') return 'text-danger font-bold';
+  if (tone === 'danger') return 'text-warning font-bold';
   if (tone === 'warning') return 'text-amber-700 font-bold';
   return 'text-charcoal';
 }

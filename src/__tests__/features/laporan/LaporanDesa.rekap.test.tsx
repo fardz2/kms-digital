@@ -1,31 +1,27 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { RekapTabel } from '../../../features/laporan/LaporanDesa';
 
-const perPosyandu = [
-  {
-    id: 1,
-    nama: 'Posyandu Melati',
-    total: 10,
-    beratBadan: { sangat_kurus: 1, kurus: 2, normal: 5, gemuk: 2 },
-    tinggiBadan: { sangat_pendek: 1, pendek: 2, normal: 5, tinggi: 2 },
-    lingkarKepala: { mikrosefali: 1, normal: 8, makrosefali: 1 },
-    gizi: {
-      gizi_buruk: 1,
-      gizi_kurang: 2,
-      gizi_baik: 5,
-      berisiko_gizi_lebih: 0,
-      gizi_lebih: 1,
-      obesitas: 1,
-    },
+const perPosyandu = Array.from({ length: 6 }, (_, idx) => ({
+  id: idx + 1,
+  nama: `Posyandu ${idx + 1}`,
+  total: 10,
+  beratBadan: { sangat_kurus: 1, kurus: 2, normal: 5, gemuk: 2 },
+  tinggiBadan: { sangat_pendek: 1, pendek: 2, normal: 5, tinggi: 2 },
+  lingkarKepala: { mikrosefali: 1, normal: 8, makrosefali: 1 },
+  gizi: {
+    normal: 5,
+    kurang: 2,
+    stunting: 1,
+    obesitas: 2,
   },
-];
+}));
 
 describe('RekapTabel', () => {
-  test('menempatkan gizi sebagai grup paling kanan', () => {
+  test('menempatkan status gizi sebagai grup paling kanan dengan header polos', () => {
     render(
       <RekapTabel
-        perPosyandu={perPosyandu}
+        perPosyandu={perPosyandu.slice(0, 1)}
         distribusiBB={perPosyandu[0].beratBadan}
         distribusiTB={perPosyandu[0].tinggiBadan}
         distribusiLK={perPosyandu[0].lingkarKepala}
@@ -35,16 +31,16 @@ describe('RekapTabel', () => {
 
     const headers = screen.getAllByRole('columnheader').map((el) => el.textContent);
     expect(headers.slice(2, 6)).toEqual([
-      'Berat Badan (BB/U)',
-      'Tinggi Badan (TB/U)',
-      'Lingkar Kepala (LK/U)',
-      'Gizi (BB/TB)',
+      'Berat Badan',
+      'Tinggi Badan',
+      'Lingkar Kepala',
+      'Status Gizi',
     ]);
-    expect(screen.getByRole('columnheader', { name: 'Gizi Buruk' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Berisiko Gizi Lebih' })).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader', { name: 'Normal' })[0]).toHaveClass('sticky');
+    expect(screen.queryByRole('columnheader', { name: 'Gizi Buruk' })).not.toBeInTheDocument();
   });
 
-  test('menampilkan nilai berat badan dari data desa', () => {
+  test('header tetap sticky saat tabel panjang dan pagination berpindah halaman', () => {
     render(
       <RekapTabel
         perPosyandu={perPosyandu}
@@ -55,19 +51,20 @@ describe('RekapTabel', () => {
       />
     );
 
-    const row = screen.getByText('Posyandu Melati').closest('tr');
-    expect(row).not.toBeNull();
-    const cells = row?.querySelectorAll('td');
-    expect(cells?.[2]?.textContent).toBe('1');
-    expect(cells?.[3]?.textContent).toBe('2');
-    expect(cells?.[4]?.textContent).toBe('5');
-    expect(cells?.[5]?.textContent).toBe('2');
+    expect(screen.getByRole('columnheader', { name: 'Posyandu' })).toHaveClass('sticky');
+    expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('sticky');
+    expect(screen.queryByText('Posyandu 6')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /halaman 2/i }));
+
+    expect(screen.getByText('Posyandu 6')).toBeInTheDocument();
+    expect(screen.getByText('Total')).toBeInTheDocument();
   });
 
-  test('ada garis pemisah antar grup indikator', () => {
+  test('status ringkas di header desa tetap punya pemisah grup', () => {
     render(
       <RekapTabel
-        perPosyandu={perPosyandu}
+        perPosyandu={perPosyandu.slice(0, 1)}
         distribusiBB={perPosyandu[0].beratBadan}
         distribusiTB={perPosyandu[0].tinggiBadan}
         distribusiLK={perPosyandu[0].lingkarKepala}
@@ -75,14 +72,14 @@ describe('RekapTabel', () => {
       />
     );
 
-    expect(screen.getByRole('columnheader', { name: 'Tinggi Badan (TB/U)' })).toHaveClass('border-l-4');
-    expect(screen.getByRole('columnheader', { name: 'Gizi (BB/TB)' })).toHaveClass('border-l-4');
+    expect(screen.getByRole('columnheader', { name: 'Tinggi Badan' })).toHaveClass('border-l-4');
+    expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toHaveClass('border-l-4');
   });
 
-  test('status raw desa memakai warna indikator yang benar', () => {
+  test('status bahaya di body tabel desa dipoles kuning lewat status badge cells', () => {
     render(
       <RekapTabel
-        perPosyandu={perPosyandu}
+        perPosyandu={perPosyandu.slice(0, 1)}
         distribusiBB={perPosyandu[0].beratBadan}
         distribusiTB={perPosyandu[0].tinggiBadan}
         distribusiLK={perPosyandu[0].lingkarKepala}
@@ -90,24 +87,7 @@ describe('RekapTabel', () => {
       />
     );
 
-    expect(screen.getByRole('columnheader', { name: 'Sangat Kurus' })).toHaveClass('bg-danger');
-    expect(screen.getByRole('columnheader', { name: 'Kurus' })).toHaveClass('bg-warning');
-    expect(screen.getByRole('columnheader', { name: 'Gemuk' })).toHaveClass('bg-warning');
-  });
-
-  test('gizi tetap tampil walau distribusi kosong', () => {
-    render(
-      <RekapTabel
-        perPosyandu={perPosyandu}
-        distribusiBB={{}}
-        distribusiTB={{}}
-        distribusiLK={{}}
-        distribusiGizi={{}}
-      />
-    );
-
-    expect(screen.getByRole('columnheader', { name: 'Gizi (BB/TB)' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Gizi Buruk' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Obesitas' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Status Gizi' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Stunting' })).toHaveClass('bg-primary-600');
   });
 });

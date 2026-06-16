@@ -1,4 +1,4 @@
-import { useMemo, type Ref } from 'react';
+import { useMemo, useState, type Ref } from 'react';
 import {
   Baby,
   Building2,
@@ -27,6 +27,7 @@ import {
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
 } from './indicatorTableStyles';
+import TablePagination from './TablePagination';
 
 const LABEL_MAP: Record<string, string> = {
   normal: 'Normal',
@@ -92,11 +93,16 @@ const GROUPS: {
   order: string[];
   toneMap: Record<string, string>;
 }[] = [
-  { label: 'Berat Badan (BB/U)', field: 'beratBadan', distribusi: 'distribusiBB', order: BB_ORDER, toneMap: BB_TONE_MAP },
-  { label: 'Tinggi Badan (TB/U)', field: 'tinggiBadan', distribusi: 'distribusiTB', order: TBU_ORDER, toneMap: TBU_TONE_MAP },
-  { label: 'Lingkar Kepala (LK/U)', field: 'lingkarKepala', distribusi: 'distribusiLK', order: LKU_ORDER, toneMap: LKU_TONE_MAP },
+  { label: 'Berat Badan', field: 'beratBadan', distribusi: 'distribusiBB', order: BB_ORDER, toneMap: BB_TONE_MAP },
+  { label: 'Tinggi Badan', field: 'tinggiBadan', distribusi: 'distribusiTB', order: TBU_ORDER, toneMap: TBU_TONE_MAP },
+  { label: 'Lingkar Kepala', field: 'lingkarKepala', distribusi: 'distribusiLK', order: LKU_ORDER, toneMap: LKU_TONE_MAP },
   { label: 'Status Gizi', field: 'gizi', distribusi: 'distribusiGizi', order: GIZI_ORDER, toneMap: GIZI_TONE_MAP },
 ];
+
+const DEFAULT_PAGE_SIZE = 5;
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const HEADER_ROW_CLASS = 'sticky top-0 z-30';
+const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 
 export function RekapTabel({
   perPosyandu,
@@ -111,6 +117,8 @@ export function RekapTabel({
   distribusiLK: Record<string, number>;
   distribusiGizi: Record<string, number>;
 }) {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const distribusiMap = {
     distribusiBB: distribusiBB ?? {},
     distribusiTB: distribusiTB ?? {},
@@ -126,6 +134,10 @@ export function RekapTabel({
     return { ...g, statuses: present };
   });
   const hasData = groups.some((g) => g.statuses.length > 0);
+  const pageCount = Math.max(1, Math.ceil(perPosyandu.length / pageSize));
+  const safePageIndex = Math.min(pageIndex, pageCount - 1);
+  const pageRows = perPosyandu.slice(safePageIndex * pageSize, safePageIndex * pageSize + pageSize);
+
   if (perPosyandu.length === 0 || !hasData) {
     return <div className="text-body-sm text-graphite">Belum ada data</div>;
   }
@@ -136,103 +148,116 @@ export function RekapTabel({
     'px-[13px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap';
 
   return (
+    <div className="space-y-[17px]">
       <div className="overflow-x-auto rounded-default border-2 border-light-ash">
-      <table className="w-full border-collapse text-charcoal">
-        <thead>
-          <tr>
-            <th rowSpan={2} className={`${headCls} bg-primary-600 border-l-0`}>
-              Posyandu
-            </th>
-            <th
-              rowSpan={2}
-              className={`${headCls} bg-primary-600 ${indicatorGroupBorderClass('header', false)}`}
-            >
-              Jumlah Balita
-            </th>
-            {groups.map((g, gIdx) => (
-              <th
-                key={g.field}
-                colSpan={g.statuses.length}
-                className={`${headCls} bg-primary-600 ${indicatorGroupBorderClass('header', gIdx > 0)}`}
-              >
-                {g.label}
+        <table className="w-full border-collapse text-charcoal">
+          <thead>
+            <tr>
+              <th rowSpan={2} className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 border-l-0`}>
+                Posyandu
               </th>
+              <th
+                rowSpan={2}
+                className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 ${indicatorGroupBorderClass('header', false)}`}
+              >
+                Jumlah Balita
+              </th>
+              {groups.map((g, gIdx) => (
+                <th
+                  key={g.field}
+                  colSpan={g.statuses.length}
+                  className={`${headCls} ${HEADER_ROW_CLASS} bg-primary-600 ${indicatorGroupBorderClass('header', gIdx > 0)}`}
+                >
+                  {g.label}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              {groups.flatMap((g, gIdx) =>
+                g.statuses.map((s, sIdx) => {
+                  const toneKey = g.toneMap[s] ?? s;
+                  const tone = INDICATOR_TONE[toneKey] || 'unknown';
+                  const label = g.field === 'gizi' ? STATUS_LABEL[s] ?? s : LABEL_MAP[s] ?? s;
+                  return (
+                    <th
+                      key={`${g.field}-${s}`}
+                      className={`${headCls} ${SUBHEADER_ROW_CLASS} ${indicatorHeaderToneClass(tone)} ${indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0)}`}
+                    >
+                      {label}
+                    </th>
+                  );
+                })
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.map((p, idx) => (
+              <tr
+                key={p.id}
+                className={`border-b-2 border-light-ash ${idx % 2 === 1 ? 'bg-faint-fog' : 'bg-white'}`}
+              >
+                <td className="px-[13px] py-[10px] text-body-sm text-center font-medium align-middle">
+                  {p.nama}
+                </td>
+                <td className={`${cellCls} ${indicatorGroupBorderClass('cell', false)}`}>
+                  {p.total}
+                </td>
+                {groups.flatMap((g, gIdx) => {
+                  const cat = p[g.field] ?? {};
+                  return g.statuses.map((s, sIdx) => {
+                    const v = Number(cat[s] || 0);
+                    return (
+                      <td
+                        key={`${g.field}-${s}`}
+                        className={`${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`}
+                      >
+                        {v}
+                      </td>
+                    );
+                  });
+                })}
+              </tr>
             ))}
-          </tr>
-          <tr>
-            {groups.flatMap((g, gIdx) =>
-              g.statuses.map((s, sIdx) => {
-                const toneKey = g.toneMap[s] ?? s;
-                const tone = INDICATOR_TONE[toneKey] || 'unknown';
-                const label = g.field === 'gizi' ? STATUS_LABEL[s] ?? s : LABEL_MAP[s] ?? s;
-                return (
-                  <th
-                    key={`${g.field}-${s}`}
-                    className={`${headCls} ${indicatorHeaderToneClass(tone)} ${indicatorGroupBorderClass('header', gIdx > 0 && sIdx === 0)}`}
-                  >
-                    {label}
-                  </th>
-                );
-              })
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {perPosyandu.map((p, idx) => (
-            <tr
-              key={p.id}
-              className={`border-b-2 border-light-ash ${idx % 2 === 1 ? 'bg-faint-fog' : 'bg-white'}`}
-            >
-            <td className="px-[13px] py-[10px] text-body-sm text-center font-medium align-middle">
-              {p.nama}
-            </td>
+            <tr className="border-t-2 border-primary-600/40 font-semibold bg-primary-50">
+              <td className="px-[13px] py-[10px] text-body-sm text-center align-middle">
+                Total
+              </td>
               <td className={`${cellCls} ${indicatorGroupBorderClass('cell', false)}`}>
-                {p.total}
+                {sumCat(distribusiBB)}
               </td>
               {groups.flatMap((g, gIdx) => {
-                const cat = p[g.field] ?? {};
+                const dist = distribusiMap[g.distribusi];
+                const grand = sumCat(dist);
                 return g.statuses.map((s, sIdx) => {
-                  const v = Number(cat[s] || 0);
+                  const v = Number(dist[s] || 0);
                   return (
                     <td
-                      key={`${g.field}-${s}`}
+                      key={`${g.field}-total-${s}`}
                       className={`${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`}
                     >
-                      {v}
+                      <div className="leading-tight">{v}</div>
+                      <div className="text-caption font-normal text-graphite">
+                        {pct(v, grand)}
+                      </div>
                     </td>
                   );
                 });
               })}
             </tr>
-          ))}
-          <tr className="border-t-2 border-primary-600/40 font-semibold bg-primary-50">
-            <td className="px-[13px] py-[10px] text-body-sm text-center align-middle">
-              Total
-            </td>
-            <td className={`${cellCls} ${indicatorGroupBorderClass('cell', false)}`}>
-              {sumCat(distribusiBB)}
-            </td>
-            {groups.flatMap((g, gIdx) => {
-              const dist = distribusiMap[g.distribusi];
-              const grand = sumCat(dist);
-              return g.statuses.map((s, sIdx) => {
-                const v = Number(dist[s] || 0);
-                return (
-                  <td
-                    key={`${g.field}-${s}`}
-                    className={`${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`}
-                  >
-                    <div className="leading-tight">{v}</div>
-                    <div className="text-caption font-normal text-graphite">
-                      {pct(v, grand)}
-                    </div>
-                  </td>
-                );
-              });
-            })}
-          </tr>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+      <TablePagination
+        pageIndex={safePageIndex}
+        pageCount={pageCount}
+        pageSize={pageSize}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        onPageIndexChange={setPageIndex}
+        onPageSizeChange={(nextSize) => {
+          setPageSize(nextSize);
+          setPageIndex(0);
+        }}
+      />
     </div>
   );
 }
