@@ -8,7 +8,6 @@ const useSessionMock = vi.fn();
 const usePengukuranBulananKaderMock = vi.fn();
 const usePendingOrangTuaMock = vi.fn();
 const usePendingAnakMock = vi.fn();
-const useReminderListMock = vi.fn();
 const useConfirmDialogMock = vi.fn();
 
 vi.mock('../../../features/auth/useSession', () => ({
@@ -22,10 +21,6 @@ vi.mock('../../../queries/usePengukuranBulananKader', () => ({
 vi.mock('../../../queries/useApproveQueries', () => ({
   usePendingOrangTua: () => usePendingOrangTuaMock(),
   usePendingAnak: () => usePendingAnakMock(),
-}));
-
-vi.mock('../../../queries/useReminderQueries', () => ({
-  useReminderList: () => useReminderListMock(),
 }));
 
 vi.mock('../../../hooks/useConfirmDialog', () => ({
@@ -74,7 +69,6 @@ describe('ModePosyandu', () => {
     usePengukuranBulananKaderMock.mockReset();
     usePendingOrangTuaMock.mockReset();
     usePendingAnakMock.mockReset();
-    useReminderListMock.mockReset();
     useConfirmDialogMock.mockReset();
 
     useSessionMock.mockReturnValue({
@@ -84,37 +78,25 @@ describe('ModePosyandu', () => {
       logout: vi.fn(),
     });
     usePengukuranBulananKaderMock.mockReturnValue({
-      anakList: [],
-      pengukuranByAnak: {},
+      anakList: [{ id: 1, nama: 'Budi' }],
+      pengukuranByAnak: { 1: [] },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
     });
     usePendingOrangTuaMock.mockReturnValue({ data: [] });
     usePendingAnakMock.mockReturnValue({ data: [] });
-    useReminderListMock.mockReturnValue({
-      data: [
-        {
-          id: 1,
-          judul: 'Posyandu Melati',
-          deskripsi: 'Hari timbang balita',
-          tanggal_reminder: '2026-06-20',
-        },
-      ],
-      isLoading: false,
-    });
     useConfirmDialogMock.mockReturnValue(vi.fn());
   });
 
-  test('menampilkan section acara posyandu di kader', () => {
+  test('menampilkan daftar balita di kader', () => {
     render(
       <MemoryRouter>
         <ModePosyandu />
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'Acara Posyandu' })).toBeInTheDocument();
-    expect(screen.getByText('Posyandu Melati')).toBeInTheDocument();
-    expect(screen.getByText('Hari timbang balita')).toBeInTheDocument();
+    expect(screen.getByTestId('balita-card')).toBeInTheDocument();
+    expect(screen.queryByText('Acara Posyandu')).not.toBeInTheDocument();
   });
 });

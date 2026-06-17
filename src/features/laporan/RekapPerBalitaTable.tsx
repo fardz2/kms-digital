@@ -63,10 +63,7 @@ const INDICATOR_LABEL_MAP: Record<string, string> = {
 };
 
 export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
-  const rows = useMemo(
-    () => (data ?? []).filter((r) => r.tanggalUkur != null),
-    [data]
-  );
+  const rows = useMemo(() => data ?? [], [data]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 

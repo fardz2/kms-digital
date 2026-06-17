@@ -9,6 +9,7 @@ import LoginPortal from '../features/auth/LoginPortal';
 import LandingPage from '../pages/LandingPage';
 import NotFound from '../pages/NotFound';
 import ModePosyandu from '../features/kader/ModePosyandu';
+import AcaraPosyanduPage from '../features/kader/AcaraPosyanduPage';
 import AkunOrangTuaPage from '../features/kader/AkunOrangTuaPage';
 import BerandaOT from '../features/orangtua/BerandaOT';
 import BerandaDesa from '../features/desa/BerandaDesa';
@@ -58,6 +59,7 @@ export default function AppRoutes() {
       {/* Role: Kader Posyandu */}
       <Route element={<RequireRole allow={['KADER_POSYANDU']} />}>
         <Route path="/kader/balita" element={<ModePosyandu />} />
+        <Route path="/kader/acara" element={<AcaraPosyanduPage />} />
         <Route path="/kader/balita/:id" element={withSuspense(<DetailAnak />)} />
         <Route path="/kader/orangtua" element={<AkunOrangTuaPage />} />
         <Route path="/kader/laporan" element={<LaporanBulananKader />} />

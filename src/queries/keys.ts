@@ -63,7 +63,7 @@ export const qk = {
   },
   reminder: {
     all: ['reminder'],
-    list: ['reminder', 'list'],
+    list: (role) => ['reminder', 'list', role],
   },
   orangTua: {
     all: ['orangTua'],

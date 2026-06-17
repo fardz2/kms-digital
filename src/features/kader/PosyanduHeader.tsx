@@ -1,6 +1,6 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { BarChart3, LogOut, Users, Lock } from 'lucide-react';
+import { BarChart3, CalendarDays, LogOut, Users, Lock } from 'lucide-react';
 import Button from '../../components/ui/Button';
 
 export default function PosyanduHeader({
@@ -9,6 +9,7 @@ export default function PosyanduHeader({
   sudahCount,
   totalCount,
   pendingCount = 0,
+  onAcara,
   onAkunOrangTua,
   onLaporan,
   onUbahSandi,
@@ -35,6 +36,14 @@ export default function PosyanduHeader({
             )}
           </div>
           <div className="flex flex-wrap gap-[8px] w-full md:w-auto">
+            <Button
+              variant="default"
+              size="md"
+              leadingIcon={<CalendarDays size={18} strokeWidth={2} />}
+              onClick={onAcara}
+            >
+              Acara
+            </Button>
             <Button
               variant="default"
               size="md"

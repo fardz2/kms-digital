@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useQueries } from '@tanstack/react-query';
@@ -12,7 +11,6 @@ import {
 import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import MonthPicker from '../../components/ui/MonthPicker';
 import StatCard from '../../components/ui/StatCard';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { useAnakList } from '../../queries/useAnakQueries';
@@ -25,7 +23,7 @@ import ErrorState from '../../components/ui/ErrorState';
 
 export default function LaporanBulananKader() {
   const navigate = useNavigate();
-  const [bulan, setBulan] = useState(() => dayjs().format('YYYY-MM'));
+  const bulan = dayjs().format('YYYY-MM');
   const { role } = useSession();
   const { data: anakList, isLoading: anakLoading, isError: anakError, refetch: refetchAnak } = useAnakList();
 
@@ -77,13 +75,6 @@ export default function LaporanBulananKader() {
         >
           Kembali
         </Button>
-
-        <div data-tour-id="kader-laporan-picker" className="mb-[25px]">
-          <div className="text-caption font-bold uppercase tracking-[0.12em] text-graphite mb-[8px]">
-            Pilih Bulan
-          </div>
-          <MonthPicker value={bulan} onChange={setBulan} />
-        </div>
 
         {isError && <ErrorState onRetry={refetchAll} />}
 

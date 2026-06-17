@@ -17,6 +17,7 @@ export interface PosyanduStat {
 export interface AnakDesaStat {
   id: number;
   id_posyandu?: number | null;
+  nama?: string;
 }
 
 export interface PengukuranDesaStat {
@@ -39,6 +40,10 @@ export interface PerPosyanduSummary {
 
 export interface AggregatedDesa {
   totalBalita: number;
+  tanpaPosyandu: number;
+  tanpaPosyanduList: Array<{ id: number; nama: string }>;
+  posyanduTidakDikenal: number;
+  posyanduTidakDikenalList: Array<{ id: number; nama: string; idPosyandu: number }>;
   perPosyandu: PerPosyanduSummary[];
   distribusiBB: Record<string, number>;
   distribusiTB: Record<string, number>;
@@ -85,6 +90,10 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
   if (!Array.isArray(statistik) || statistik.length === 0) {
     return {
       totalBalita: 0,
+      tanpaPosyandu: 0,
+      tanpaPosyanduList: [],
+      posyanduTidakDikenal: 0,
+      posyanduTidakDikenalList: [],
       perPosyandu: [],
       distribusiBB: {},
       distribusiTB: {},
@@ -187,11 +196,15 @@ export function aggregateDesaDariAnak({
     : [];
   const safeAnak = Array.isArray(anakList) ? anakList : [];
   const summaryMap = new Map<number, PerPosyanduSummary>();
+  const tanpaPosyanduList: Array<{ id: number; nama: string }> = [];
+  const posyanduTidakDikenalList: Array<{ id: number; nama: string; idPosyandu: number }> = [];
   const metaById = new Map(
     metaPosyandu
       .filter((p: PosyanduStat) => p.id_posyandu != null)
       .map((p: PosyanduStat) => [p.id_posyandu as number, p.nama_posyandu] as const)
   );
+  let tanpaPosyandu = 0;
+  let posyanduTidakDikenal = 0;
 
   metaPosyandu.forEach((p: PosyanduStat) => {
     if (p.id_posyandu == null) return;
@@ -204,11 +217,28 @@ export function aggregateDesaDariAnak({
   safeAnak.forEach((anak: AnakDesaStat) => {
     const latest = latestPengukuran(pengukuranByAnak?.[anak.id]);
     const idPosyandu = anak.id_posyandu;
-    if (idPosyandu == null) return;
+    if (idPosyandu == null) {
+      tanpaPosyandu += 1;
+      tanpaPosyanduList.push({
+        id: anak.id,
+        nama: anak.nama ?? `Balita ${anak.id}`,
+      });
+      return;
+    }
+
+    const knownPosyandu = metaById.has(idPosyandu);
+    if (!knownPosyandu) {
+      posyanduTidakDikenal += 1;
+      posyanduTidakDikenalList.push({
+        id: anak.id,
+        nama: anak.nama ?? `Balita ${anak.id}`,
+        idPosyandu,
+      });
+    }
 
     const row =
       summaryMap.get(idPosyandu) ??
-      createSummary(idPosyandu, metaById.get(idPosyandu));
+      createSummary(idPosyandu, metaById.get(idPosyandu) ?? 'Posyandu Tidak Dikenal');
 
     row.total += 1;
 
@@ -244,7 +274,7 @@ export function aggregateDesaDariAnak({
     (a.id ?? 0) - (b.id ?? 0)
   );
 
-  const totalBalita = perPosyandu.reduce((acc, row) => acc + row.total, 0);
+  const totalBalita = safeAnak.length;
   const distribusiBB: Record<string, number> = {};
   const distribusiTB: Record<string, number> = {};
   const distribusiLK: Record<string, number> = {};
@@ -259,6 +289,10 @@ export function aggregateDesaDariAnak({
 
   return {
     totalBalita,
+    tanpaPosyandu,
+    tanpaPosyanduList,
+    posyanduTidakDikenal,
+    posyanduTidakDikenalList,
     perPosyandu,
     distribusiBB,
     distribusiTB,

@@ -337,6 +337,52 @@ const LaporanDesa = function LaporanDesa({ ref }: { ref?: Ref<HTMLDivElement> })
         </Card>
       )}
 
+      {(agg.tanpaPosyandu > 0 || agg.posyanduTidakDikenal > 0) && (
+        <Card>
+          <div className="space-y-[13px] text-body-sm text-warning">
+            {agg.tanpaPosyandu > 0 && (
+              <div className="space-y-[8px]">
+                <div className="flex items-start gap-[13px]">
+                  <AlertTriangle size={18} strokeWidth={2} className="mt-[2px] shrink-0" />
+                  <span>
+                    Ada {agg.tanpaPosyandu} balita tanpa posyandu di data desa. Data ini tidak ikut masuk rekap per-posyandu.
+                  </span>
+                </div>
+                {agg.tanpaPosyanduList.length > 0 && (
+                  <ul className="m-0 pl-[34px] space-y-[6px] text-deep-slate">
+                    {agg.tanpaPosyanduList.map((item) => (
+                      <li key={item.id} className="list-disc">
+                        {item.nama}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            {agg.posyanduTidakDikenal > 0 && (
+              <div className="space-y-[8px]">
+                <div className="flex items-start gap-[13px]">
+                  <AlertTriangle size={18} strokeWidth={2} className="mt-[2px] shrink-0" />
+                  <span>
+                    Ada {agg.posyanduTidakDikenal} balita dengan posyandu yang tidak dikenal di data desa. Mereka tetap dihitung, tetapi posyandunya perlu diperiksa.
+                  </span>
+                </div>
+                {agg.posyanduTidakDikenalList.length > 0 && (
+                  <ul className="m-0 pl-[34px] space-y-[6px] text-deep-slate">
+                    {agg.posyanduTidakDikenalList.map((item) => (
+                      <li key={item.id} className="list-disc">
+                        {item.nama}
+                        <span className="text-graphite"> (ID posyandu: {item.idPosyandu})</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       <Card title="Rekap Gizi per Posyandu">
         <RekapTabel
           perPosyandu={agg.perPosyandu}
@@ -347,7 +393,7 @@ const LaporanDesa = function LaporanDesa({ ref }: { ref?: Ref<HTMLDivElement> })
         />
       </Card>
 
-      {agg.perPosyandu.length > 0 && agg.totalBalita > 0 && (
+      {agg.perPosyandu.length > 0 && agg.totalBalita > 0 && agg.tanpaPosyandu === 0 && agg.posyanduTidakDikenal === 0 && (
         <Card>
           <div className="flex items-center gap-[13px] text-body-sm text-success">
             <CheckCircle2 size={18} strokeWidth={2} />

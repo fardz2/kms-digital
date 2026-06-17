@@ -12,14 +12,14 @@ interface CreateReminderPayload {
 }
 
 export function useReminderList() {
-  const { isAuthenticated } = useSession();
+  const { role, isAuthenticated } = useSession();
   return useQuery<Reminder[]>({
-    queryKey: qk.reminder.list,
+    queryKey: qk.reminder.list(role),
     queryFn: async () => {
       const res = await reminderApi.list();
       return res.data ?? [];
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!role,
     staleTime: 60 * 1000,
   });
 }
@@ -34,7 +34,8 @@ export function useCreateReminder() {
 
 export function useDeleteReminder() {
   const qc = useQueryClient();
-  const optimistic = optimisticRemove<Reminder>(qc, qk.reminder.list);
+  const { role } = useSession();
+  const optimistic = optimisticRemove<Reminder>(qc, qk.reminder.list(role));
   return useMutation({
     mutationFn: (id: number) => reminderApi.remove(id),
     onMutate: optimistic.onMutate,

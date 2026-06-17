@@ -17,6 +17,19 @@ const rows = Array.from({ length: 6 }, (_, idx) => {
   };
 });
 
+const rowsWithUnmeasured = [
+  ...rows.slice(0, 2),
+  {
+    id: 99,
+    nama: 'Balita 99',
+    tanggalUkur: null,
+    bbu: 'unknown',
+    tbu: 'unknown',
+    lku: 'unknown',
+    gizi: 'unknown',
+  },
+];
+
 describe('RekapPerBalitaTable', () => {
   test('header sticky dan pagination bekerja', () => {
     render(<RekapPerBalitaTable data={rows} />);
@@ -55,5 +68,15 @@ describe('RekapPerBalitaTable', () => {
     expect(row).not.toBeNull();
     const cells = row?.querySelectorAll('td');
     expect(cells?.[13]).not.toHaveClass('bg-warning-bg');
+  });
+
+  test('balita tanpa tanggal ukur tetap tampil dan ikut dihitung', () => {
+    render(<RekapPerBalitaTable data={rowsWithUnmeasured} />);
+
+    expect(screen.getByText('Balita 99')).toBeInTheDocument();
+    const totalRow = screen.getByText('Total').closest('tr');
+    expect(totalRow).not.toBeNull();
+    const cells = totalRow?.querySelectorAll('td');
+    expect(cells?.[1]?.textContent).toBe('3');
   });
 });

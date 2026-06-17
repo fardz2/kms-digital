@@ -121,7 +121,12 @@ describe('query key factory (qk)', () => {
 
   test('reminder namespace keys', () => {
     expect(qk.reminder.all).toEqual(['reminder']);
-    expect(qk.reminder.list).toEqual(['reminder', 'list']);
+    expect(qk.reminder.list('KADER_POSYANDU')).toEqual([
+      'reminder',
+      'list',
+      'KADER_POSYANDU',
+    ]);
+    expect(qk.reminder.list('DESA')).not.toEqual(qk.reminder.list('KADER_POSYANDU'));
   });
 
   test('orangTua namespace keys', () => {

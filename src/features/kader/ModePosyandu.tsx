@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { AlertTriangle, Search, Plus, CalendarDays } from 'lucide-react';
+import { AlertTriangle, Search, Plus } from 'lucide-react';
 import PosyanduHeader from './PosyanduHeader';
 import FilterChip from './FilterChip';
 import BalitaCard from './BalitaCard';
@@ -15,7 +15,6 @@ import {
   usePendingOrangTua,
   usePendingAnak,
 } from '../../queries/useApproveQueries';
-import { useReminderList } from '../../queries/useReminderQueries';
 import FormInputDataAnak from '../../components/form/FormInputDataAnak';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import ErrorState from '../../components/ui/ErrorState';
@@ -37,18 +36,9 @@ export default function ModePosyandu() {
 
   const { data: pendingOT } = usePendingOrangTua(true);
   const { data: pendingAnak } = usePendingAnak(true);
-  const { data: reminders, isLoading: remindersLoading } = useReminderList();
   const pendingCount = (pendingOT?.length ?? 0) + (pendingAnak?.length ?? 0);
 
   const currentBulan = dayjs().format('YYYY-MM');
-  const acaraMendatang = (reminders ?? [])
-    .filter((r) => {
-      if (!r.tanggal_reminder) return false;
-      return !dayjs(r.tanggal_reminder).isBefore(dayjs(), 'day');
-    })
-    .toSorted((a, b) =>
-      (a.tanggal_reminder ?? '').localeCompare(b.tanggal_reminder ?? '')
-    );
 
   const balitaWithMeta = (anakList ?? []).map((anak) => ({
     anak,
@@ -141,6 +131,7 @@ export default function ModePosyandu() {
         sudahCount={counts.semua - counts.belum}
         totalCount={counts.semua}
         pendingCount={pendingCount}
+        onAcara={() => navigate('/kader/acara')}
         onAkunOrangTua={() => navigate('/kader/orangtua')}
         onLaporan={() => navigate('/kader/laporan')}
         onUbahSandi={() => setSandiOpen(true)}
@@ -169,53 +160,6 @@ export default function ModePosyandu() {
             <FilterChip value={filter} onChange={setFilter} counts={counts} />
           </div>
         </div>
-
-        <section className="space-y-[17px]" data-tour-id="kader-acara">
-          <div>
-            <p className="text-caption font-bold uppercase tracking-[0.12em] text-primary-600 mb-[6px]">
-              Jadwal
-            </p>
-            <h2 className="text-heading-lg font-bold text-deep-slate leading-[1.15] tracking-tight m-0">
-              Acara Posyandu
-            </h2>
-          </div>
-
-          {remindersLoading && <SkeletonList count={2} />}
-
-          {!remindersLoading && acaraMendatang.length === 0 && (
-            <div className="bg-white border border-light-ash rounded-default py-[33px] px-[21px] text-center text-body-sm text-graphite">
-              Belum ada acara posyandu yang dijadwalkan.
-            </div>
-          )}
-
-          <div className="flex flex-col gap-[8px]">
-            {acaraMendatang.map((acara) => (
-              <div
-                key={acara.id}
-                className="bg-white border border-light-ash rounded-default p-[17px] transition-colors duration-150 hover:border-graphite/30"
-              >
-                <div className="flex items-start gap-[13px]">
-                  <span className="flex items-center justify-center w-[44px] h-[44px] rounded-full bg-polar-mist text-primary-600 shrink-0">
-                    <CalendarDays size={20} strokeWidth={1.75} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-body-sm font-semibold text-deep-slate break-words">
-                      {acara.judul}
-                    </div>
-                    <div className="text-caption font-medium text-primary-600 mt-[2px]">
-                      {dayjs(acara.tanggal_reminder).format('dddd, DD MMMM YYYY')}
-                    </div>
-                    {acara.deskripsi && (
-                      <div className="text-caption text-graphite mt-[6px] break-words">
-                        {acara.deskripsi}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {isError && <ErrorState onRetry={() => refetch()} />}
 
