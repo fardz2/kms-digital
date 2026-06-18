@@ -146,7 +146,12 @@ const SEVERITY = {
   [STATUS.UNKNOWN]: 0,
 };
 
-export function overallStatus({ zScoreBB, zScoreTB, zScoreGizi }) {
+export function overallStatus({ zScoreBB, zScoreTB, zScoreGizi }: {
+  zScoreBB?: number | null;
+  zScoreTB?: number | null;
+  zScoreGizi?: number | null;
+  zScoreLK?: number | null;
+}) {
   const candidates = [];
 
   if (isZ(zScoreTB)) {

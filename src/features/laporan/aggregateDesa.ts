@@ -134,6 +134,10 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
 
   return {
     totalBalita,
+    tanpaPosyandu: 0,
+    tanpaPosyanduList: [],
+    posyanduTidakDikenal: 0,
+    posyanduTidakDikenalList: [],
     perPosyandu,
     distribusiBB: reduceCategory('berat_badan'),
     distribusiTB: reduceCategory('tinggi_badan'),
