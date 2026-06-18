@@ -2,8 +2,14 @@ import {
   overallStatus,
   STATUS,
   classifyBBU,
-  classifyLKU,
   classifyTBU,
+  classifyLKU,
+  normalizeBBU,
+  normalizeTBU,
+  normalizeLKU,
+  BBU,
+  TBU,
+  LKU,
 } from '../pengukuran/statusGizi';
 
 export interface PosyanduStat {
@@ -18,6 +24,9 @@ export interface AnakDesaStat {
   id: number;
   id_posyandu?: number | null;
   nama?: string;
+  status_berat_terakhir?: string | null;
+  status_tinggi_terakhir?: string | null;
+  status_lingkaran_kepala_terakhir?: string | null;
 }
 
 export interface PengukuranDesaStat {
@@ -26,6 +35,9 @@ export interface PengukuranDesaStat {
   z_score_tinggi?: number | string | null;
   z_score_lingkar_kepala?: number | string | null;
   z_score_gizi?: number | string | null;
+  status_berat_badan?: string | null;
+  status_tinggi_badan?: string | null;
+  status_lingkar_kepala?: string | null;
 }
 
 export interface PerPosyanduSummary {
@@ -74,6 +86,37 @@ function isAggregateRow(p: PosyanduStat): boolean {
 
 const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
 
+// Normalisasi key summary API (lowercase backend) → enum lokal
+// e.g. { gemuk: 1, kurus: 2 } → { [BBU.LEBIH]: 1, [BBU.KURANG]: 2 }
+const BB_KEY_MAP: Record<string, string> = {
+  sangat_kurus: BBU.SANGAT_KURANG,
+  kurus:        BBU.KURANG,
+  normal:       BBU.NORMAL,
+  gemuk:        BBU.LEBIH,
+};
+const TB_KEY_MAP: Record<string, string> = {
+  sangat_pendek: TBU.SANGAT_PENDEK,
+  pendek:        TBU.PENDEK,
+  normal:        TBU.NORMAL,
+  tinggi:        TBU.TINGGI,
+};
+const LK_KEY_MAP: Record<string, string> = {
+  mikrosefali:  LKU.MIKROSEFALI,
+  normal:       LKU.NORMAL,
+  makrosefali:  LKU.MAKROSEFALI,
+};
+
+function normalizeSummaryCat(
+  cat: Record<string, number> | undefined,
+  keyMap: Record<string, string>
+): Record<string, number> {
+  const result: Record<string, number> = {};
+  Object.entries(cat ?? {}).forEach(([k, v]) => {
+    result[keyMap[k] ?? k] = (result[keyMap[k] ?? k] ?? 0) + Number(v || 0);
+  });
+  return result;
+}
+
 // Fallback dari endpoint summary lama hanya punya kategori BB, bukan status
 // ringkas per-anak. Kita collapse ke 4 status supaya UI tetap konsisten.
 // `stunting` tidak bisa diturunkan persis dari summary ini, jadi tetap 0.
@@ -111,9 +154,9 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
       id: p.id_posyandu,
       nama: p.nama_posyandu,
       total: sumCategory(p.berat_badan),
-      beratBadan: p.berat_badan ?? {},
-      tinggiBadan: p.tinggi_badan ?? {},
-      lingkarKepala: p.lingkar_kepala ?? {},
+      beratBadan: normalizeSummaryCat(p.berat_badan, BB_KEY_MAP),
+      tinggiBadan: normalizeSummaryCat(p.tinggi_badan, TB_KEY_MAP),
+      lingkarKepala: normalizeSummaryCat(p.lingkar_kepala, LK_KEY_MAP),
       gizi: toGizi(p.berat_badan ?? {}),
     }))
     .sort((a, b) =>
@@ -139,16 +182,16 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
     posyanduTidakDikenal: 0,
     posyanduTidakDikenalList: [],
     perPosyandu,
-    distribusiBB: reduceCategory('berat_badan'),
-    distribusiTB: reduceCategory('tinggi_badan'),
-    distribusiLK: reduceCategory('lingkar_kepala'),
+    distribusiBB: normalizeSummaryCat(reduceCategory('berat_badan'), BB_KEY_MAP),
+    distribusiTB: normalizeSummaryCat(reduceCategory('tinggi_badan'), TB_KEY_MAP),
+    distribusiLK: normalizeSummaryCat(reduceCategory('lingkar_kepala'), LK_KEY_MAP),
     distribusiGizi: toGizi(reduceCategory('berat_badan')),
   };
 }
 
-const BBU_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
-const TBU_ORDER = ['sangat_pendek', 'pendek', 'normal', 'tinggi'];
-const LKU_ORDER = ['mikrosefali', 'normal', 'makrosefali'];
+const BBU_ORDER = [BBU.SANGAT_KURANG, BBU.KURANG, BBU.NORMAL, BBU.LEBIH];
+const TBU_ORDER = [TBU.SANGAT_PENDEK, TBU.PENDEK, TBU.NORMAL, TBU.TINGGI];
+const LKU_ORDER = [LKU.MIKROSEFALI, LKU.NORMAL, LKU.MAKROSEFALI];
 
 function latestPengukuran(
   pengukuran: PengukuranDesaStat[] | undefined
@@ -251,9 +294,15 @@ export function aggregateDesaDariAnak({
       return;
     }
 
-    const bbu = classifyBBU(toZ(latest.z_score_berat));
-    const tbu = classifyTBU(toZ(latest.z_score_tinggi));
-    const lku = classifyLKU(toZ(latest.z_score_lingkar_kepala));
+    const bbu = anak.status_berat_terakhir
+      ? normalizeBBU(anak.status_berat_terakhir)
+      : classifyBBU(toZ(latest.z_score_berat));
+    const tbu = anak.status_tinggi_terakhir
+      ? normalizeTBU(anak.status_tinggi_terakhir)
+      : classifyTBU(toZ(latest.z_score_tinggi));
+    const lku = anak.status_lingkaran_kepala_terakhir
+      ? normalizeLKU(anak.status_lingkaran_kepala_terakhir)
+      : classifyLKU(toZ(latest.z_score_lingkar_kepala));
     const gizi = overallStatus({
       zScoreBB: toZ(latest.z_score_berat),
       zScoreTB: toZ(latest.z_score_tinggi),

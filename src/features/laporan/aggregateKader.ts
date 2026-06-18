@@ -2,13 +2,14 @@ import dayjs from 'dayjs';
 import {
   overallStatus,
   STATUS,
-  classifyBBU,
-  classifyTBU,
-  classifyLKU,
+  normalizeBBU,
+  normalizeTBU,
+  normalizeLKU,
   BBU,
   TBU,
   LKU,
 } from '../pengukuran/statusGizi';
+
 
 function matchesBulan(date, bulan) {
   if (!date) return false;
@@ -115,9 +116,9 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
     );
     totalDiukur += 1;
 
-    const bbu = classifyBBU(toZ(latest.z_score_berat));
-    const tbu = classifyTBU(toZ(latest.z_score_tinggi));
-    const lku = classifyLKU(toZ(latest.z_score_lingkar_kepala));
+    const bbu = normalizeBBU(anak.status_berat_terakhir);
+    const tbu = normalizeTBU(anak.status_tinggi_terakhir);
+    const lku = normalizeLKU(anak.status_lingkaran_kepala_terakhir);
     const statusGizi = overallStatus({
       zScoreBB: toZ(latest.z_score_berat),
       zScoreTB: toZ(latest.z_score_tinggi),
@@ -169,9 +170,9 @@ export function aggregateKaderPerBalita({ anakList, pengukuranByAnak }) {
         id: anak.id,
         nama: anak.nama,
         tanggalUkur: latest.date ?? null,
-        bbu: classifyBBU(toZ(latest.z_score_berat)),
-        tbu: classifyTBU(toZ(latest.z_score_tinggi)),
-        lku: classifyLKU(toZ(latest.z_score_lingkar_kepala)),
+        bbu: normalizeBBU(anak.status_berat_terakhir),
+        tbu: normalizeTBU(anak.status_tinggi_terakhir),
+        lku: normalizeLKU(anak.status_lingkaran_kepala_terakhir),
         gizi: overallStatus({
           zScoreBB: toZ(latest.z_score_berat),
           zScoreTB: toZ(latest.z_score_tinggi),

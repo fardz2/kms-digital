@@ -48,28 +48,28 @@ const LABEL_MAP: Record<string, string> = {
 };
 
 const GIZI_ORDER = [STATUS.STUNTING, STATUS.KURANG, STATUS.NORMAL, STATUS.OBESITAS];
-const BB_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
-const TBU_ORDER = ['sangat_pendek', 'pendek', 'normal', 'tinggi'];
-const LKU_ORDER = ['mikrosefali', 'normal', 'makrosefali'];
+const BB_ORDER = [BBU.SANGAT_KURANG, BBU.KURANG, BBU.NORMAL, BBU.LEBIH];
+const TBU_ORDER = [TBU.SANGAT_PENDEK, TBU.PENDEK, TBU.NORMAL, TBU.TINGGI];
+const LKU_ORDER = [LKU.MIKROSEFALI, LKU.NORMAL, LKU.MAKROSEFALI];
 
 const BB_TONE_MAP: Record<string, string> = {
-  sangat_kurus: BBU.SANGAT_KURANG,
-  kurus: BBU.KURANG,
-  normal: BBU.NORMAL,
-  gemuk: BBU.LEBIH,
+  [BBU.SANGAT_KURANG]: BBU.SANGAT_KURANG,
+  [BBU.KURANG]: BBU.KURANG,
+  [BBU.NORMAL]: BBU.NORMAL,
+  [BBU.LEBIH]: BBU.LEBIH,
 };
 
 const TBU_TONE_MAP: Record<string, string> = {
-  sangat_pendek: TBU.SANGAT_PENDEK,
-  pendek: TBU.PENDEK,
-  normal: TBU.NORMAL,
-  tinggi: TBU.TINGGI,
+  [TBU.SANGAT_PENDEK]: TBU.SANGAT_PENDEK,
+  [TBU.PENDEK]: TBU.PENDEK,
+  [TBU.NORMAL]: TBU.NORMAL,
+  [TBU.TINGGI]: TBU.TINGGI,
 };
 
 const LKU_TONE_MAP: Record<string, string> = {
-  mikrosefali: LKU.MIKROSEFALI,
-  normal: LKU.NORMAL,
-  makrosefali: LKU.MAKROSEFALI,
+  [LKU.MIKROSEFALI]: LKU.MIKROSEFALI,
+  [LKU.NORMAL]: LKU.NORMAL,
+  [LKU.MAKROSEFALI]: LKU.MAKROSEFALI,
 };
 
 const GIZI_TONE_MAP: Record<string, string> = {

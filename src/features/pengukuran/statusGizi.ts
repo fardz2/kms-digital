@@ -21,10 +21,12 @@ export const BBU = {
 
 export function classifyBBU(z) {
   if (!isZ(z)) return BBU.UNKNOWN;
-  if (z < -3) return BBU.SANGAT_KURANG;
-  if (z < -2) return BBU.KURANG;
-  if (z <= 1) return BBU.NORMAL;
-  return BBU.LEBIH;
+
+  if (z > 2) return BBU.LEBIH;
+  if (z > -2 && z <= 2) return BBU.NORMAL;
+  if (z >= -3 && z <= -2) return BBU.KURANG;
+
+  return BBU.SANGAT_KURANG;
 }
 
 // TB/U (atau PB/U): Tinggi/Panjang Badan menurut Umur
@@ -78,6 +80,42 @@ export function classifyLKU(z) {
   if (z < -2) return LKU.MIKROSEFALI;
   if (z <= 2) return LKU.NORMAL;
   return LKU.MAKROSEFALI;
+}
+
+// --- Normalisasi string dari backend → enum lokal ---
+// Dipakai saat endpoint mengirim status dalam bentuk teks (e.g. "Kurus", "Pendek")
+// agar konsisten dengan enum lokal yang dipakai tabel & chart.
+
+export function normalizeBBU(s: string | null | undefined): string {
+  if (!s) return BBU.UNKNOWN;
+  const map: Record<string, string> = {
+    'Sangat Kurus': BBU.SANGAT_KURANG,
+    'Kurus': BBU.KURANG,
+    'Normal': BBU.NORMAL,
+    'Gemuk': BBU.LEBIH,
+  };
+  return map[s] ?? BBU.UNKNOWN;
+}
+
+export function normalizeTBU(s: string | null | undefined): string {
+  if (!s) return TBU.UNKNOWN;
+  const map: Record<string, string> = {
+    'Sangat Pendek': TBU.SANGAT_PENDEK,
+    'Pendek': TBU.PENDEK,
+    'Normal': TBU.NORMAL,
+    'Tinggi': TBU.TINGGI,
+  };
+  return map[s] ?? TBU.UNKNOWN;
+}
+
+export function normalizeLKU(s: string | null | undefined): string {
+  if (!s) return LKU.UNKNOWN;
+  const map: Record<string, string> = {
+    'Mikrosefali': LKU.MIKROSEFALI,
+    'Normal': LKU.NORMAL,
+    'Makrosefali': LKU.MAKROSEFALI,
+  };
+  return map[s] ?? LKU.UNKNOWN;
 }
 
 export function classifyAll({ zScoreBB, zScoreTB, zScoreLK, zScoreGizi }) {
