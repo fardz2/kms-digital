@@ -1,4 +1,4 @@
-import { useMemo, useState, type Ref } from 'react';
+import { useMemo, type Ref } from 'react';
 import {
   Baby,
   Building2,
@@ -28,6 +28,7 @@ import {
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
 } from './indicatorTableStyles';
+import { useTablePagination } from '../../hooks/useTablePagination';
 import TablePagination from './TablePagination';
 
 const LABEL_MAP: Record<string, string> = {
@@ -95,8 +96,6 @@ const GROUPS: {
   { label: 'Status Gizi', field: 'gizi', distribusi: 'distribusiGizi', order: GIZI_ORDER, toneMap: GIZI_TONE_MAP },
 ];
 
-const DEFAULT_PAGE_SIZE = 5;
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 
@@ -113,8 +112,6 @@ export function RekapTabel({
   distribusiLK: Record<string, number>;
   distribusiGizi: Record<string, number>;
 }) {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const distribusiMap = {
     distribusiBB: distribusiBB ?? {},
     distribusiTB: distribusiTB ?? {},
@@ -130,9 +127,7 @@ export function RekapTabel({
     return { ...g, statuses: present };
   });
   const hasData = groups.some((g) => g.statuses.length > 0);
-  const pageCount = Math.max(1, Math.ceil(perPosyandu.length / pageSize));
-  const safePageIndex = Math.min(pageIndex, pageCount - 1);
-  const pageRows = perPosyandu.slice(safePageIndex * pageSize, safePageIndex * pageSize + pageSize);
+  const { pageRows, paginationProps } = useTablePagination(perPosyandu);
 
   if (perPosyandu.length === 0 || !hasData) {
     return <div className="text-body-sm text-graphite">Belum ada data</div>;
@@ -242,17 +237,7 @@ export function RekapTabel({
           </tbody>
         </table>
       </div>
-      <TablePagination
-        pageIndex={safePageIndex}
-        pageCount={pageCount}
-        pageSize={pageSize}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        onPageIndexChange={setPageIndex}
-        onPageSizeChange={(nextSize) => {
-          setPageSize(nextSize);
-          setPageIndex(0);
-        }}
-      />
+      <TablePagination {...paginationProps} />
     </div>
   );
 }

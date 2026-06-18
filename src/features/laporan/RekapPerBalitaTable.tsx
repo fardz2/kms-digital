@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import { Check } from 'lucide-react';
 import {
@@ -15,6 +15,7 @@ import {
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
 } from './indicatorTableStyles';
+import { useTablePagination } from '../../hooks/useTablePagination';
 import TablePagination from './TablePagination';
 
 interface BalitaRow {
@@ -43,8 +44,6 @@ const GROUPS: {
   { label: 'Status Gizi', field: 'gizi', statuses: STATUS_ORDER },
 ];
 
-const DEFAULT_PAGE_SIZE = 5;
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 const INDICATOR_LABEL_MAP: Record<string, string> = {
@@ -63,12 +62,7 @@ const INDICATOR_LABEL_MAP: Record<string, string> = {
 
 export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
   const rows = useMemo(() => data ?? [], [data]);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
-  const safePageIndex = Math.min(pageIndex, pageCount - 1);
-  const pageRows = rows.slice(safePageIndex * pageSize, safePageIndex * pageSize + pageSize);
+  const { pageRows, paginationProps } = useTablePagination(rows);
 
   const cellCls =
     'px-[10px] py-[10px] text-center whitespace-nowrap align-middle';
@@ -205,17 +199,7 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
         </tbody>
       </table>
       </div>
-      <TablePagination
-        pageIndex={safePageIndex}
-        pageCount={pageCount}
-        pageSize={pageSize}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        onPageIndexChange={setPageIndex}
-        onPageSizeChange={(nextSize) => {
-          setPageSize(nextSize);
-          setPageIndex(0);
-        }}
-      />
+      <TablePagination {...paginationProps} />
     </div>
   );
 }
