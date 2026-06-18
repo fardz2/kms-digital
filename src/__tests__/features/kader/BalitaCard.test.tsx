@@ -32,14 +32,14 @@ const metaBaru = {
 describe('BalitaCard card tap', () => {
   test('tapping the card calls onLihat with anak', () => {
     const onLihat = vi.fn();
-    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={onLihat} />);
+    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={onLihat} onUkur={vi.fn()} onUlang={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /buka detail budi/i }));
     expect(onLihat).toHaveBeenCalledWith(anak);
   });
 
   test('Enter key on the card calls onLihat', () => {
     const onLihat = vi.fn();
-    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={onLihat} />);
+    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={onLihat} onUkur={vi.fn()} onUlang={vi.fn()} />);
     fireEvent.keyDown(screen.getByRole('button', { name: /buka detail budi/i }), {
       key: 'Enter',
     });
@@ -52,7 +52,7 @@ describe('BalitaCard single action button', () => {
     const onUlang = vi.fn();
     const onLihat = vi.fn();
     render(
-      <BalitaCard anak={anak} meta={metaSudah} onUlang={onUlang} onLihat={onLihat} />
+      <BalitaCard anak={anak} meta={metaSudah} onUlang={onUlang} onLihat={onLihat} onUkur={vi.fn()} />
     );
     const btn = screen.getByRole('button', { name: /ubah/i });
     fireEvent.click(btn);
@@ -69,6 +69,7 @@ describe('BalitaCard single action button', () => {
         meta={metaBelumBulanIni}
         onUkur={onUkur}
         onLihat={onLihat}
+        onUlang={vi.fn()}
       />
     );
     const btn = screen.getByRole('button', { name: /ukur/i });
@@ -78,14 +79,14 @@ describe('BalitaCard single action button', () => {
   });
 
   test('shows "Ukur" for a brand new balita with no history', () => {
-    render(<BalitaCard anak={anak} meta={metaBaru} onUkur={() => {}} />);
+    render(<BalitaCard anak={anak} meta={metaBaru} onUkur={() => {}} onLihat={vi.fn()} onUlang={vi.fn()} />);
     expect(screen.getByRole('button', { name: /ukur/i })).toBeInTheDocument();
   });
 });
 
 describe('BalitaCard no separate Grafik button', () => {
   test('does not render a Grafik button', () => {
-    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={() => {}} />);
+    render(<BalitaCard anak={anak} meta={metaSudah} onLihat={() => {}} onUkur={vi.fn()} onUlang={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /grafik/i })).not.toBeInTheDocument();
   });
 });

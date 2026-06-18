@@ -41,8 +41,8 @@ export function usePendingAnak(enabled = true) {
 export function useApproveOrangTua() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id) => approveApi.approveOrangTua(id),
-    onMutate: async (id) => {
+    mutationFn: (id: number) => approveApi.approveOrangTua(id),
+    onMutate: async (id: number) => {
       await qc.cancelQueries({ queryKey: qk.approve.orangTua });
       const previous = qc.getQueryData(qk.approve.orangTua);
       qc.setQueryData(qk.approve.orangTua, (old) =>
@@ -66,8 +66,8 @@ export function useApproveOrangTua() {
 export function useApproveAnak() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id) => approveApi.approveAnak(id),
-    onMutate: async (id) => {
+    mutationFn: (id: number) => approveApi.approveAnak(id),
+    onMutate: async (id: number) => {
       await qc.cancelQueries({ queryKey: qk.approve.anak });
       const previous = qc.getQueryData(qk.approve.anak);
       qc.setQueryData(qk.approve.anak, (old) =>
@@ -90,8 +90,8 @@ export function useApproveAnak() {
 export function useRejectOrangTua() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id) => approveApi.rejectOrangTua(id),
-    onMutate: async (id) => {
+    mutationFn: (id: number) => approveApi.rejectOrangTua(id),
+    onMutate: async (id: number) => {
       await qc.cancelQueries({ queryKey: qk.approve.orangTua });
       const previous = qc.getQueryData(qk.approve.orangTua);
       qc.setQueryData(qk.approve.orangTua, (old) =>
@@ -114,8 +114,8 @@ export function useRejectOrangTua() {
 export function useRejectAnak() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id) => approveApi.rejectAnak(id),
-    onMutate: async (id) => {
+    mutationFn: (id: number) => approveApi.rejectAnak(id),
+    onMutate: async (id: number) => {
       await qc.cancelQueries({ queryKey: qk.approve.anak });
       const previous = qc.getQueryData(qk.approve.anak);
       qc.setQueryData(qk.approve.anak, (old) =>

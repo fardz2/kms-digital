@@ -47,40 +47,37 @@ const GROUPS: {
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 const INDICATOR_LABEL_MAP: Record<string, string> = {
-  bb_sangat_kurang: 'Sangat Kurus',
-  bb_kurang: 'Kurus',
-  bb_normal: 'Normal',
-  bb_lebih: 'Gemuk',
+  sangat_kurus: 'Sangat Kurus',
+  kurus: 'Kurus',
+  normal: 'Normal',
+  gemuk: 'Gemuk',
   sangat_pendek: 'Sangat Pendek',
   pendek: 'Pendek',
-  tb_normal: 'Normal',
   tinggi: 'Tinggi',
   mikrosefali: 'Mikrosefali',
-  lk_normal: 'Normal',
   makrosefali: 'Makrosefali',
 };
 
+const getStatusLabel = (field: 'bbu' | 'tbu' | 'lku' | 'gizi', status: string) =>
+  field === 'gizi'
+    ? STATUS_LABEL[status] ?? status
+    : INDICATOR_LABEL_MAP[status] ?? INDICATOR_LABEL[status] ?? status;
+
 export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
-  const rows = useMemo(() => data ?? [], [data]);
+  const rows = data ?? [];
   const { pageRows, paginationProps } = useTablePagination(rows);
 
   const cellCls =
     'px-[10px] py-[10px] text-center whitespace-nowrap align-middle';
   const headCls =
     'px-[10px] py-[10px] text-caption font-semibold text-white text-center align-middle whitespace-nowrap';
-  const totalByGroup = useMemo(() => {
-    return GROUPS.reduce((acc, group) => {
-      acc[group.field] = group.statuses.reduce((statusAcc, status) => {
-        statusAcc[status] = rows.filter((row) => row[group.field] === status).length;
-        return statusAcc;
-      }, {} as Record<string, number>);
-      return acc;
-    }, {} as Record<string, Record<string, number>>);
-  }, [rows]);
-  const getStatusLabel = (field: 'bbu' | 'tbu' | 'lku' | 'gizi', status: string) =>
-    field === 'gizi'
-      ? STATUS_LABEL[status] ?? status
-      : INDICATOR_LABEL_MAP[status] ?? INDICATOR_LABEL[status] ?? status;
+  const totalByGroup = GROUPS.reduce((acc, group) => {
+    acc[group.field] = group.statuses.reduce((statusAcc, status) => {
+      statusAcc[status] = rows.filter((row) => row[group.field] === status).length;
+      return statusAcc;
+    }, {} as Record<string, number>);
+    return acc;
+  }, {} as Record<string, Record<string, number>>);
 
   if (rows.length === 0) {
     return (

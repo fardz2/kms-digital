@@ -3,9 +3,36 @@ import {
   aggregateKaderPerBalita,
 } from '../../../features/laporan/aggregateKader';
 
-const anakA = { id: 1, nama: 'Budi', tanggal_lahir: '2025-05-12' };
-const anakB = { id: 2, nama: 'Siti', tanggal_lahir: '2025-01-01' };
-const anakC = { id: 3, nama: 'Rina', tanggal_lahir: '2024-12-01' };
+const anakA = {
+  id: 1,
+  nama: 'Budi',
+  tanggal_lahir: '2025-05-12',
+  status_berat_terakhir: 'Normal',
+  status_tinggi_terakhir: 'Normal',
+  status_lingkaran_kepala_terakhir: 'Normal',
+  status_gizi_terakhir: 'Gizi Baik',
+  gizi: { normal: 1 },
+};
+const anakB = {
+  id: 2,
+  nama: 'Siti',
+  tanggal_lahir: '2025-01-01',
+  status_berat_terakhir: 'Normal',
+  status_tinggi_terakhir: 'Sangat Pendek',
+  status_lingkaran_kepala_terakhir: 'Normal',
+  status_gizi_terakhir: 'Stunting',
+  gizi: { stunting: 1 },
+};
+const anakC = {
+  id: 3,
+  nama: 'Rina',
+  tanggal_lahir: '2024-12-01',
+  status_berat_terakhir: 'Kurus',
+  status_tinggi_terakhir: 'Normal',
+  status_lingkaran_kepala_terakhir: 'Normal',
+  status_gizi_terakhir: 'Gizi Kurang',
+  gizi: { kurang: 1 },
+};
 
 describe('aggregateKaderLaporan', () => {
   test('empty list returns zeros', () => {
@@ -89,7 +116,7 @@ describe('aggregateKaderLaporan', () => {
 
   test('multiple pengukuran di bulan sama pakai yang terbaru', () => {
     const r = aggregateKaderLaporan({
-      anakList: [anakC],
+      anakList: [{ ...anakC, gizi: { normal: 1 } }],
       pengukuranByAnak: {
         3: [
           { date: '2026-05-05', z_score_berat: -3.5 },
@@ -102,7 +129,7 @@ describe('aggregateKaderLaporan', () => {
     expect(r.distribusi.stunting).toBe(0);
   });
 
-  test('mixed: 3 anak, 1 normal + 1 kurang + 1 belum diukur', () => {
+  test('mixed: 3 anak, 1 normal + 1 stunting + 1 belum diukur', () => {
     const r = aggregateKaderLaporan({
       anakList: [anakA, anakB, anakC],
       pengukuranByAnak: {
@@ -116,15 +143,15 @@ describe('aggregateKaderLaporan', () => {
     expect(r.sudahDiukur).toBe(2);
     expect(r.belumDiukur).toBe(1);
     expect(r.distribusi.normal).toBe(1);
-    expect(r.distribusi.kurang).toBe(1);
+    expect(r.distribusi.stunting).toBe(1);
     expect(r.perluPerhatian).toHaveLength(1);
-    expect(r.perluPerhatian[0].status).toBe('kurang');
+    expect(r.perluPerhatian[0].status).toBe('stunting');
     expect(r.belumDiukurList[0].id).toBe(3);
   });
 
   test('null z-scores treated as unknown, not normal', () => {
     const r = aggregateKaderLaporan({
-      anakList: [anakA],
+      anakList: [{ ...anakA, gizi: {} }],
       pengukuranByAnak: {
         1: [
           {
@@ -160,7 +187,7 @@ describe('aggregateKaderLaporan', () => {
 
   test('perluPerhatian pakai pengukuran terbaru lintas-bulan (membaik -> tidak muncul)', () => {
     const r = aggregateKaderLaporan({
-      anakList: [anakC],
+      anakList: [{ ...anakC, gizi: { normal: 1 } }],
       pengukuranByAnak: {
         3: [
           { date: '2026-03-01', z_score_tinggi: -3.5 },
@@ -213,16 +240,16 @@ describe('aggregateKaderPerBalita', () => {
     expect(rows[0]).toMatchObject({
       id: 2,
       tanggalUkur: '2026-05-10',
-      bbu: 'bb_normal',
+      bbu: 'normal',
       tbu: 'sangat_pendek',
-      lku: 'lk_normal',
+      lku: 'normal',
       gizi: 'stunting',
     });
   });
 
   test('pakai pengukuran terbaru ketika ada banyak entri', () => {
     const rows = aggregateKaderPerBalita({
-      anakList: [anakC],
+      anakList: [{ ...anakC, gizi: { normal: 1 } }],
       pengukuranByAnak: {
         3: [
           { date: '2026-03-01', z_score_gizi: -3.5 },

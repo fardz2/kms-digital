@@ -24,7 +24,7 @@ const expectedStepIdsBySection = {
   'tenkes-forum': ['open-health-forum', 'select-relevant-discussion', 'review-forum-details', 'reply-forum-thread'],
   'tenkes-balita-detail': ['open-forum-detail-page', 'review-forum-context', 'reply-to-forum'],
   'orangtua-balita': ['open-child-summary', 'fill-new-child-form', 'review-growth-summary'],
-  'orangtua-forum': ['open-parent-forum', 'switch-forum-tab', 'find-discussion-topic', 'write-new-question'],
+  'orangtua-forum': ['open-parent-forum', 'find-discussion-topic', 'write-new-question'],
   'orangtua-forum-detail': ['open-forum-topic', 'read-existing-replies', 'post-followup-comment'],
   'orangtua-balita-detail': ['open-child-detail-from-list', 'verify-child-data', 'review-child-history'],
 } as const;

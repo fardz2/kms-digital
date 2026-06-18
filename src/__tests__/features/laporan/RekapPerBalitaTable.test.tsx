@@ -10,9 +10,9 @@ const rows = Array.from({ length: 6 }, (_, idx) => {
     id: idx + 1,
     nama: `Balita ${idx + 1}`,
     tanggalUkur: `2026-06-${String(idx + 1).padStart(2, '0')}`,
-    bbu: 'bb_normal',
-    tbu: 'tb_normal',
-    lku: 'lk_normal',
+    bbu: 'normal',
+    tbu: 'normal',
+    lku: 'normal',
     gizi,
   };
 });
@@ -58,7 +58,7 @@ describe('RekapPerBalitaTable', () => {
     render(<RekapPerBalitaTable data={rows} />);
 
     const stuntingIcon = screen.getByLabelText('Stunting');
-    expect(stuntingIcon.closest('td')).toHaveClass('bg-warning-bg');
+    expect(stuntingIcon.closest('td')).toHaveClass('text-danger', 'font-bold');
   });
 
   test('gizi normal di body tabel tidak diberi warna kuning', () => {
@@ -67,7 +67,7 @@ describe('RekapPerBalitaTable', () => {
     const row = screen.getByText('Balita 1').closest('tr');
     expect(row).not.toBeNull();
     const cells = row?.querySelectorAll('td');
-    expect(cells?.[13]).not.toHaveClass('bg-warning-bg');
+    expect(cells?.[13]).not.toHaveClass('text-danger', 'font-bold');
   });
 
   test('balita tanpa tanggal ukur tetap tampil dan ikut dihitung', () => {

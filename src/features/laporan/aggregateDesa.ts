@@ -1,5 +1,6 @@
 import {
   overallStatus,
+  overallStatusFromStrings,
   STATUS,
   classifyBBU,
   classifyTBU,
@@ -18,6 +19,7 @@ export interface PosyanduStat {
   berat_badan?: Record<string, number>;
   tinggi_badan?: Record<string, number>;
   lingkar_kepala?: Record<string, number>;
+  gizi?: Record<string, number>;
 }
 
 export interface AnakDesaStat {
@@ -27,6 +29,8 @@ export interface AnakDesaStat {
   status_berat_terakhir?: string | null;
   status_tinggi_terakhir?: string | null;
   status_lingkaran_kepala_terakhir?: string | null;
+  status_gizi_terakhir?: string | null;
+  gizi?: Record<string, number>;
 }
 
 export interface PengukuranDesaStat {
@@ -117,14 +121,19 @@ function normalizeSummaryCat(
   return result;
 }
 
-// Fallback dari endpoint summary lama hanya punya kategori BB, bukan status
-// ringkas per-anak. Kita collapse ke 4 status supaya UI tetap konsisten.
-// `stunting` tidak bisa diturunkan persis dari summary ini, jadi tetap 0.
-function toGizi(cat: Record<string, number>): Record<string, number> {
+// Fallback dari endpoint summary. Stunting diturunkan dari tinggi_badan
+// (pendek + sangat_pendek sesuai standar TB/U WHO) jika tersedia.
+function toGizi(
+  cat: Record<string, number>,
+  tbCat?: Record<string, number>
+): Record<string, number> {
+  const stunting = tbCat
+    ? Number(tbCat?.pendek || 0) + Number(tbCat?.sangat_pendek || 0)
+    : 0;
   return {
-    [STATUS.NORMAL]: Number(cat?.normal || 0),
-    [STATUS.KURANG]: Number(cat?.sangat_kurus || 0) + Number(cat?.kurus || 0),
-    [STATUS.STUNTING]: 0,
+    [STATUS.NORMAL]:   Number(cat?.normal || 0),
+    [STATUS.KURANG]:   Number(cat?.sangat_kurus || 0) + Number(cat?.kurus || 0),
+    [STATUS.STUNTING]: stunting,
     [STATUS.OBESITAS]: Number(cat?.gemuk || 0) + Number(cat?.obesitas || 0),
   };
 }
@@ -157,17 +166,21 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
       beratBadan: normalizeSummaryCat(p.berat_badan, BB_KEY_MAP),
       tinggiBadan: normalizeSummaryCat(p.tinggi_badan, TB_KEY_MAP),
       lingkarKepala: normalizeSummaryCat(p.lingkar_kepala, LK_KEY_MAP),
-      gizi: toGizi(p.berat_badan ?? {}),
+      gizi: p.gizi ?? toGizi(p.berat_badan ?? {}, p.tinggi_badan ?? {}),
     }))
     .sort((a, b) =>
       (a.nama ?? '').localeCompare(b.nama ?? '', 'id', { sensitivity: 'base' })
     );
   const totalBalita = perPosyandu.reduce((acc, x) => acc + x.total, 0);
 
-  const reduceCategory = (key: 'berat_badan' | 'tinggi_badan' | 'lingkar_kepala') => {
+  const reduceCategory = (key: 'berat_badan' | 'tinggi_badan' | 'lingkar_kepala' | 'gizi') => {
     const acc: Record<string, number> = {};
     realPosyandu.forEach((p: PosyanduStat) => {
-      const cat = p[key] ?? {};
+      let cat = p[key];
+      if (key === 'gizi' && !cat) {
+         cat = toGizi(p.berat_badan ?? {}, p.tinggi_badan ?? {});
+      }
+      cat = cat ?? {};
       Object.entries(cat).forEach(([k, v]) => {
         acc[k] = (acc[k] ?? 0) + Number(v || 0);
       });
@@ -185,7 +198,7 @@ export function aggregateDesa(statistik: PosyanduStat[] | unknown): AggregatedDe
     distribusiBB: normalizeSummaryCat(reduceCategory('berat_badan'), BB_KEY_MAP),
     distribusiTB: normalizeSummaryCat(reduceCategory('tinggi_badan'), TB_KEY_MAP),
     distribusiLK: normalizeSummaryCat(reduceCategory('lingkar_kepala'), LK_KEY_MAP),
-    distribusiGizi: toGizi(reduceCategory('berat_badan')),
+    distribusiGizi: reduceCategory('gizi'),
   };
 }
 
@@ -289,26 +302,40 @@ export function aggregateDesaDariAnak({
 
     row.total += 1;
 
-    if (!latest) {
+    const hasStatus = anak.status_berat_terakhir && anak.status_tinggi_terakhir && anak.status_gizi_terakhir;
+
+    if (!latest && !hasStatus) {
       summaryMap.set(idPosyandu, row);
       return;
     }
 
     const bbu = anak.status_berat_terakhir
       ? normalizeBBU(anak.status_berat_terakhir)
-      : classifyBBU(toZ(latest.z_score_berat));
+      : classifyBBU(toZ(latest?.z_score_berat));
     const tbu = anak.status_tinggi_terakhir
       ? normalizeTBU(anak.status_tinggi_terakhir)
-      : classifyTBU(toZ(latest.z_score_tinggi));
+      : classifyTBU(toZ(latest?.z_score_tinggi));
     const lku = anak.status_lingkaran_kepala_terakhir
       ? normalizeLKU(anak.status_lingkaran_kepala_terakhir)
-      : classifyLKU(toZ(latest.z_score_lingkar_kepala));
-    const gizi = overallStatus({
-      zScoreBB: toZ(latest.z_score_berat),
-      zScoreTB: toZ(latest.z_score_tinggi),
-      zScoreLK: toZ(latest.z_score_lingkar_kepala),
-      zScoreGizi: toZ(latest.z_score_gizi),
-    });
+      : classifyLKU(toZ(latest?.z_score_lingkar_kepala));
+      
+    let gizi;
+    if (anak.gizi) {
+      gizi = Object.keys(anak.gizi).find((k) => anak.gizi![k] === 1) ?? STATUS.UNKNOWN;
+    } else if (anak.status_gizi_terakhir) {
+      gizi = overallStatusFromStrings({
+        bbuStr: anak.status_berat_terakhir,
+        tbuStr: anak.status_tinggi_terakhir,
+        giziStr: anak.status_gizi_terakhir,
+      });
+    } else {
+      gizi = overallStatus({
+        zScoreBB: toZ(latest?.z_score_berat),
+        zScoreTB: toZ(latest?.z_score_tinggi),
+        zScoreLK: toZ(latest?.z_score_lingkar_kepala),
+        zScoreGizi: toZ(latest?.z_score_gizi),
+      });
+    }
 
     if ([bbu, tbu, lku, gizi].some((status) => status === 'unknown')) {
       summaryMap.set(idPosyandu, row);

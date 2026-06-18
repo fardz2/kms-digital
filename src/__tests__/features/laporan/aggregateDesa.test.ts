@@ -44,10 +44,10 @@ describe('aggregateDesaDariAnak', () => {
     expect(result.posyanduTidakDikenalList).toEqual([]);
     expect(result.perPosyandu).toHaveLength(1);
     expect(result.perPosyandu[0].total).toBe(3);
-    expect(result.perPosyandu[0].beratBadan.bb_normal).toBe(2);
+    expect(result.perPosyandu[0].beratBadan.normal).toBe(2);
     expect(result.perPosyandu[0].gizi.normal).toBe(1);
     expect(result.perPosyandu[0].gizi.obesitas).toBe(1);
-    expect(result.distribusiBB.bb_normal).toBe(2);
+    expect(result.distribusiBB.normal).toBe(2);
     expect(result.distribusiGizi.normal).toBe(1);
     expect(result.distribusiGizi.obesitas).toBe(1);
   });

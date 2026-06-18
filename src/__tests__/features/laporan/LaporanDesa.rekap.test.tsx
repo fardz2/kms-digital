@@ -97,8 +97,8 @@ describe('RekapTabel', () => {
     const row = screen.getByText('Posyandu 1').closest('tr');
     expect(row).not.toBeNull();
     const cells = row?.querySelectorAll('td');
-    expect(cells?.[3]).toHaveClass('bg-warning-bg');
-    expect(cells?.[16]).toHaveClass('bg-warning-bg');
-    expect(cells?.[14]).not.toHaveClass('bg-warning-bg');
+    expect(cells?.[3]).toHaveClass('text-amber-700', 'font-bold'); // kurus = warning
+    expect(cells?.[16]).toHaveClass('text-danger', 'font-bold'); // stunting/obesitas = danger
+    expect(cells?.[14]).not.toHaveClass('text-amber-700', 'font-bold'); // normal
   });
 });

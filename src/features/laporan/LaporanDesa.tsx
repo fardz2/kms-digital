@@ -8,11 +8,9 @@ import {
 import Card from '../../components/ui/Card';
 import StatCard from '../../components/ui/StatCard';
 import { useStatistikGiziDesa } from '../../queries/useLaporanQueries';
-import { usePengukuranBulananDesa } from '../../queries/usePengukuranBulananDesa';
 import { useSession } from '../auth/useSession';
 import {
   aggregateDesa,
-  aggregateDesaDariAnak,
   type PerPosyanduSummary,
 } from './aggregateDesa';
 import {
@@ -250,25 +248,8 @@ const LaporanDesa = function LaporanDesa({ ref }: { ref?: Ref<HTMLDivElement> })
     isLoading: statistikLoading,
     isError: statistikError,
   } = useStatistikGiziDesa(idDesa);
-  const {
-    anakList,
-    pengukuranByAnak,
-    isLoading: anakLoading,
-  } = usePengukuranBulananDesa();
-
-  const agg = useMemo(
-    () => {
-      const fallback = aggregateDesa(statistikData);
-      const calculated = aggregateDesaDariAnak({
-        posyanduStats: statistikData,
-        anakList,
-        pengukuranByAnak,
-      });
-      return anakList.length > 0 ? calculated : fallback;
-    },
-    [statistikData, anakList, pengukuranByAnak]
-  );
-  const isLoading = statistikLoading || anakLoading;
+  const agg = aggregateDesa(statistikData);
+  const isLoading = statistikLoading;
   const isError = statistikError;
 
   if (!idDesa) {

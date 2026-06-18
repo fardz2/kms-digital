@@ -5,6 +5,7 @@ import {
   normalizeBBU,
   normalizeTBU,
   normalizeLKU,
+  overallStatusFromStrings,
   BBU,
   TBU,
   LKU,
@@ -54,7 +55,8 @@ export function aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan }) {
       const latest = inBulan.reduce((a, b) =>
         (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
       );
-      const status = computePengukuranStatus(latest);
+      // "Ikuti API saja": gunakan object gizi dari backend
+      const status = Object.keys(anak.gizi ?? {}).find((k) => (anak.gizi as any)[k] > 0) || STATUS.UNKNOWN;
       if (distribusi[status] != null) distribusi[status] += 1;
     }
 
@@ -64,7 +66,7 @@ export function aggregateKaderLaporan({ anakList, pengukuranByAnak, bulan }) {
       const latestEver = pengukuran.reduce((a, b) =>
         (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
       );
-      const statusEver = computePengukuranStatus(latestEver);
+      const statusEver = Object.keys(anak.gizi ?? {}).find((k) => (anak.gizi as any)[k] > 0) || STATUS.UNKNOWN;
       if (statusEver !== STATUS.NORMAL && statusEver !== STATUS.UNKNOWN) {
         perluPerhatian.push({ id: anak.id, nama: anak.nama, status: statusEver });
       }
@@ -98,7 +100,7 @@ const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESIT
 // Rekap distribusi per-indikator (BB/U, TB/U, LK/U) memakai pengukuran
 // TERAKHIR tiap balita. Dipakai untuk tabel rekap posyandu (scope 1 posyandu),
 // sejajar dengan tabel rekap Pemerintah Desa.
-export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
+export function aggregateKaderRekap({ anakList }) {
   const safeAnak = anakList ?? [];
 
   const beratBadan = emptyCount(BBU_ORDER);
@@ -108,28 +110,33 @@ export function aggregateKaderRekap({ anakList, pengukuranByAnak }) {
   let totalDiukur = 0;
 
   safeAnak.forEach((anak) => {
-    const pengukuran = pengukuranByAnak?.[anak.id] ?? [];
-    if (pengukuran.length === 0) return;
+    if (anak.tanggal_ukur_terakhir || anak.status_berat_terakhir) {
+      totalDiukur += 1;
+    }
 
-    const latest = pengukuran.reduce((a, b) =>
-      (a.date ?? '').localeCompare(b.date ?? '') > 0 ? a : b
-    );
-    totalDiukur += 1;
-
-    const bbu = normalizeBBU(anak.status_berat_terakhir);
-    const tbu = normalizeTBU(anak.status_tinggi_terakhir);
-    const lku = normalizeLKU(anak.status_lingkaran_kepala_terakhir);
-    const statusGizi = overallStatus({
-      zScoreBB: toZ(latest.z_score_berat),
-      zScoreTB: toZ(latest.z_score_tinggi),
-      zScoreLK: toZ(latest.z_score_lingkar_kepala),
-      zScoreGizi: toZ(latest.z_score_gizi),
+    Object.entries(anak.berat_badan ?? {}).forEach(([k, v]) => {
+      const mapped = normalizeBBU(k);
+      if (beratBadan[mapped] != null) beratBadan[mapped] += Number(v || 0);
     });
 
-    if (beratBadan[bbu] != null) beratBadan[bbu] += 1;
-    if (tinggiBadan[tbu] != null) tinggiBadan[tbu] += 1;
-    if (lingkarKepala[lku] != null) lingkarKepala[lku] += 1;
-    if (gizi[statusGizi] != null) gizi[statusGizi] += 1;
+    Object.entries(anak.tinggi_badan ?? {}).forEach(([k, v]) => {
+      const mapped = normalizeTBU(k);
+      if (tinggiBadan[mapped] != null) tinggiBadan[mapped] += Number(v || 0);
+    });
+
+    Object.entries(anak.lingkar_kepala ?? {}).forEach(([k, v]) => {
+      const mapped = normalizeLKU(k);
+      if (lingkarKepala[mapped] != null) lingkarKepala[mapped] += Number(v || 0);
+    });
+
+    Object.entries(anak.gizi ?? {}).forEach(([k, v]) => {
+      // API keys are already "normal", "kurang", "stunting", "obesitas" matching STATUS enum
+      if (gizi[k] != null) {
+        gizi[k] += Number(v || 0);
+      } else {
+        gizi[k] = Number(v || 0);
+      }
+    });
   });
 
   return {
@@ -173,12 +180,7 @@ export function aggregateKaderPerBalita({ anakList, pengukuranByAnak }) {
         bbu: normalizeBBU(anak.status_berat_terakhir),
         tbu: normalizeTBU(anak.status_tinggi_terakhir),
         lku: normalizeLKU(anak.status_lingkaran_kepala_terakhir),
-        gizi: overallStatus({
-          zScoreBB: toZ(latest.z_score_berat),
-          zScoreTB: toZ(latest.z_score_tinggi),
-          zScoreLK: toZ(latest.z_score_lingkar_kepala),
-          zScoreGizi: toZ(latest.z_score_gizi),
-        }),
+        gizi: Object.keys(anak.gizi ?? {}).find((k) => (anak.gizi as any)[k] > 0) || STATUS.UNKNOWN,
       };
     })
     .sort((a, b) =>

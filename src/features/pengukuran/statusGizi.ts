@@ -12,19 +12,19 @@ const isZ = (z) => z != null && Number.isFinite(z);
 
 // BB/U: Berat Badan menurut Umur
 export const BBU = {
-  SANGAT_KURANG: 'bb_sangat_kurang',
-  KURANG: 'bb_kurang',
-  NORMAL: 'bb_normal',
-  LEBIH: 'bb_lebih',
+  SANGAT_KURANG: 'sangat_kurus',
+  KURANG: 'kurus',
+  NORMAL: 'normal',
+  LEBIH: 'gemuk',
   UNKNOWN: 'unknown',
 };
 
 export function classifyBBU(z) {
   if (!isZ(z)) return BBU.UNKNOWN;
 
-  if (z > 2) return BBU.LEBIH;
-  if (z > -2 && z <= 2) return BBU.NORMAL;
-  if (z >= -3 && z <= -2) return BBU.KURANG;
+  if (z > 1) return BBU.LEBIH;
+  if (z >= -2 && z <= 1) return BBU.NORMAL;
+  if (z >= -3 && z < -2) return BBU.KURANG;
 
   return BBU.SANGAT_KURANG;
 }
@@ -33,7 +33,7 @@ export function classifyBBU(z) {
 export const TBU = {
   SANGAT_PENDEK: 'sangat_pendek',
   PENDEK: 'pendek',
-  NORMAL: 'tb_normal',
+  NORMAL: 'normal',
   TINGGI: 'tinggi',
   UNKNOWN: 'unknown',
 };
@@ -70,7 +70,7 @@ export function classifyBBTB(z) {
 // LK/U: Lingkar Kepala menurut Umur (indikator perkembangan, bukan status gizi)
 export const LKU = {
   MIKROSEFALI: 'mikrosefali',
-  NORMAL: 'lk_normal',
+  NORMAL: 'normal',
   MAKROSEFALI: 'makrosefali',
   UNKNOWN: 'unknown',
 };
@@ -167,6 +167,10 @@ export const INDICATOR_TONE = {
   [LKU.MIKROSEFALI]: 'warning',
   [LKU.NORMAL]: 'normal',
   [LKU.MAKROSEFALI]: 'warning',
+  [STATUS.STUNTING]: 'danger',
+  [STATUS.OBESITAS]: 'danger',
+  [STATUS.KURANG]: 'warning',
+  [STATUS.NORMAL]: 'normal',
   unknown: 'unknown',
 };
 
@@ -176,7 +180,7 @@ export const INDICATOR_TONE = {
 //   OBESITAS  ← BB/TB (z > +2)
 //   KURANG    ← BB/TB (z < -2) atau BB/U (z < -2)
 //   LK/U tidak menentukan status gizi.
-const SEVERITY = {
+export const SEVERITY = {
   [STATUS.STUNTING]: 4,
   [STATUS.OBESITAS]: 3,
   [STATUS.KURANG]: 2,
@@ -202,6 +206,40 @@ export function overallStatus({ zScoreBB, zScoreTB, zScoreGizi }: {
   }
   if (isZ(zScoreBB)) {
     candidates.push(zScoreBB < -2 ? STATUS.KURANG : STATUS.NORMAL);
+  }
+
+  if (candidates.length === 0) return STATUS.UNKNOWN;
+
+  return candidates.reduce((worst, current) =>
+    SEVERITY[current] > SEVERITY[worst] ? current : worst
+  );
+}
+
+export function overallStatusFromStrings({
+  bbuStr,
+  tbuStr,
+  giziStr,
+}: {
+  bbuStr?: string | null;
+  tbuStr?: string | null;
+  giziStr?: string | null;
+}) {
+  const candidates: string[] = [];
+
+  if (tbuStr) {
+    if (tbuStr === 'Sangat Pendek' || tbuStr === 'Pendek') candidates.push(STATUS.STUNTING);
+    else if (tbuStr === 'Normal' || tbuStr === 'Tinggi') candidates.push(STATUS.NORMAL);
+  }
+
+  if (giziStr) {
+    if (giziStr === 'Gizi Lebih' || giziStr === 'Obesitas') candidates.push(STATUS.OBESITAS);
+    else if (giziStr === 'Gizi Buruk' || giziStr === 'Gizi Kurang') candidates.push(STATUS.KURANG);
+    else if (giziStr === 'Gizi Baik' || giziStr === 'Berisiko Gizi Lebih') candidates.push(STATUS.NORMAL);
+  }
+
+  if (bbuStr) {
+    if (bbuStr === 'Sangat Kurus' || bbuStr === 'Kurus') candidates.push(STATUS.KURANG);
+    else if (bbuStr === 'Normal' || bbuStr === 'Gemuk') candidates.push(STATUS.NORMAL);
   }
 
   if (candidates.length === 0) return STATUS.UNKNOWN;
