@@ -17,7 +17,7 @@ function mostRecent(list) {
   );
 }
 
-export function classifyBalita(pengukuranList, currentBulan) {
+export function classifyBalita(anak, pengukuranList, currentBulan) {
   const safe = pengukuranList ?? [];
   const latest = mostRecent(safe);
 
@@ -26,14 +26,19 @@ export function classifyBalita(pengukuranList, currentBulan) {
   );
   const latestBulanIni = mostRecent(bulanIni);
 
-  const status = latest
-    ? overallStatus({
-        zScoreBB: toZ(latest.z_score_berat),
-        zScoreTB: toZ(latest.z_score_tinggi),
-        zScoreLK: toZ(latest.z_score_lingkar_kepala),
-        zScoreGizi: toZ(latest.z_score_gizi),
-      })
-    : STATUS.UNKNOWN;
+  // Ikuti API: Gunakan data gizi dari backend alih-alih menghitung dari z-score
+  let status = STATUS.UNKNOWN;
+  if (anak && anak.gizi) {
+    status = Object.keys(anak.gizi).find((k) => (anak.gizi as any)[k] > 0) || STATUS.UNKNOWN;
+  } else if (latest) {
+    // Fallback jika tidak ada data gizi (misalnya di tes lama yang belum dimock)
+    status = overallStatus({
+      zScoreBB: toZ(latest.z_score_berat),
+      zScoreTB: toZ(latest.z_score_tinggi),
+      zScoreLK: toZ(latest.z_score_lingkar_kepala),
+      zScoreGizi: toZ(latest.z_score_gizi),
+    });
+  }
 
   const sudahDiukur = !!latestBulanIni;
   const perluPerhatian =

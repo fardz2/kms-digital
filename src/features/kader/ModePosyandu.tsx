@@ -42,7 +42,7 @@ export default function ModePosyandu() {
 
   const balitaWithMeta = (anakList ?? []).map((anak) => ({
     anak,
-    meta: classifyBalita(pengukuranByAnak[anak.id], currentBulan),
+    meta: classifyBalita(anak, pengukuranByAnak[anak.id], currentBulan),
   }));
 
   const counts = {
