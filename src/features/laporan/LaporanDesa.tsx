@@ -24,9 +24,9 @@ import {
   TBU,
 } from '../pengukuran/statusGizi';
 import {
+  indicatorCellToneClass,
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
-  indicatorWarningBgClass,
 } from './indicatorTableStyles';
 import TablePagination from './TablePagination';
 
@@ -46,7 +46,7 @@ const LABEL_MAP: Record<string, string> = {
   mikrosefali: 'Mikrosefali',
 };
 
-const GIZI_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
+const GIZI_ORDER = [STATUS.STUNTING, STATUS.KURANG, STATUS.NORMAL, STATUS.OBESITAS];
 const BB_ORDER = ['sangat_kurus', 'kurus', 'normal', 'gemuk'];
 const TBU_ORDER = ['sangat_pendek', 'pendek', 'normal', 'tinggi'];
 const LKU_ORDER = ['mikrosefali', 'normal', 'makrosefali'];
@@ -96,7 +96,7 @@ const GROUPS: {
 ];
 
 const DEFAULT_PAGE_SIZE = 5;
-const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 
@@ -203,10 +203,8 @@ export function RekapTabel({
                     const v = Number(cat[s] || 0);
                     const toneKey = g.toneMap[s] ?? s;
                     const tone = INDICATOR_TONE[toneKey] || 'unknown';
-                    const cellClass =
-                      tone === 'normal'
-                        ? `${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)}`
-                        : `${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)} ${v > 0 ? indicatorWarningBgClass() : ''}`;
+                    const textClass = indicatorCellToneClass(tone);
+                    const cellClass = `${cellCls} ${indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0)} ${v > 0 ? textClass : ''}`;
                     return (
                       <td
                         key={`${g.field}-${s}`}

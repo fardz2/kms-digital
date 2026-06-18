@@ -7,7 +7,7 @@ export function indicatorWarningBgClass(): string {
 }
 
 export function indicatorCellToneClass(tone: string): string {
-  if (tone === 'danger') return 'text-warning font-bold';
+  if (tone === 'danger') return 'text-danger font-bold';
   if (tone === 'warning') return 'text-amber-700 font-bold';
   return 'text-charcoal';
 }

@@ -14,7 +14,6 @@ import {
   indicatorCellToneClass,
   indicatorGroupBorderClass,
   indicatorHeaderToneClass,
-  indicatorWarningBgClass,
 } from './indicatorTableStyles';
 import TablePagination from './TablePagination';
 
@@ -31,7 +30,7 @@ interface BalitaRow {
 const BBU_ORDER = [BBU.SANGAT_KURANG, BBU.KURANG, BBU.NORMAL, BBU.LEBIH];
 const TBU_ORDER = [TBU.SANGAT_PENDEK, TBU.PENDEK, TBU.NORMAL, TBU.TINGGI];
 const LKU_ORDER = [LKU.MIKROSEFALI, LKU.NORMAL, LKU.MAKROSEFALI];
-const STATUS_ORDER = [STATUS.NORMAL, STATUS.KURANG, STATUS.STUNTING, STATUS.OBESITAS];
+const STATUS_ORDER = [STATUS.STUNTING, STATUS.KURANG, STATUS.NORMAL, STATUS.OBESITAS];
 
 const GROUPS: {
   label: string;
@@ -45,7 +44,7 @@ const GROUPS: {
 ];
 
 const DEFAULT_PAGE_SIZE = 5;
-const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const HEADER_ROW_CLASS = 'sticky top-0 z-30';
 const SUBHEADER_ROW_CLASS = 'sticky top-[44px] z-20';
 const INDICATOR_LABEL_MAP: Record<string, string> = {
@@ -160,11 +159,7 @@ export default function RekapPerBalitaTable({ data }: { data: BalitaRow[] }) {
                 const tone = INDICATOR_TONE[s] || 'unknown';
                 const textClass = indicatorCellToneClass(tone);
                 const borderClass = indicatorGroupBorderClass('cell', gIdx > 0 && sIdx === 0);
-                const isNormalStatus = tone === 'normal' || (g.field === 'gizi' && s === STATUS.NORMAL);
-                const cellClass =
-                  isNormalStatus
-                    ? `${cellCls} ${borderClass} !bg-transparent ${checked ? textClass : ''}`
-                    : `${cellCls} ${borderClass} ${checked ? indicatorWarningBgClass() : ''}`;
+                const cellClass = `${cellCls} ${borderClass} ${checked ? textClass : ''}`;
                 return (
                   <td key={`${g.field}-${s}`} className={cellClass}>
                     {checked ? (
